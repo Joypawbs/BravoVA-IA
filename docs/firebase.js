@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app-check.js";
 import { getAI, getGenerativeModel, GoogleAIBackend } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-ai.js";
 
 const firebaseConfig = {
@@ -16,9 +17,14 @@ const firebaseConfig = {
 const FIRESTORE_DB_ID = "ai-studio-android-bravova-a4e573d9-b4f2-44a4-af7f-b9667f2faaf3";
 
 const app = initializeApp(firebaseConfig);
+// App Check (igual que la app Android, que usa reCAPTCHA Enterprise): clave web propia para joypawbs.github.io
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider("6Ld2Uy8uAAAAAH3yA7xR6cGqSW_fm82Nevg_eOCG"),
+  isTokenAutoRefreshEnabled: true
+});
 const auth = getAuth(app);
 const db = getFirestore(app, FIRESTORE_DB_ID);
-const ai = getAI(app, { backend: new GoogleAIBackend() });
+const ai = getAI(app, { backend: new GoogleAIBackend(), useLimitedUseAppCheckTokens: false });
 const models = {
   primary: getGenerativeModel(ai, { model: "gemini-3.8-flash" }),
   fallback: getGenerativeModel(ai, { model: "gemini-3.5-flash-lite" })
