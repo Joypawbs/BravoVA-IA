@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script type="module" src="firebase.js"></script>
+<script src="product_info.js"></script>
 <style>
 /*
 VOICE: la app BravoVa tal cual, réplica fiel de la versión Android (Compose) en tamaño de teléfono.
@@ -165,6 +166,47 @@ svg.i{width:1em;height:1em;flex:none}
 .send{width:38px;height:38px;border-radius:50%;border:0;background:var(--primary);color:var(--onPrimary);display:flex;align-items:center;justify-content:center;font-size:16px}
 .dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--primary);margin-right:3px;animation:tw 1s infinite}.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
 .placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:40px 24px;color:var(--ink2);font-weight:700}
+/* ronda 2: cabecera cápsula, catálogo, categoría, detalle, carrito, biometría */
+.caphdr{position:absolute;top:calc(8px + env(safe-area-inset-top));left:12px;right:12px;z-index:6;border-radius:24px;padding:10px 12px 9px;display:flex;flex-direction:column;gap:8px;transition:gap .2s,padding .2s;box-shadow:0 10px 28px rgba(0,0,0,.14)}
+.caphdr.sc{gap:5px;padding:7px 12px 6px}
+.caphdr .cht{font-size:16.5px;transition:font-size .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.caphdr.sc .cht{font-size:15px}
+.backbtn{width:38px;height:38px;border-radius:50%;border:0;background:var(--surfVar);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+.seccard{margin:0 14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s}
+.seccard:active,.ccard:active{transform:scale(.985)}
+.meta.wrap{white-space:normal;flex-wrap:wrap;row-gap:2px}
+.art.big img{inset:11px;width:calc(100% - 22px);height:calc(100% - 22px)}
+.rbtn{width:38px;height:38px;border-radius:50%;border:0;background:var(--surfVar);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.rbtn.favon{background:#FFE4E6;border:1px solid rgba(225,29,72,.4);color:#E11D48}
+.hl{padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;background:color-mix(in srgb,var(--primary) 10%,transparent);color:var(--primary);border:1px solid color-mix(in srgb,var(--primary) 22%,transparent)}
+.tip{padding:9px 12px;border-radius:14px;background:color-mix(in srgb,var(--surfVar) 70%,transparent);font-size:11.5px;font-weight:700;color:var(--ink2);line-height:1.45}
+.algc{padding:4px 9px;border-radius:999px;font-size:10.5px;font-weight:800}
+.stepper{width:32px;height:32px;border-radius:50%;border:1px solid color-mix(in srgb,var(--primary) 35%,transparent);background:var(--surface);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:17px;padding:0}
+.stepper.p{background:var(--primary);color:#fff;border:0}
+.dangerbtn{height:46px;padding:0 16px;border-radius:999px;border:1.5px solid #E11D48;background:#FFE4E6;color:#BE123C;font:600 13.5px 'Fredoka';display:flex;align-items:center;gap:6px;flex:none}
+:root.dark .dangerbtn{background:#4C0519;color:#FDA4AF}
+.ccard{margin:0 14px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s}
+.opt{flex:1;display:flex;align-items:center;gap:8px;padding:10px;border-radius:14px;border:1px solid color-mix(in srgb,var(--ink2) 25%,transparent);background:color-mix(in srgb,var(--surfVar) 45%,transparent);text-align:left;color:var(--ink)}
+.opt.on{border:1.4px solid var(--primary);background:color-mix(in srgb,var(--primary) 15%,transparent)}
+.opt.on b,.opt.on svg{color:var(--primary)}
+.opt b{display:block;font:600 11.5px 'Fredoka'}
+.opt small{display:block;font-size:10px;font-weight:700;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncf{flex:1;padding:8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--ink2) 25%,transparent);background:color-mix(in srgb,var(--surfVar) 50%,transparent);font:600 10px 'Fredoka';color:var(--ink2)}
+.ncf.on{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--primary)}
+.sw{width:44px;height:26px;border-radius:99px;border:0;background:var(--border);position:relative;flex:none;transition:background .2s;padding:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sw.on{background:var(--primary)}.sw.on::after{transform:translateX(18px)}
+.trow{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700}
+.modal{position:absolute;inset:0;z-index:70;background:rgba(2,6,23,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px;animation:pop .2s ease-out}
+.bio{width:100%;max-width:370px;border-radius:26px;padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.sensor{width:110px;height:110px;border-radius:50%;border:0;background:none;display:flex;align-items:center;justify-content:center;position:relative;padding:0;color:var(--acc)}
+.sensor .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--acc);opacity:.55;animation:ring 1.1s ease-in-out infinite alternate}
+.sensor.scan .ring{opacity:.95}
+@keyframes ring{from{transform:scale(.92)}to{transform:scale(1.18)}}
+.sensor .core{width:82px;height:82px;border-radius:50%;background:#F8FAFC;border:1.5px solid color-mix(in srgb,var(--acc) 45%,transparent);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
+:root.dark .sensor .core{background:#131C2E}
+.sensor .laser{position:absolute;left:12%;right:12%;height:2px;border-radius:2px;background:var(--acc);box-shadow:0 0 8px var(--acc);animation:laser .9s linear infinite alternate}
+@keyframes laser{from{top:15%}to{top:85%}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -210,6 +252,18 @@ const P={
  lock:'<g fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></g>',
  user:'<g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.4 3.5-5.2 7-5.2s6.2 1.8 7 5.2"/></g>',
  paw:'<g fill="currentColor"><circle cx="7" cy="9" r="2"/><circle cx="17" cy="9" r="2"/><circle cx="10" cy="5.5" r="2"/><circle cx="14" cy="5.5" r="2"/><path d="M12 11c-3 0-5.5 4-5.5 6.2C6.5 19 8 20 9.6 20c1 0 1.6-.6 2.4-.6s1.4.6 2.4.6c1.6 0 3.1-1 3.1-2.8C17.5 15 15 11 12 11z"/></g>',
+ back:'<path d="M19 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+ share:'<g fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></g>',
+ filter:'<path d="M4 7h16M7 12h10M10 17h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+ verified:'<path d="m12 2.5 2.3 1.7 2.8-.1.9 2.7 2.3 1.6-.9 2.7.9 2.7-2.3 1.6-.9 2.7-2.8-.1L12 21.5l-2.3-1.7-2.8.1-.9-2.7-2.3-1.6.9-2.7-.9-2.7 2.3-1.6.9-2.7 2.8.1z" fill="currentColor"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ trash:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.9 13h9.2l.9-13M10 11v5.5M14 11v5.5"/></g>',
+ finger:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.2 5.4A9 9 0 0 1 20.5 12M3.6 9.5A9 9 0 0 1 4.6 7M3.5 13.5V12M7 19.5c1-2 1.5-4.4 1.5-7.5a3.5 3.5 0 0 1 7 0c0 1.2 0 2.4-.2 3.5M12 12c0 3.6-.8 6.6-2.4 9M15.5 19.5c.5-1.2.9-2.5 1.1-3.9M20.3 15.5c.1-1 .2-2.3.2-3.5"/></g>',
+ bike:'<g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5 9 9h6l3.5 7.5M9 9 12 16.5h-1.5M14 5.5h2.5L18.5 9"/></g>',
+ store:'<g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 9.5 5.5 4h13L20 9.5a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0 2.7 2.7 0 0 1-5.3 0zM5 12v8h14v-8M9.5 20v-5h5v5"/></g>',
+ ccard:'<g fill="none" stroke="currentColor" stroke-width="1.9"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.5h19M6 15h4"/></g>',
+ lockopen:'<g fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 7.7-1.5"/></g>',
+ shield:'<g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12 2.2 2.2 4.3-4.4" stroke-linecap="round"/></g>',
+ checkc:'<circle cx="12" cy="12" r="9.5" fill="currentColor"/><path d="m7.5 12.3 3 3 6-6.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
  bag:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/></g>',
 };
 const LOGO={bravo:['img/logo_bravo_official.png',118,31],arca:['img/logo_arca_official.png',80,34]};
@@ -230,9 +284,9 @@ const SECTIONS={
 const COMPACT={"Snacks y dulces":"Snacks","Pescadería y mariscos":"Pescadería","Congelados y helados":"Congelados","Frutas y vegetales":"Frutas y veg.","Lácteos y huevos":"Lácteos","Panes y galletas":"Panadería","Hogar y limpieza":"Hogar","Carne res y cerdo":"Carnes","Agua y refrescos":"Bebidas","Aceite y vinagres":"Despensa","Alimentación general":"Despensa","Productos Nuevos":"Nuevos","Alimentos Húmedos y Snacks":"Snacks Pet","Salud y Cuidado Veterinario":"Salud Vet","Hogar y Arena Sanitaria":"Higiene Pet","Accesorios y Paseo":"Accesorios","Juguetes y Confort":"Juguetes","Aves, Peces y Exóticos":"Exóticos","Farmacia y Suplementos":"Farmacia","Alimentos Secos":"Alimento Seco"};
 
 /* ---------------- state ---------------- */
-const S={screen:'splash',store:'bravo',dark:true,cart:{},favs:{},offerDay:0,query:'',storeMenu:false,guest:false};
+const S={screen:'splash',store:'bravo',dark:true,cart:{},favs:{},offerDay:0,query:'',storeMenu:false,guest:false,catQ:'',gridQ:'',branch:'Bravo Winston Churchill',bravBal:145,bravLocked:false,redeem:false,deliveryMode:'delivery',ncf:'B02',cards:[{id:'pm1',brand:'Visa',bank:'Popular',last4:'4821',exp:'09/28',def:true},{id:'pm2',brand:'Mastercard',bank:'BHD',last4:'9034',exp:'11/27',def:false}],orders:[]};
 try{const raw=localStorage.getItem('bravova_replica');if(raw)Object.assign(S,JSON.parse(raw),{screen:'splash',storeMenu:false,query:''})}catch(e){}
-const save=()=>{try{localStorage.setItem('bravova_replica',JSON.stringify({store:S.store,dark:S.dark,cart:S.cart,favs:S.favs,guest:S.guest,authed:S.authed}))}catch(e){}};
+const save=()=>{try{localStorage.setItem('bravova_replica',JSON.stringify({store:S.store,dark:S.dark,cart:S.cart,favs:S.favs,guest:S.guest,authed:S.authed,bravBal:S.bravBal,bravLocked:S.bravLocked,redeem:S.redeem,cards:S.cards,orders:S.orders,trackedOrder:S.trackedOrder}))}catch(e){}};
 let PRODUCTS=[],BY_SKU={};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>document.getElementById(id);
@@ -262,10 +316,12 @@ function vector(p){
   else shapes=`<div class="sh" style="left:18%;top:14%;width:64%;height:72%;border-radius:16px;background:${hexA(c,.82)}"></div><div class="sh" style="left:24%;top:30%;width:52%;height:40%;border-radius:10px;background:var(--badgeCard)"></div>`;
   return `<div class="vec" style="background:radial-gradient(circle,${hexA(c,d?.22:.14)},var(--artBg));border:1px solid ${hexA(c,d?.36:.22)}">${shapes}<div class="lab"><b style="color:${c}">${p.bravo?'b':'★'}</b><span>${esc((p.badge||'BRAVO').slice(0,10))}</span></div></div>`;
 }
-function artwork(p,h=80,r=12){
-  return `<div class="art" style="height:${h}px;border-radius:${r}px">${vector(p)}${p.img?`<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">`:''}</div>`;
+function artwork(p,h=80,r=12,x=''){
+  // Solo la foto real; la ilustración vectorial aparece únicamente si no hay foto o si falla la carga
+  return `<div class="art" style="height:${h}px;border-radius:${r}px;${x}">${p.img?`<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" onerror="artFail(this,'${p.sku}')">`:vector(p)}</div>`;
 }
-function metaStrip(items){return `<div class="meta">${items.map(esc).join('<i>/</i>')}</div>`}
+window.artFail=(img,sku)=>{const p=BY_SKU[sku];if(p)img.outerHTML=vector(p);else img.remove()};
+function metaStrip(items,fs,cls=''){return `<div class="meta ${cls}"${fs?` style="font-size:${fs}px"`:''}>${items.map(esc).join('<i>/</i>')}</div>`}
 function productCard(p){
   const q=S.cart[p.sku]||0,fav=!!S.favs[p.sku];
   const tag=p.bravo?(isArca()?'ARCA':'BRAVO'):(p.badge||'MARCA').slice(0,7);
@@ -300,7 +356,7 @@ function dailyOffers(){
   const label=S.offerDay===0?`Hoy ${names[dow]}`:`${names[dow]} (+${S.offerDay}d)`;
   return {label,theme:themes[dow],offers:Array.from({length:Math.min(5,dayPool.length)},(_,i)=>{const p=dayPool[(base+i)%dayPool.length],pct=steps[(doy+i)%5];return{p,pct,orig:Math.max(Math.floor(p.price*100/(100-pct)),p.price+25),label}})};
 }
-window.rotateDay=()=>{S.offerDay=(S.offerDay+1)%7;const d=dailyOffers(),t=d.offers[0];if(t)toast('offer',`${t.label}: ${t.p.name} (-${t.pct}%)`);renderHome(true)};
+window.rotateDay=()=>{S.offerDay=(S.offerDay+1)%7;const d=dailyOffers(),t=d.offers[0];if(t)toast('offer',`${t.label}: ${t.p.name} (-${t.pct}%)`);if(S.screen==='catalog')renderCatalog(true);else renderHome(true)};
 window.offerPush=()=>{const d=dailyOffers(),t=d.offers[0];toast('bell',t?`Push enviado: ${t.p.name} -${t.pct}%`:'Push enviado')};
 
 /* ---------------- screens ---------------- */
@@ -479,18 +535,227 @@ window.sendChat=async()=>{
 window.openProduct=sku=>{S.product=sku;go('product')};
 window.openCategory=n=>{S.category=n;go('category')};
 
+/* ================= RONDA 2 ================= */
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const HIST=[];
+window.back=()=>{const p=HIST.pop()||'home';go(p,true)};
+function bindScroll(sc,hdr){let last=0;sc.addEventListener('scroll',()=>{const y=sc.scrollTop,max=sc.scrollHeight-sc.clientHeight,pg=$('prog');if(pg)pg.style.width=Math.max(6,Math.min(100,max>0?y/max*100:0))+'%';if(hdr)hdr.classList.toggle('sc',y>24);const hide=y>last+6&&y>120,show=y<last-6||y<120;if(hide)setMenus(false);else if(show)setMenus(true);last=y},{passive:true})}
+function bindSearch(id,fn){let t;$(id).addEventListener('input',e=>{clearTimeout(t);const v=e.target.value;t=setTimeout(()=>fn(v),300)})}
+function capsule(o){
+  return `<div class="caphdr tcard" id="caphdr"><div class="row" style="gap:8px">${o.back?`<button class="backbtn" aria-label="Volver" onclick="back()">${ic('back')}</button>`:''}
+    <div style="flex:1;text-align:center;${o.back?'padding-right:46px':''}"><div class="sect cht">${esc(o.title)}</div><div class="ul" style="margin:3px auto 0"></div></div></div>
+    <label class="search">${ic('search','color:var(--ink2);font-size:17px')}<input id="${o.qid}" type="search" value="${esc(o.val)}" placeholder="${esc(o.ph)}" aria-label="${esc(o.ph)}"></label>
+    <div class="prog"><div id="prog"></div></div></div>`;
+}
+function emptyCard(title,msg){return `<div class="tcard" style="margin:6px 14px;padding:22px;text-align:center"><div class="disp" style="font-weight:600;font-size:15px">${esc(title)}</div><p style="font-size:12px;color:var(--ink2);font-weight:600;margin:6px 0 12px">${esc(msg)}</p><button class="pbtn" onclick="go('bravia')">${ic('spark')} Consultar sustitutos en Brav IA</button></div>`}
+
+/* ---------- Catálogo (CatalogScreen) ---------- */
+function catalogBody(){
+  const q=(S.catQ||'').trim().toLowerCase(),by={};
+  storeProducts().forEach(p=>(by[p.cat]=by[p.cat]||[]).push(p));
+  const secs=SECTIONS[S.store].filter(([n])=>by[n]).filter(([n])=>!q||n.toLowerCase().includes(q)||by[n].some(p=>p.name.toLowerCase().includes(q)));
+  return (q?'':offersSection())
+   +`<div style="padding:4px 14px;text-align:center"><div class="sect" style="font-size:17px">${isArca()?'Departamentos El Arca Petshop':'Pasillos Oficiales Supermercados Bravo'}</div><div class="ul" style="margin:3px auto 0"></div></div>`
+   +(secs.length?secs.map(([n,t])=>`<div class="tcard seccard" role="button" tabindex="0" onclick="openCategory('${esc(n)}')"><span class="secic" style="width:42px;height:42px;border-radius:13px;font-size:21px">${ic(SECIC[t]||'bag')}</span>
+      <div style="flex:1"><div class="disp" style="font-weight:700;font-size:15px">${esc(n)}</div><div style="margin-top:3px">${metaStrip([`${by[n].length} arts.`,'Pasillo oficial'],11)}</div></div>
+      <span style="color:var(--ink2);font-size:20px;display:flex">${ic('chev')}</span></div>`).join(''):emptyCard(`Sin resultados para "${S.catQ.trim()}"`,'Prueba otra palabra clave o consulta opciones disponibles en el catálogo con Brav IA.'));
+}
+function renderCatalog(keep){
+  const prev=keep&&$('mainScroll')?$('mainScroll').scrollTop:0;
+  $('screen').className='view';
+  $('screen').innerHTML=capsule({title:isArca()?'Catálogo El Arca Petshop':'Catálogo Supermercados Bravo',ph:'Buscar departamentos, marcas o productos...',qid:'cq',val:S.catQ||''})
+    +`<div class="scroll" id="mainScroll" style="padding-top:132px;display:flex;flex-direction:column;gap:10px">${catalogBody()}</div>`;
+  const sc=$('mainScroll');sc.scrollTop=prev;bindScroll(sc,$('caphdr'));
+  bindSearch('cq',v=>{S.catQ=v;$('mainScroll').innerHTML=catalogBody()});
+}
+
+/* ---------- Categoría (CategoryGridScreen) ---------- */
+function categoryBody(){
+  const q=(S.gridQ||'').trim().toLowerCase();
+  const items=PRODUCTS.filter(p=>p.cat===S.category).filter(p=>!q||p.name.toLowerCase().includes(q)||p.badge.toLowerCase().includes(q));
+  if(!items.length)return emptyCard(`Sin resultados para "${S.gridQ.trim()}"`,'Prueba otra palabra clave o consulta opciones disponibles en el catálogo con Brav IA.');
+  return `<div class="grid3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px;padding:0 14px">${items.map(productCard).join('')}</div>`;
+}
+function renderCategory(){
+  $('screen').className='view';
+  $('screen').innerHTML=capsule({back:true,title:S.category,ph:`Buscar dentro de ${S.category}...`,qid:'gq',val:S.gridQ||''})
+    +`<div class="scroll" id="mainScroll" style="padding-top:138px">${categoryBody()}</div>`;
+  bindScroll($('mainScroll'),$('caphdr'));
+  bindSearch('gq',v=>{S.gridQ=v;$('mainScroll').innerHTML=categoryBody()});
+}
+
+/* ---------- Detalle (ProductDetailScreen) ---------- */
+function topBar(title,right=''){
+  return `<div class="caphdr tcard" style="flex-direction:row;align-items:center;gap:10px;padding:8px 10px"><button class="backbtn" style="width:36px;height:36px" aria-label="Volver" onclick="back()">${ic('back')}</button>
+    <div style="flex:1"><div class="sect" style="font-size:16px">${esc(title)}</div><div class="ul"></div></div>${right}</div>`;
+}
+function cartBtn(){const n=cartCount();return `<button class="rbtn" style="width:42px;height:42px;color:var(--primary);position:relative;font-size:21px" aria-label="Ver carrito" onclick="go('cart')">${ic('cart')}${n?`<span style="position:absolute;top:-2px;right:-2px;min-width:17px;height:17px;padding:0 3px;border-radius:99px;background:var(--red);color:#fff;font:900 9px 'Nunito';display:flex;align-items:center;justify-content:center">${n}</span>`:''}</button>`}
+function renderProduct(keep){
+  const p=BY_SKU[S.product];if(!p){back();return}
+  const prev=keep&&$('mainScroll')?$('mainScroll').scrollTop:0;
+  const q=S.cart[p.sku]||0,eff=q>0?q:1,acc=p.price*eff,d=BV_INFO.describe(p),nu=BV_INFO.nutrition(p),fav=!!S.favs[p.sku];
+  const al=nu.allergens.map(a=>{const free=/libre/i.test(a),c=free?'#059669':'#D97706';return `<span class="algc" style="color:${c};background:${hexA(c,.12)};border:1px solid ${hexA(c,.3)}">${esc(free?'✓ '+a:'Alérgeno: '+a)}</span>`}).join('');
+  $('screen').className='view';
+  $('screen').innerHTML=topBar('Detalle del Producto',cartBtn())+`<div class="scroll" id="mainScroll" style="padding:80px 14px 188px;display:flex;flex-direction:column;gap:12px">
+   <div class="tcard" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+     <div class="row" style="justify-content:space-between;gap:8px">
+       <button class="chip alt" style="height:30px;color:var(--ink)" onclick="openCategory('${esc(p.cat)}')">${ic('filter','font-size:14px;color:var(--primary)')}${metaStrip([p.cat,p.bravo?'Marca Bravo':(p.badge.trim()||'Oficial')],11)}</button>
+       <div class="row" style="gap:8px"><button class="rbtn" aria-label="Compartir producto" onclick="shareProduct()">${ic('share','font-size:17px')}</button><button class="rbtn ${fav?'favon':''}" aria-label="Favorito" onclick="toggleFav('${p.sku}',event);renderProduct(true)">${ic(fav?'favOn':'fav','font-size:19px')}</button></div>
+     </div>
+     <div class="art big" style="height:190px;border-radius:22px;margin:0">${p.img?`<img src="${esc(p.img)}" alt="${esc(p.name)}" onerror="artFail(this,'${p.sku}')">`:vector(p)}</div>
+     ${metaStrip([p.cat,p.unit,'ITBIS Incluido','1% Retorno Bravísima'],10.5,'wrap')}
+     <div class="disp" style="font-weight:700;font-size:21px;line-height:1.2">${esc(p.name)}</div>
+     <div class="row" style="gap:6px;align-items:baseline"><span class="disp" style="font-weight:700;font-size:25px;color:var(--primary)">RD$ ${fmt(p.price)}.00</span><span style="font-size:12.5px;font-weight:700;color:var(--ink2)">/ ${esc(p.unit)}</span></div>
+     <div class="hr"></div>
+     <div class="row" style="gap:6px">${ic('verified','font-size:15px;color:#059669')}<span class="disp" style="font-weight:600;font-size:12.5px">Descripción Precisa y Ficha (${esc(p.cat)})</span></div>
+     <div style="font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.55">${esc(d.summary)}</div>
+     <div class="row" style="flex-wrap:wrap;gap:6px">${d.highlights.map(h=>`<span class="hl">${esc(h)}</span>`).join('')}</div>
+     <div class="tip">${esc(d.tip)}</div>
+   </div>
+   <div class="tcard" style="padding:18px;display:flex;flex-direction:column;gap:9px">
+     <div><div class="sect" style="font-size:14.5px">Nutrición, Calorías Exactas e Ingredientes</div><div class="ul"></div></div>
+     <div class="row" style="gap:8px"><span class="secic" style="width:30px;height:30px;font-size:15px">${ic('spark')}</span><span style="font-size:12px;font-weight:800">${esc(nu.kcal==null?nu.portion:`${nu.kcal} kcal • ${nu.portion}`)}</span></div>
+     ${nu.prot?metaStrip([`Prot: ${nu.prot}`,`Carb: ${nu.carbs}`,`Grasa: ${nu.fat}`],10):''}
+     <div class="disp" style="font-weight:600;font-size:12px">Ingredientes investigados:</div>
+     <div style="font-size:12px;font-weight:600;color:var(--ink2);line-height:1.5">${esc(nu.ingredients)}</div>
+     <div class="row" style="flex-wrap:wrap;gap:6px">${al}</div>
+     <div class="row" style="flex-wrap:wrap;gap:6px">${nu.diets.map(t=>`<span class="hl" style="font-size:10.5px">${esc(t)}</span>`).join('')}</div>
+   </div>
+   <div class="tcard" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+     <div class="row" style="justify-content:space-between"><div>${metaStrip(['CANTIDAD',q>0?`${q} en carrito`:'Selecciona unidades'],10.5)}<div class="disp" style="font-weight:700;font-size:19px;margin-top:2px">Total: RD$ ${fmt(acc)}.00</div></div>
+       <div class="row" style="gap:10px"><button class="stepper" aria-label="Disminuir" onclick="detailQty(-1)">${ic('remove')}</button><span class="disp" style="font-weight:700;font-size:15px;min-width:16px;text-align:center">${eff}</span><button class="stepper p" aria-label="Aumentar" onclick="detailQty(1)">${ic('add')}</button></div></div>
+     <div class="row" style="gap:10px">${q>0?`<button class="dangerbtn" onclick="removeAll('${p.sku}')">${ic('trash','font-size:17px')} Remover</button>`:''}
+       <button class="pbtn" style="flex:1" onclick="${q===0?'detailQty(1)':"go('cart')"}">${ic('cart')} ${q===0?`Agregar • RD$ ${fmt(p.price)}`:`Ir al pago • RD$ ${fmt(acc)}`}</button></div>
+   </div>
+   <div class="tcard aura" style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:18px" onclick="askAbout('${p.sku}')">
+     <span style="color:var(--amber);font-size:18px;display:flex">${ic('spark')}</span>
+     <div style="flex:1">${metaStrip(['OPCIÓN SUGERIDA','Brav IA'],10)}<div class="disp" style="font-weight:600;font-size:12.5px;margin-top:2px">Consultar recetas, alergias o dietas con este producto</div></div>
+     <span style="color:var(--ink2);font-size:20px;display:flex">${ic('chev')}</span></div>
+  </div>`;
+  const sc=$('mainScroll');sc.scrollTop=prev;bindScroll(sc);
+}
+window.detailQty=d=>{const p=BY_SKU[S.product],q=S.cart[p.sku]||0;if(d<0&&q===0)return;chg(p.sku,d);renderProduct(true)};
+window.removeAll=sku=>{const q=S.cart[sku]||0;if(q)chg(sku,-q);toast('trash','Producto removido del carrito');if(S.screen==='product')renderProduct(true);else renderCart(true)};
+window.shareProduct=()=>{const p=BY_SKU[S.product];const url=location.origin+location.pathname+'#p='+p.sku;try{navigator.clipboard.writeText(`${p.name} · RD$ ${p.price} — ${url}`)}catch(e){}toast('share',`Enlace de ${p.name} copiado`)};
+window.askAbout=sku=>{const p=BY_SKU[sku];go('bravia');const i=$('chatIn');if(i){i.value=`Dame una receta exacta, concisa y paso a paso usando ${p.name} (RD$ ${p.price}) y dime qué otros productos del catálogo necesito.`;sendChat()}};
+
+/* ---------- Carrito y checkout (CartCheckoutScreen) ---------- */
+function cartTotals(){
+  let count=0,subtotal=0;for(const[sku,q]of Object.entries(S.cart)){const p=BY_SKU[sku];if(p){count+=q;subtotal+=p.price*q}}
+  const gen=Math.floor(subtotal/100),redeemed=S.redeem&&!S.bravLocked?Math.floor(Math.min(S.bravBal,subtotal)):0;
+  return {count,subtotal,gen,redeemed,finalPay:Math.max(0,subtotal-redeemed)};
+}
+function activeCard(){return S.cards.find(c=>c.def)||S.cards[0]}
+function cardSummary(){const c=activeCard();return c?`${c.brand} •••• ${c.last4}`:'Visa •••• 4821'}
+function deliverySummary(){return S.deliveryMode==='pickup'?`Pickup Express • ${S.branch}`:`Delivery Express • ${S.branch}`}
+function renderCart(keep){
+  const prev=keep&&$('mainScroll')?$('mainScroll').scrollTop:0;
+  const items=Object.entries(S.cart).map(([s,q])=>[BY_SKU[s],q]).filter(x=>x[0]),t=cartTotals(),lv=S.lastBio;
+  const del=S.deliveryMode!=='pickup';
+  const right=items.length?`<button class="dangerbtn" style="height:34px;padding:0 12px;font-size:11px;border-width:1.2px" onclick="emptyCart()">${ic('trash','font-size:15px')} Vaciar</button>`:'';
+  let body;
+  if(!items.length)body=`<div class="tcard" style="margin:16px 14px;padding:26px;display:flex;flex-direction:column;align-items:center;text-align:center"><div style="font:800 20px 'Nunito'">Tu carrito está vacío</div><p style="margin:6px 0 18px;font-size:13.5px;font-weight:600;color:var(--ink2)">Agrega productos directamente desde los pasillos con un toque rápido.</p><button class="pbtn" onclick="go('home')">Explorar productos</button></div>`;
+  else body=items.map(([p,q])=>`<div class="tcard ccard" onclick="openProduct('${p.sku}')">
+      <div style="width:60px;height:60px;flex:none;border-radius:14px;background:color-mix(in srgb,var(--surfVar) 50%,transparent);padding:5px">${artwork(p,50,12,'margin:0;border:0;background:none')}</div>
+      <div style="flex:1"><div style="font-weight:800;font-size:13.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(p.name)}</div>
+        <div style="margin:3px 0">${metaStrip([p.cat,`RD$${p.price} / ${p.unit}`],10.5)}</div><div class="disp" style="font-weight:700;font-size:14px;color:var(--primary)">RD$ ${fmt(p.price*q)}.00</div></div>
+      <div class="row" style="gap:8px" onclick="event.stopPropagation()"><button class="stepper" style="${q===1?'background:#FFE4E6;color:#BE123C;border-color:rgba(225,29,72,.35)':''}" aria-label="Restar" onclick="cartQty('${p.sku}',-1)">${ic(q===1?'trash':'remove')}</button><span class="disp" style="font-weight:700;font-size:14px;min-width:14px;text-align:center">${q}</span><button class="stepper p" aria-label="Sumar" onclick="cartQty('${p.sku}',1)">${ic('add')}</button></div></div>`).join('')
+  +`<div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+      <div class="row" style="justify-content:space-between;gap:8px"><div><div class="sect" style="font-size:15.5px">Pago, Entrega y Seguridad</div><div style="margin-top:3px">${metaStrip(['Protección BiometricPrompt',S.branch],10.5)}</div></div>
+        <span class="row" style="gap:4px;padding:5px 9px;border-radius:999px;background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.35);color:#10B981;font:600 10px 'Fredoka';flex:none">${ic('finger','font-size:14px')}3DS + Huella</span></div>
+      <div class="row" style="gap:8px"><button class="opt ${del?'on':''}" onclick="setDelivery('delivery')">${ic('bike','font-size:20px')}<span style="min-width:0"><b>Delivery Express</b><small>18 min • Gratis</small></span></button>
+        <button class="opt ${del?'':'on'}" onclick="setDelivery('pickup')">${ic('store','font-size:20px')}<span style="min-width:0"><b>Pickup en Tienda</b><small>${esc(S.branch)}</small></span></button></div>
+      <div class="row" style="justify-content:space-between"><span class="disp" style="font-weight:600;font-size:11.5px">Método de pago (protegido con huella)</span><button class="chip" style="height:26px;font-size:10px" onclick="addCard()">${ic('add')}Nueva tarjeta</button></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">${S.cards.map(c=>{const on=c===activeCard();return `<button class="opt ${on?'on':''}" style="flex:1 1 45%" onclick="pickCard('${c.id}')">${ic('ccard','font-size:19px')}<span style="min-width:0"><b>${esc(c.brand)} •••• ${c.last4}</b><small style="${on?'color:var(--primary)':''}">${on?`Activa • Exp ${c.exp}`:'Toca para autorizar'}</small></span></button>`}).join('')}</div>
+      <span class="disp" style="font-weight:600;font-size:11.5px">Comprobante Fiscal (DGII)</span>
+      <div class="row" style="gap:8px">${[['B02','Consumidor Final'],['B01','Crédito Fiscal']].map(([c,l])=>`<button class="ncf ${S.ncf===c?'on':''}" onclick="S.ncf='${c}';renderCart(true)">${c} • ${l}</button>`).join('')}</div>
+    </div>
+    <div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+      <div><div class="sect" style="font-size:16.5px">Resumen de Compra</div><div class="ul"></div></div>
+      <div class="row" style="gap:10px;justify-content:space-between"><div style="flex:1;cursor:pointer" onclick="toggleRedeem()"><div style="font-weight:800;font-size:13px;${S.bravLocked?'color:var(--red)':''}">${S.bravLocked?'Tarjeta Bravísima bloqueada (Toca para desbloquear)':'Canjear balance Tarjeta Bravísima'}</div><div style="margin-top:2px">${metaStrip(S.bravLocked?['Desbloqueo con Huella',`RD$ ${fmt(S.bravBal)}.00`]:['Disponible',`RD$ ${fmt(S.bravBal)}.00`,'Protegido con Huella'],10.5)}</div></div>
+        ${S.bravLocked?`<button class="chip" style="height:30px;font-size:10.5px" onclick="unlockCard()">${ic('lockopen')}Desbloquear</button>`:`<button class="sw ${S.redeem?'on':''}" role="switch" aria-checked="${!!S.redeem}" aria-label="Canjear balance Tarjeta Bravísima" onclick="toggleRedeem()"></button>`}</div>
+      <div class="hr"></div>
+      <div class="trow"><span style="color:var(--ink2)">Subtotal (${t.count} art.)</span><span>RD$ ${fmt(t.subtotal)}.00</span></div>
+      ${t.redeemed>0?`<div class="trow" style="color:#059669"><span>Descuento Bravísima (Autorizado)</span><span>-RD$ ${fmt(t.redeemed)}.00</span></div>`:''}
+      <div class="trow"><span style="color:var(--ink2);font-size:12px">Cargo con ${esc(cardSummary())} (${S.ncf})</span>${metaStrip(['GRATIS',`+RD$ ${t.gen} Bravísima`],11.5)}</div>
+      <div class="hr"></div>
+      <div class="trow"><span class="disp" style="font-weight:700;font-size:18px">Total a pagar</span><span class="disp" style="font-weight:700;font-size:23px;color:var(--primary)">RD$ ${fmt(t.finalPay)}.00</span></div>
+      <div class="row" style="gap:10px;padding:10px 12px;border-radius:16px;background:${lv?'rgba(16,185,129,.10)':'color-mix(in srgb,var(--primary) 8%,transparent)'};border:1px solid ${lv?'rgba(16,185,129,.38)':'color-mix(in srgb,var(--primary) 25%,transparent)'}">
+        <span style="width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:19px;background:${lv?'rgba(16,185,129,.18)':'color-mix(in srgb,var(--primary) 14%,transparent)'};color:${lv?'#10B981':'var(--primary)'}">${ic('finger')}</span>
+        <div style="flex:1"><div class="disp" style="font-weight:600;font-size:11.5px">${lv?`Sello Biométrico Activo • ${lv}`:'Confirmación con BiometricPrompt'}</div><div style="font-size:10.5px;font-weight:700;color:var(--ink2)">${lv?'Identidad biométrica verificada para operaciones críticas del checkout.':`Pagos con ${esc(cardSummary())}, canjes Bravísima y envío requieren huella.`}</div></div>
+        <span style="color:#10B981;font-size:18px;display:flex">${ic('shield')}</span></div>
+      <button class="pbtn" onclick="confirmPay()">${ic('finger')} Confirmar Pago con Huella • RD$ ${fmt(t.finalPay)}</button>
+    </div>
+    <div class="tcard aura" style="margin:0 14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:18px" onclick="go('bravia')">
+      <span style="color:var(--amber);font-size:18px;display:flex">${ic('spark')}</span>
+      <div style="flex:1">${metaStrip(['OPCIÓN DE AHORRO','Brav IA'],10)}<div class="disp" style="font-weight:600;font-size:12.5px;margin-top:2px">¿Deseas ajustar este carrito a un presupuesto menor?</div></div>
+      <span style="color:var(--ink2);font-size:20px;display:flex">${ic('chev')}</span></div>`;
+  $('screen').className='view';
+  $('screen').innerHTML=topBar(`Mi Carrito (${t.count})`,right)+`<div class="scroll" id="mainScroll" style="padding-top:78px;padding-bottom:132px;display:flex;flex-direction:column;gap:12px">${body}</div>${S.bio?bioDialog():''}`;
+  const sc=$('mainScroll');sc.scrollTop=prev;bindScroll(sc);
+}
+window.cartQty=(sku,d)=>{chg(sku,d);renderCart(true)};
+window.emptyCart=()=>{Object.keys(S.cart).forEach(sku=>{delete S.cart[sku];syncCart(sku)});save();updateCart();toast('trash','Carrito vaciado');renderCart()};
+window.setDelivery=m=>{S.deliveryMode=m;renderCart(true)};
+function bioReq(r,onOk){const t=cartTotals();S.bio=Object.assign({amount:t.finalPay,cashback:t.gen,payLabel:'',deliveryLabel:deliverySummary(),state:'idle',msg:r.description},r,{onOk});renderCart(true)}
+window.addCard=()=>bioReq({op:'CRD',title:'Vincular Nueva Tarjeta',subtitle:'Verificación biométrica requerida',description:'Autoriza con tu huella digital para registrar un nuevo método de pago en el checkout.',badge:'SEGURIDAD DE MÉTODO DE PAGO',payLabel:'Nueva Tarjeta Crédito / Débito'},()=>{const l4=String(1000+Math.floor(Math.random()*9000));S.cards.forEach(c=>c.def=false);S.cards.push({id:'pm_'+Date.now(),brand:'Visa',bank:'BHD',last4:l4,exp:'08/29',def:true});save();toast('ccard',`Nueva tarjeta •••• ${l4} agregada`)});
+window.pickCard=id=>{const c=S.cards.find(x=>x.id===id);if(!c||c===activeCard())return;bioReq({op:'CRD',title:'Cambiar Método de Pago',subtitle:`${c.brand} •••• ${c.last4} • Exp ${c.exp}`,description:'Confirma tu huella digital para autorizar el cambio de tarjeta predeterminada en este pedido.',badge:'CAMBIO DE TARJETA EN CHECKOUT',payLabel:`${c.brand} •••• ${c.last4}`},()=>{S.cards.forEach(x=>x.def=x.id===id);save();toast('ccard','Método de pago actualizado')})};
+window.toggleRedeem=()=>{if(S.bravLocked){unlockCard();return}if(S.redeem){S.redeem=false;save();renderCart(true);return}if(S.bravBal<=0)return;
+  const t=cartTotals(),max=Math.floor(Math.min(S.bravBal,t.subtotal));
+  bioReq({op:'BRV',title:'Autorizar Canje Bravísima',subtitle:`Aplicar -RD$ ${fmt(max)}.00 al pedido`,description:'Confirma tu identidad con huella digital para redimir tus puntos acumulados de Tarjeta Bravísima en este checkout.',badge:'CANJE DE SALDO BRAVÍSIMA',amount:max,payLabel:`Balance Bravísima (RD$ ${fmt(S.bravBal)}.00)`},()=>{S.redeem=true;save()})};
+window.unlockCard=()=>bioReq({op:'ULK',title:'Desbloquear Tarjeta Bravísima',subtitle:`Balance disponible: RD$ ${fmt(S.bravBal)}.00`,description:'Tu Tarjeta Bravísima está bloqueada. Verifica tu huella digital para desbloquearla y habilitar el canje en el checkout.',badge:'DESBLOQUEO BIOMÉTRICO BRAVÍSIMA',amount:S.bravBal,payLabel:'Tarjeta Bravísima Digital'},()=>{S.bravLocked=false;save()});
+window.confirmPay=()=>{const t=cartTotals();if(!t.count)return;bioReq({op:'PAY',title:'Confirmar Pago y Pedido',subtitle:`Total RD$ ${fmt(t.finalPay)}.00 • ${cardSummary()}`,description:`Coloca tu huella digital para autorizar el cargo en ${cardSummary()} (${S.ncf}) y despachar tu pedido (${deliverySummary()}).`,badge:'AUTORIZACIÓN BIOMÉTRICA DE PAGO',payLabel:`${cardSummary()} • NCF ${S.ncf}`},()=>completeCheckout())};
+function bioDialog(){
+  const b=S.bio,acc=b.state==='verified'?'#10B981':b.state==='scanning'?'#F59E0B':b.state==='error'?'#EF4444':'var(--primary)',busy=b.state==='scanning'||b.state==='verified';
+  return `<div class="modal" onclick="if(event.target===this&&!${busy})bioCancel()"><div class="bio" role="dialog" aria-modal="true" aria-label="${esc(b.title)}" style="--acc:${acc}">
+    <span class="row" style="gap:5px;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);font:600 10px 'Fredoka'">${ic('shield','font-size:14px')}${esc(b.badge)}</span>
+    <div class="disp" style="font-weight:700;font-size:19px;text-align:center">${esc(b.title)}</div>
+    <div style="font-size:12px;font-weight:600;text-align:center;line-height:1.45;color:${b.state==='verified'?'#10B981':'var(--ink2)'}">${esc(b.msg)}</div>
+    <div style="width:100%;padding:12px;border-radius:16px;background:color-mix(in srgb,var(--surfVar) 70%,transparent);display:flex;flex-direction:column;gap:6px">
+      <div class="row" style="justify-content:space-between;gap:8px"><div><div style="font-size:11px;font-weight:700;color:var(--ink2)">${esc(b.subtitle)}</div><div class="disp" style="font-weight:700;font-size:17px">RD$ ${fmt(b.amount)}.00</div></div>
+        <span style="padding:4px 9px;border-radius:999px;background:rgba(16,185,129,.14);color:#10B981;font:600 10.5px 'Fredoka';flex:none">+RD$ ${b.cashback} Bravísima</span></div>
+      ${metaStrip([b.payLabel,b.deliveryLabel].filter(Boolean),10,'wrap')}</div>
+    <button class="sensor ${b.state==='scanning'?'scan':''}" aria-label="Sensor de Huella Digital" ${busy?'disabled':''} onclick="bioVerify()">${b.state==='idle'||b.state==='scanning'?'<span class="ring"></span>':''}<span class="core">${ic(b.state==='verified'?'checkc':'finger')}${b.state==='scanning'?'<span class="laser"></span>':''}</span></button>
+    <div style="font-size:11.5px;font-weight:700;color:var(--ink2)">${b.token?`Criptograma verificado: ${esc(b.token)}`:b.state==='verified'?'Identidad confirmada':'Toca el sensor de huella para autorizar'}</div>
+    <div class="row" style="gap:10px;width:100%"><button class="obtn" style="flex:1;font-size:12px" ${busy?'disabled':''} onclick="bioCancel()">Cancelar</button><button class="pbtn" style="flex:1;font-size:12px" ${busy?'disabled':''} onclick="bioVerify()">${ic('finger','font-size:16px')} Verificar Huella</button></div>
+  </div></div>`;
+}
+window.bioCancel=()=>{S.bio=null;renderCart(true)};
+async function bioToken(op,amount){
+  const payload=`${{PAY:'CHECKOUT_PAY',BRV:'BRAVISIMA_REDEEM',ULK:'BRAVISIMA_SECURITY',CRD:'PAYMENT_METHOD_AUTH'}[op]||op}:${amount}:0:${Date.now()}`;
+  try{const h=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(payload)));return `BIO-${op}-${[...h.slice(0,3)].map(x=>x.toString(16).padStart(2,'0').toUpperCase()).join('')}`}
+  catch(e){return `BIO-${op}-${String(Date.now()%1e6).padStart(6,'0')}`}
+}
+window.bioVerify=async()=>{const b=S.bio;if(!b||b.state==='scanning'||b.state==='verified')return;
+  b.state='scanning';b.msg='Validando firma biométrica y criptograma de seguridad...';renderCart(true);
+  await new Promise(r=>setTimeout(r,420));const tok=await bioToken(b.op,b.amount);
+  if(S.bio!==b)return;b.state='verified';b.token=tok;b.msg=`¡Identidad verificada! Token ${tok}`;renderCart(true);
+  await new Promise(r=>setTimeout(r,650));if(S.bio!==b)return;
+  S.bio=null;S.lastBio=tok;toast('check',`BiometricPrompt verificado (${tok})`);b.onOk();if(S.screen==='cart')renderCart(true);
+};
+function completeCheckout(){
+  const t=cartTotals();if(!t.count)return;
+  S.bravBal=Math.max(0,S.bravBal-t.redeemed+t.gen);
+  const id='ORD-'+(10000+Math.floor(Math.random()*90000));
+  const order={id,status:'Envío preparado',badgeNum:t.count,date:'Hace un instante',total:t.finalPay,branch:S.branch,skus:Object.keys(S.cart)};
+  S.orders=[order,...(S.orders||[])];S.trackedOrder=id;
+  if(FB_USER&&window.BV_FB){const uid=FB_USER.uid;BV_FB.clearCart(uid).catch(e=>console.warn('Firestore',e));BV_FB.createOrder(uid,order).catch(e=>console.warn('Firestore',e))}
+  S.cart={};S.redeem=false;S.lastBio=null;save();updateCart();
+  toast('check',`¡Pedido confirmado! +RD$ ${t.gen} en tu Tarjeta Bravísima`);
+  go('delivery');
+}
 /* ---------------- dock + router ---------------- */
 const TABS=[['bravisima','card','Tarjeta'],['catalog','grid','Catálogos'],['home','home','Home'],['bravia','search','Buscar'],['account','person','Perfil']];
 function activeTab(){return {bravisima:'bravisima',catalog:'catalog',category:'catalog',product:'catalog',home:'home',cart:'home',delivery:'home',bravia:'bravia',account:'account',account_sub:'account'}[S.screen]}
 function renderDock(){const a=activeTab();$('dock').innerHTML=TABS.map(([k,i,l])=>`<button class="dk ${a===k?'on':''}" aria-label="${l}" ${a===k?'aria-current="page"':''} onclick="go('${k}')">${ic(i)}${k==='bravia'?`<span class="spark">${ic('spark')}</span>`:''}</button>`).join('')}
-const TITLES={catalog:['Catálogos','Grid de categorías con filtros: se construye en la ronda 2.'],category:['Categoría','Listado completo por categoría: ronda 2.'],product:['Detalle de producto','Ficha con descripción, nutrición y Brav IA: ronda 2.'],cart:['Carrito','Carrito y checkout con biometría: ronda 2.'],delivery:['Seguimiento en vivo','Mapa de entrega en tiempo real: ronda 2.'],bravia:['Brav IA','Chat con recetas, voz y fotos: ronda 2.'],bravisima:['Tarjeta Bravísima','Tarjeta, cashback y canjes: ronda 2.'],account:['Mi cuenta','Pedidos, perfil, pagos, direcciones, listas y ajustes: ronda 2.']};
-window.go=s=>{S.screen=s;S.storeMenu=false;applyTheme();render()};
+const TITLES={delivery:['Seguimiento en vivo','Mapa de entrega en tiempo real: ronda 3.'],bravisima:['Tarjeta Bravísima','Tarjeta, cashback y canjes: ronda 3.'],account:['Mi cuenta','Pedidos, perfil, pagos, direcciones, listas y ajustes: ronda 3.']};
+window.go=(s,noPush)=>{if(!noPush&&S.screen!==s&&!['splash','auth'].includes(S.screen)){HIST.push(S.screen);if(HIST.length>40)HIST.shift()}if(s==='category'&&S.screen!=='category')S.gridQ='';S.bio=null;S.screen=s;S.storeMenu=false;applyTheme();render()};
 function render(){
   const s=S.screen;
   const inApp=!['splash','auth'].includes(s);
   $('dock').classList.toggle('hide',!inApp);$('fabs').classList.toggle('hide',!(inApp&&['home','catalog','category'].includes(s)));
   if(inApp)renderDock();
-  if(s==='splash')renderSplash();else if(s==='auth')renderAuth();else if(s==='home')renderHome();else if(s==='bravia')renderBravIA();else renderPlaceholder(...TITLES[s]);
+  if(s==='splash')renderSplash();else if(s==='auth')renderAuth();else if(s==='home')renderHome();else if(s==='bravia')renderBravIA();else if(s==='catalog')renderCatalog();else if(s==='category')renderCategory();else if(s==='product')renderProduct();else if(s==='cart')renderCart();else renderPlaceholder(...TITLES[s]);
   updateCart();
 }
 $('icAi').innerHTML=ic('spark');$('icCart').innerHTML=ic('cart');

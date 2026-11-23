@@ -62,6 +62,25 @@ window.BV_FB = {
       await updateDoc(ref, { qty: q, storeMode, updatedAt: serverTimestamp() });
     }
   },
+  // Igual que BravoFirestoreRepository.clearUserCart
+  async clearCart(uid) {
+    const snap = await getDocs(collection(db, "users", uid, "cart"));
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+  },
+  // Igual que BravoFirestoreRepository.createOrder: users/{uid}/orders/{ORD-xxxxx}
+  async createOrder(uid, o) {
+    await setDoc(doc(db, "users", uid, "orders", o.id), {
+      userId: uid,
+      status: o.status.slice(0, 80),
+      badgeNum: Math.min(500, Math.max(0, o.badgeNum)),
+      date: o.date.slice(0, 80),
+      total: Math.min(1000000, Math.max(0, o.total)),
+      branch: o.branch.slice(0, 120),
+      skus: o.skus.slice(0, 50),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  },
   async loadCart(uid) {
     const snap = await getDocs(collection(db, "users", uid, "cart"));
     const out = {};
