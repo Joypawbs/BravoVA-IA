@@ -6,8 +6,8 @@
 <title>BravoVa — réplica web</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-<script type="module" src="firebase.js?v=4"></script>
-<script src="product_info.js?v=4"></script>
+<script type="module" src="firebase.js?v=5"></script>
+<script src="product_info.js?v=5"></script>
 <style>
 /*
 VOICE: la app BravoVa tal cual, réplica fiel de la versión Android (Compose) en tamaño de teléfono.
@@ -207,6 +207,19 @@ svg.i{width:1em;height:1em;flex:none}
 :root.dark .sensor .core{background:#131C2E}
 .sensor .laser{position:absolute;left:12%;right:12%;height:2px;border-radius:2px;background:var(--acc);box-shadow:0 0 8px var(--acc);animation:laser .9s linear infinite alternate}
 @keyframes laser{from{top:15%}to{top:85%}}
+.tile{flex:1;display:flex;align-items:center;gap:7px;padding:9px 10px;border-radius:14px;border:1px solid var(--border);background:color-mix(in srgb,var(--surfVar) 55%,transparent)}
+.tile b{display:block;font:700 13.5px 'Fredoka';white-space:nowrap}.tile small{display:block;font-size:10px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.celeb{position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#059669,#10B981,#047857);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .26s;animation:cflash .28s ease-out}
+@keyframes cflash{from{box-shadow:inset 0 0 0 2000px #fff}to{box-shadow:inset 0 0 0 2000px rgba(255,255,255,0)}}
+.conf{position:absolute;left:50%;top:34%}
+.conf i{position:absolute;width:10px;height:6px;border-radius:2px;margin:-3px -5px;animation:conf 2.4s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes conf{from{transform:translate(0,0) rotate(0);opacity:1}to{transform:translate(var(--dx),calc(var(--dy) + 42vh)) rotate(var(--r));opacity:0}}
+.cring{position:absolute;border-radius:50%;background:#fff;animation:breath 1.2s ease-in-out infinite alternate}
+.ccirc{width:128px;height:128px;border-radius:50%;background:rgba(255,255,255,.22);border:3.5px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 24px 50px rgba(0,0,0,.25);animation:cpop .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cpop{from{transform:scale(0)}to{transform:scale(1)}}
+.cchk{stroke-dasharray:1;stroke-dashoffset:1;animation:cdraw .52s .4s ease-out forwards}
+@keyframes cdraw{to{stroke-dashoffset:0}}
+.cfade{opacity:0;animation:cfade .36s .92s forwards}@keyframes cfade{to{opacity:1}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -219,6 +232,7 @@ svg.i{width:1em;height:1em;flex:none}
     <button class="fab" aria-label="Abrir carrito" onclick="go('cart')"><span id="icCart"></span><span class="bd" id="cartBadge" hidden>0</span></button>
   </div>
   <nav class="dock hide" id="dock" aria-label="Navegación principal"></nav>
+  <div id="overlay"></div>
   <div class="toast" id="toast"><div><span id="toastIc"></span><span id="toastMsg"></span></div></div>
 </div>
 <script>
@@ -264,6 +278,16 @@ const P={
  lockopen:'<g fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 7.7-1.5"/></g>',
  shield:'<g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12 2.2 2.2 4.3-4.4" stroke-linecap="round"/></g>',
  checkc:'<circle cx="12" cy="12" r="9.5" fill="currentColor"/><path d="m7.5 12.3 3 3 6-6.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+ phone:'<path d="M6.6 3.5h3l1.5 4.3-2.1 1.5a11 11 0 0 0 5.7 5.7l1.5-2.1 4.3 1.5v3a2 2 0 0 1-2.2 2A16.6 16.6 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>',
+ chat:'<path d="M4 5.5h16v10.5H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>',
+ sendi:'<path d="M4 12 20 4l-6 16-2.5-6.5z" fill="currentColor"/>',
+ speed:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.2 17.5a8.5 8.5 0 1 1 15.6 0"/><path d="m12 13.5 4-4"/><circle cx="12" cy="13.5" r="1.2" fill="currentColor"/></g>',
+ traffic:'<g fill="none" stroke="currentColor" stroke-width="1.9"><rect x="8" y="2.5" width="8" height="19" rx="2.5"/><circle cx="12" cy="7" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/><path d="M8 6H5M8 11H5M8 16H5M16 6h3M16 11h3M16 16h3" stroke-linecap="round"/></g>',
+ map:'<g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3.5 6.5 9 4.5l6 2 5.5-2v13l-5.5 2-6-2-5.5 2z"/><path d="M9 4.5v13M15 6.5v13"/></g>',
+ locate:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></g>',
+ pause:'<path d="M8 5.5v13M16 5.5v13" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>',
+ play:'<path d="M7.5 5v14l11-7z" fill="currentColor"/>',
+ close:'<path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
  bag:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/></g>',
 };
 const LOGO={bravo:['img/logo_bravo_official.png',118,31],arca:['img/logo_arca_official.png',80,34]};
@@ -526,7 +550,7 @@ window.sendChat=async()=>{
   const inp=$('chatIn');const q=(inp.value||'').trim();if(!q&&!S.pendImg)return;
   const img=S.pendImg;S.pendImg=null;S.chat.push({s:'u',t:q||'Analiza esta imagen',img:!!img});
   const m={s:'a',t:'',loading:true,label:img?'Brav IA Soporte • Auditoría Visual Multimodal':'Brav IA • Chef Ejecutivo & Asesor Oficial'};S.chat.push(m);renderBravIA();
-  if(!FB_USER||!window.BV_FB){m.loading=false;m.t='Inicia sesión con tu cuenta de Google para usar Brav IA con Gemini (igual que en la app). En modo invitado no se envían consultas a la IA.';renderBravIA();return}
+  if(!window.BV_FB){m.loading=false;m.t='Conectando con Gemini… intenta de nuevo en unos segundos.';renderBravIA();return}
   try{for await(const t of BV_FB.generate(systemPrompt(q||'Analiza esta imagen',!!img),img&&img.data,img&&img.mime)){m.t+=t;const last=$('chatScroll')?.lastElementChild;if(last&&S.screen==='bravia'){last.outerHTML=chatMsgHtml(m);$('chatScroll').scrollTop=$('chatScroll').scrollHeight}}
     const mm=m.t.match(/SKUS:\s*\[([^\]]*)\]/);if(mm){m.skus=[...mm[1].matchAll(/"([A-Z]{3}-\d+)"/g)].map(x=>x[1]);m.t=m.t.replace(/SKUS:\s*\[[^\]]*\]/,'').trim()}
   }catch(e){m.t='No pude conectar con Gemini en este momento. Intenta de nuevo en unos segundos.';console.warn(e)}
@@ -741,21 +765,229 @@ function completeCheckout(){
   S.orders=[order,...(S.orders||[])];S.trackedOrder=id;
   if(FB_USER&&window.BV_FB){const uid=FB_USER.uid;BV_FB.clearCart(uid).catch(e=>console.warn('Firestore',e));BV_FB.createOrder(uid,order).catch(e=>console.warn('Firestore',e))}
   S.cart={};S.redeem=false;S.lastBio=null;save();updateCart();
+  const st=STAGES[1],m=metrics(st);S.celebrate={id,total:t.finalPay,branch:S.branch,eta:m.eta,km:m.road};syncTel(st,false);BANNER=null;
   toast('check',`¡Pedido confirmado! +RD$ ${t.gen} en tu Tarjeta Bravísima`);
-  go('delivery');
+  go('delivery');$('overlay').innerHTML=celebration();setTimeout(endCelebrate,3500);
+  setTimeout(()=>{if(trackedOrder()&&trackedOrder().id===id){setOrderStage(STAGES[2],false);if(S.screen==='delivery')renderDelivery(true)}},4500);
 }
+/* ================= RONDA 3: Seguimiento en vivo (DeliveryTrackingScreen) ================= */
+const STAGES=[
+ {k:'RECEIVED',status:'Orden recibida',short:'Recibido',pct:20,eta:12,rp:0,emoji:'receipt',desc:'Orden confirmada y asignada al equipo de selección en sucursal.',upd:'Hoy, recién recibida'},
+ {k:'PREPARED',status:'Envío preparado',short:'Preparado',pct:45,eta:9,rp:2,emoji:'box',desc:'Artículos empacados con cadena de frío verificada y listos para salir.',upd:'Hoy, empaque listo'},
+ {k:'IN_TRANSIT',status:'En camino',short:'En ruta',pct:72,eta:5,rp:4,emoji:'delivery',desc:'El repartidor Carlos Rodríguez avanza hacia tu dirección con GPS activo.',upd:'En ruta ahora'},
+ {k:'ARRIVING',status:'Llegando a tu dirección',short:'Llegando',pct:90,eta:2,rp:7,emoji:'pin',desc:'El motorista está a menos de 200 metros entrando a tu cuadra residencial.',upd:'A 2 min de llegar'},
+ {k:'DELIVERED',status:'Entregado',short:'Entregado',pct:100,eta:0,rp:8,emoji:'check',desc:'¡Pedido entregado exitosamente en tu dirección! Gracias por comprar en Bravo.',upd:'Entregado'}];
+function stageOf(s){const n=(s||'').trim().toLowerCase(),f=(...k)=>k.some(x=>n.includes(x));
+  return STAGES[f('entregado','completado')?4:f('llegando','cerca','puerta')?3:f('camino','ruta','reparto')?2:f('preparado','empacado','empaque')?1:f('recibid','confirmad','procesando')?0:1]}
+const ROUTE=[[.18,.23],[.26,.30],[.35,.37],[.45,.44],[.55,.51],[.64,.58],[.73,.65],[.81,.72],[.85,.76]];
+const SEGS=[[0,.05,'Zona de Despacho Cadena de Frío • Sucursal Bravo',0,'Verificando sellado térmico','FLUIDO',0],[1,.18,'Incorporación a Av. Winston Churchill',26,'Salida despejada de sucursal','FLUIDO',0],[2,.34,'Av. Winston Churchill esq. C. Roberto Pastoriza',38,'Tráfico fluido en corredor central','FLUIDO',0],[3,.50,'Crucero Semafórico Av. 27 de Febrero',19,'Tráfico moderado en intersección (+1 min)','MODERADO',1],[4,.66,'Av. Abraham Lincoln • Polígono Central Piantini',42,'Vía rápida despejada (-1 min)','FLUIDO',-1],[5,.78,'Calle Paseo de los Locutores • Ensanche Naco',33,'Flujo vehicular continuo','FLUIDO',0],[6,.88,'Calle Gustavo Mejía Ricart • Vía Residencial',25,'Reducción preventiva en zona residencial','FLUIDO',0],[7,.95,'Entrando a tu cuadra residencial (A 140 metros)',16,'Aproximación final a tu edificio','FLUIDO',0],[8,1,'En la puerta de tu dirección / Lobby principal',0,'¡El repartidor ha llegado a tu puerta!','FLUIDO',0]].map(([i,f,st,sp,tc,tl,d])=>({i,f,st,sp,tc,tl,d}));
+const BRANCHES=[['Bravo Winston Churchill',18.4719,-69.9388],['Bravo Núñez de Cáceres',18.4632,-69.9574],['Bravo Enriquillo',18.4485,-69.9691],['Bravo Los Próceres',18.4882,-69.9465],['Bravo San Isidro',18.4945,-69.8321],['Bravo Santiago',19.4517,-70.6970]];
+function hav(a,b,c,d){const r=6371,R=x=>x*Math.PI/180,dl=R(c-a),dn=R(d-b),h=Math.sin(dl/2)**2+Math.cos(R(a))*Math.cos(R(c))*Math.sin(dn/2)**2;return r*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h))}
+function metrics(stage){
+  const u=S.gps||{lat:18.4685,lng:-69.9442,real:false};
+  const br=BRANCHES.find(b=>b[0].toLowerCase()===S.branch.toLowerCase())||BRANCHES.reduce((m,b)=>hav(u.lat,u.lng,b[1],b[2])<hav(u.lat,u.lng,m[1],m[2])?b:m);
+  const raw=Math.min(28,Math.max(.45,hav(u.lat,u.lng,br[1],br[2]))),road=Math.round(raw*1.28*10)/10,h=new Date().getHours();
+  const [mul,tl]=(h>=7&&h<=9)||(h>=17&&h<=19)?[1.35,'Tráfico hora pico (Av. principales)']:h>=12&&h<=14?[1.18,'Tráfico moderado mediodía']:[1,'Tráfico fluido en ruta'];
+  const base=Math.min(48,Math.max(6,Math.round(road/26*60*mul+5)));
+  const se={RECEIVED:base+4,PREPARED:base,IN_TRANSIT:Math.max(3,Math.round(base*.62)),ARRIVING:2,DELIVERED:0}[(stage||STAGES[1]).k];
+  return {user:u,branch:br[0],bLat:br[1],bLng:br[2],road,eta:se,fee:Math.min(240,Math.max(75,65+Math.round(road*14))),traffic:tl};
+}
+const TEL={speed:34,avg:31,peak:44,street:'Av. Winston Churchill esq. C. Roberto Pastoriza',tc:'Tráfico fluido en corredor central',tl:'FLUIDO',delay:0,eta:5,rem:1.15,frac:.72,wp:4,auto:true,upd:'Actualizado en vivo'};
+const DCHAT=[{s:'driver',t:'¡Saludos! Soy Carlos Rodríguez, tu repartidor Express de Bravo (Placa K-04921). Llevo tu orden con cadena de frío verificada por la Av. Winston Churchill. Escríbeme por aquí si tienes alguna indicación de entrega.',ts:'Hace 1 min',sp:34}];
+let BANNER=null,DTYPING=false,tick=0;
+const tnow=(s)=>new Date().toLocaleTimeString('en-US',s?{hour:'numeric',minute:'2-digit',second:'2-digit'}:{hour:'numeric',minute:'2-digit'});
+function trackedOrder(){return (S.orders||[]).find(o=>o.id===S.trackedOrder)||(S.orders||[])[0]||null}
+function setOrderStage(st,feedback){
+  const o=trackedOrder();if(o){o.status=st.status;o.date=st.upd;save();if(FB_USER&&window.BV_FB)BV_FB.updateOrderStatus(FB_USER.uid,o.id,{status:st.status,date:st.upd}).catch(e=>console.warn('Firestore',e))}
+  syncTel(st,feedback);
+  if(feedback)toast(st.emoji==='check'?'check':'truck',`Orden #${o?o.id:'ORD-88412'}: ${st.status} (${st.pct}%)`);
+}
+function syncTel(st,banner){
+  const seg=SEGS[Math.min(8,st.rp)],m=metrics(st),eta=st.k==='DELIVERED'?0:Math.max(1,st.eta+seg.d);
+  Object.assign(TEL,{speed:seg.sp,street:seg.st,tc:seg.tc,tl:seg.tl,delay:seg.d,eta,rem:Math.max(0,Math.round(m.road*(1-seg.f)*100)/100),frac:seg.f,wp:seg.i,upd:`Actualizado • ${tnow(1)}`});
+  if(banner)BANNER={icon:st.emoji,title:`${st.status} • ${seg.sp} km/h`,sub:`${seg.st} • ${seg.tc}`,speed:seg.sp,eta,pct:st.pct};
+}
+setInterval(()=>{tick++;if(!TEL.auto)return;const o=trackedOrder(),st=stageOf(o&&o.status),m=metrics(st),total=Math.max(.85,m.road);
+  if(st.k==='DELIVERED'||TEL.frac>=.999){if(TEL.speed||TEL.frac<1){const d=SEGS[8];Object.assign(TEL,{speed:0,street:d.st,tc:d.tc,tl:d.tl,eta:0,rem:0,frac:1,wp:8});liveRefresh()}return}
+  const cur=Math.min(.999,Math.max(.05,TEL.frac)),seg=SEGS.find(s=>s.f>=cur)||SEGS[8];
+  const live=Math.min(48,Math.max(14,(seg.sp>0?seg.sp:26)+Math.trunc(Math.sin(tick*.08))*2));
+  const next=Math.min(1,Math.max(.05,cur+(live/3600*.25)/total)),rem=Math.max(0,Math.round(total*(1-next)*100)/100);
+  const eta=next>=.995?0:Math.max(1,Math.round(rem/Math.max(live,22)*60)+seg.d),prev=TEL.wp;
+  Object.assign(TEL,{speed:next>=.999?0:live,avg:tick%16===0?Math.trunc((TEL.avg*3+live)/4):TEL.avg,peak:Math.max(TEL.peak,live),street:seg.st,tc:seg.tc,tl:seg.tl,delay:seg.d,eta,rem,frac:next,wp:seg.i,upd:`GPS 1:1 en tiempo real • ${tnow(1)}`});
+  if(seg.i!==prev){const imp=STAGES[seg.i===0?0:seg.i<=2?1:seg.i<=6?2:seg.i===7?3:4];
+    if(imp!==st&&o){o.status=imp.status;o.date=imp.upd;save();if(FB_USER&&window.BV_FB)BV_FB.updateOrderStatus(FB_USER.uid,o.id,{status:imp.status,date:imp.upd}).catch(()=>{})}
+    BANNER={icon:imp.emoji,title:`${imp.status} • ${live>0?live+' km/h':'En punto'}`,sub:`${seg.st} • ${seg.tc}`,speed:live,eta,pct:Math.round(next*100)};
+    if([4,7,8].includes(seg.i))DCHAT.push({s:'driver',t:seg.i===4?`Voy cruzando por ${seg.st} a ${live} km/h. El tráfico está ${seg.tl.toLowerCase()}, llego en unos ${eta} min.`:seg.i===7?'¡Ya estoy entrando a tu cuadra a menos de 150 metros! Ve preparándote para recibir el pedido.':'¡Acabo de llegar a la entrada principal con tu pedido Bravo! Cadena de frío 100% intacta.',ts:tnow(),sp:live});
+    if(S.screen==='delivery'){renderDelivery(true);return}}
+  liveRefresh();
+},250);
+function liveRefresh(){if(S.screen!=='delivery')return;document.querySelectorAll('[data-t]').forEach(el=>{const v=telText(el.dataset.t);if(el.textContent!==v)el.textContent=v})}
+function telText(k){const st=stageOf(trackedOrder()?.status),m=metrics(st),eta=TEL.eta>0?TEL.eta:m.eta,del=st.k==='DELIVERED';
+  return {sub:del?'Entregado':`${TEL.speed} km/h • ~${eta} min`,street:`${TEL.street} • ${TEL.upd}`,speed:`${TEL.speed} km/h`,avg:`Prom. ${TEL.avg} km/h`,eta:del?'Entregado':`~${eta} min`,rem:`${TEL.rem} km rest.`,
+    traf:TEL.tl==='DENSO'?'Tráfico Denso':TEL.tl==='MODERADO'?'Tráfico Moderado':'Tráfico Fluido',delay:TEL.delay>0?`+${TEL.delay} min por tráfico`:'Ruta despejada',
+    mapTop:`${TEL.street} • Tiempo Real 1:1`,mapBot:`${TEL.speed} km/h / ${TEL.rem} km restantes / ${del?'Entregado':'ETA ~'+TEL.eta+' min'}`,
+    bTitle:BANNER?BANNER.title:`${st.status} • Carlos Rodríguez en ruta`,bSub:BANNER?BANNER.sub:`${TEL.street} • ${TEL.tc}`,bSpeed:`${BANNER?BANNER.speed:TEL.speed} km/h`,
+    bEta:del?'Pedido entregado en tu puerta':`Llegada estimada en ~${BANNER?BANNER.eta:TEL.eta} min • ${TEL.rem} km`,bPct:`${BANNER?BANNER.pct:Math.round(TEL.frac*100)}%`,dPill:`IA En Ruta • ${TEL.speed} km/h`}[k]}
+function renderDelivery(keep){
+  const prev=keep&&$('mainScroll')?$('mainScroll').scrollTop:0,draft=$('dIn')?$('dIn').value:'',hadFocus=document.activeElement&&document.activeElement.id==='dIn';
+  const o=trackedOrder(),st=stageOf(o&&o.status),m=metrics(st),oid=o?o.id:'ORD-88412',del=st.k==='DELIVERED';
+  const tlc=TEL.tl==='DENSO'?'#D97706':TEL.tl==='MODERADO'?'#059669':'#10B981';
+  const prods=(o?o.skus.map(s=>[BY_SKU[s],1]):Object.entries(S.cart).map(([s,q])=>[BY_SKU[s],q])).filter(x=>x[0]);
+  const ords=S.orders||[];
+  const pbar=v=>`<div style="height:7px;border-radius:9px;background:color-mix(in srgb,var(--primary) 14%,transparent);overflow:hidden"><div style="height:100%;width:${v}%;background:linear-gradient(90deg,var(--amber),var(--primary));border-radius:9px;transition:width .65s"></div></div>`;
+  $('screen').className='view';
+  $('screen').innerHTML=`<div class="caphdr tcard" style="flex-direction:row;align-items:center;gap:10px;padding:8px 10px"><button class="backbtn" style="width:36px;height:36px" aria-label="Volver" onclick="back()">${ic('back')}</button>
+    <div style="flex:1"><div class="sect" style="font-size:15.5px">Seguimiento en Tiempo Real</div><div data-t="sub" style="font-size:11px;font-weight:800;color:#059669">${esc(telText('sub'))}</div></div>
+    <button class="rbtn" style="color:#059669;background:rgba(5,150,105,.14)" aria-label="Llamar al repartidor" onclick="toast('truck','Llamando a Carlos Rodríguez (Repartidor)...')">${ic('phone')}</button></div>
+  <div class="scroll" id="mainScroll" style="padding:76px 0 128px;display:flex;flex-direction:column;gap:12px">
+   <div class="tcard" style="margin:0 14px;padding:12px 14px;border:1px solid rgba(5,150,105,.35)">
+     <div class="row" style="gap:10px"><span class="secic" style="width:40px;height:40px;font-size:20px;color:#059669;background:rgba(5,150,105,.14);border-color:rgba(5,150,105,.3)">${ic(STICON[BANNER?BANNER.icon:st.emoji]||'truck')}</span>
+       <div style="flex:1"><div class="row" style="gap:4px;color:#059669;font:900 10px 'Nunito'">${ic('bell','font-size:12px')}NOTIFICACIÓN LIVE • #${esc(oid)}</div><div data-t="bTitle" class="disp" style="font-weight:600;font-size:13.5px">${esc(telText('bTitle'))}</div><div data-t="bSub" style="font-size:11.5px;font-weight:600;color:var(--ink2)">${esc(telText('bSub'))}</div></div>
+       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="row" style="gap:3px;font:800 10.5px 'Nunito';color:var(--primary)">${ic('speed','font-size:13px')}<span data-t="bSpeed">${esc(telText('bSpeed'))}</span></span><button class="iconbtn" style="width:24px;height:24px;font-size:12px;color:var(--ink2)" aria-label="Cerrar notificación" onclick="BANNER=null;renderDelivery(true)">${ic('close')}</button></div></div>
+     <div class="row" style="gap:6px;margin-top:8px;font-size:11px;font-weight:800;color:#059669">${ic('bike','font-size:14px')}<span data-t="bEta" style="flex:1">${esc(telText('bEta'))}</span><span data-t="bPct">${esc(telText('bPct'))}</span></div>
+     <div style="height:4px;border-radius:9px;background:rgba(5,150,105,.15);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.round(TEL.frac*100)}%;background:#059669"></div></div>
+   </div>
+   ${ords.length>1?`<div class="hscroll" style="gap:8px">${ords.map(x=>{const on=x.id===oid,xs=stageOf(x.status);return `<button class="chip" style="${on?'background:var(--primary);color:var(--onPrimary);border-color:var(--primary)':'background:var(--surface);color:var(--ink)'}" onclick="S.trackedOrder='${x.id}';save();syncTel(stageOf('${esc(x.status)}'),false);renderDelivery()">#${x.id} • ${xs.pct}%</button>`}).join('')}</div>`:''}
+   <div class="tcard" style="margin:0 14px;padding:14px;display:flex;flex-direction:column;gap:10px">
+     <div class="row" style="gap:8px">${ic('map','font-size:19px;color:var(--primary)')}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:15px">Mapa GPS en Tiempo Real • Tráfico y Velocidad</div><div data-t="street" style="font-size:11px;font-weight:700;color:var(--ink2)">${esc(telText('street'))}</div></div></div>
+     <div class="row" style="gap:6px;flex-wrap:wrap"><button class="chip alt" style="height:30px;color:var(--ink);font-size:11px" onclick="useGps()">${ic('locate')}Mi GPS</button>
+       <button class="chip" style="height:30px;font-size:11px" onclick="toggleAuto()">${ic(TEL.auto?'pause':'play')}${TEL.auto?'Auto-Tráfico Activo':'Reanudar Ruta'}</button>
+       <button class="chip alt" style="height:30px;color:var(--ink);font-size:11px" onclick="trafficNow()">${ic('traffic')}Tráfico Ahora</button>
+       <button class="iconbtn" style="width:32px;height:32px" aria-label="Enviar notificación en vivo" onclick="gpsPush()">${ic('bell')}</button></div>
+     <div id="dmap" style="position:relative;height:310px;border-radius:18px;overflow:hidden;touch-action:none;cursor:grab">
+       <canvas id="dmapc" style="width:100%;height:100%;display:block"></canvas>
+       <div class="row" style="position:absolute;top:10px;left:10px;gap:5px;padding:5px 9px;border-radius:999px;background:var(--dockBg);backdrop-filter:blur(10px);font-size:10px;font-weight:800;max-width:62%">${ic('store','font-size:13px;color:var(--primary)')}<span data-t="mapTop" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(telText('mapTop'))}</span></div>
+       <div style="position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+         <button class="rbtn" style="width:34px;height:34px;background:var(--dockBg)" aria-label="Acercar mapa" onclick="mapZoom(.25)">${ic('add')}</button>
+         <button class="rbtn" style="width:34px;height:34px;background:var(--dockBg)" aria-label="Alejar mapa" onclick="mapZoom(-.25)">${ic('remove')}</button>
+         <button class="chip" style="height:26px;font-size:9.5px;background:var(--dockBg)" aria-label="Seguir repartidor" onclick="MAP.follow=true;MAP.zoom=1.15;MAP.btn()">${ic('locate','font-size:12px')}<span id="followLbl">${MAP.follow?'Siguiendo':'Centrar'}</span></button></div>
+       <div class="row" style="position:absolute;left:10px;right:10px;bottom:10px;gap:6px;padding:7px 11px;border-radius:999px;background:rgba(11,15,23,.92);color:#E2E8F0;font-size:11px;font-weight:800">${ic('bike','font-size:14px;color:#34D399')}<span data-t="mapBot">${esc(telText('mapBot'))}</span></div>
+     </div>
+     <div class="row" style="gap:8px">
+       <div class="tile">${ic('speed','font-size:17px;color:var(--primary)')}<div><b data-t="speed">${esc(telText('speed'))}</b><small data-t="avg">${esc(telText('avg'))}</small></div></div>
+       <div class="tile" style="border-color:${hexA(tlc,.35)};background:${hexA(tlc,.10)}">${ic('traffic',`font-size:17px;color:${tlc}`)}<div><b data-t="traf" style="color:${tlc};font-size:12.5px">${esc(telText('traf'))}</b><small data-t="delay">${esc(telText('delay'))}</small></div></div>
+       <div class="tile" style="flex:.8;flex-direction:column;align-items:flex-start;gap:0"><b data-t="eta" style="color:var(--primary)">${esc(telText('eta'))}</b><small data-t="rem">${esc(telText('rem'))}</small></div></div>
+     ${metaStrip([`Ruta real: ${m.road} km`,TEL.tc,`Envío base RD$ ${m.fee} (Gratis Bravísima)`],10.5,'wrap')}
+     <a class="obtn" style="height:auto;min-height:44px;padding:8px 14px;text-decoration:none;font-size:11.5px;text-align:center" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${m.bLat},${m.bLng}&destination=${m.user.lat},${m.user.lng}&travelmode=driving">${ic('map','color:var(--primary)')} Abrir Navegación Completa en Google Maps (${m.road} km • ~${TEL.eta>0?TEL.eta:m.eta} min)</a>
+   </div>
+   <div class="tcard" style="margin:0 14px;padding:14px;display:flex;flex-direction:column;gap:10px">
+     <div class="row" style="gap:10px"><span class="secic" style="width:42px;height:42px;font-size:21px;color:#059669;background:rgba(5,150,105,.14);border-color:rgba(5,150,105,.3)">${ic('bike')}</span>
+       <div style="flex:1"><div class="row" style="gap:6px;flex-wrap:wrap"><span class="disp" style="font-weight:700;font-size:15px">Carlos Rodríguez</span><span data-t="dPill" style="padding:2px 8px;border-radius:99px;background:rgba(5,150,105,.14);color:#059669;font:900 9.5px 'Nunito'">${esc(telText('dPill'))}</span></div>${metaStrip(['Repartidor BravoVa','4.95 Estrellas','Placa K-04921'],10)}</div>
+       <button class="rbtn" style="color:#059669;background:rgba(5,150,105,.14)" aria-label="Llamar" onclick="toast('truck','Llamando a Carlos Rodríguez (Repartidor)...')">${ic('phone')}</button>
+       <button class="rbtn" style="color:var(--primary)" aria-label="Mensaje rápido" onclick="driverSend('Hola Carlos, ¿por dónde vienes y en cuánto tiempo llegas?')">${ic('chat')}</button></div>
+     <div class="hscroll" style="padding:0;gap:6px">${['¿Por dónde vienes?','¿Cómo está el tráfico?','Déjalo en recepción','Avísame al llegar','¿Viene fría la compra?'].map(q=>`<button class="chip" style="height:26px;font-size:11px" onclick="driverSend('${q}')">${q}</button>`).join('')}</div>
+     <div id="dchat" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto">${DCHAT.map(x=>{const u=x.s==='user';return `<div class="msg ${u?'u':'a'}" style="${u?'':'background:var(--surfVar)'};max-width:92%"><span class="lbl" style="${u?'color:inherit;opacity:.85':''}">${u?'Tú':'🛵 Carlos Rodríguez (Repartidor)'} <span style="font-weight:500;opacity:.75;font-size:9.5px">${esc(x.ts)} • ${x.sp} km/h</span></span>${fmtAi(x.t)}</div>`}).join('')}
+       ${DTYPING?`<div style="font-size:11px;font-weight:700;color:var(--ink2)">Carlos Rodríguez está respondiendo desde la ruta (${TEL.speed} km/h)...</div>`:''}</div>
+     <div class="row" style="gap:8px;padding:4px 4px 4px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface)"><input id="dIn" style="flex:1;border:0;background:transparent;outline:0;color:var(--ink);font:600 12.5px 'Nunito'" placeholder="Escribe un mensaje al repartidor Carlos..." aria-label="Mensaje al repartidor" onkeydown="if(event.key==='Enter')driverSend()"><button class="send" style="width:34px;height:34px" aria-label="Enviar" onclick="driverSend()">${ic('sendi')}</button></div>
+   </div>
+   <div class="tcard" style="margin:0 14px;padding:14px;display:flex;flex-direction:column;gap:10px">
+     <div class="row" style="gap:6px;font-size:11.5px;font-weight:800;color:#059669">${ic('cloud','font-size:15px')}<span class="disp" style="font-weight:600">Seguimiento en Tiempo Real • #${esc(oid)}</span></div>
+     <div style="font-size:10.5px;font-weight:700;color:var(--ink2)">${esc(o?o.date:st.upd)}</div>
+     <div class="row" style="gap:10px"><span class="secic" style="width:40px;height:40px;font-size:20px">${ic(STICON[st.emoji])}</span><div style="flex:1"><div class="disp" style="font-weight:700;font-size:19px">${esc(st.status)}</div><div style="font-size:11.5px;font-weight:600;color:var(--ink2)">${esc(st.desc)}</div></div><span class="disp" style="font-weight:700;font-size:12px;color:var(--primary)">${st.pct}%</span></div>
+     <div class="row" style="justify-content:space-between">${metaStrip(['Progreso de entrega',`Etapa ${STAGES.indexOf(st)+1} de ${STAGES.length}`],10.5)}<span class="disp" style="font-weight:700;font-size:12px">${st.pct}%</span></div>
+     ${pbar(st.pct)}
+     <div class="row" style="justify-content:space-between;gap:4px">${STAGES.map((x,i)=>{const done=i<=STAGES.indexOf(st);return `<button style="flex:1;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:4px;color:${done?'var(--primary)':'var(--ink2)'}" onclick="setOrderStage(STAGES[${i}],true);renderDelivery(true)"><span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${done?20:13}px;${done?'':'border:1.5px solid var(--border)'}">${done?ic('checkc'):i+1}</span><span style="font-size:10px;font-weight:800">${x.short}</span></button>`}).join('')}</div>
+     <div style="font-size:10.5px;font-weight:700;color:var(--ink2);text-align:center">${FB_USER?'Sincronizado con tu cuenta de Google':'Modo invitado • Guardado en este dispositivo'}</div>
+     <button class="pbtn" style="height:40px;font-size:11px" onclick="setOrderStage(STAGES[(STAGES.indexOf(stageOf(trackedOrder()?.status))+1)%5],true);renderDelivery(true)">${ic('refresh')} Actualizar etapa de entrega</button>
+   </div>
+   ${prods.length?`<div class="tcard" style="margin:0 14px;padding:14px;display:flex;flex-direction:column;gap:10px">
+     <div><div class="sect" style="font-size:15px">Artículos en este envío (${prods.length})</div><div style="font-size:11px;font-weight:700;color:var(--ink2)">Cadena de frío activa • Orden #${esc(oid)}</div></div>
+     <div class="hscroll" style="padding:0">${prods.map(([p,q])=>`<div class="tcard" style="width:120px;padding:8px;cursor:pointer;border-radius:14px" onclick="openProduct('${p.sku}')">${artwork(p,64,10,'margin:0 0 6px')}<div style="font-size:11px;font-weight:800;line-height:1.25;height:28px;overflow:hidden">${esc(p.name)}</div><div style="font-size:10px;font-weight:700;color:var(--ink2)">x${q} • RD$ ${p.price}</div></div>`).join('')}</div></div>`:''}
+  </div>`;
+  const sc=$('mainScroll');sc.scrollTop=prev;bindScroll(sc);const dc=$('dchat');if(dc)dc.scrollTop=dc.scrollHeight;if(draft&&$('dIn')){$('dIn').value=draft}if(hadFocus)$('dIn')?.focus();
+  MAP.mount();
+}
+const STICON={receipt:'list',box:'bag',delivery:'bike',pin:'locate',check:'checkc'};
+window.toggleAuto=()=>{TEL.auto=!TEL.auto;toast(TEL.auto?'truck':'bell',TEL.auto?'Actualización automática de tráfico y GPS activada':'Simulación en tiempo real en pausa');renderDelivery(true)};
+window.trafficNow=()=>{const ni=TEL.wp>=8?1:Math.min(8,TEL.wp+1),seg=SEGS[ni],st=STAGES[ni===0?0:ni<=2?1:ni<=6?2:ni===7?3:4];setOrderStage(st,false);syncTel(st,true);toast('bell',`Tráfico en vivo actualizado: ${seg.sp} km/h • ${seg.tc}`);renderDelivery(true)};
+window.gpsPush=()=>{const m=metrics(stageOf(trackedOrder()?.status));toast('locate',`Push GPS: ${m.road} km • ETA ~${m.eta} min`);try{if('Notification' in window&&Notification.permission==='granted')new Notification(`Pedido #${trackedOrder()?.id||'ORD-88412'} • ${TEL.speed} km/h`,{body:`${TEL.street}. ETA ~${TEL.eta} min.`,icon:'img/ic_launcher_art.png'});else if('Notification' in window&&Notification.permission!=='denied')Notification.requestPermission()}catch(e){}};
+window.useGps=()=>{if(!navigator.geolocation){toast('locate','GPS no disponible en este navegador');return}
+  navigator.geolocation.getCurrentPosition(p=>{S.gps={lat:p.coords.latitude,lng:p.coords.longitude,real:true};const m=metrics(stageOf(trackedOrder()?.status));toast('locate',`GPS real: ${m.branch} • ${m.road} km • ETA ~${m.eta} min`);renderDelivery(true)},()=>toast('locate','Permiso de ubicación pendiente • Usando coordenadas de referencia'),{enableHighAccuracy:true,timeout:8000})};
+function driverReply(msg,oid){const l=msg.toLowerCase(),f=(S.profile?.name||'Cliente').split(' ')[0]||'Cliente',c=(...k)=>k.some(x=>l.includes(x));
+  return c('donde','dónde','ubicacion','vienes')?`¡Hola ${f}! Ahora mismo voy por **${TEL.street}** a **${TEL.speed} km/h**. Me faltan **${TEL.rem} km** (~${TEL.eta} min) para llegar.`
+   :c('recepcion','recepción','lobby','porteria','conserje')?`¡Copiado ${f}! Apenas llegue al edificio en unos **${TEL.eta} minutos**, lo dejo en recepción/lobby con el encargado y te aviso por aquí.`
+   :c('frio','frío','helado','congelado','carne')?`¡Tranquilo ${f}! Llevo tus refrigerados en la cava térmica sellada a **2°C**. Van 100% frescos y sin perder cadena de frío.`
+   :c('trafico','tráfico','tarda','demora','tiempo')?`El reporte en vivo marca **${TEL.tc.toLowerCase()}** por ${TEL.street}. Mantengo **${TEL.speed} km/h** y llego en **~${TEL.eta} min**.`
+   :c('avisa','llamar','timbre','llegar')?`¡Claro que sí ${f}! En cuanto esté parqueando frente a tu entrada (en ~${TEL.eta} min) te timbro y te mando alerta en vivo.`
+   :`¡Recibido ${f}! Tomo en cuenta tu mensaje («${msg}») para la orden **#${oid}**. Avanzo por **${TEL.street}** a **${TEL.speed} km/h** (ETA ~${TEL.eta} min).`}
+window.driverSend=async t=>{const i=$('dIn'),msg=(t||(i&&i.value)||'').trim();if(!msg||DTYPING)return;
+  DCHAT.push({s:'user',t:msg,ts:tnow(),sp:TEL.speed});DTYPING=true;renderDelivery(true);
+  const o=trackedOrder(),oid=o?o.id:'ORD-88412',f=(S.profile?.name||'Cliente').split(' ')[0]||'Cliente';
+  const items=o?o.skus.map(s=>BY_SKU[s]?.name).filter(Boolean).slice(0,5).join(', '):'productos frescos de Supermercados Bravo';
+  const prompt=`Actúa como Carlos Rodríguez, repartidor motorista Express de Supermercados Bravo en Santo Domingo (Placa K-04921, calificación 4.95 estrellas).\nEstás entregando en tiempo real el pedido #${oid} al cliente ${f}.\nDatos reales del GPS en este instante:\n- Calle actual: ${TEL.street}\n- Velocidad actual: ${TEL.speed} km/h\n- Estado del tráfico: ${TEL.tc} (${TEL.tl})\n- Distancia restante: ${TEL.rem} km\n- Tiempo estimado de llegada (ETA): ${TEL.eta} minutos\n- Artículos en la mochila térmica: ${items}\nEl cliente te acaba de escribir este mensaje: "${msg}"\nResponde en primera persona como Carlos Rodríguez, en 1 o 2 oraciones breves, amables, profesionales y realistas, mencionando tu calle o velocidad/ETA actual si aplica. No uses códigos SKU.`;
+  let reply='';
+  try{if(!window.BV_FB)throw 0;await Promise.race([(async()=>{for await(const c of BV_FB.generate(prompt))reply+=c})(),new Promise((_,r)=>setTimeout(()=>r('timeout'),8500))]);reply=reply.trim();if(reply.length<12)throw 0}
+  catch(e){await new Promise(r=>setTimeout(r,650));reply=driverReply(msg,oid)}
+  reply=reply.replace(/\b[A-Z]{3}-\d+\b/g,'');DCHAT.push({s:'driver',t:reply,ts:tnow(),sp:TEL.speed});DTYPING=false;
+  BANNER={icon:'delivery',title:`Mensaje de Carlos Rodríguez (${TEL.speed} km/h)`,sub:reply.replace(/\*\*/g,''),speed:TEL.speed,eta:TEL.eta,pct:Math.round(TEL.frac*100)};
+  if(S.screen==='delivery')renderDelivery(true)};
+/* ---------- Mapa (RealInteractiveDeliveryMapView, dibujado igual en canvas) ---------- */
+const MAP={zoom:1,az:1,px:0,py:0,follow:true,dash:36,raf:0,ax:null,ay:null,
+  btn(){const l=$('followLbl');if(l)l.textContent=this.follow?'Siguiendo':'Centrar'},
+  mount(){const host=$('dmap'),cv=$('dmapc');if(!host)return;cancelAnimationFrame(this.raf);
+    let drag=null;host.onpointerdown=e=>{drag=[e.clientX,e.clientY];host.setPointerCapture(e.pointerId)};
+    host.onpointermove=e=>{if(!drag)return;this.follow=false;this.px=Math.max(-180,Math.min(180,this.px+(e.clientX-drag[0])));this.py=Math.max(-140,Math.min(140,this.py+(e.clientY-drag[1])));drag=[e.clientX,e.clientY];this.btn()};
+    host.onpointerup=()=>drag=null;
+    let t0=performance.now();const loop=t=>{if(!document.body.contains(cv))return;this.draw(cv,(t-t0)/1000);this.raf=requestAnimationFrame(loop)};this.raf=requestAnimationFrame(loop)},
+  draw(cv,sec){const dpr=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(cv.width!==W*dpr){cv.width=W*dpr;cv.height=H*dpr}
+    const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);const d=S.dark,s=dpr>1?1:1;
+    this.az+=(this.zoom-this.az)*.2;
+    const segs=ROUTE.length-1,sp=Math.min(1,Math.max(0,TEL.frac))*segs,lo=Math.min(segs,Math.floor(sp)),hi=Math.min(segs,lo+1),f=sp-lo;
+    const tx=ROUTE[lo][0]+(ROUTE[hi][0]-ROUTE[lo][0])*f,ty=ROUTE[lo][1]+(ROUTE[hi][1]-ROUTE[lo][1])*f;
+    if(this.ax==null){this.ax=tx;this.ay=ty}this.ax+=(tx-this.ax)*.25;this.ay+=(ty-this.ay)*.25;
+    const fx=this.follow&&this.zoom>1.05?(.5-this.ax)*W*.45:this.px,fy=this.follow&&this.zoom>1.05?(.5-this.ay)*H*.45:this.py,z=this.az;
+    const P=(x,y)=>[W/2+(W*x-W/2)*z+fx,H/2+(H*y-H/2)*z+fy];
+    const C=d?{bg:'#0C1320',bl:'#131C2E',pk:'#102A22',wt:'#0E2238',ss:'#1E293B',av:'#283548',bd:'#334155'}:{bg:'#E9EEF5',bl:'#F4F7FB',pk:'#D6EFE0',wt:'#CFE6FA',ss:'#FFFFFF',av:'#FFFBEB',bd:'#CBD5E1'};
+    g.fillStyle=C.bg;g.fillRect(0,0,W,H);
+    const rr=(a,b,c,e,col,r)=>{const p1=P(a,b),p2=P(c,e);g.fillStyle=col;g.beginPath();g.roundRect(p1[0],p1[1],Math.max(4,p2[0]-p1[0]),Math.max(4,p2[1]-p1[1]),r*z/2.6);g.fill()};
+    [[.04,.06,.18,.19],[.26,.05,.45,.19],[.51,.05,.64,.19],[.04,.27,.18,.43],[.26,.27,.45,.43],[.51,.27,.64,.43],[.72,.36,.94,.44],[.35,.54,.64,.70],[.72,.54,.95,.70],[.35,.78,.64,.94]].forEach(b=>rr(...b,C.bl,12));
+    rr(.05,.55,.29,.89,C.pk,18);rr(.71,.07,.94,.30,C.pk,18);rr(.09,.64,.21,.78,C.wt,24);
+    const line=(a,b,c,e,col,w)=>{const p1=P(a,b),p2=P(c,e);g.strokeStyle=col;g.lineWidth=w*z/2.6;g.lineCap='round';g.beginPath();g.moveTo(...p1);g.lineTo(...p2);g.stroke()};
+    [[0,.22,1,.22],[0,.74,1,.74],[.48,0,.48,1],[.32,0,.32,1],[.84,0,.84,1],[.18,.22,.84,.76]].forEach(l=>{line(...l,C.bd,13);line(...l,C.ss,10)});
+    [[.21,0,.21,1],[.68,0,.68,1],[0,.48,1,.48]].forEach(l=>{line(...l,C.bd,22);line(...l,C.av,18)});
+    g.font=`800 ${Math.max(9,Math.min(15,10.5*z))}px Nunito,sans-serif`;g.fillStyle=d?'rgba(203,213,225,.84)':'rgba(51,65,85,.86)';
+    [['Av. 27 de Febrero',.35,.465],['C. Roberto Pastoriza',.24,.205],['Av. Gustavo Mejía Ricart',.36,.725],['Av. Churchill',.03,.38],['Av. Lincoln',.70,.62]].forEach(([t,x,y])=>g.fillText(t,...P(x,y)));
+    g.font=`800 ${Math.max(8.5,Math.min(13,9.5*z))}px Nunito,sans-serif`;g.fillStyle=d?'rgba(110,231,183,.82)':'rgba(4,120,87,.86)';
+    g.fillText('Parque La Lira',...P(.07,.61));g.fillText('Plaza Piantini',...P(.73,.16));
+    const prim=getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()||'#D9232A';
+    const rc=TEL.tl==='DENSO'?'#F59E0B':TEL.tl==='MODERADO'?'#10B981':'#059669';
+    const path=()=>{g.beginPath();ROUTE.forEach((p,i)=>{const q=P(...p);i?g.lineTo(...q):g.moveTo(...q)})};
+    g.lineJoin='round';g.lineCap='round';
+    path();g.strokeStyle=hexA(prim,.24);g.lineWidth=18*z/2.6;g.setLineDash([]);g.stroke();
+    path();g.strokeStyle=hexA(rc,.35);g.lineWidth=9*z/2.6;g.stroke();
+    path();g.strokeStyle=rc;g.lineWidth=6.5*z/2.6;g.setLineDash([20/2.6,14/2.6]);g.lineDashOffset=-((sec*34/0.95)%34)/2.6;g.stroke();g.setLineDash([]);
+    const dot=(p,r1,r2,r3,c)=>{g.fillStyle=hexA(c,.25);g.beginPath();g.arc(...p,r1*z/2.6,0,7);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(...p,r2*z/2.6,0,7);g.fill();g.fillStyle=c;g.beginPath();g.arc(...p,r3*z/2.6,0,7);g.fill()};
+    const o=P(...ROUTE[0]),de=P(...ROUTE[8]),dr=P(this.ax,this.ay);
+    dot(o,18,11,8,prim);dot(de,20,12,8.5,'#059669');
+    g.strokeStyle=prim;g.lineWidth=6*z/2.6;g.beginPath();g.moveTo(...o);g.lineTo(...dr);g.stroke();
+    const pr=12+((sec%1.1)/1.1)*16;g.fillStyle=hexA(prim,.28);g.beginPath();g.arc(...dr,pr*z/2.6*1.3,0,7);g.fill();
+    dot(dr,0,14,10.5,prim);
+    const tag=(p,t,bg,fg)=>{g.font='800 10px Nunito,sans-serif';const w=g.measureText(t).width+14;g.fillStyle=bg;g.beginPath();g.roundRect(p[0]-w/2,p[1]-30,w,20,10);g.fill();g.fillStyle=fg;g.fillText(t,p[0]-w/2+7,p[1]-16)};
+    tag(o,`🏪 ${S.branch}`,d?'rgba(17,24,39,.9)':'rgba(255,255,255,.95)',d?'#F8FAFC':'#0F172A');tag(de,'📍 Tu Entrega','#059669','#fff');tag(dr,`🛵 Carlos • ${TEL.speed} km/h`,prim,'#fff');
+  }};
+window.mapZoom=d=>{MAP.zoom=Math.max(.85,Math.min(2.25,MAP.zoom+d))};
+/* ---------- Celebración (OrderSuccessCelebrationOverlay) ---------- */
+function celebration(){const c=S.celebrate,cols=['#D9232A','#F59E0B','#10B981','#FFFFFF'];
+  const conf=Array.from({length:24},(_,i)=>{const a=((i*137.5)%360)*Math.PI/180,sp=.35+((i*29)%100)/150;return `<i style="--dx:${Math.cos(a)*72*sp}vw;--dy:${Math.sin(a)*72*sp*.68}vw;--r:${540+i*24}deg;background:${cols[i%4]}"></i>`}).join('');
+  return `<div class="celeb" onclick="endCelebrate()" role="dialog" aria-label="Pedido confirmado"><div class="conf">${conf}</div><span class="cring" style="width:250px;height:250px;opacity:.16"></span><span class="cring" style="width:188px;height:188px;opacity:.22"></span>
+   <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 28px;text-align:center">
+    <div class="ccirc"><svg viewBox="0 0 68 68" width="68" height="68"><path d="M12 35.4 29.2 51.7 57.1 17.7" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" class="cchk"/></svg></div>
+    <div class="cfade" style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="disp" style="font-weight:700;font-size:28px;color:#fff">¡Pedido Confirmado!</div>
+     <div style="font-weight:800;font-size:16px;color:rgba(255,255,255,.92)">Orden ${esc(c.id)} • RD$${fmt(c.total)}</div>
+     <div class="row" style="gap:10px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;text-align:left">${ic('locate','font-size:22px')}<div><div style="font-weight:800;font-size:13px">${esc(c.branch)} • ${c.km} km</div><div style="font-size:11.5px;font-weight:700;opacity:.9">Llegada estimada por GPS: ~${c.eta} min</div></div></div></div></div></div>`}
+window.endCelebrate=()=>{if(!S.celebrate)return;S.celebrate=null;const el=document.querySelector('.celeb');if(el){el.style.opacity=0;setTimeout(()=>el.remove(),260)}};
 /* ---------------- dock + router ---------------- */
 const TABS=[['bravisima','card','Tarjeta'],['catalog','grid','Catálogos'],['home','home','Home'],['bravia','search','Buscar'],['account','person','Perfil']];
 function activeTab(){return {bravisima:'bravisima',catalog:'catalog',category:'catalog',product:'catalog',home:'home',cart:'home',delivery:'home',bravia:'bravia',account:'account',account_sub:'account'}[S.screen]}
 function renderDock(){const a=activeTab();$('dock').innerHTML=TABS.map(([k,i,l])=>`<button class="dk ${a===k?'on':''}" aria-label="${l}" ${a===k?'aria-current="page"':''} onclick="go('${k}')">${ic(i)}${k==='bravia'?`<span class="spark">${ic('spark')}</span>`:''}</button>`).join('')}
-const TITLES={delivery:['Seguimiento en vivo','Mapa de entrega en tiempo real: ronda 3.'],bravisima:['Tarjeta Bravísima','Tarjeta, cashback y canjes: ronda 3.'],account:['Mi cuenta','Pedidos, perfil, pagos, direcciones, listas y ajustes: ronda 3.']};
+const TITLES={bravisima:['Tarjeta Bravísima','Tarjeta, cashback y canjes: ronda 3.'],account:['Mi cuenta','Pedidos, perfil, pagos, direcciones, listas y ajustes: ronda 3.']};
 window.go=(s,noPush)=>{if(!noPush&&S.screen!==s&&!['splash','auth'].includes(S.screen)){HIST.push(S.screen);if(HIST.length>40)HIST.shift()}if(s==='category'&&S.screen!=='category')S.gridQ='';S.bio=null;S.screen=s;S.storeMenu=false;applyTheme();render()};
 function render(){
   const s=S.screen;
   const inApp=!['splash','auth'].includes(s);
   $('dock').classList.toggle('hide',!inApp);$('fabs').classList.toggle('hide',!(inApp&&['home','catalog','category'].includes(s)));
   if(inApp)renderDock();
-  if(s==='splash')renderSplash();else if(s==='auth')renderAuth();else if(s==='home')renderHome();else if(s==='bravia')renderBravIA();else if(s==='catalog')renderCatalog();else if(s==='category')renderCategory();else if(s==='product')renderProduct();else if(s==='cart')renderCart();else renderPlaceholder(...TITLES[s]);
+  if(s==='splash')renderSplash();else if(s==='auth')renderAuth();else if(s==='home')renderHome();else if(s==='bravia')renderBravIA();else if(s==='catalog')renderCatalog();else if(s==='category')renderCategory();else if(s==='product')renderProduct();else if(s==='cart')renderCart();else if(s==='delivery')renderDelivery();else renderPlaceholder(...TITLES[s]);
   updateCart();
 }
 $('icAi').innerHTML=ic('spark');$('icCart').innerHTML=ic('cart');

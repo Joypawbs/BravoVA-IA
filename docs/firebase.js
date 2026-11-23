@@ -87,6 +87,10 @@ window.BV_FB = {
       updatedAt: serverTimestamp()
     });
   },
+  // Igual que updateTrackedOrderStatusInFirestore: solo status/date/updatedAt
+  async updateOrderStatus(uid, id, o) {
+    await updateDoc(doc(db, "users", uid, "orders", id), { status: o.status.slice(0, 80), date: o.date.slice(0, 80), updatedAt: serverTimestamp() });
+  },
   async loadCart(uid) {
     const snap = await getDocs(collection(db, "users", uid, "cart"));
     const out = {};
