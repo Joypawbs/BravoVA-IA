@@ -47,9 +47,15 @@ window.BV_FB = {
   // Igual que la app: primero gemini-3.8-flash y, si falla, gemini-3.5-flash-lite
   async *generate(prompt, imageBase64, mime) {
     const parts = imageBase64 ? [{ inlineData: { data: imageBase64, mimeType: mime || "image/jpeg" } }, prompt] : [prompt];
+    let got = false;
     try {
-      yield* streamFrom(models.primary, parts);
+      // Si el modelo principal no empieza a responder en 20 s (alta demanda), se pasa al respaldo
+      const it = streamFrom(models.primary, parts)[Symbol.asyncIterator]();
+      const first = await Promise.race([it.next(), new Promise((_, r) => setTimeout(() => r(new Error("timeout primario")), 20000))]);
+      if (!first.done) { got = true; yield first.value; }
+      for (let r = await it.next(); !r.done; r = await it.next()) { got = true; yield r.value; }
     } catch (e) {
+      if (got) throw e;
       console.warn("Modelo principal falló, usando respaldo", e);
       yield* streamFrom(models.fallback, parts);
     }
