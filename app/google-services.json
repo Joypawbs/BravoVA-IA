@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "723529928496",
+    "project_id": "gen-lang-client-0590253686",
+    "storage_bucket": "gen-lang-client-0590253686.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723529928496:android:87ffda3502fa1cd5e4c2f5",
+        "android_client_info": {
+          "package_name": "com.aistudio.bravova.rdshop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "723529928496-b7t4uiikfbmn3b08aiovk2r2enohiu2c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aistudio.bravova.rdshop",
+            "certificate_hash": "9ca3b1515627e1beac213cd2064553e40a8577ab"
+          }
+        },
+        {
+          "client_id": "723529928496-108qdfcl1dhfus46lbjjglkd3sqd5aud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBt3hQAD1eaVkUYjjkWv_--50OkXfPcPgo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "723529928496-108qdfcl1dhfus46lbjjglkd3sqd5aud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
