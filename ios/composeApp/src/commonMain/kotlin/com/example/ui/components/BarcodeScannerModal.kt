@@ -151,7 +151,7 @@ fun BarcodeScannerModal(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp)) {
                         Text(
                             text = "Escáner Óptico BravoVa",
                             fontFamily = PlusJakartaSans,

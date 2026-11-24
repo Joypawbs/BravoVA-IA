@@ -323,7 +323,7 @@ fun FcmPushControlAndFeedCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp)) {
                         Text(
                             text = "Bandeja de Alertas Push ($unreadCount nuevas)",
                             fontFamily = PlusJakartaSans,

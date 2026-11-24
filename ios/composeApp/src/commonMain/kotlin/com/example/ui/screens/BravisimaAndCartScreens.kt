@@ -1800,9 +1800,9 @@ fun CartCheckoutScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
+                            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                                 Text(
-                                    text = "Pago, Entrega y Seguridad",
+                                    text = "Pago y entrega",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.5.sp,
@@ -1835,7 +1835,9 @@ fun CartCheckoutScreen(
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 10.sp,
-                                        color = Color(0xFF10B981)
+                                        color = Color(0xFF10B981),
+                                        maxLines = 1,
+                                        softWrap = false
                                     )
                                 }
                             }
@@ -2086,11 +2088,10 @@ fun CartCheckoutScreen(
                             }
                         }
 
-                        // Comprobante Fiscal (NCF) selector
-                        Row(
+                        // Comprobante fiscal (NCF): etiqueta arriba y opciones debajo, para que no se aprieten
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
                                 text = "Comprobante Fiscal (DGII)",
@@ -2119,7 +2120,9 @@ fun CartCheckoutScreen(
                                             text = "$code • $label",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
+                                            maxLines = 1,
+                                            softWrap = false,
                                             color = if (selected) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
                                         )

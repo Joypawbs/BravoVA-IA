@@ -1513,7 +1513,7 @@ fun ProductDetailScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp)) {
                             DiagonalMetadataStrip(
                                 items = listOf(
                                     "CANTIDAD",
@@ -1755,105 +1755,51 @@ private fun DailyRotatingOffersCarouselSection(
             .testTag(sectionTag),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        // Encabezado como el resto de secciones: título a la izquierda y acciones compactas a la derecha.
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.LocalOffer,
-                    contentDescription = "Ofertas del día",
-                    tint = primaryColor,
-                    modifier = Modifier.size(17.dp)
-                )
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Ofertas del día",
-                    fontFamily = PlusJakartaSans,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 17.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "$activeDayLabel • $activeThemeSubtitle",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-            BravoUnderline(isArca = isArca)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "$activeDayLabel • $activeThemeSubtitle",
-                fontFamily = PlusJakartaSans,
-                fontWeight = FontWeight.Medium,
-                fontSize = 11.5.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Surface(
-                    onClick = {
-                        performCrispHaptic(view, HapticStyle.TICK)
-                        onRotateOfferDay(1)
-                    },
-                    shape = RoundedCornerShape(999.dp),
-                    color = primaryColor.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.32f)),
-                    modifier = Modifier.testTag(rotateButtonTag)
+            listOf(
+                Triple(Icons.Filled.Refresh, "Ver ofertas del siguiente día", rotateButtonTag),
+                Triple(Icons.Filled.NotificationsActive, "Avisarme de la oferta del día", "daily_offer_push_button")
+            ).forEachIndexed { index, (icon, label, tag) ->
+                Box(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .clickable {
+                            if (index == 0) {
+                                performCrispHaptic(view, HapticStyle.TICK)
+                                onRotateOfferDay(1)
+                            } else {
+                                performCrispHaptic(view, HapticStyle.CONFIRM)
+                                onTriggerDailyOfferPush()
+                            }
+                        }
+                        .testTag(tag),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Ver siguiente día",
-                            tint = primaryColor,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(
-                            text = "Rotar Día",
-                            fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
-                            color = primaryColor
-                        )
-                    }
-                }
-
-                Surface(
-                    onClick = {
-                        performCrispHaptic(view, HapticStyle.CONFIRM)
-                        onTriggerDailyOfferPush()
-                    },
-                    shape = RoundedCornerShape(999.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.testTag("daily_offer_push_button")
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.NotificationsActive,
-                            contentDescription = "Enviar alerta de oferta del día",
-                            tint = primaryColor,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(
-                            text = "Alerta Push",
-                            fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
-                            color = primaryColor
-                        )
-                    }
+                    Icon(icon, contentDescription = label, tint = primaryColor, modifier = Modifier.size(18.dp))
                 }
             }
         }
