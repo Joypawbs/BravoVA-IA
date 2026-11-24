@@ -504,42 +504,25 @@ fun HomeScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 8.dp)
-                                ) {
-                                    SectionLineIcon(
-                                        iconType = section.iconType,
-                                        isArca = isArca
-                                    )
-                                    Column(
-                                        horizontalAlignment = Alignment.Start,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Text(
-                                            text = section.name,
-                                            fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 17.sp,
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        BravoUnderline(isArca = isArca)
-                                    }
-                                }
+                                Text(
+                                    text = section.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                                )
 
                                 Row(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(999.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                         .clickable {
                                             HapticFeedbackManager.onNavigationClick(view)
                                             onOpenCategory(section.name)
                                         }
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp)
                                         .testTag("see_all_${section.id}"),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -581,7 +564,7 @@ fun HomeScreen(
                                         onDecrement = { onChangeQty(product.sku, -1) },
                                         isFavorite = isFavoriteProvider(product.sku),
                                         onToggleFavorite = onToggleFavorite?.let { fn -> { fn(product.sku) } },
-                                        modifier = Modifier.width(126.dp)
+                                        modifier = Modifier.width(140.dp)
                                     )
                                 }
                             }
