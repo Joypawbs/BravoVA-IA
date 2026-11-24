@@ -47,6 +47,9 @@ targets:
         OTHER_LDFLAGS: ["$(inherited)", "-ObjC", "-lsqlite3"]
         FRAMEWORK_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"]
         CODE_SIGN_STYLE: Automatic
+    scheme:
+      testTargets:
+        - iosAppUITests
     dependencies:
       - package: Firebase
         product: FirebaseCore
@@ -64,3 +67,16 @@ targets:
           fi
           cd "$SRCROOT/.."
           ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+  iosAppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: iosAppUITests
+    dependencies:
+      - target: iosApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.bravova.rdshop.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: iosApp
+        CODE_SIGN_STYLE: Automatic

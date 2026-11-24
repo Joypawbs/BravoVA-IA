@@ -40,39 +40,41 @@ jobs:
             || echo "::warning::idb-companion no se pudo instalar"
           python3 -m pip install --break-system-packages fb-idb || pipx install fb-idb || true
           which idb idb_companion || true
-      - name: Build simulator app
+      - name: Generate Xcode project
         working-directory: ios/iosApp
+        run: xcodegen generate
+      - name: Boot iPhone
         run: |
-          set -o pipefail
-          xcodegen generate
-          xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build/sim CODE_SIGNING_ALLOWED=NO ARCHS=arm64 build | tail -n 50
-      - name: Boot iPhone, install and run
-        run: |
-          set -x
-          xcrun simctl list devices available | grep -i iphone | head -20
           UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];c=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone 16 Pro') and 'Max' not in x['name']] or [x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone')];print(c[0]['udid'])")
           echo "UDID=$UDID" >> $GITHUB_ENV
-          xcrun simctl boot "$UDID"
-          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
           xcrun simctl ui "$UDID" appearance dark
-          APP=$(find ios/iosApp/build/sim/Build/Products/Debug-iphonesimulator -maxdepth 1 -name "*.app" | head -1)
-          xcrun simctl install "$UDID" "$APP"
-          mkdir -p sim-out
-          xcrun simctl io "$UDID" recordVideo --codec=h264 --force sim-out/recorrido.mp4 &
+      - name: Recorrido automático (XCUITest)
+        working-directory: ios/iosApp
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/sim-out"
+          xcrun simctl io "$UDID" recordVideo --codec=h264 --force "$GITHUB_WORKSPACE/sim-out/recorrido.mp4" &
           echo $! > /tmp/rec.pid
-          xcrun simctl spawn "$UDID" log stream --level debug --predicate 'process == "BravoVa"' > sim-out/app.log 2>&1 &
-          xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop
-          python3 .github/scripts/sim_tour.py sim-out "$UDID" || true
-          kill -INT $(cat /tmp/rec.pid) || true
-          sleep 3
-          xcrun simctl spawn "$UDID" launchctl list | grep -i bravova || echo "La app no está en ejecución (posible cierre)"
-          ls -la sim-out
+          set -o pipefail
+          TEST_RUNNER_SHOTS_DIR="$GITHUB_WORKSPACE/sim-out" xcodebuild test -project iosApp.xcodeproj -scheme iosApp \
+            -destination "id=$UDID" -derivedDataPath build/test \
+            -resultBundlePath "$GITHUB_WORKSPACE/sim-out/resultado.xcresult" \
+            CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO ARCHS=arm64 2>&1 | grep -E "\[tour\]|error:|Test Case|passed|failed|\*\* TEST" | tail -n 80 || true
+          kill -INT $(cat /tmp/rec.pid) || true; sleep 3
+          ls -la "$GITHUB_WORKSPACE/sim-out"
+      - name: Exportar capturas del resultado
+        if: always()
+        run: |
+          cd sim-out
+          if ! ls [0-9][0-9]_*.png >/dev/null 2>&1 && [ -d resultado.xcresult ]; then
+            xcrun xcresulttool export attachments --path resultado.xcresult --output-path adjuntos || true
+            i=0; for f in adjuntos/*.png; do [ -f "$f" ] || continue; i=$((i+1)); cp "$f" "$(printf '%02d' $i)_$(basename "$f")"; done
+          fi
+          ls -la
       - name: Publicar capturas en la rama capturas-simulador
         if: always()
         run: |
-          mkdir -p /tmp/pub && cp sim-out/*.png sim-out/*.log /tmp/pub/ 2>/dev/null || true
+          mkdir -p /tmp/pub && cp sim-out/*.png sim-out/*.log sim-out/*.txt /tmp/pub/ 2>/dev/null || true
           cd /tmp/pub && git init -q -b capturas-simulador
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           printf '# Capturas del simulador iOS\n\nGeneradas por el flujo "Vista en simulador iOS" (%s).\n' "$(date -u)" > README.md
