@@ -509,7 +509,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         listOf(
             ChatMessage(
                 sender = "ai",
-                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu chef y asistente personal de compras.\n\n**¿En qué puedo ayudarte hoy?:**\n• **Recetas e instrucciones paso a paso:** Pídeme cualquier plato y te daré todos los ingredientes exactos con sus precios en RD$y pasos numerados.\n• **Catálogo oficial completo:** Consulto al instante los **750 productos** de Supermercados Bravo y El Arca Petshop.\n• **Pedidos asistidos en el chat:** Puedo armar y pedir tu compra directamente con tu confirmación manual.",
+                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu chef y asistente personal de compras.\n\n**¿En qué puedo ayudarte hoy?:**\n• **Recetas e instrucciones paso a paso:** Pídeme cualquier plato y te daré todos los ingredientes exactos con sus precios en RD$ y pasos numerados.\n• **Catálogo oficial completo:** Consulto al instante los **750 productos** de Supermercados Bravo y El Arca Petshop.\n• **Pedidos asistidos en el chat:** Puedo armar y pedir tu compra directamente con tu confirmación manual.",
                 skus = listOf("BRV-001", "BRV-009", "BRV-053", "BRV-075", "BRV-301", "BRV-412"),
                 modelLabel = "Brav IA • 750 Productos & Pedido Asistido"
             )
@@ -3367,7 +3367,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             q.contains("historial") || q.contains("habitual") || q.contains("lista") ->
                 "Analizando tus compras frecuentes y listas en $storeName..."
             q.contains("precio") || q.contains("cuanto") || q.contains("cuesta") ->
-                "Consultando precios exactos en RD$y calorías para «$cleanSnippet»..."
+                "Consultando precios exactos en RD$ y calorías para «$cleanSnippet»..."
             else -> "Analizando «$cleanSnippet» en el inventario oficial de $storeName..."
         }
     }
@@ -3948,21 +3948,21 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 # REGLAS INQUEBRANTABLES DE EXACTITUD Y FUNDAMENTACIÓN (ZERO HALLUCINATION)
                 1. **PROHIBICIÓN DE RESPUESTAS VAGAS Y CERO CÓDIGOS SKU EN EL TEXTO VISIBLE:**
                    - Jamás respondas con generalidades como "compra algunos vegetales", "añade condimentos al gusto" o "busca una comida para perro".
-                   - Toda respuesta debe estar fundamentada en datos concretos: nombres exactos del catálogo en **negrita**, gramajes/unidades (Lb, Gr, Oz, Kg, Litro), precios unitarios en RD${'$'}, calorías exactas (kcal) y justificación culinaria, veterinaria o nutricional.
+                   - Toda respuesta debe estar fundamentada en datos concretos: nombres exactos del catálogo en **negrita**, gramajes/unidades (Lb, Gr, Oz, Kg, Litro), precios unitarios en RD$${'$'}, calorías exactas (kcal) y justificación culinaria, veterinaria o nutricional.
                    - No escribas los códigos internos [BRV-xxx] o [ARC-xxx] dentro de los párrafos visibles al usuario; colócalos ÚNICAMENTE en el arreglo final SKUS: [...].
                 2. **BÚSQUEDA WEB OBLIGATORIA PARA RECETAS (GROUNDING SEARCH):**
                    - Usa los datos verificados de la búsqueda web para indicar cantidades exactas por porción (en gramos/ml/tazas), tiempos exactos de cocción en minutos y temperaturas en °C y °F.
                 3. **EXACTITUD DEL 100% EN INGREDIENTES Y EQUIVALENCIAS:**
                    - Cruza cada ingrediente con el **Inventario Oficial Disponible**.
-                   - Especifica la cantidad exacta a utilizar en la receta (ej. "250g de arroz") y la unidad comercial exacta que el cliente llevará en su carrito con su precio en RD${'$'}.
+                   - Especifica la cantidad exacta a utilizar en la receta (ej. "250g de arroz") y la unidad comercial exacta que el cliente llevará en su carrito con su precio en RD$${'$'}.
                    - Prioriza siempre los productos de **Marca Exclusiva Bravo** para maximizar el ahorro del cliente.
                 4. **CUMPLIMIENTO MATEMÁTICO DEL PRESUPUESTO (RD$$budgetLimit.00):**
                    - Suma internamente el precio de todos los productos que vas a recomendar: la suma total DEBE ser menor o igual a RD$$budgetLimit.00.
                    - Si la suma supera los RD$$budgetLimit.00, sustituye automáticamente los artículos más costosos por presentaciones medianas o equivalentes **Marca Exclusiva Bravo** hasta quedar estrictamente por debajo del límite.
                    - Muestra siempre al final un desglose financiero claro:
-                     * **Subtotal de la compra:** RD$X.00
-                     * **Margen de ahorro bajo tu presupuesto:** RD$Y.00
-                     * **Retorno Tarjeta Bravísima (1%):** +RD$Z.00 (RD$1 por cada RD$100).
+                     * **Subtotal de la compra:** RD$ X.00
+                     * **Margen de ahorro bajo tu presupuesto:** RD$ Y.00
+                     * **Retorno Tarjeta Bravísima (1%):** +RD$ Z.00 (RD$1 por cada RD$100).
 
                 # ESTRUCTURA DE SALIDA OBLIGATORIA (MODO COMPRAS / CHEF / VETERINARIO)
                 1. **Saludo cálido y confirmación del objetivo:** Breve, cortés y enfocado en la solicitud de $firstName.
@@ -3975,7 +3975,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 # MODO SOPORTE Y VISIÓN MULTIMODAL (BRAV IA SOPORTE)
                 - **CAPACIDAD 1 (ANÁLISIS VISUAL MULTIMODAL):** Si el cliente adjuntó una imagen (${if (attachedBitmap != null) "IMAGEN ADJUNTA PRESENTE EN ESTA CONSULTA: analízala visualmente en detalle" else "sin imagen en este turno"}):
                   1. *Producto dañado, vencido o empaque defectuoso:* Identifica visualmente el producto, verifica el estado del sello/empaque o fecha impresa, ofrece una disculpa cálida en nombre de $storeDisplayName y autoriza inmediatamente la reposición sin costo o nota de crédito en su **Tarjeta Bravísima (${_profile.value.bravisimaNumber})** indicando la sucursal **${_activeBranch.value}**.
-                  2. *Foto de factura o ticket de caja (NCF):* Extrae mediante OCR el número de factura/NCF, los artículos cobrados y el total en RD${'$'}, aclarando descuentos, ITBIS (18%/16%) o puntos Bravísima generados.
+                  2. *Foto de factura o ticket de caja (NCF):* Extrae mediante OCR el número de factura/NCF, los artículos cobrados y el total en RD$${'$'}, aclarando descuentos, ITBIS (18%/16%) o puntos Bravísima generados.
                   3. *Foto de ingrediente, alacena o etiqueta de mascota:* Identifica qué tiene el cliente en mano, busca su equivalente exacto en nuestro catálogo y explica cómo usarlo o conservarlo.
                 - **CAPACIDAD 2 (RESOLUCIÓN EXACTA DE DUDAS OPERATIVAS):**
                   * *Fidelidad Bravísima:* Retorno exacto del 1% (RD$1.00 por cada RD$100.00 de compra), canje directo en carrito o caja presentando el código de barras ${_profile.value.bravisimaNumber}.

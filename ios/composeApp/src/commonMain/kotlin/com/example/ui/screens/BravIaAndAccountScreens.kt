@@ -508,7 +508,7 @@ private fun BravIaPersonalizedThinkingRow(
             lower.contains("pide") || lower.contains("pedir") || lower.contains("orden") || lower.contains("compra") -> listOf(
                 initialText,
                 "Verificando existencias de «$snippet» en $activeBranch...",
-                "Calculando precios exactos en RD$y retorno Bravísima...",
+                "Calculando precios exactos en RD$ y retorno Bravísima...",
                 "Preparando tu resumen de confirmación manual en el chat..."
             )
             lower.contains("receta") || lower.contains("paso") || lower.contains("cocinar") || lower.contains("hacer") || lower.contains("mangu") || lower.contains("sancocho") || lower.contains("pasta") || lower.contains("pastelon") -> listOf(
@@ -519,7 +519,7 @@ private fun BravIaPersonalizedThinkingRow(
             )
             lower.contains("precio") || lower.contains("cuanto") || lower.contains("cuesta") -> listOf(
                 initialText,
-                "Consultando precios en RD$para «$snippet» en los 16 pasillos...",
+                "Consultando precios en RD$ para «$snippet» en los 16 pasillos...",
                 "Comparando presentaciones Marca Exclusiva Bravo...",
                 "Preparando tu respuesta personalizada al detalle..."
             )
@@ -534,7 +534,7 @@ private fun BravIaPersonalizedThinkingRow(
                     listOf(
                         "Revisando nuestros 16 pasillos oficiales para «$snippet»...",
                         initialText,
-                        "Consultando precios actualizados en RD$y detalles...",
+                        "Consultando precios actualizados en RD$ y detalles...",
                         "Afinando las mejores recomendaciones de Bravo para ti..."
                     )
                 )
