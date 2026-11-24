@@ -37,7 +37,7 @@ jobs:
           heap-size: 512M
           cores: 4
           disable-animations: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu guest -noaudio -no-boot-anim -camera-back none
           working-directory: ios
           script: |
             adb install -r $(ls composeApp/build/outputs/apk/debug/*.apk | head -1)
