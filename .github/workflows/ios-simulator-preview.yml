@@ -41,7 +41,7 @@ jobs:
           UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];c=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone 16 Pro') and 'Max' not in x['name']] or [x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone')];print(c[0]['udid'])")
           echo "UDID=$UDID" >> $GITHUB_ENV
           xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
-          xcrun simctl ui "$UDID" appearance dark
+          xcrun simctl ui "$UDID" appearance light
       - name: Recorrido automático (XCUITest)
         working-directory: ios/iosApp
         run: |
