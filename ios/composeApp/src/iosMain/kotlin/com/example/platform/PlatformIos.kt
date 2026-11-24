@@ -10,6 +10,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
+import platform.Foundation.create
 import platform.Foundation.NSDate
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
@@ -20,7 +21,7 @@ import platform.Foundation.NSUserDomainMask
 import platform.Foundation.timeIntervalSince1970
 import platform.UIKit.UIApplication
 import platform.UIKit.UIDevice
-import platform.UIKit.UITraitCollection
+import platform.UIKit.UIScreen
 import platform.UIKit.UIUserInterfaceStyle
 import platform.posix.memcpy
 
@@ -68,7 +69,7 @@ actual object PlatformInfo {
 }
 
 actual fun currentDarkModeHint(context: PlatformContext): Boolean =
-    UITraitCollection.currentTraitCollection.userInterfaceStyle == UIUserInterfaceStyle.UIUserInterfaceStyleDark
+    UIScreen.mainScreen.traitCollection.userInterfaceStyle == UIUserInterfaceStyle.UIUserInterfaceStyleDark
 
 /* ------------------------------------------------------------------ */
 /*  Preferences (NSUserDefaults with a per-file key prefix)             */

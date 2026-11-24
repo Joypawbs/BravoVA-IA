@@ -691,10 +691,10 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
     private fun haversineKm(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val r = 6371.0
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLon = Math.toRadians(lon2 - lon1)
+        val dLat = ((lat2 - lat1) * kotlin.math.PI / 180.0)
+        val dLon = ((lon2 - lon1) * kotlin.math.PI / 180.0)
         val a = sin(dLat / 2) * sin(dLat / 2) +
-            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
+            cos(((lat1) * kotlin.math.PI / 180.0)) * cos(((lat2) * kotlin.math.PI / 180.0)) *
             sin(dLon / 2) * sin(dLon / 2)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return r * c

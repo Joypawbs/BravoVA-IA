@@ -1,6 +1,7 @@
 package com.example.data.local
 
 import androidx.room.ConstructedBy
+import com.example.platform.getDatabaseBuilder
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -170,8 +171,6 @@ expect object BravoDatabaseConstructor : RoomDatabaseConstructor<BravoDatabase> 
     override fun initialize(): BravoDatabase
 }
 
-/** Platform-specific database file location. */
-expect fun getDatabaseBuilder(context: PlatformContext): RoomDatabase.Builder<BravoDatabase>
 
 class BravoLocalRepository(
     private val dao: BravoDao,

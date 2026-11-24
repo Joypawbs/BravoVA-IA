@@ -1,8 +1,10 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package com.example.platform
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone as KTimeZone
 import kotlinx.datetime.toLocalDateTime

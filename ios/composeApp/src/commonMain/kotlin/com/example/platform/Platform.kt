@@ -338,3 +338,6 @@ expect fun createGenerativeModel(modelName: String): GenerativeModelCompat
 
 /** Whether the system UI is currently in dark mode. */
 expect fun currentDarkModeHint(context: PlatformContext): Boolean
+
+/** Platform-specific database file location (Room KMP). */
+expect fun getDatabaseBuilder(context: PlatformContext): androidx.room.RoomDatabase.Builder<com.example.data.local.BravoDatabase>

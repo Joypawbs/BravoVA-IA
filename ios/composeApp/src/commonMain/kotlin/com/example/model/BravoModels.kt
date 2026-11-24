@@ -1,5 +1,7 @@
 package com.example.model
 
+import com.example.platform.System
+
 enum class StoreMode {
     BRAVO,
     ARCA

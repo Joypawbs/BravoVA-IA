@@ -1,8 +1,6 @@
 package com.example.ui.screens
 
 import com.example.platform.*
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -344,7 +342,7 @@ fun BravisimaScreen(
                                         val result = launchGoogleSignInSheet(context)
                                         isGoogleSigningIn = false
                                         result.onFailure { e ->
-                                            authErrorBanner = e.localizedMessage
+                                            authErrorBanner = e.message
                                                 ?: "No se pudo completar el inicio de sesión con Google."
                                         }
                                     }

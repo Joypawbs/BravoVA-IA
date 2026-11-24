@@ -235,7 +235,7 @@ private fun CLLocation.toGeoPoint(): GeoPoint = coordinate.useContents {
     GeoPoint(latitude, longitude, horizontalAccuracy.toFloat())
 }
 
-private class LocationDelegate : NSObject(), CLLocationManagerDelegateProtocol {
+internal class LocationDelegate : NSObject(), CLLocationManagerDelegateProtocol {
     var onLocation: ((GeoPoint) -> Unit)? = null
     var onAuthorization: ((Boolean) -> Unit)? = null
 
