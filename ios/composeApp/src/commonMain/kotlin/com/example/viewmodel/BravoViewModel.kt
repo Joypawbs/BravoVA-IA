@@ -188,12 +188,26 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     private val _categorySearchQuery = MutableStateFlow("")
     val categorySearchQuery: StateFlow<String> = _categorySearchQuery.asStateFlow()
 
-    private val _darkMode = MutableStateFlow(
-        localRepo.getDarkModeSync(
-            currentDarkModeHint(application)
-        )
-    )
+    /** null = seguir el tema claro/oscuro del dispositivo. */
+    private val _darkModeOverride = MutableStateFlow(localRepo.getDarkModeOverrideSync())
+    val darkModeOverride: StateFlow<Boolean?> = _darkModeOverride.asStateFlow()
+
+    private val _systemDark = MutableStateFlow(currentDarkModeHint(application))
+    private val _darkMode = MutableStateFlow(_darkModeOverride.value ?: _systemDark.value)
     val darkMode: StateFlow<Boolean> = _darkMode.asStateFlow()
+
+    /** La UI avisa cada vez que cambia el tema del sistema. */
+    fun onSystemDarkThemeChanged(isDark: Boolean) {
+        _systemDark.value = isDark
+        _darkMode.value = _darkModeOverride.value ?: isDark
+    }
+
+    /** Vuelve a seguir el tema del dispositivo. */
+    fun followSystemTheme() {
+        _darkModeOverride.value = null
+        _darkMode.value = _systemDark.value
+        viewModelScope.launch { localRepo.saveDarkModeOverride(null) }
+    }
 
     private val _selectedPaletteId = MutableStateFlow(localRepo.getPaletteIdSync("material_you"))
     val selectedPaletteId: StateFlow<String> = _selectedPaletteId.asStateFlow()
@@ -495,7 +509,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         listOf(
             ChatMessage(
                 sender = "ai",
-                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu chef y asistente personal de compras.\n\n**¿En qué puedo ayudarte hoy?:**\n• **Recetas e instrucciones paso a paso:** Pídeme cualquier plato y te daré todos los ingredientes exactos con sus precios en RD$ y pasos numerados.\n• **Catálogo oficial completo:** Consulto al instante los **750 productos** de Supermercados Bravo y El Arca Petshop.\n• **Pedidos asistidos en el chat:** Puedo armar y pedir tu compra directamente con tu confirmación manual.",
+                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu chef y asistente personal de compras.\n\n**¿En qué puedo ayudarte hoy?:**\n• **Recetas e instrucciones paso a paso:** Pídeme cualquier plato y te daré todos los ingredientes exactos con sus precios en RD$y pasos numerados.\n• **Catálogo oficial completo:** Consulto al instante los **750 productos** de Supermercados Bravo y El Arca Petshop.\n• **Pedidos asistidos en el chat:** Puedo armar y pedir tu compra directamente con tu confirmación manual.",
                 skus = listOf("BRV-001", "BRV-009", "BRV-053", "BRV-075", "BRV-301", "BRV-412"),
                 modelLabel = "Brav IA • 750 Productos & Pedido Asistido"
             )
@@ -565,7 +579,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             }
         }
         viewModelScope.launch {
-            _darkMode.value = localRepo.loadDarkMode(_darkMode.value)
+            _darkModeOverride.value = localRepo.loadDarkModeOverride()
+            _darkMode.value = _darkModeOverride.value ?: _systemDark.value
             _selectedPaletteId.value = localRepo.loadPaletteId(_selectedPaletteId.value)
             _activeBranch.value = localRepo.loadActiveBranch(_activeBranch.value)
             _accumulatedBravisimaBalance.value = localRepo.getBravisimaBalance(145)
@@ -1311,10 +1326,10 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         val stats = getPurchaseHistoryStats()
         val ordersSummary = _orders.value.joinToString("\n") { ord ->
             val names = ord.skus.mapNotNull { findProductBySku(it)?.let { p -> "${p.name} [${p.sku}]" } }
-            "- Orden ${ord.id} (${ord.date}, ${ord.branch}, Total RD$ ${ord.total.toInt()}): ${names.joinToString(", ")}"
+            "- Orden ${ord.id} (${ord.date}, ${ord.branch}, Total RD$${ord.total.toInt()}): ${names.joinToString(", ")}"
         }
         val freqSummary = stats.joinToString("\n") { st ->
-            "- [${st.product.sku}] ${st.product.name} (${st.product.category}, RD$ ${st.product.price}): comprado ${st.purchaseCount} veces (última vez: ${st.lastBoughtLabel})"
+            "- [${st.product.sku}] ${st.product.name} (${st.product.category}, RD$${st.product.price}): comprado ${st.purchaseCount} veces (última vez: ${st.lastBoughtLabel})"
         }
         return "ÓRDENES RECIENTES DEL CLIENTE:\n$ordersSummary\n\nFRECUENCIA DE COMPRA HABITUAL:\n$freqSummary"
     }
@@ -1884,7 +1899,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             val calTag = nut.caloriesKcal?.let { "${it} kcal (${nut.caloriesPortionLabel})" } ?: "Artículo no comestible (0 kcal)"
             val allergenTag = nut.allergens.joinToString(", ")
             val dietTag = nut.dietaryTags.joinToString(", ")
-            "[${p.sku}] ${p.name} - RD$ ${p.price} (${p.unit} • ${p.category} • $storeTag) | Calorías: $calTag | Ingredientes: ${nut.ingredients} | Alérgenos: $allergenTag | Dietas: $dietTag"
+            "[${p.sku}] ${p.name} - RD$${p.price} (${p.unit} • ${p.category} • $storeTag) | Calorías: $calTag | Ingredientes: ${nut.ingredients} | Alérgenos: $allergenTag | Dietas: $dietTag"
         }
 
         val fullCatalogCompact = allProducts.joinToString("\n") { p ->
@@ -2269,7 +2284,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
         if (p != null) {
             if (delta > 0) {
-                showToast("✓", "${p.name} • RD$ ${p.price}")
+                showToast("✓", "${p.name} • RD$${p.price}")
             } else if (delta < 0 && newQty == 0) {
                 showToast("🗑️", "${p.name} removido")
             }
@@ -2451,7 +2466,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 }
             }
         }
-        showToast("sparkles", "¡Código $code aplicado! +RD$ $bonusAmount.00 en Bravísima")
+        showToast("sparkles", "¡Código $code aplicado! +RD$$bonusAmount.00 en Bravísima")
     }
 
     fun completeCheckoutOrder() {
@@ -2545,7 +2560,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         _realLocationMetrics.value = updatedMetrics
         _celebrationOrder.value = newOrder
 
-        showToast("check", "¡Pedido confirmado! +RD$ ${t.bravisimaGenerated} en tu Tarjeta Bravísima")
+        showToast("check", "¡Pedido confirmado! +RD$${t.bravisimaGenerated} en tu Tarjeta Bravísima")
         navigateTo(AppScreen.DELIVERY)
 
         if (_pushNotifications.value) {
@@ -2554,7 +2569,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 context = app,
                 category = PushNotificationCategory.ORDER_STATUS,
                 title = "Pedido #$orderId Confirmado en $branch",
-                body = "Ruta calculada por GPS (${updatedMetrics.roadDistanceKm} km • ${updatedMetrics.trafficLabel}). Total RD$ ${t.finalPay.toInt()}.00 (+RD$ ${t.bravisimaGenerated} en Bravísima). ETA: ~${updatedMetrics.stageAdjustedEtaMinutes} min.",
+                body = "Ruta calculada por GPS (${updatedMetrics.roadDistanceKm} km • ${updatedMetrics.trafficLabel}). Total RD$${t.finalPay.toInt()}.00 (+RD$${t.bravisimaGenerated} en Bravísima). ETA: ~${updatedMetrics.stageAdjustedEtaMinutes} min.",
                 topic = BravoPushNotificationCenter.TOPIC_ORDERS_REALTIME,
                 targetOrderId = orderId,
                 progressPct = OrderDeliveryStage.PREPARED.progressPct,
@@ -2598,9 +2613,10 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
     fun toggleDarkMode() {
         val next = !_darkMode.value
+        _darkModeOverride.value = next
         _darkMode.value = next
         viewModelScope.launch {
-            localRepo.saveDarkMode(next)
+            localRepo.saveDarkModeOverride(next)
         }
         showToast(
             if (next) "moon" else "sun",
@@ -2672,9 +2688,9 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             "Oferta del Día Bravo: Pollo Fresco Entero"
         }
         val body = if (chosenOffer != null) {
-            "Hoy baja de RD$ ${chosenOffer.originalPrice} a solo RD$ ${chosenOffer.offerPrice} en ${_activeBranch.value} (${_realLocationMetrics.value.roadDistanceKm} km de ti)."
+            "Hoy baja de RD$${chosenOffer.originalPrice} a solo RD$${chosenOffer.offerPrice} en ${_activeBranch.value} (${_realLocationMetrics.value.roadDistanceKm} km de ti)."
         } else {
-            "Hoy a solo RD$ 185.00/lb en ${_activeBranch.value} + doble retorno en tu Tarjeta Bravísima."
+            "Hoy a solo RD$185.00/lb en ${_activeBranch.value} + doble retorno en tu Tarjeta Bravísima."
         }
         val sku = chosenOffer?.sku ?: "BRV-075"
         val isArcaSku = sku.startsWith("ARC-")
@@ -2868,25 +2884,25 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         val userMsg = ChatMessage(
             sender = "user",
             text = if (optimizeExisting) {
-                "Ajustar mi carrito actual para no pasarme de RD$ $limit"
+                "Ajustar mi carrito actual para no pasarme de RD$$limit"
             } else {
-                "Armar una compra inteligente dentro de RD$ $limit"
+                "Armar una compra inteligente dentro de RD$$limit"
             }
         )
         val aiMsg = ChatMessage(
             sender = "ai",
-            text = "¡Con mucho gusto! Te armé una selección de **${chosen.size} productos esenciales de $storeName** por **RD$ $sum.00** (ahorras **RD$ ${limit - sum}** respecto a tu meta de RD$ $limit y sumas **+RD$ $cashback** en Bravísima). También puedes guardarla como lista de compras con un toque.",
+            text = "¡Con mucho gusto! Te armé una selección de **${chosen.size} productos esenciales de $storeName** por **RD$$sum.00** (ahorras **RD$${limit - sum}** respecto a tu meta de RD$$limit y sumas **+RD$$cashback** en Bravísima). También puedes guardarla como lista de compras con un toque.",
             skus = chosen,
             modelLabel = "Planificador Inteligente de Presupuesto"
         )
         _chatHistory.value = _chatHistory.value + userMsg + aiMsg
-        showToast("💰", "Carrito ajustado a RD$ $sum.00")
+        showToast("💰", "Carrito ajustado a RD$$sum.00")
     }
 
     fun askAiAboutProduct(sku: String) {
         val p = findProductBySku(sku) ?: return
         navigateTo(AppScreen.BRAVIA)
-        sendCustomChatMsg("Dame una receta exacta, concisa y paso a paso usando ${p.name} (RD$ ${p.price}) y dime qué otros productos del catálogo necesito.")
+        sendCustomChatMsg("Dame una receta exacta, concisa y paso a paso usando ${p.name} (RD$${p.price}) y dime qué otros productos del catálogo necesito.")
     }
 
     fun addAiBundleToCart(messageId: Long) {
@@ -3041,10 +3057,10 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         val savingsMargin = (budgetLimit - subtotal).coerceAtLeast(0)
         val bravisimaReturn = subtotal / 100
         return """
-            **Resumen de Presupuesto y Fidelidad (Límite RD$ $budgetLimit.00):**
-            • **Subtotal de la compra:** RD$ $subtotal.00
-            • **Margen de ahorro bajo tu presupuesto:** RD$ $savingsMargin.00
-            • **Retorno Tarjeta Bravísima (1%):** +RD$ $bravisimaReturn.00 (RD$ 1.00 por cada RD$ 100.00)
+            **Resumen de Presupuesto y Fidelidad (Límite RD$$budgetLimit.00):**
+            • **Subtotal de la compra:** RD$$subtotal.00
+            • **Margen de ahorro bajo tu presupuesto:** RD$$savingsMargin.00
+            • **Retorno Tarjeta Bravísima (1%):** +RD$$bravisimaReturn.00 (RD$1.00 por cada RD$100.00)
         """.trimIndent()
     }
 
@@ -3258,7 +3274,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
         val confirmationMsg = ChatMessage(
             sender = "ai",
-            text = "¡Pedido **#$createdOrderId** confirmado manualmente con éxito! Se enviaron **${createdOrder?.badgeNum ?: orderSkus.size} artículos** desde **${_activeBranch.value}** por **RD$ ${createdOrder?.total?.toInt() ?: 0}.00** (Ruta GPS: ${_realLocationMetrics.value.roadDistanceKm} km • ETA ~${_realLocationMetrics.value.stageAdjustedEtaMinutes} min).",
+            text = "¡Pedido **#$createdOrderId** confirmado manualmente con éxito! Se enviaron **${createdOrder?.badgeNum ?: orderSkus.size} artículos** desde **${_activeBranch.value}** por **RD$${createdOrder?.total?.toInt() ?: 0}.00** (Ruta GPS: ${_realLocationMetrics.value.roadDistanceKm} km • ETA ~${_realLocationMetrics.value.stageAdjustedEtaMinutes} min).",
             skus = orderSkus,
             modelLabel = "Brav IA • Pedido Confirmado #$createdOrderId",
             requiresOrderConfirmation = false,
@@ -3341,17 +3357,17 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             hasAttachedImage -> "Brav IA Soporte auditando visualmente tu imagen adjunta (empaque, NCF o etiqueta)..."
             q.contains("sugerencia") || q.contains("sugiero") || q.contains("queja") || q.contains("reclamo") || q.contains("reporte") || q.contains("felicit") ->
                 "Registrando tu reporte oficial y preparando envío a bezaleelpatrocino0@gmail.com..."
-            isOrderIntentQuery(query) -> "Preparando tu orden asistida bajo tu presupuesto de RD$ ${_targetBudgetInChat.value}.00..."
+            isOrderIntentQuery(query) -> "Preparando tu orden asistida bajo tu presupuesto de RD$${_targetBudgetInChat.value}.00..."
             q.contains("alergia") || q.contains("sin lactosa") || q.contains("sin gluten") || q.contains("vegano") || q.contains("keto") || q.contains("caloria") || q.contains("diabet") ->
                 "Verificando ingredientes, alérgenos y calorías exactas para «$cleanSnippet»..."
             isInstructionOrRecipeQuery(query) ->
-                "Consultando receta verificada en la web y calculando presupuesto (≤ RD$ ${_targetBudgetInChat.value}.00) para «$cleanSnippet»..."
+                "Consultando receta verificada en la web y calculando presupuesto (≤ RD$${_targetBudgetInChat.value}.00) para «$cleanSnippet»..."
             q.contains("oferta") || q.contains("descuento") || q.contains("barato") ->
                 "Verificando los descuentos del día en ${_activeBranch.value}..."
             q.contains("historial") || q.contains("habitual") || q.contains("lista") ->
                 "Analizando tus compras frecuentes y listas en $storeName..."
             q.contains("precio") || q.contains("cuanto") || q.contains("cuesta") ->
-                "Consultando precios exactos en RD$ y calorías para «$cleanSnippet»..."
+                "Consultando precios exactos en RD$y calorías para «$cleanSnippet»..."
             else -> "Analizando «$cleanSnippet» en el inventario oficial de $storeName..."
         }
     }
@@ -3378,7 +3394,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             val nut = p.nutritionProfile()
             val calPart = nut.caloriesKcal?.let { " • **${it} kcal** (${nut.caloriesPortionLabel})" } ?: " • *Uso general / mascota*"
             val dietPart = nut.dietaryTags.take(2).joinToString(", ").let { if (it.isNotBlank()) " • $it" else "" }
-            "• **${p.name}** — Medida comercial: **${p.unit}** — **RD$ ${p.price}.00** ($calPart$dietPart)"
+            "• **${p.name}** — Medida comercial: **${p.unit}** — **RD$${p.price}.00** ($calPart$dietPart)"
         }
     }
 
@@ -3418,7 +3434,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                         **Auditoría OCR de Factura / Comprobante Fiscal (NCF) — Brav IA Soporte:**
                         • **Verificación de Comprobante:** Hemos procesado la imagen de tu ticket de compra de **${_activeBranch.value}** (modalidad **B02 Consumidor Final** / **B01 Crédito Fiscal**).
                         • **Desglose de Impuestos y Descuentos:** Los artículos exentos de la canasta básica mantienen **0% ITBIS**, los gravados reducidos aplican **16% ITBIS** y los generales **18% ITBIS**, respetando íntegramente los descuentos de **Marca Exclusiva Bravo**.
-                        • **Retorno Tarjeta Bravísima (1%):** Tu compra genera **+RD$ 1.00 por cada RD$ 100.00 facturados** acreditados directamente al código **${_profile.value.bravisimaNumber}**.
+                        • **Retorno Tarjeta Bravísima (1%):** Tu compra genera **+RD$1.00 por cada RD$100.00 facturados** acreditados directamente al código **${_profile.value.bravisimaNumber}**.
                     """.trimIndent()
                 }
                 else -> {
@@ -3449,7 +3465,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 **Facturación Fiscal (NCF B01 y B02) en $storeName (${_activeBranch.value}):**
                 • **Comprobante B01 (Crédito Fiscal):** Disponible para empresas y profesionales con RNC activo para deducción de ITBIS (16% / 18%) y gastos ante la DGII.
                 • **Comprobante B02 (Consumidor Final):** Emitido por defecto en todas tus órdenes express y compras en caja con tu cédula o **Tarjeta Bravísima (${_profile.value.bravisimaNumber})**.
-                • **Retorno de Fidelidad:** Ambas modalidades acumulan el **1% de retorno directo** (RD$ 1.00 por cada RD$ 100.00 de compra).
+                • **Retorno de Fidelidad:** Ambas modalidades acumulan el **1% de retorno directo** (RD$1.00 por cada RD$100.00 de compra).
             """.trimIndent()
         } else if (isOrderIntent && matchedProducts.isNotEmpty()) {
             """
@@ -3469,7 +3485,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                         **¡Hola, $firstName! Bienvenido a $storeName (${_activeBranch.value}):**
                         Soy **Brav IA**, tu Asistente Personal de Compras, Chef Ejecutivo, Asesor Veterinario y Especialista de Soporte Multimodal de **Supermercados Bravo** (*«Los expertos en vender barato»*) y **El Arca Petshop**.
                         
-                        **¿Cómo puedo servirte hoy bajo tu presupuesto de RD$ $budgetLimit.00?:**
+                        **¿Cómo puedo servirte hoy bajo tu presupuesto de RD$$budgetLimit.00?:**
                         • **Chef Ejecutivo con Búsqueda Web:** Pídeme cualquier receta dominicana o internacional (*pizza, lasaña, mofongo, sancocho, chofán, mangú, postres o dietas especiales*) con medidas exactas, tiempos en minutos, temperaturas en °C/°F y cálculo matemático bajo tu presupuesto.
                         • **Soporte y Visión Multimodal (Fotos):** Adjunta una foto con el botón de cámara/galería para auditar un **producto dañado/vencido**, leer una **factura NCF (B01/B02)** o identificar **ingredientes de tu alacena o mascota**.
                         • **Buzón de Sugerencias Directo:** Cuéntame cualquier idea o mejora y la registraré automáticamente hacia **bezaleelpatrocino0@gmail.com**.
@@ -3486,8 +3502,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 q.contains("bravisima") || q.contains("puntos") || q.contains("balance") || q.contains("recompensa") -> {
                     """
                         **Fidelidad Tarjeta Bravísima (${_profile.value.bravisimaNumber}):**
-                        • **Balance disponible:** **RD$ ${_accumulatedBravisimaBalance.value}.00** listos para canje directo en carrito o caja.
-                        • **Retorno Exacto del 1%:** Acumulas **RD$ 1.00 por cada RD$ 100.00 de compra** en todos los pasillos de Bravo y El Arca Petshop, priorizando aún más ahorro con **Marca Exclusiva Bravo**.
+                        • **Balance disponible:** **RD$${_accumulatedBravisimaBalance.value}.00** listos para canje directo en carrito o caja.
+                        • **Retorno Exacto del 1%:** Acumulas **RD$1.00 por cada RD$100.00 de compra** en todos los pasillos de Bravo y El Arca Petshop, priorizando aún más ahorro con **Marca Exclusiva Bravo**.
                         • **Canje sin fricción:** Activa el descuento inmediato en la pestaña **Tarjeta** o en **Mi Carrito** presentando tu código de barras `${_profile.value.bravisimaNumber}`.
                     """.trimIndent()
                 }
@@ -3502,7 +3518,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 q.contains("oferta") || q.contains("especial") || q.contains("descuento") -> {
                     val offers = getDailyRotatingOffersForCurrentStore()
                     val offerLines = offers.joinToString("\n") { off ->
-                        "• **${off.title}** — Baja de RD$ ${off.originalPrice} a **RD$ ${off.offerPrice}.00** (**-${off.discountPct}%** • ${off.dayLabel})"
+                        "• **${off.title}** — Baja de RD$${off.originalPrice} a **RD$${off.offerPrice}.00** (**-${off.discountPct}%** • ${off.dayLabel})"
                     }
                     """
                         **Ofertas Oficiales del Día en $storeName (${_activeBranch.value}):**
@@ -3512,7 +3528,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 q.contains("historial") || q.contains("habitual") || q.contains("lista") -> {
                     val stats = getPurchaseHistoryStats().take(6)
                     val summary = stats.joinToString("\n") { st ->
-                        "• **${st.product.name}** — **${st.product.unit}** — **RD$ ${st.product.price}.00** (comprado ${st.purchaseCount} veces)"
+                        "• **${st.product.name}** — **${st.product.unit}** — **RD$${st.product.price}.00** (comprado ${st.purchaseCount} veces)"
                     }
                     """
                         **Tu Selección Habitual Basada en tus ${_orders.value.size} Órdenes:**
@@ -3812,7 +3828,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                         **Atención Personalizada $storeName (${_activeBranch.value}):**
                         • Hola **$firstName**, busqué **«$query»** en el inventario oficial de **${_activeBranch.value}** y no figura bajo ese nombre exacto en este momento.
                         • **¿Deseas que lo registremos como sugerencia de producto?** Dime *"Sugiero agregar $query"* y lo enviaré inmediatamente a nuestro buzón oficial (**bezaleelpatrocino0@gmail.com**).
-                        • También puedes adjuntar una **foto** con el botón de imagen o pedirme cualquier **receta con medidas exactas** bajo tu presupuesto de **RD$ $budgetLimit.00**.
+                        • También puedes adjuntar una **foto** con el botón de imagen o pedirme cualquier **receta con medidas exactas** bajo tu presupuesto de **RD$$budgetLimit.00**.
                     """.trimIndent()
                 }
             }
@@ -3868,7 +3884,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         if (!hasImage && !suggestionIntent && isOffTopicQuery(query) && !orderIntent && !recipeOrInstructionIntent) {
             val guardrailMsg = ChatMessage(
                 sender = "ai",
-                text = "**Asesoría Exclusiva Bravo & El Arca:**\n• ¡Hola **$firstName**! Soy **Brav IA** y **Brav IA Soporte**, tu Chef Ejecutivo, Asesor Veterinario y Especialista de Atención al Cliente de **Supermercados Bravo** y **El Arca Petshop**.\n• Conozco el inventario completo con **precios en RD$, calorías exactas y equivalencias Marca Bravo**, verifico recetas en la web bajo tu presupuesto (**RD$ $budgetLimit.00**), audito **fotos de productos o facturas NCF** y envío tus **sugerencias a bezaleelpatrocino0@gmail.com**.\n• ¿En qué puedo asistirte hoy?",
+                text = "**Asesoría Exclusiva Bravo & El Arca:**\n• ¡Hola **$firstName**! Soy **Brav IA** y **Brav IA Soporte**, tu Chef Ejecutivo, Asesor Veterinario y Especialista de Atención al Cliente de **Supermercados Bravo** y **El Arca Petshop**.\n• Conozco el inventario completo con **precios en RD$, calorías exactas y equivalencias Marca Bravo**, verifico recetas en la web bajo tu presupuesto (**RD$$budgetLimit.00**), audito **fotos de productos o facturas NCF** y envío tus **sugerencias a bezaleelpatrocino0@gmail.com**.\n• ¿En qué puedo asistirte hoy?",
                 skus = emptyList(),
                 modelLabel = "Brav IA & Soporte Oficial"
             )
@@ -3920,8 +3936,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 # CONTEXTO DINÁMICO DE LA SESIÓN
                 - **Sucursal Activa:** ${_activeBranch.value} (Distancia GPS: ${_realLocationMetrics.value.roadDistanceKm} km | ETA Express: ~${_realLocationMetrics.value.stageAdjustedEtaMinutes} min)
                 - **Tienda Activa:** $activeStoreCode ("bravo" = Supermercados Bravo | "arca" = El Arca Petshop)
-                - **Cliente:** ${_profile.value.name} | Contacto: ${_profile.value.email} / ${_profile.value.phone} | Tarjeta Bravísima: ${_profile.value.bravisimaNumber} (Balance: RD$ ${_accumulatedBravisimaBalance.value}.00)
-                - **Presupuesto Límite Acordado:** RD$ $budgetLimit.00
+                - **Cliente:** ${_profile.value.name} | Contacto: ${_profile.value.email} / ${_profile.value.phone} | Tarjeta Bravísima: ${_profile.value.bravisimaNumber} (Balance: RD$${_accumulatedBravisimaBalance.value}.00)
+                - **Presupuesto Límite Acordado:** RD$$budgetLimit.00
                 - **Inventario Oficial Disponible (RAG Context):**
                 $storeInventoryRag
 
@@ -3940,19 +3956,19 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                    - Cruza cada ingrediente con el **Inventario Oficial Disponible**.
                    - Especifica la cantidad exacta a utilizar en la receta (ej. "250g de arroz") y la unidad comercial exacta que el cliente llevará en su carrito con su precio en RD${'$'}.
                    - Prioriza siempre los productos de **Marca Exclusiva Bravo** para maximizar el ahorro del cliente.
-                4. **CUMPLIMIENTO MATEMÁTICO DEL PRESUPUESTO (RD$ $budgetLimit.00):**
-                   - Suma internamente el precio de todos los productos que vas a recomendar: la suma total DEBE ser menor o igual a RD$ $budgetLimit.00.
-                   - Si la suma supera los RD$ $budgetLimit.00, sustituye automáticamente los artículos más costosos por presentaciones medianas o equivalentes **Marca Exclusiva Bravo** hasta quedar estrictamente por debajo del límite.
+                4. **CUMPLIMIENTO MATEMÁTICO DEL PRESUPUESTO (RD$$budgetLimit.00):**
+                   - Suma internamente el precio de todos los productos que vas a recomendar: la suma total DEBE ser menor o igual a RD$$budgetLimit.00.
+                   - Si la suma supera los RD$$budgetLimit.00, sustituye automáticamente los artículos más costosos por presentaciones medianas o equivalentes **Marca Exclusiva Bravo** hasta quedar estrictamente por debajo del límite.
                    - Muestra siempre al final un desglose financiero claro:
-                     * **Subtotal de la compra:** RD$ X.00
-                     * **Margen de ahorro bajo tu presupuesto:** RD$ Y.00
-                     * **Retorno Tarjeta Bravísima (1%):** +RD$ Z.00 (RD$ 1 por cada RD$ 100).
+                     * **Subtotal de la compra:** RD$X.00
+                     * **Margen de ahorro bajo tu presupuesto:** RD$Y.00
+                     * **Retorno Tarjeta Bravísima (1%):** +RD$Z.00 (RD$1 por cada RD$100).
 
                 # ESTRUCTURA DE SALIDA OBLIGATORIA (MODO COMPRAS / CHEF / VETERINARIO)
                 1. **Saludo cálido y confirmación del objetivo:** Breve, cortés y enfocado en la solicitud de $firstName.
-                2. **Lista Exacta de Ingredientes / Productos:** Viñetas (•) con **[Nombre Exacto]** — [Medida para la receta y unidad comercial] — **RD$ [Precio].00**.
+                2. **Lista Exacta de Ingredientes / Productos:** Viñetas (•) con **[Nombre Exacto]** — [Medida para la receta y unidad comercial] — **RD$[Precio].00**.
                 3. **Preparación Paso a Paso Fundamentada:** Instrucciones numeradas (1., 2., 3., 4., 5.) con tiempos exactos en minutos y temperaturas en °C/°F o guía de aplicación veterinaria.
-                4. **Resumen de Presupuesto y Fidelidad:** Cálculo verificado frente al límite de RD$ $budgetLimit.00.
+                4. **Resumen de Presupuesto y Fidelidad:** Cálculo verificado frente al límite de RD$$budgetLimit.00.
                 5. **Arreglo de SKUs para el Carrito (Última línea obligatoria cuando recomiendes productos):**
                 SKUS: ["SKU-1", "SKU-2", "SKU-3"]
 
@@ -3962,7 +3978,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                   2. *Foto de factura o ticket de caja (NCF):* Extrae mediante OCR el número de factura/NCF, los artículos cobrados y el total en RD${'$'}, aclarando descuentos, ITBIS (18%/16%) o puntos Bravísima generados.
                   3. *Foto de ingrediente, alacena o etiqueta de mascota:* Identifica qué tiene el cliente en mano, busca su equivalente exacto en nuestro catálogo y explica cómo usarlo o conservarlo.
                 - **CAPACIDAD 2 (RESOLUCIÓN EXACTA DE DUDAS OPERATIVAS):**
-                  * *Fidelidad Bravísima:* Retorno exacto del 1% (RD$ 1.00 por cada RD$ 100.00 de compra), canje directo en carrito o caja presentando el código de barras ${_profile.value.bravisimaNumber}.
+                  * *Fidelidad Bravísima:* Retorno exacto del 1% (RD$1.00 por cada RD$100.00 de compra), canje directo en carrito o caja presentando el código de barras ${_profile.value.bravisimaNumber}.
                   * *Horarios y Logística:* Lunes a Sábado de 7:00 AM a 10:00 PM (Domingos cerrados por valores familiares). Delivery express en 8–12 minutos en el polígono central.
                   * *Facturación Fiscal:* Emisión de Comprobantes B01 (Crédito Fiscal) y B02 (Consumidor Final).
                 - **CAPACIDAD 3 (CAPTURA Y ENVÍO DE SUGERENCIAS A CORREO ELECTRÓNICO):**

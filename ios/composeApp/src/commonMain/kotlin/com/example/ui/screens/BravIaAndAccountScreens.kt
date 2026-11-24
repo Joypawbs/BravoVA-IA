@@ -508,7 +508,7 @@ private fun BravIaPersonalizedThinkingRow(
             lower.contains("pide") || lower.contains("pedir") || lower.contains("orden") || lower.contains("compra") -> listOf(
                 initialText,
                 "Verificando existencias de «$snippet» en $activeBranch...",
-                "Calculando precios exactos en RD$ y retorno Bravísima...",
+                "Calculando precios exactos en RD$y retorno Bravísima...",
                 "Preparando tu resumen de confirmación manual en el chat..."
             )
             lower.contains("receta") || lower.contains("paso") || lower.contains("cocinar") || lower.contains("hacer") || lower.contains("mangu") || lower.contains("sancocho") || lower.contains("pasta") || lower.contains("pastelon") -> listOf(
@@ -519,7 +519,7 @@ private fun BravIaPersonalizedThinkingRow(
             )
             lower.contains("precio") || lower.contains("cuanto") || lower.contains("cuesta") -> listOf(
                 initialText,
-                "Consultando precios en RD$ para «$snippet» en los 16 pasillos...",
+                "Consultando precios en RD$para «$snippet» en los 16 pasillos...",
                 "Comparando presentaciones Marca Exclusiva Bravo...",
                 "Preparando tu respuesta personalizada al detalle..."
             )
@@ -534,7 +534,7 @@ private fun BravIaPersonalizedThinkingRow(
                     listOf(
                         "Revisando nuestros 16 pasillos oficiales para «$snippet»...",
                         initialText,
-                        "Consultando precios actualizados en RD$ y detalles...",
+                        "Consultando precios actualizados en RD$y detalles...",
                         "Afinando las mejores recomendaciones de Bravo para ti..."
                     )
                 )
@@ -1121,7 +1121,7 @@ fun BravIaChatScreen(
                         ) {
                             Column {
                                 Text(
-                                    text = "RD$ ${formatPesos(budgetAmount)}",
+                                    text = "RD$${formatPesos(budgetAmount)}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 20.sp,
@@ -1595,7 +1595,7 @@ fun BravIaChatScreen(
                                                         overflow = TextOverflow.Ellipsis
                                                     )
                                                     DiagonalMetadataStrip(
-                                                        items = listOf("RD$ ${prod.price}.00", prod.unit, prod.category),
+                                                        items = listOf("RD$${prod.price}.00", prod.unit, prod.category),
                                                         slashColor = primaryColor,
                                                         fontSizeSp = 10.5f
                                                     )
@@ -1676,7 +1676,7 @@ fun BravIaChatScreen(
                                                 }
                                             }
                                             Text(
-                                                text = "RD$ ${formatPesos(totalCombo)}",
+                                                text = "RD$${formatPesos(totalCombo)}",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = 13.5.sp,
@@ -1727,14 +1727,14 @@ fun BravIaChatScreen(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
-                                                    text = "Total a autorizar (+RD$ $cashbackCombo Bravísima)",
+                                                    text = "Total a autorizar (+RD$$cashbackCombo Bravísima)",
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 12.sp,
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                                 Text(
-                                                    text = "RD$ ${formatPesos(totalCombo)}.00",
+                                                    text = "RD$${formatPesos(totalCombo)}.00",
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.ExtraBold,
                                                     fontSize = 16.sp,
@@ -1790,7 +1790,7 @@ fun BravIaChatScreen(
                                                     )
                                                     Spacer(modifier = Modifier.width(6.dp))
                                                     Text(
-                                                        text = "Confirmar Pedido • RD$ ${formatPesos(totalCombo)}",
+                                                        text = "Confirmar Pedido • RD$${formatPesos(totalCombo)}",
                                                         fontFamily = PlusJakartaSans,
                                                         fontWeight = FontWeight.ExtraBold,
                                                         fontSize = 11.5.sp,
@@ -1836,7 +1836,7 @@ fun BravIaChatScreen(
                                         }
 
                                         AnimatedPurchaseButton(
-                                            text = "Agregar (${recommendedProducts.size}) • RD$ ${formatPesos(totalCombo)}",
+                                            text = "Agregar (${recommendedProducts.size}) • RD$${formatPesos(totalCombo)}",
                                             icon = Icons.Default.ShoppingCart,
                                             primaryColor = primaryColor,
                                             onClick = {
@@ -1875,7 +1875,7 @@ fun BravIaChatScreen(
                                             )
                                             Spacer(modifier = Modifier.width(6.dp))
                                             Text(
-                                                text = "Pedir por mí con Brav IA (Confirmación Manual • RD$ ${formatPesos(totalCombo)})",
+                                                text = "Pedir por mí con Brav IA (Confirmación Manual • RD$${formatPesos(totalCombo)})",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = 11.5.sp,
@@ -1903,7 +1903,7 @@ fun BravIaChatScreen(
                 darkMode = darkMode,
                 accent = primaryColor,
                 title = if (isArca) "Brav IA • El Arca & Soporte" else "Brav IA • Chef, Asesor & Soporte",
-                subtitle = if (isGenerating) "Verificando web, presupuesto y visión..." else "Recetas Web • Visión Multimodal • RD$ $budgetAmount",
+                subtitle = if (isGenerating) "Verificando web, presupuesto y visión..." else "Recetas Web • Visión Multimodal • RD$$budgetAmount",
                 onBack = {
                     HapticFeedbackManager.onNavigationClick(view)
                     onBack()
@@ -2866,6 +2866,8 @@ fun AccountSubScreenView(
     onAddSingleToCart: (String) -> Unit = {},
     onOpenProduct: (String) -> Unit = {},
     onToggleDarkMode: () -> Unit,
+    followsSystemTheme: Boolean = false,
+    onFollowSystemTheme: () -> Unit = {},
     onSelectPalette: (String) -> Unit = {},
     onToggleNotifications: () -> Unit,
     onToggleFcmTopic: (String, Boolean) -> Unit = { _, _ -> },
@@ -3096,7 +3098,7 @@ fun AccountSubScreenView(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "RD$ ${formatPesos(order.total.roundToInt())}.00",
+                                    text = "RD$${formatPesos(order.total.roundToInt())}.00",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 17.sp,
@@ -3395,6 +3397,37 @@ fun AccountSubScreenView(
                             modifier = Modifier.padding(18.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Usar tema del dispositivo",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
+                                    Text(
+                                        text = "Claro u oscuro según los ajustes del teléfono",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Switch(
+                                    checked = followsSystemTheme,
+                                    onCheckedChange = { follow ->
+                                        performCrispHaptic(view, HapticStyle.CONFIRM)
+                                        if (follow) onFollowSystemTheme() else onToggleDarkMode()
+                                    },
+                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor),
+                                    modifier = Modifier.testTag("follow_system_theme_switch")
+                                )
+                            }
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -3990,7 +4023,7 @@ fun AccountSubScreenView(
 
             AccountSubScreen.AYUDA -> {
                 val faqs = listOf(
-                    "¿Cómo funciona el 1% de la Tarjeta Bravísima?" to "Retorno exacto del 1% (RD$ 1.00 por cada RD$ 100.00 de compra), canje directo en carrito o caja presentando el código de barras ${userProfile.bravisimaNumber}.",
+                    "¿Cómo funciona el 1% de la Tarjeta Bravísima?" to "Retorno exacto del 1% (RD$1.00 por cada RD$100.00 de compra), canje directo en carrito o caja presentando el código de barras ${userProfile.bravisimaNumber}.",
                     "¿Cuáles son los horarios y tiempos de entrega?" to "Lunes a Sábado de 7:00 AM a 10:00 PM (Domingos cerrados por valores familiares). Delivery express en 8-12 minutos en el polígono central.",
                     "¿Cómo funciona la Facturación Fiscal (NCF)?" to "Emitimos Comprobantes B01 (Crédito Fiscal para empresas/RNC) y B02 (Consumidor Final) con desglose exacto de ITBIS (18%/16%).",
                     "¿Qué hace Brav IA y Brav IA Soporte?" to "Brav IA verifica recetas en vivo en la web con medidas exactas, cumple matemáticamente tu presupuesto en RD$, audita fotos de productos/facturas NCF y envía sugerencias a bezaleelpatrocino0@gmail.com."

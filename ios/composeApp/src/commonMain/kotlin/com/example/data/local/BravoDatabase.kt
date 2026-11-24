@@ -369,20 +369,21 @@ class BravoLocalRepository(
         dao.setPref(AppPrefEntity("bravisima_balance", balance.toString()))
     }
 
-    fun getDarkModeSync(defaultDark: Boolean = false): Boolean {
-        return sharedPrefs.getBoolean("dark_mode", defaultDark)
-    }
+    /** Elección manual del usuario; null significa "seguir el tema del dispositivo". */
+    fun getDarkModeOverrideSync(): Boolean? =
+        if (sharedPrefs.contains(DARK_MODE_CHOICE_KEY)) sharedPrefs.getBoolean(DARK_MODE_CHOICE_KEY, false) else null
 
-    suspend fun loadDarkMode(defaultDark: Boolean = false): Boolean {
-        val fromRoom = dao.getPref("dark_mode")?.toBooleanStrictOrNull()
-        val resolved = fromRoom ?: sharedPrefs.getBoolean("dark_mode", defaultDark)
-        sharedPrefs.edit().putBoolean("dark_mode", resolved).apply()
-        return resolved
-    }
+    suspend fun loadDarkModeOverride(): Boolean? =
+        dao.getPref(DARK_MODE_CHOICE_KEY)?.toBooleanStrictOrNull() ?: getDarkModeOverrideSync()
 
-    suspend fun saveDarkMode(enabled: Boolean) {
-        sharedPrefs.edit().putBoolean("dark_mode", enabled).apply()
-        dao.setPref(AppPrefEntity("dark_mode", enabled.toString()))
+    suspend fun saveDarkModeOverride(enabled: Boolean?) {
+        if (enabled == null) {
+            sharedPrefs.edit().remove(DARK_MODE_CHOICE_KEY).apply()
+            dao.setPref(AppPrefEntity(DARK_MODE_CHOICE_KEY, "system"))
+        } else {
+            sharedPrefs.edit().putBoolean(DARK_MODE_CHOICE_KEY, enabled).apply()
+            dao.setPref(AppPrefEntity(DARK_MODE_CHOICE_KEY, enabled.toString()))
+        }
     }
 
     fun getPaletteIdSync(defaultPalette: String = "material_you"): String {
@@ -539,3 +540,5 @@ class BravoLocalRepository(
         }
     }
 }
+
+private const val DARK_MODE_CHOICE_KEY = "dark_mode_choice"

@@ -211,7 +211,7 @@ fun BravIaHistoryAutoListHeroCard(
                                             maxLines = 1
                                         )
                                         Text(
-                                            text = "Comprado ${stat.purchaseCount}x • RD$ ${stat.product.price}",
+                                            text = "Comprado ${stat.purchaseCount}x • RD$${stat.product.price}",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 10.sp,
@@ -544,7 +544,7 @@ fun ManagedShoppingListCard(
                     DiagonalMetadataStrip(
                         items = listOf(
                             "${resolvedProducts.size} productos",
-                            "RD$ ${formatListMoney(totalPrice)}.00",
+                            "RD$${formatListMoney(totalPrice)}.00",
                             shoppingList.updatedAtLabel
                         ),
                         slashColor = primaryColor,
@@ -814,7 +814,7 @@ fun ManagedShoppingListCard(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                         DiagonalMetadataStrip(
-                                            items = listOf("RD$ ${prod.price}.00", prod.unit, prod.category),
+                                            items = listOf("RD$${prod.price}.00", prod.unit, prod.category),
                                             slashColor = primaryColor,
                                             fontSizeSp = 10.5f
                                         )
@@ -1009,7 +1009,7 @@ fun ManagedShoppingListCard(
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
-                                                text = "RD$ ${prod.price}.00 • ${prod.unit}",
+                                                text = "RD$${prod.price}.00 • ${prod.unit}",
                                                 fontSize = 10.5.sp,
                                                 color = primaryColor,
                                                 fontWeight = FontWeight.Bold

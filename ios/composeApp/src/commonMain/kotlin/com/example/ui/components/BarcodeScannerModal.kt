@@ -418,7 +418,7 @@ fun BarcodeScannerModal(
                                         color = Color(0xFF64748B)
                                     )
                                     Text(
-                                        text = "RD$ ${selectedProduct.price}.00",
+                                        text = "RD$${selectedProduct.price}.00",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 18.sp,

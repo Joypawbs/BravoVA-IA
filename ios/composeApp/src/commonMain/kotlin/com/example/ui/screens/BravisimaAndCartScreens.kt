@@ -759,7 +759,7 @@ fun BravisimaScreen(
                                     color = Color.White.copy(alpha = 0.94f)
                                 )
                                 Text(
-                                    text = "RD$ ${formatMoney(balance)}.00",
+                                    text = "RD$${formatMoney(balance)}.00",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 28.sp,
@@ -903,7 +903,7 @@ fun BravisimaScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Nivel ${tier.label} • RD$ ${formatMoney(bravisimaCard.lifetimeEarned)}",
+                                    text = "Nivel ${tier.label} • RD$${formatMoney(bravisimaCard.lifetimeEarned)}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 13.sp,
@@ -914,7 +914,7 @@ fun BravisimaScreen(
                                     color = primaryColor.copy(alpha = if (darkMode) 0.22f else 0.12f)
                                 ) {
                                     Text(
-                                        text = if (nextTarget != null) "Meta: RD$ $nextTarget" else "Nivel Máximo",
+                                        text = if (nextTarget != null) "Meta: RD$$nextTarget" else "Nivel Máximo",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 11.5.sp,
@@ -962,7 +962,7 @@ fun BravisimaScreen(
                                 )
                             }
                             Text(
-                                text = "${tier.benefitSummary} • Meta mensual: RD$ ${formatMoney(bravisimaCard.balance)} / RD$ ${formatMoney(bravisimaCard.monthlyGoal)} (${(goalProgress * 100).roundToInt()}%)",
+                                text = "${tier.benefitSummary} • Meta mensual: RD$${formatMoney(bravisimaCard.balance)} / RD$${formatMoney(bravisimaCard.monthlyGoal)} (${(goalProgress * 100).roundToInt()}%)",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 12.5.sp,
@@ -1131,7 +1131,7 @@ fun BravisimaScreen(
                                 )
 
                                 Text(
-                                    text = "Meta mensual de ahorro: RD$ ${formatMoney(editableGoal)}",
+                                    text = "Meta mensual de ahorro: RD$${formatMoney(editableGoal)}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
@@ -1155,7 +1155,7 @@ fun BravisimaScreen(
                                             border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.4f))
                                         ) {
                                             Text(
-                                                text = "RD$ $goalOption",
+                                                text = "RD$$goalOption",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = 11.5.sp,
@@ -1306,7 +1306,7 @@ fun BravisimaScreen(
                                 .horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            listOf("BRAVO25" to "+RD$ 25", "BRAVISIMA50" to "+RD$ 50", "ARCA20" to "+RD$ 20").forEach { (code, reward) ->
+                            listOf("BRAVO25" to "+RD$25", "BRAVISIMA50" to "+RD$50", "ARCA20" to "+RD$20").forEach { (code, reward) ->
                                 val alreadyClaimed = bravisimaCard.claimedPromoCodes.any { it.equals(code, ignoreCase = true) }
                                 Surface(
                                     onClick = {
@@ -1371,14 +1371,14 @@ fun BravisimaScreen(
                             BravoUnderline(isArca = false)
                             Spacer(modifier = Modifier.height(6.dp))
                             DiagonalMetadataStrip(
-                                items = listOf("+RD$ ${cartTotals.bravisimaGenerated}", "Hoy"),
+                                items = listOf("+RD$${cartTotals.bravisimaGenerated}", "Hoy"),
                                 slashColor = if (darkMode) Color(0xFF34D399) else Color(0xFF059669),
                                 fontSizeSp = 12.5f
                             )
                         }
 
                         Text(
-                            text = "Recibes RD$ 1.00 de retorno automático por cada RD$ 100.00 en compras.",
+                            text = "Recibes RD$1.00 de retorno automático por cada RD$100.00 en compras.",
                             fontFamily = PlusJakartaSans,
                             fontSize = 12.5.sp,
                             lineHeight = 18.sp,
@@ -1398,7 +1398,7 @@ fun BravisimaScreen(
                         )
 
                         DiagonalMetadataStrip(
-                            items = listOf("Próximo peso", "Faltan RD$ $neededForNextPeso"),
+                            items = listOf("Próximo peso", "Faltan RD$$neededForNextPeso"),
                             slashColor = primaryColor,
                             fontSizeSp = 12f
                         )
@@ -1445,9 +1445,9 @@ fun BravisimaScreen(
                             movements.forEachIndexed { idx, mov ->
                                 val isPositive = mov.amount >= 0
                                 val formattedAmount = if (isPositive) {
-                                    "+RD$ ${formatMoney(mov.amount)}.00"
+                                    "+RD$${formatMoney(mov.amount)}.00"
                                 } else {
-                                    "-RD$ ${formatMoney(abs(mov.amount))}.00"
+                                    "-RD$${formatMoney(abs(mov.amount))}.00"
                                 }
                                 MovementRow(
                                     title = mov.title,
@@ -1491,7 +1491,7 @@ fun BravisimaScreen(
                 request = BiometricPromptRequest(
                     operation = BiometricCriticalOperation.UNLOCK_BRAVISIMA_CARD,
                     title = actionTitle,
-                    subtitle = "Balance protegido: RD$ ${formatMoney(balance)}.00",
+                    subtitle = "Balance protegido: RD$${formatMoney(balance)}.00",
                     description = actionDesc,
                     badgeTitle = "SEGURIDAD TARJETA BRAVÍSIMA",
                     amountRd = balance,
@@ -1713,7 +1713,7 @@ fun CartCheckoutScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "RD$ ${formatMoney(product.price * qty)}.00",
+                                text = "RD$${formatMoney(product.price * qty)}.00",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 14.sp,
@@ -2168,13 +2168,13 @@ fun CartCheckoutScreen(
                                     request = BiometricPromptRequest(
                                         operation = BiometricCriticalOperation.AUTHORIZE_BRAVISIMA_REDEMPTION,
                                         title = "Autorizar Canje Bravísima",
-                                        subtitle = "Aplicar -RD$ ${formatMoney(maxRedeemable)}.00 al pedido",
+                                        subtitle = "Aplicar -RD$${formatMoney(maxRedeemable)}.00 al pedido",
                                         description = "Confirma tu identidad con huella digital para redimir tus puntos acumulados de Tarjeta Bravísima en este checkout.",
                                         badgeTitle = "CANJE DE SALDO BRAVÍSIMA",
                                         amountRd = maxRedeemable,
                                         itemCount = cartTotals.count,
                                         cashbackRd = cartTotals.bravisimaGenerated,
-                                        paymentMethodLabel = "Balance Bravísima (RD$ ${formatMoney(bravisimaBalance)}.00)",
+                                        paymentMethodLabel = "Balance Bravísima (RD$${formatMoney(bravisimaBalance)}.00)",
                                         deliveryOrBranchLabel = activeDeliverySummary
                                     ),
                                     onAuthorized = { res ->
@@ -2200,7 +2200,7 @@ fun CartCheckoutScreen(
                                             request = BiometricPromptRequest(
                                                 operation = BiometricCriticalOperation.UNLOCK_BRAVISIMA_CARD,
                                                 title = "Desbloquear Tarjeta Bravísima",
-                                                subtitle = "Balance disponible: RD$ ${formatMoney(bravisimaBalance)}.00",
+                                                subtitle = "Balance disponible: RD$${formatMoney(bravisimaBalance)}.00",
                                                 description = "Tu Tarjeta Bravísima está bloqueada. Verifica tu huella digital para desbloquearla y habilitar el canje en el checkout.",
                                                 badgeTitle = "DESBLOQUEO BIOMÉTRICO BRAVÍSIMA",
                                                 amountRd = bravisimaBalance,
@@ -2237,9 +2237,9 @@ fun CartCheckoutScreen(
                                 )
                                 DiagonalMetadataStrip(
                                     items = if (isBravisimaLocked) {
-                                        listOf("Desbloqueo con Huella", "RD$ ${formatMoney(bravisimaBalance)}.00")
+                                        listOf("Desbloqueo con Huella", "RD$${formatMoney(bravisimaBalance)}.00")
                                     } else {
-                                        listOf("Disponible", "RD$ ${formatMoney(bravisimaBalance)}.00", "Protegido con Huella")
+                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con Huella")
                                     },
                                     slashColor = if (isBravisimaLocked) BravoRed else primaryColor,
                                     fontSizeSp = 10.5f
@@ -2289,7 +2289,7 @@ fun CartCheckoutScreen(
                         ) {
                             Text("Subtotal (${cartTotals.count} art.)", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
-                                "RD$ ${formatMoney(cartTotals.subtotal.roundToInt())}.00",
+                                "RD$${formatMoney(cartTotals.subtotal.roundToInt())}.00",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -2302,7 +2302,7 @@ fun CartCheckoutScreen(
                             ) {
                                 Text("Descuento Bravísima (Autorizado)", color = Color(0xFF059669))
                                 Text(
-                                    "-RD$ ${formatMoney(cartTotals.redeemed)}.00",
+                                    "-RD$${formatMoney(cartTotals.redeemed)}.00",
                                     fontWeight = FontWeight.ExtraBold,
                                     color = Color(0xFF059669)
                                 )
@@ -2315,7 +2315,7 @@ fun CartCheckoutScreen(
                         ) {
                             Text("Cargo con $activeCardSummary ($ncfType)", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                             DiagonalMetadataStrip(
-                                items = listOf("GRATIS", "+RD$ ${cartTotals.bravisimaGenerated} Bravísima"),
+                                items = listOf("GRATIS", "+RD$${cartTotals.bravisimaGenerated} Bravísima"),
                                 slashColor = Color(0xFF059669),
                                 fontSizeSp = 11.5f
                             )
@@ -2336,7 +2336,7 @@ fun CartCheckoutScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "RD$ ${formatMoney(cartTotals.finalPay.roundToInt())}.00",
+                                text = "RD$${formatMoney(cartTotals.finalPay.roundToInt())}.00",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 23.sp,
@@ -2423,7 +2423,7 @@ fun CartCheckoutScreen(
                         }
 
                         AnimatedPurchaseButton(
-                            text = "Confirmar Pago con Huella • RD$ ${formatMoney(cartTotals.finalPay.roundToInt())}",
+                            text = "Confirmar Pago con Huella • RD$${formatMoney(cartTotals.finalPay.roundToInt())}",
                             icon = Icons.Default.Fingerprint,
                             primaryColor = primaryColor,
                             onClick = {
@@ -2433,7 +2433,7 @@ fun CartCheckoutScreen(
                                     request = BiometricPromptRequest(
                                         operation = BiometricCriticalOperation.CONFIRM_PAYMENT_AND_ORDER,
                                         title = "Confirmar Pago y Pedido",
-                                        subtitle = "Total RD$ ${formatMoney(finalPayRd)}.00 • $activeCardSummary",
+                                        subtitle = "Total RD$${formatMoney(finalPayRd)}.00 • $activeCardSummary",
                                         description = "Coloca tu huella digital para autorizar el cargo en $activeCardSummary ($ncfType) y despachar tu pedido ($activeDeliverySummary).",
                                         badgeTitle = "AUTORIZACIÓN BIOMÉTRICA DE PAGO",
                                         amountRd = finalPayRd,
@@ -2570,7 +2570,7 @@ fun BiometricOrderPromptDialog(
         request = BiometricPromptRequest(
             operation = BiometricCriticalOperation.CONFIRM_PAYMENT_AND_ORDER,
             title = "Confirmar Pedido con Huella",
-            subtitle = "Total RD$ ${formatMoney(totalAmountRd)}.00 • $itemCount artículo(s)",
+            subtitle = "Total RD$${formatMoney(totalAmountRd)}.00 • $itemCount artículo(s)",
             description = "Coloca tu huella digital para autorizar el pago y confirmar tu pedido.",
             badgeTitle = "AUTORIZACIÓN BIOMÉTRICA BRAVO",
             amountRd = totalAmountRd,
@@ -2783,7 +2783,7 @@ fun BiometricOrderPromptDialog(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = "RD$ ${formatMoney(request.amountRd)}.00",
+                                        text = "RD$${formatMoney(request.amountRd)}.00",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 17.sp,
@@ -2796,7 +2796,7 @@ fun BiometricOrderPromptDialog(
                                         color = Color(0xFF10B981).copy(alpha = 0.14f)
                                     ) {
                                         Text(
-                                            text = "+RD$ ${request.cashbackRd} Bravísima",
+                                            text = "+RD$${request.cashbackRd} Bravísima",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 10.5.sp,
@@ -3482,7 +3482,7 @@ fun DeliveryTrackingScreen(
                                 items = listOf(
                                     "Ruta real: $effectiveRoadKm km",
                                     driverTelemetry.trafficCondition,
-                                    "Envío base RD$ $deliveryFeeRd (Gratis Bravísima)"
+                                    "Envío base RD$$deliveryFeeRd (Gratis Bravísima)"
                                 ),
                                 slashColor = primaryColor,
                                 fontSizeSp = 10.5f
@@ -3888,7 +3888,7 @@ fun DeliveryTrackingScreen(
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
-                                                text = "x$qty • RD$ ${prod.price}",
+                                                text = "x$qty • RD$${prod.price}",
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = primaryColor

@@ -4,9 +4,10 @@ import com.example.platform.*
 
 import androidx.compose.ui.graphics.Color
 
-val BravoRed = Color(0xFFD9232A)
-val BravoRedDark = Color(0xFF991B1B)
-val BravoRedSoft = Color(0xFFFFE4E6)
+val BravoRed = Color(0xFFE1251B)
+val BravoOrange = Color(0xFFF26A2E)
+val BravoRedDark = Color(0xFFB71C14)
+val BravoRedSoft = Color(0xFFFDE8E6)
 val BravoAmber = Color(0xFFF59E0B)
 val BravoAmberSoft = Color(0xFFFFF7ED)
 val BravoAmberText = Color(0xFF9A3412)
@@ -19,20 +20,20 @@ val ArcaTealDark = Color(0xFF115E59)
 val ArcaTealSoft = Color(0xFFCCFBF1)
 val ArcaEmerald = Color(0xFF14B8A6)
 
-val LightBackground = Color(0xFFFFF7ED)
+val LightBackground = Color(0xFFF4F5F7)
 val LightSurface = Color(0xFFFFFFFF)
-val LightCardSurface = Color(0xFAFFFFFF)
-val LightBorder = Color(0xFFE2E8F0)
-val LightTextPrimary = Color(0xFF0F172A)
-val LightTextSecondary = Color(0xFF475569)
+val LightCardSurface = Color(0xFFFFFFFF)
+val LightBorder = Color(0xFFE6E8EC)
+val LightTextPrimary = Color(0xFF1A1B1F)
+val LightTextSecondary = Color(0xFF6B6F78)
 
-val DarkBackground = Color(0xFF090D16)
-val DarkSurface = Color(0xFF111827)
-val DarkCardSurface = Color(0xFF162032)
-val DarkInputSurface = Color(0xFF1E293B)
-val DarkBorder = Color(0xFF283548)
-val DarkTextPrimary = Color(0xFFF8FAFC)
-val DarkTextSecondary = Color(0xFF94A3B8)
+val DarkBackground = Color(0xFF0C0C0E)
+val DarkSurface = Color(0xFF17181B)
+val DarkCardSurface = Color(0xFF1F2024)
+val DarkInputSurface = Color(0xFF26272C)
+val DarkBorder = Color(0xFF2E3036)
+val DarkTextPrimary = Color(0xFFF5F5F7)
+val DarkTextSecondary = Color(0xFF9A9CA3)
 
 data class AppColorPalette(
     val id: String,
@@ -51,9 +52,9 @@ val FAVORITE_COLOR_PALETTES = listOf(
         id = "material_you",
         title = "Material Design 3 (Dispositivo)",
         subtitle = "Dinámico Android • Bravo Oficial",
-        primary = Color(0xFFD9232A),
-        primaryDark = Color(0xFF991B1B),
-        backgroundLight = Color(0xFFFFF7ED),
+        primary = BravoRed,
+        primaryDark = BravoRedDark,
+        backgroundLight = LightBackground,
         surfaceLight = Color(0xFFFFFFFF),
         accent = Color(0xFFF59E0B),
         hexPreview = listOf("M3 Auto", "#D9232A", "#F59E0B")
@@ -140,3 +141,6 @@ val FAVORITE_COLOR_PALETTES = listOf(
 fun findPaletteById(id: String): AppColorPalette {
     return FAVORITE_COLOR_PALETTES.find { it.id == id } ?: FAVORITE_COLOR_PALETTES.first()
 }
+
+/** Degradado naranja → rojo de los botones principales de la app oficial. */
+val BravoCtaGradient = listOf(BravoOrange, BravoRed)

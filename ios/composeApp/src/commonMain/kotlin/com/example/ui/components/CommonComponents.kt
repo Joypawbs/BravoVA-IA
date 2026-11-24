@@ -2373,7 +2373,7 @@ fun FloatingActionFabs(
                         .testTag("cart_added_feedback_pill")
                 ) {
                     Text(
-                        text = "+1 • RD$ ${lastCartFeedback.second}",
+                        text = "+1 • RD$${lastCartFeedback.second}",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 11.sp,

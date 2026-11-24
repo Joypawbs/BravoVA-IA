@@ -1353,7 +1353,7 @@ fun ProductDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = "RD$ ${formatCurrency(product.price)}.00",
+                                text = "RD$${formatCurrency(product.price)}.00",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 25.sp,
@@ -1615,7 +1615,7 @@ fun ProductDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Total: RD$ ${formatCurrency(accumulatedPrice)}.00",
+                                text = "Total: RD$${formatCurrency(accumulatedPrice)}.00",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 19.sp,
@@ -1720,7 +1720,7 @@ fun ProductDetailScreen(
                         }
 
                         AnimatedPurchaseButton(
-                            text = if (qtyInCart == 0) "Agregar • RD$ ${formatCurrency(product.price)}" else "Ir al pago • RD$ ${formatCurrency(accumulatedPrice)}",
+                            text = if (qtyInCart == 0) "Agregar • RD$${formatCurrency(product.price)}" else "Ir al pago • RD$${formatCurrency(accumulatedPrice)}",
                             icon = Icons.Default.ShoppingCart,
                             primaryColor = primaryColor,
                             onClick = {
@@ -2049,7 +2049,7 @@ private fun DailyRotatingOffersCarouselSection(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "RD$ ${offer.offerPrice}",
+                                        text = "RD$${offer.offerPrice}",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,

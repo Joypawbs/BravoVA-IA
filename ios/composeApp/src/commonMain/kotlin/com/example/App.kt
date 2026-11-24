@@ -171,6 +171,10 @@ fun BravoRoot(
             val activeStore by viewModel.activeStore.collectAsStateWithLifecycle()
             val selectedPaletteId by viewModel.selectedPaletteId.collectAsStateWithLifecycle()
 
+            LaunchedEffect(systemDark) {
+                viewModel.onSystemDarkThemeChanged(systemDark)
+            }
+
             LaunchedEffect(darkMode) {
                 authScreenDarkMode = darkMode
             }
@@ -240,6 +244,7 @@ fun BravoVaApp(
     val cartPulseTrigger by viewModel.cartPulseTrigger.collectAsStateWithLifecycle()
     val lastAddedCartFeedback by viewModel.lastAddedCartFeedback.collectAsStateWithLifecycle()
     val darkMode by viewModel.darkMode.collectAsStateWithLifecycle()
+    val darkModeOverride by viewModel.darkModeOverride.collectAsStateWithLifecycle()
     val selectedPaletteId by viewModel.selectedPaletteId.collectAsStateWithLifecycle()
     val pushNotifications by viewModel.pushNotifications.collectAsStateWithLifecycle()
     val fcmToken by viewModel.fcmToken.collectAsStateWithLifecycle()
@@ -359,7 +364,7 @@ fun BravoVaApp(
         label = "startup_skeleton_crossfade"
     ) { booting ->
         if (booting) {
-            AppStartupSkeletonScreen(darkMode = darkMode || isSystemInDarkTheme(), isArca = isArca)
+            AppStartupSkeletonScreen(darkMode = darkMode, isArca = isArca)
         } else {
             Scaffold(
                 modifier = Modifier
@@ -796,7 +801,7 @@ fun BravoVaApp(
                                         request = BiometricPromptRequest(
                                             operation = BiometricCriticalOperation.CONFIRM_AI_ORDER,
                                             title = "Confirmar Pedido Brav IA",
-                                            subtitle = "Total RD$ $estTotal.00 • $estCount artículo(s)",
+                                            subtitle = "Total RD$$estTotal.00 • $estCount artículo(s)",
                                             description = "Autoriza con tu huella digital el pago con $cardLabel y el despacho inmediato de tu compra preparada por Brav IA.",
                                             badgeTitle = "AUTORIZACIÓN BIOMÉTRICA BRAV IA",
                                             amountRd = estTotal,
@@ -889,6 +894,8 @@ fun BravoVaApp(
                                 onAddSingleToCart = { sku -> viewModel.changeProductQty(sku, 1) },
                                 onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                 onToggleDarkMode = { viewModel.toggleDarkMode() },
+                                followsSystemTheme = darkModeOverride == null,
+                                onFollowSystemTheme = { viewModel.followSystemTheme() },
                                 npuStatus = npuStatus,
                                 onToggleNpuMode = { viewModel.toggleNpuMode() },
                                 onSelectPalette = { paletteId -> viewModel.selectColorPalette(paletteId) },

@@ -13,29 +13,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * Ultra-rounded, highly legible, and professional typography family combining
- * Fredoka (geometric rounded display/UI weights), Varela Round (crisp rounded terminals),
- * and Nunito (balanced multi-weight clarity) installed locally in res/font.
+ * Poppins es la tipografía geométrica que usa la app oficial de BravoVa.
+ * Fredoka/Nunito quedan disponibles, pero toda la interfaz usa Poppins.
  */
-val RoundedDisplayFont: FontFamily
+private val PoppinsFamily: FontFamily
     @Composable get() = FontFamily(
-    Font(Res.font.varela_round, weight = FontWeight.Normal),
-    Font(Res.font.fredoka, weight = FontWeight.Medium),
-    Font(Res.font.fredoka, weight = FontWeight.SemiBold),
-    Font(Res.font.fredoka, weight = FontWeight.Bold),
-    Font(Res.font.fredoka, weight = FontWeight.ExtraBold),
-    Font(Res.font.fredoka, weight = FontWeight.Black)
-)
+        Font(Res.font.poppins_regular, weight = FontWeight.Normal),
+        Font(Res.font.poppins_medium, weight = FontWeight.Medium),
+        Font(Res.font.poppins_semi_bold, weight = FontWeight.SemiBold),
+        Font(Res.font.poppins_bold, weight = FontWeight.Bold),
+        Font(Res.font.poppins_extra_bold, weight = FontWeight.ExtraBold),
+        Font(Res.font.poppins_extra_bold, weight = FontWeight.Black)
+    )
+
+val RoundedDisplayFont: FontFamily
+    @Composable get() = PoppinsFamily
 
 val RoundedBodyFont: FontFamily
-    @Composable get() = FontFamily(
-    Font(Res.font.varela_round, weight = FontWeight.Normal),
-    Font(Res.font.fredoka, weight = FontWeight.Medium),
-    Font(Res.font.fredoka, weight = FontWeight.SemiBold),
-    Font(Res.font.fredoka, weight = FontWeight.Bold),
-    Font(Res.font.nunito, weight = FontWeight.ExtraBold),
-    Font(Res.font.nunito, weight = FontWeight.Black)
-)
+    @Composable get() = PoppinsFamily
 
 // Keep existing identifier names so every screen and component inherits the rounded, high-legibility font seamlessly
 val PlusJakartaSans: FontFamily
