@@ -11,8 +11,9 @@ import platform.UIKit.UIViewController
  * Entry point called from Swift (ContentView.swift):
  *   MainViewControllerKt.MainViewController(aiBridge: FirebaseAiBridge())
  */
-fun MainViewController(aiBridge: IosAiBridge?): UIViewController {
+fun MainViewController(aiBridge: IosAiBridge?, glassBridge: com.example.ui.components.IosGlassBridge?): UIViewController {
     AppContext.init(IosPlatformContext)
     IosBridges.ai = aiBridge
+    IosBridges.glass = glassBridge
     return ComposeUIViewController { BravoRoot() }
 }

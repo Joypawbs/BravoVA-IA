@@ -456,6 +456,8 @@ interface IosAiBridge {
 
 object IosBridges {
     var ai: IosAiBridge? = null
+    /** Vidrio líquido nativo (SwiftUI), registrado desde iOSApp. */
+    var glass: com.example.ui.components.IosGlassBridge? = null
 }
 
 private class BridgedGenerativeModel(private val modelName: String) : GenerativeModelCompat {

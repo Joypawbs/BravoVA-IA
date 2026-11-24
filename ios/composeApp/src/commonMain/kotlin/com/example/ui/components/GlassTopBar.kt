@@ -1,0 +1,186 @@
+package com.example.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+/*
+ * Barra superior estilo Liquid Glass (como la app de Claude en iOS 26):
+ * piezas de vidrio separadas que flotan sobre el contenido:
+ *   [ ◀ ]   [   Título / subtítulo   ]   [ acciones ]
+ * En iOS 26 se dibuja con el vidrio nativo de Apple (SwiftUI .glassEffect);
+ * en Android y en iOS anteriores, con el componente LiquidGlass de Compose.
+ */
+
+/** Una acción de la barra. [symbol] es el SF Symbol para iOS; [icon] se usa en Compose. */
+data class GlassBarAction(
+    val symbol: String,
+    val icon: ImageVector?,
+    val label: String,
+    val text: String? = null,
+    val badge: String? = null,
+    val highlighted: Boolean = false,
+    val tint: Color? = null,
+    val testTag: String = "",
+    val onClick: (() -> Unit)? = null
+)
+
+/** Datos de la barra que viajan a la vista nativa. */
+data class GlassTopBarSpec(
+    val title: String,
+    val subtitle: String,
+    val subtitleColor: Color,
+    val hasBack: Boolean,
+    val backLabel: String,
+    val actions: List<GlassBarAction>,
+    val accent: Color,
+    val darkMode: Boolean
+)
+
+/** True cuando la plataforma dibuja el vidrio de forma nativa (iOS 26 o superior). */
+expect fun nativeLiquidGlassAvailable(): Boolean
+
+@Composable
+expect fun NativeGlassTopBar(spec: GlassTopBarSpec, onBack: () -> Unit, onAction: (Int) -> Unit, modifier: Modifier)
+
+@Composable
+expect fun NativeGlassDock(
+    symbols: List<String>,
+    labels: List<String>,
+    selectedIndex: Int,
+    accent: Color,
+    darkMode: Boolean,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier
+)
+
+internal fun Color.argbInt(): Int = toArgb()
+
+@Composable
+fun GlassTopBar(
+    darkMode: Boolean,
+    accent: Color,
+    title: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    subtitleColor: Color? = null,
+    onBack: (() -> Unit)? = null,
+    backLabel: String = "Volver",
+    backTestTag: String = "",
+    actions: List<GlassBarAction> = emptyList()
+) {
+    val spec = GlassTopBarSpec(
+        title = title,
+        subtitle = subtitle.orEmpty(),
+        subtitleColor = subtitleColor ?: accent,
+        hasBack = onBack != null,
+        backLabel = backLabel,
+        actions = actions,
+        accent = accent,
+        darkMode = darkMode
+    )
+    if (nativeLiquidGlassAvailable()) {
+        NativeGlassTopBar(
+            spec = spec,
+            onBack = { onBack?.invoke() },
+            onAction = { i -> actions.getOrNull(i)?.onClick?.invoke() },
+            modifier = modifier.fillMaxWidth().padding(top = 4.dp).height(60.dp)
+        )
+        return
+    }
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (onBack != null) {
+            LiquidGlass(darkMode = darkMode, accent = accent, cornerRadius = 24.dp, elevation = 8.dp,
+                modifier = Modifier.size(48.dp).clickable { onBack() }.then(if (backTestTag.isNotEmpty()) Modifier.testTag(backTestTag) else Modifier)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel, tint = onSurface, modifier = Modifier.align(Alignment.Center).size(21.dp))
+            }
+        }
+        LiquidGlass(darkMode = darkMode, accent = accent, cornerRadius = 24.dp, elevation = 8.dp,
+            modifier = Modifier.weight(1f).height(48.dp)) {
+            Column(
+                modifier = Modifier.align(Alignment.Center).padding(horizontal = 14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (!subtitle.isNullOrEmpty()) {
+                    Text(subtitle, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = subtitleColor ?: accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+        if (actions.isNotEmpty()) {
+            val single = actions.size == 1 && actions[0].text == null
+            LiquidGlass(darkMode = darkMode, accent = accent, cornerRadius = 24.dp, elevation = 8.dp,
+                modifier = Modifier.height(48.dp).then(if (single) Modifier.width(48.dp) else Modifier.widthIn(min = 48.dp))) {
+                Row(
+                    modifier = Modifier.align(Alignment.Center).padding(horizontal = if (single) 0.dp else 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    actions.forEach { a ->
+                        val color = a.tint ?: if (a.highlighted) accent else onSurface
+                        Box(
+                            modifier = Modifier
+                                .height(40.dp)
+                                .widthIn(min = 40.dp)
+                                .clip(CircleShape)
+                                .then(if (a.highlighted) Modifier.background(accent.copy(alpha = 0.18f)) else Modifier)
+                                .then(if (a.onClick != null) Modifier.clickable { a.onClick.invoke() } else Modifier)
+                                .then(if (a.testTag.isNotEmpty()) Modifier.testTag(a.testTag) else Modifier)
+                                .padding(horizontal = if (a.text != null) 8.dp else 0.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                if (a.icon != null) Icon(a.icon, contentDescription = a.label, tint = color, modifier = Modifier.size(20.dp))
+                                if (a.text != null) Text(a.text, fontSize = 11.5.sp, fontWeight = FontWeight.ExtraBold, color = color, maxLines = 1)
+                            }
+                            if (a.badge != null) {
+                                Box(
+                                    modifier = Modifier.align(Alignment.TopEnd).offset(x = 2.dp, y = 2.dp)
+                                        .size(16.dp).clip(CircleShape).background(accent),
+                                    contentAlignment = Alignment.Center
+                                ) { Text(a.badge, color = Color.White, fontSize = 8.5.sp, fontWeight = FontWeight.Black) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.width(0.dp))
+    }
+}

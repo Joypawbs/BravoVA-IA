@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.components.GlassBarAction
+import com.example.ui.components.GlassTopBar
 import com.example.platform.*
 
 import androidx.compose.animation.AnimatedVisibility
@@ -1793,93 +1795,28 @@ fun ProductDetailScreen(
         }
     }
 
-        FloatingHeaderCapsule(
+        GlassTopBar(
             darkMode = darkMode,
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
+            accent = primaryColor,
+            title = "Detalle del Producto",
+            modifier = Modifier.align(Alignment.TopCenter),
+            onBack = {
+                HapticFeedbackManager.onNavigationClick(view)
+                onBack()
+            },
+            backTestTag = "detail_back_button",
+            actions = listOf(
+                GlassBarAction(
+                    symbol = "cart", icon = Icons.Default.ShoppingCart, label = "Ver carrito",
+                    badge = if (totalCartCount > 0) totalCartCount.toString() else null,
+                    testTag = "detail_cart_button",
                     onClick = {
                         HapticFeedbackManager.onNavigationClick(view)
-                        onBack()
-                    },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .testTag("detail_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = primaryColor
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Detalle del Producto",
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    BravoUnderline(isArca = isArca)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .testTag("detail_cart_button"),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                HapticFeedbackManager.onNavigationClick(view)
-                                onOpenCart()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Ver carrito",
-                            tint = primaryColor,
-                            modifier = Modifier.size(21.dp)
-                        )
+                        onOpenCart()
                     }
-                    if (totalCartCount > 0) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(17.dp)
-                                .clip(CircleShape)
-                                .background(primaryColor),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = totalCartCount.toString(),
-                                color = Color.White,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                    }
-                }
-            }
-        }
+                )
+            )
+        )
     }
 }
 

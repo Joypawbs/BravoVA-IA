@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.components.GlassBarAction
+import com.example.ui.components.GlassTopBar
 import com.example.platform.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
@@ -1464,65 +1466,15 @@ fun BravisimaScreen(
             }
         }
 
-        FloatingHeaderCapsule(
+        GlassTopBar(
             darkMode = darkMode,
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(primaryColor.copy(alpha = 0.12f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_bravisima_card),
-                        contentDescription = "Icono Tarjeta Bravísima",
-                        tint = primaryColor,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = "Tarjeta Bravísima",
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    BravoUnderline(isArca = false)
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = primaryColor.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = bravisimaCard.tier.label,
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 10.5.sp,
-                        color = primaryColor,
-                        maxLines = 1,
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
-                    )
-                }
-            }
-        }
+            accent = primaryColor,
+            title = "Tarjeta Bravísima",
+            modifier = Modifier.align(Alignment.TopCenter),
+            actions = listOf(
+                GlassBarAction(symbol = "creditcard", icon = null, label = "Nivel ${bravisimaCard.tier.label}", text = bravisimaCard.tier.label, highlighted = true)
+            )
+        )
 
         if (showCardLockBiometricPrompt) {
             val actionTitle = if (bravisimaCard.isLocked) {
@@ -2560,87 +2512,28 @@ fun CartCheckoutScreen(
         }
     }
 
-        FloatingHeaderCapsule(
+        GlassTopBar(
             darkMode = darkMode,
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
+            accent = primaryColor,
+            title = "Mi Carrito (${cartTotals.count})",
+            modifier = Modifier.align(Alignment.TopCenter),
+            onBack = {
                         performCrispHaptic(view, HapticStyle.TICK)
                         onBack()
                     },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .testTag("cart_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = primaryColor
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = "Mi Carrito (${cartTotals.count})",
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 16.5.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    BravoUnderline(isArca = isArca)
-                }
-
-                if (cartItems.isNotEmpty()) {
-                    Surface(
-                        onClick = {
+            backTestTag = "cart_back_button",
+            actions = if (cartItems.isNotEmpty()) listOf(
+                GlassBarAction(
+                    symbol = "trash", icon = Icons.Default.DeleteOutline, label = "Vaciar carrito", text = "Vaciar",
+                    tint = if (darkMode) Color(0xFFFDA4AF) else Color(0xFFBE123C),
+                    testTag = "cart_empty_button",
+                    onClick = {
                             performCrispHaptic(view, HapticStyle.HEAVY)
                             onEmptyCart()
-                        },
-                        shape = RoundedCornerShape(999.dp),
-                        color = if (darkMode) Color(0xFF4C0519) else Color(0xFFFFE4E6),
-                        border = BorderStroke(1.2.dp, Color(0xFFE11D48)),
-                        modifier = Modifier.testTag("cart_empty_button")
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.DeleteOutline,
-                                contentDescription = null,
-                                tint = if (darkMode) Color(0xFFFDA4AF) else Color(0xFFBE123C),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = "Vaciar",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 11.sp,
-                                color = if (darkMode) Color(0xFFFDA4AF) else Color(0xFFBE123C),
-                                maxLines = 1
-                            )
                         }
-                    }
-                } else {
-                    Spacer(modifier = Modifier.width(36.dp))
-                }
-            }
-        }
+                )
+            ) else emptyList()
+        )
 
         val activePromptRequest = pendingBiometricRequest
         if (activePromptRequest != null) {
@@ -4010,77 +3903,19 @@ fun DeliveryTrackingScreen(
             }
         }
 
-        FloatingHeaderCapsule(
+        GlassTopBar(
             darkMode = darkMode,
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        HapticFeedbackManager.onNavigationClick(view)
-                        onBack()
-                    },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .testTag("delivery_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = primaryColor
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = "Seguimiento en Tiempo Real",
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 15.5.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    BravoUnderline(isArca = false)
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = if (deliveryStage == OrderDeliveryStage.DELIVERED) {
-                        Color(0xFFECFDF5)
-                    } else {
-                        primaryColor.copy(alpha = 0.12f)
-                    }
-                ) {
-                    Text(
-                        text = if (deliveryStage == OrderDeliveryStage.DELIVERED) {
-                            "Entregado"
-                        } else {
-                            "${driverTelemetry.currentSpeedKmh} km/h • ~$effectiveEtaMinutes min"
-                        },
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 11.sp,
-                        color = if (deliveryStage == OrderDeliveryStage.DELIVERED) {
-                            Color(0xFF047857)
-                        } else {
-                            primaryColor
-                        },
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                    )
-                }
-            }
-        }
+            accent = primaryColor,
+            title = "Seguimiento en Tiempo Real",
+            modifier = Modifier.align(Alignment.TopCenter),
+            subtitle = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Entregado" else "${driverTelemetry.currentSpeedKmh} km/h • ~$effectiveEtaMinutes min",
+            subtitleColor = if (deliveryStage == OrderDeliveryStage.DELIVERED) Color(0xFF10B981) else primaryColor,
+            onBack = {
+                HapticFeedbackManager.onNavigationClick(view)
+                onBack()
+            },
+            backTestTag = "delivery_back_button"
+        )
     }
 }
 

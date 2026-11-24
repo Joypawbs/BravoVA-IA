@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.components.GlassBarAction
+import com.example.ui.components.GlassTopBar
 import com.example.platform.*
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import kotlinx.coroutines.IO
@@ -1897,68 +1899,22 @@ fun BravIaChatScreen(
                 .fillMaxWidth()
                 .onSizeChanged { topOverlayHeightPx = it.height }
         ) {
-            FloatingHeaderCapsule(darkMode = darkMode) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(
+            GlassTopBar(
+                darkMode = darkMode,
+                accent = primaryColor,
+                title = if (isArca) "Brav IA • El Arca & Soporte" else "Brav IA • Chef, Asesor & Soporte",
+                subtitle = if (isGenerating) "Verificando web, presupuesto y visión..." else "Recetas Web • Visión Multimodal • RD$ $budgetAmount",
+                onBack = {
+                    HapticFeedbackManager.onNavigationClick(view)
+                    onBack()
+                },
+                backTestTag = "bravia_back_button",
+                actions = listOf(
+                    GlassBarAction(
+                        symbol = "waveform", icon = Icons.Default.GraphicEq, label = "Conversación por voz",
+                        text = "Voz", highlighted = isLiveVoiceModeActive,
+                        testTag = "bravia_voice_mode_toggle",
                         onClick = {
-                            HapticFeedbackManager.onNavigationClick(view)
-                            onBack()
-                        },
-                        modifier = Modifier
-                            .size(36.dp)
-                            .testTag("bravia_back_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = primaryColor
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 6.dp)
-                    ) {
-                        BravoAiPlasmaOrb(size = 30.dp, isActive = isGenerating)
-                        Column(
-                            horizontalAlignment = Alignment.Start,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = if (isArca) "Brav IA • El Arca & Soporte" else "Brav IA • Chef, Asesor & Soporte",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 14.5.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            BravoUnderline(isArca = isArca)
-                            Text(
-                                text = if (isGenerating) "Verificando web, presupuesto y visión..." else "Recetas Web • Visión Multimodal • RD$ $budgetAmount",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 10.sp,
-                                color = primaryColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Surface(
-                            onClick = {
                                 HapticFeedbackManager.onAssistantTrigger(view)
                                 if (!isLiveVoiceModeActive) {
                                     lastSpokenMessageId = messages.lastOrNull()?.id ?: -1L
@@ -1977,66 +1933,19 @@ fun BravIaChatScreen(
                                     isVoicePaused = false
                                     isLiveVoiceModeActive = false
                                 }
-                            },
-                            shape = RoundedCornerShape(999.dp),
-                            color = if (isLiveVoiceModeActive) primaryColor else primaryColor.copy(alpha = 0.12f),
-                            modifier = Modifier.testTag("bravia_voice_mode_toggle")
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(3.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.GraphicEq,
-                                    contentDescription = "Conversación por voz",
-                                    tint = if (isLiveVoiceModeActive) Color.White else primaryColor,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "Voz",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 10.5.sp,
-                                    color = if (isLiveVoiceModeActive) Color.White else primaryColor,
-                                    maxLines = 1
-                                )
                             }
+                    ),
+                    GlassBarAction(
+                        symbol = "cart", icon = Icons.Default.ShoppingCart, label = "Ver carrito",
+                        text = "RD$${formatPesos(cartTotals.finalPay.roundToInt())}",
+                        testTag = "bravia_cart_pill",
+                        onClick = {
+                            HapticFeedbackManager.onNavigationClick(view)
+                            onOpenCart()
                         }
-
-                        Surface(
-                            onClick = {
-                                HapticFeedbackManager.onNavigationClick(view)
-                                onOpenCart()
-                            },
-                            shape = RoundedCornerShape(999.dp),
-                            color = primaryColor.copy(alpha = 0.12f),
-                            modifier = Modifier.testTag("bravia_cart_pill")
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(3.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ShoppingCart,
-                                    contentDescription = null,
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(13.dp)
-                                )
-                                Text(
-                                    text = "RD$${formatPesos(cartTotals.finalPay.roundToInt())}",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 10.5.sp,
-                                    color = primaryColor,
-                                    maxLines = 1
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+                    )
+                )
+            )
 
             AnimatedVisibility(
                 visible = isLiveVoiceModeActive,
@@ -2890,91 +2799,27 @@ fun AccountGridScreen(
         }
     }
 
-        FloatingHeaderCapsule(
+        GlassTopBar(
             darkMode = darkMode,
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
+            accent = primaryColor,
+            title = "Mi cuenta",
+            modifier = Modifier.align(Alignment.TopCenter),
+            onBack = {
+                HapticFeedbackManager.onNavigationClick(view)
+                onBack()
+            },
+            actions = listOf(
+                GlassBarAction(
+                    symbol = "cart", icon = Icons.Default.ShoppingCart, label = "Carrito",
+                    badge = if (cartCount > 0) cartCount.toString() else null,
+                    testTag = "account_cart_button",
                     onClick = {
                         HapticFeedbackManager.onNavigationClick(view)
-                        onBack()
-                    },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = primaryColor
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = "Mi cuenta",
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    BravoUnderline(isArca = false)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .testTag("account_cart_button"),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                HapticFeedbackManager.onNavigationClick(view)
-                                onOpenCart()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Carrito",
-                            tint = primaryColor,
-                            modifier = Modifier.size(21.dp)
-                        )
+                        onOpenCart()
                     }
-                    if (cartCount > 0) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(17.dp)
-                                .clip(CircleShape)
-                                .background(primaryColor),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = cartCount.toString(),
-                                color = Color.White,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                    }
-                }
-            }
-        }
+                )
+            )
+        )
     }
 }
 
@@ -4180,52 +4025,17 @@ fun AccountSubScreenView(
         }
     }
 
-        FloatingHeaderCapsule(
+        GlassTopBar(
             darkMode = darkMode,
-            modifier = Modifier.align(Alignment.TopCenter)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    onClick = {
-                        HapticFeedbackManager.onNavigationClick(view)
-                        onBack()
-                    },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .testTag("account_sub_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Volver a Mi Cuenta",
-                        tint = primaryColor
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = subScreen.title,
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    BravoUnderline(isArca = false)
-                }
-
-                Spacer(modifier = Modifier.size(36.dp))
-            }
-        }
+            accent = primaryColor,
+            title = subScreen.title,
+            modifier = Modifier.align(Alignment.TopCenter),
+            onBack = {
+                HapticFeedbackManager.onNavigationClick(view)
+                onBack()
+            },
+            backLabel = "Volver a Mi Cuenta",
+            backTestTag = "account_sub_back_button"
+        )
     }
 }

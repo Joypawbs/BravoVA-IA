@@ -2483,6 +2483,26 @@ fun TranslucentBottomDock(
         )
     }
 
+    if (nativeLiquidGlassAvailable()) {
+        // iOS 26: barra de pestañas con el vidrio líquido nativo de Apple
+        val selectedIndex = navItems.indexOfFirst { it.first == activeTab }.coerceAtLeast(0)
+        NativeGlassDock(
+            symbols = listOf("creditcard", "square.grid.2x2", "house", "magnifyingglass", "person"),
+            labels = navItems.map { it.third },
+            selectedIndex = selectedIndex,
+            accent = activeColor,
+            darkMode = darkMode,
+            onSelect = { i ->
+                val screen = navItems[i].first
+                if (screen == AppScreen.BRAVIA) HapticFeedbackManager.onAssistantTrigger(view)
+                else HapticFeedbackManager.onNavigationClick(view)
+                onNavigate(screen)
+            },
+            modifier = modifier.fillMaxWidth().height(70.dp)
+        )
+        return
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
