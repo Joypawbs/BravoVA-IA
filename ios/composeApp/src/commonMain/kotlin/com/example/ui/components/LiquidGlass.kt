@@ -124,7 +124,7 @@ fun LiquidGlass(
     val hazeState = LocalTranslucentHazeState.current
     val useHaze = hazeState != null && DeviceSupportsGpuBlur
     val hazeStyle = rememberLiquidGlassHazeStyle(darkMode)
-    var size by remember { mutableStateOf(IntSize.Zero) }
+    var glassSize by remember { mutableStateOf(IntSize.Zero) }
     var pressed by remember { mutableStateOf(false) }
     var touch by remember { mutableStateOf(Offset.Unspecified) }
     val glow = remember { Animatable(0f) }
@@ -138,12 +138,11 @@ fun LiquidGlass(
     val radiusPx = with(density) { cornerRadius.toPx() }
     val depthPx = with(density) { 14.dp.toPx() }
     val dispersionPx = with(density) { 1.4.dp.toPx() }
-    val refraction = remember(size, radiusPx, depthPx) {
-        if (size.width <= 0 || size.height <= 0) null
-        else liquidGlassRefractionEffect(
-            size.width.toFloat(), size.height.toFloat(),
-            min(radiusPx, min(size.width, size.height) / 2f), min(depthPx, min(size.width, size.height) / 2f), dispersionPx
-        )
+    val refraction = remember(glassSize, radiusPx, depthPx) {
+        val w = glassSize.width.toFloat()
+        val h = glassSize.height.toFloat()
+        if (w <= 0f || h <= 0f) null
+        else liquidGlassRefractionEffect(w, h, min(radiusPx, min(w, h) / 2f), min(depthPx, min(w, h) / 2f), dispersionPx)
     }
 
     Box(
@@ -154,7 +153,7 @@ fun LiquidGlass(
             }
             .shadow(elevation, shape, spotColor = accent.copy(alpha = 0.20f), ambientColor = Color.Black.copy(alpha = 0.18f))
             .clip(shape)
-            .onSizeChanged { size = it }
+            .onSizeChanged { glassSize = it }
             .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
