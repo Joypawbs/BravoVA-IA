@@ -20,3 +20,13 @@ View your app in AI Studio: https://ai.studio/apps/a4e573d9-b4f2-44a4-af7f-b9667
 5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
 6. Run the app on an emulator or physical device
 7. If you have already published your app in AI Studio, please [request upload key reset](https://support.google.com/googleplay/android-developer/answer/9842756#zippy=%2Crequest-an-upload-key-reset) in Google Play Console.
+
+## Estructura del repositorio
+
+| Carpeta | Contenido |
+|---|---|
+| `app/` (raíz) | App nativa Android original (Jetpack Compose + Kotlin, AI Studio) |
+| `docs/` | Réplica web en HTML, publicada en https://joypawbs.github.io/BravoVA-IA/ |
+| `ios/` | Versión Compose Multiplatform (Android + iOS). Ver `ios/README.md` |
+
+El flujo `.github/workflows/ios-kmp.yml` compila la carpeta `ios/` (APK de Android e IPA sin firmar para iOS) cuando cambia algo dentro de `ios/` o al ejecutarlo a mano desde la pestaña Actions.
