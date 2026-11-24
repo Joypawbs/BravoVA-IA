@@ -1,5 +1,9 @@
 package com.example.ui.components
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+
 import com.example.platform.*
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
@@ -1261,33 +1265,15 @@ fun FloatingHeaderCapsule(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = 10.dp,
-                    shape = shape,
-                    spotColor = primary.copy(alpha = 0.22f)
-                )
-                .clip(shape)
-                .translucentBackdropEffect(
-                    darkMode = darkMode,
-                    accentColor = primary,
-                    enabled = useRealHaze
-                ),
-            shape = shape,
-            color = containerColor,
-            border = BorderStroke(
-                width = 1.15.dp,
-                brush = borderBrush
-            )
+        // Cabecera con vidrio líquido (Liquid Glass)
+        LiquidGlass(
+            darkMode = darkMode,
+            accent = primary,
+            cornerRadius = 24.dp,
+            elevation = 10.dp,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Box(
-                modifier = Modifier
-                    .background(uniformMenuTranslucentGlowBrush(primary, darkMode))
-                    .background(sheenBrush)
-                    .padding(horizontal = 12.dp, vertical = 9.dp)
-            ) {
+            Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp)) {
                 content()
             }
         }
@@ -2418,39 +2404,26 @@ fun FloatingActionFabs(
                         scaleY = cartScale.value
                     }
                 ) {
-                    Surface(
-                        onClick = {
-                            HapticFeedbackManager.onNavigationClick(view)
-                            onOpenCart()
-                        },
-                        shape = CircleShape,
-                        color = fabBg,
-                        border = BorderStroke(1.2.dp, borderBrush),
-                        shadowElevation = 10.dp,
+                    // Botón flotante del carrito en vidrio líquido
+                    LiquidGlass(
+                        darkMode = darkMode,
+                        accent = accent,
+                        cornerRadius = 24.dp,
+                        elevation = 10.dp,
                         modifier = Modifier
                             .size(48.dp)
-                            .clip(CircleShape)
-                            .translucentBackdropEffect(
-                                darkMode = darkMode,
-                                accentColor = accent,
-                                enabled = useRealHaze
-                            )
+                            .clickable {
+                                HapticFeedbackManager.onNavigationClick(view)
+                                onOpenCart()
+                            }
                             .testTag("fab_cart")
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(uniformMenuTranslucentGlowBrush(accent, darkMode))
-                                .background(sheenBrush),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ShoppingCart,
-                                contentDescription = "Ver mi Carrito",
-                                tint = accent,
-                                modifier = Modifier.size(21.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Filled.ShoppingCart,
+                            contentDescription = "Ver mi Carrito",
+                            tint = accent,
+                            modifier = Modifier.size(21.dp).align(Alignment.Center)
+                        )
                     }
 
                     if (cartCount > 0) {
@@ -2516,32 +2489,41 @@ fun TranslucentBottomDock(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .height(58.dp)
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .shadow(
-                    elevation = 10.dp,
-                    shape = RoundedCornerShape(999.dp),
-                    spotColor = activeColor.copy(alpha = 0.22f)
-                )
-                .clip(RoundedCornerShape(999.dp))
-                .translucentBackdropEffect(
-                    darkMode = darkMode,
-                    accentColor = activeColor,
-                    enabled = useRealHaze
-                ),
-            shape = RoundedCornerShape(999.dp),
-            color = dockBg,
-            border = BorderStroke(
-                width = 1.15.dp,
-                brush = borderBrush
-            )
+        LiquidGlass(
+            darkMode = darkMode,
+            accent = activeColor,
+            cornerRadius = 29.dp,
+            modifier = Modifier.fillMaxSize()
         ) {
+            // Gota de vidrio que se desliza bajo la pestaña activa (Liquid Glass)
+            BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
+                val itemWidth = maxWidth / navItems.size
+                val activeIndex = navItems.indexOfFirst { it.first == activeTab }.coerceAtLeast(0)
+                val dropX by animateDpAsState(
+                    targetValue = itemWidth * activeIndex,
+                    animationSpec = spring(dampingRatio = 0.62f, stiffness = 420f),
+                    label = "liquidDockDrop"
+                )
+                Box(
+                    modifier = Modifier
+                        .offset(x = dropX)
+                        .width(itemWidth)
+                        .fillMaxHeight()
+                        .padding(horizontal = 2.dp, vertical = 5.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(activeColor.copy(alpha = if (darkMode) 0.20f else 0.12f))
+                        .border(
+                            0.9.dp,
+                            Brush.verticalGradient(
+                                listOf(Color.White.copy(alpha = if (darkMode) 0.42f else 0.85f), activeColor.copy(alpha = 0.22f))
+                            ),
+                            RoundedCornerShape(999.dp)
+                        )
+                )
+            }
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(uniformMenuTranslucentGlowBrush(activeColor, darkMode))
-                    .background(sheenBrush)
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
@@ -2580,32 +2562,6 @@ fun TranslucentBottomDock(
                             .testTag("nav_${screen.name.lowercase()}"),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 4.dp, vertical = 4.dp)
-                                .graphicsLayer { alpha = pillAlpha }
-                                .clip(RoundedCornerShape(999.dp))
-                                .background(activeColor.copy(alpha = if (darkMode) 0.22f else 0.13f))
-                                .border(
-                                    0.8.dp,
-                                    activeColor.copy(alpha = 0.28f),
-                                    RoundedCornerShape(999.dp)
-                                )
-                        )
-
-                        if (isSelected) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 3.dp)
-                                    .width(24.dp)
-                                    .height(3.dp)
-                                    .clip(CircleShape)
-                                    .background(activeColor)
-                            )
-                        }
-
                         Box(
                             contentAlignment = Alignment.TopEnd,
                             modifier = Modifier.graphicsLayer {
