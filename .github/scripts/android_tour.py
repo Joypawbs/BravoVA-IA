@@ -93,6 +93,11 @@ def tap(labels, prefix=False, wait=2.0, fallback=None):
     return False
 
 
+def swipe_down():
+    adb("shell", "input", "swipe", "540", "800", "540", "1800", "350")
+    time.sleep(1.5)
+
+
 def swipe_up():
     adb("shell", "input", "swipe", "540", "1700", "540", "700", "350")
     time.sleep(1.5)
@@ -114,11 +119,13 @@ def main():
     shot("home")
     if tap(["Café Soluble"], prefix=True, wait=3):
         shot("detalle_producto")
-        adb("shell", "input", "keyevent", "4"); time.sleep(2)
+        tap(["Volver"], wait=2, fallback=(0.06, 0.06))
     swipe_up(); shot("home_secciones")
     tap(["Agregar "], prefix=True, wait=1)
     tap(["Agregar "], prefix=True, wait=1)
     shot("home_con_carrito")
+    # Al bajar se esconden las barras; subir un poco las vuelve a mostrar.
+    swipe_down(); swipe_down()
 
     tabs = [("Catálogo", 0.3, "catalogo"), ("Tarjeta", 0.1, "tarjeta_bravisima"),
             ("Brav IA", 0.7, "brav_ia"), ("Perfil", 0.9, "mi_cuenta")]
@@ -127,10 +134,10 @@ def main():
         shot(name)
 
     tap(["Mis pedidos"], wait=3, fallback=(0.4, 0.115)); shot("mis_pedidos")
-    adb("shell", "input", "keyevent", "4"); time.sleep(2)
+    tap(["Volver"], wait=2, fallback=(0.06, 0.06))
     tap(["Inicio"], wait=3, fallback=(0.5, 0.955))
     tap(["Ver carrito"], wait=3, fallback=(0.5, 0.865)); shot("carrito")
-    adb("shell", "input", "keyevent", "4"); time.sleep(2)
+    tap(["Volver"], wait=2, fallback=(0.06, 0.06))
 
     # Modo oscuro del sistema: la app debe seguirlo sola.
     adb("shell", "cmd", "uimode", "night", "yes"); time.sleep(4)
