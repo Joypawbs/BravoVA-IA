@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.appcheck.configureAppCheck
 import com.example.notifications.BravoPushNotificationCenter
 import com.example.platform.AppContext
@@ -46,6 +47,7 @@ private fun configureHighRefreshRateAndHdr(activity: ComponentActivity) {
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         AppContext.init(applicationContext)
         configureAppCheck(this, intent)

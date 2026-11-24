@@ -31,19 +31,8 @@ jobs:
       - name: Build Kotlin framework (simulator)
         working-directory: ios
         run: ./gradlew --no-daemon :composeApp:linkDebugFrameworkIosSimulatorArm64
-      - name: Install XcodeGen and idb
-        run: |
-          brew install xcodegen
-          # idb permite tocar la pantalla del simulador; si no se instala, solo habrá capturas del arranque
-          brew tap facebook/fb || true
-          brew trust facebook/fb 2>/dev/null || true
-          X26=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
-          if [ -n "$X26" ]; then export DEVELOPER_DIR="$X26/Contents/Developer"; echo "idb-companion con $X26"; fi
-          HOMEBREW_NO_INSTALL_FROM_API=1 brew install facebook/fb/idb-companion \
-            || brew install --formula facebook/fb/idb-companion \
-            || echo "::warning::idb-companion no se pudo instalar"
-          python3 -m pip install --break-system-packages fb-idb || pipx install fb-idb || true
-          which idb idb_companion || true
+      - name: Install XcodeGen
+        run: brew install xcodegen
       - name: Generate Xcode project
         working-directory: ios/iosApp
         run: xcodegen generate

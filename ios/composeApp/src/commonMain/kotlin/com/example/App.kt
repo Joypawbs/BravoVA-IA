@@ -1,5 +1,10 @@
 package com.example
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -930,6 +935,29 @@ fun BravoVaApp(
                             )
                         }
                     }
+                    }
+
+                    if (PlatformInfo.isIos && canInterceptBack) {
+                        // iOS no tiene botón "atrás": deslizar desde el borde izquierdo vuelve, como en las apps nativas.
+                        val swipeThresholdPx = with(LocalDensity.current) { 72.dp.toPx() }
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .fillMaxHeight()
+                                .width(20.dp)
+                                .pointerInput(Unit) {
+                                    var dragged = 0f
+                                    detectHorizontalDragGestures(
+                                        onDragStart = { dragged = 0f },
+                                        onDragEnd = {
+                                            if (dragged > swipeThresholdPx) {
+                                                HapticFeedbackManager.onNavigationClick(view)
+                                                viewModel.navigateBack()
+                                            }
+                                        }
+                                    ) { _, dx -> dragged += dx }
+                                }
+                        )
                     }
 
                     val showCartBar = cartTotals.count > 0 && currentScreen in listOf(

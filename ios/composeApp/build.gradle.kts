@@ -84,6 +84,7 @@ kotlin {
             implementation(libs.androidx.camera.view)
             // ListenableFuture de ProcessCameraProvider (igual que la app original vía Guava)
             implementation("com.google.guava:guava:33.4.8-android")
+            implementation("androidx.core:core-splashscreen:1.0.1")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
