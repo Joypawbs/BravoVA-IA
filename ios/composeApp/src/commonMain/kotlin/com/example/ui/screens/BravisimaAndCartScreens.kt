@@ -1621,7 +1621,7 @@ fun CartCheckoutScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 132.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (cartItems.isEmpty()) {
@@ -3078,7 +3078,7 @@ fun DeliveryTrackingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 128.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // 1. Live Notification Banner with Icons & Real-Time Telemetry

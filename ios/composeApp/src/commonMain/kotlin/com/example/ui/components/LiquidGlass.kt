@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import com.example.platform.PlatformInfo
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -120,6 +122,19 @@ fun LiquidGlass(
     content: @Composable BoxScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(cornerRadius)
+    if (PlatformInfo.isAndroid) {
+        // En Android usamos superficies Material 3 (colores dinámicos) en lugar de vidrio.
+        androidx.compose.material3.Surface(
+            modifier = modifier,
+            shape = shape,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 2.dp,
+            shadowElevation = (elevation / 4)
+        ) {
+            Box(content = content)
+        }
+        return
+    }
     val density = LocalDensity.current
     val hazeState = LocalTranslucentHazeState.current
     val useHaze = hazeState != null && DeviceSupportsGpuBlur

@@ -1,5 +1,14 @@
 package com.example.ui.components
 
+import com.example.platform.PlatformInfo
+import com.example.ui.theme.BravoOrange
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.IconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -117,6 +126,10 @@ fun GlassTopBar(
         )
         return
     }
+    if (PlatformInfo.isAndroid) {
+        MaterialTopBar(title, subtitle, subtitleColor ?: accent, accent, onBack, backLabel, backTestTag, actions, modifier)
+        return
+    }
     val onSurface = MaterialTheme.colorScheme.onSurface
     Row(
         modifier = modifier
@@ -182,5 +195,97 @@ fun GlassTopBar(
             }
         }
         Spacer(Modifier.width(0.dp))
+    }
+}
+
+/**
+ * Cabecera de Android: barra Material 3 centrada, con la línea degradada bajo el título
+ * que usa la app oficial.
+ */
+@Composable
+private fun MaterialTopBar(
+    title: String,
+    subtitle: String?,
+    subtitleColor: Color,
+    accent: Color,
+    onBack: (() -> Unit)?,
+    backLabel: String,
+    backTestTag: String,
+    actions: List<GlassBarAction>,
+    modifier: Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 4.dp)
+            .height(64.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.width(52.dp)) {
+            if (onBack != null) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = if (backTestTag.isNotEmpty()) Modifier.testTag(backTestTag) else Modifier
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel)
+                }
+            }
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (!subtitle.isNullOrBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = subtitleColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Box(
+                    Modifier
+                        .padding(top = 4.dp)
+                        .width(28.dp)
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Brush.horizontalGradient(listOf(BravoOrange, accent)))
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.widthIn(min = 52.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            actions.forEach { action ->
+                val tint = action.tint ?: if (action.highlighted) accent else MaterialTheme.colorScheme.onSurface
+                val clickModifier = if (action.testTag.isNotEmpty()) Modifier.testTag(action.testTag) else Modifier
+                if (action.text != null) {
+                    TextButton(onClick = { action.onClick?.invoke() }, modifier = clickModifier) {
+                        action.icon?.let { Icon(it, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp)) }
+                        Spacer(Modifier.width(4.dp))
+                        Text(action.text, color = tint, style = MaterialTheme.typography.labelLarge)
+                    }
+                } else {
+                    IconButton(onClick = { action.onClick?.invoke() }, modifier = clickModifier) {
+                        BadgedBox(badge = {
+                            if (!action.badge.isNullOrBlank()) Badge { Text(action.badge) }
+                        }) {
+                            action.icon?.let { Icon(it, contentDescription = action.label, tint = tint) }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

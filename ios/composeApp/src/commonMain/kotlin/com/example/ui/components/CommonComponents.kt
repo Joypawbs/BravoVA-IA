@@ -1,5 +1,14 @@
 package com.example.ui.components
 
+import androidx.compose.ui.text.style.TextAlign
+import com.example.ui.theme.BravoCtaGradient
+import com.example.ui.theme.formatRd
+import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBar
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -247,73 +256,23 @@ fun Modifier.translucentBackdropEffect(
 
 @Composable
 fun uniformMenuTranslucentContainerColor(darkMode: Boolean): Color {
-    return if (darkMode) {
-        Color(0xFF0F172A).copy(alpha = 0.72f)
-    } else {
-        Color.White.copy(alpha = 0.82f)
-    }
+    return MaterialTheme.colorScheme.surface
 }
 
 @Composable
 fun uniformInlineTranslucentCardColor(darkMode: Boolean): Color {
-    return if (darkMode) {
-        Color(0xFF0E1626).copy(alpha = 0.88f)
-    } else {
-        Color(0xFFFFFFFF).copy(alpha = 0.90f)
-    }
+    return if (darkMode) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surface
 }
 
-fun uniformMenuTranslucentGlowBrush(accentColor: Color, darkMode: Boolean): Brush {
-    return if (darkMode) {
-        Brush.verticalGradient(
-            listOf(
-                Color(0xFF162032).copy(alpha = 0.22f),
-                Color(0xFF0F172A).copy(alpha = 0.16f)
-            )
-        )
-    } else {
-        Brush.verticalGradient(
-            listOf(
-                Color.White.copy(alpha = 0.34f),
-                Color.White.copy(alpha = 0.14f)
-            )
-        )
-    }
-}
+fun uniformMenuTranslucentGlowBrush(accentColor: Color, darkMode: Boolean): Brush =
+    SolidColor(Color.Transparent)
 
-fun uniformMenuTranslucentBorderBrush(accentColor: Color, darkMode: Boolean): Brush {
-    return if (darkMode) {
-        Brush.verticalGradient(
-            listOf(
-                Color.White.copy(alpha = 0.22f),
-                accentColor.copy(alpha = 0.26f),
-                Color.White.copy(alpha = 0.10f)
-            )
-        )
-    } else {
-        val topRim = Color.White.copy(alpha = 0.90f)
-        val bottomRim = accentColor.copy(alpha = 0.22f)
-        Brush.verticalGradient(listOf(topRim, bottomRim))
-    }
-}
+/** Borde fino: casi invisible en claro (como la app oficial), una línea suave en oscuro. */
+fun uniformMenuTranslucentBorderBrush(accentColor: Color, darkMode: Boolean): Brush =
+    SolidColor(if (darkMode) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.045f))
 
-fun uniformMenuTranslucentSheenBrush(darkMode: Boolean, accentColor: Color): Brush {
-    return if (darkMode) {
-        Brush.verticalGradient(
-            listOf(
-                Color.White.copy(alpha = 0.04f),
-                Color.Transparent
-            )
-        )
-    } else {
-        Brush.verticalGradient(
-            listOf(
-                Color.White.copy(alpha = 0.28f),
-                Color.Transparent
-            )
-        )
-    }
-}
+fun uniformMenuTranslucentSheenBrush(darkMode: Boolean, accentColor: Color): Brush =
+    SolidColor(Color.Transparent)
 
 fun parseHexColor(hex: String, fallback: Color = BravoRed): Color {
     return try {
@@ -1284,7 +1243,7 @@ fun FloatingHeaderCapsule(
 fun TranslucentCard(
     darkMode: Boolean,
     isArca: Boolean = false,
-    cornerRadius: Dp = 22.dp,
+    cornerRadius: Dp = 16.dp,
     modifier: Modifier = Modifier,
     enableHazeBlur: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -1297,15 +1256,16 @@ fun TranslucentCard(
 
     val bg = if (useRealHaze) Color.Transparent else uniformInlineTranslucentCardColor(darkMode)
     val borderBrush = uniformMenuTranslucentBorderBrush(accent, darkMode)
-    val spot = accent.copy(alpha = if (darkMode) 0.18f else 0.16f)
+    val spot = Color.Black.copy(alpha = if (darkMode) 0.0f else 0.10f)
     val translucentSheen = uniformMenuTranslucentSheenBrush(darkMode, accent)
     val shape = RoundedCornerShape(cornerRadius)
 
     val cardModifier = modifier
         .shadow(
-            elevation = if (darkMode) 6.dp else 7.dp,
+            elevation = if (darkMode) 0.dp else 3.dp,
             shape = shape,
-            spotColor = spot
+            spotColor = spot,
+            ambientColor = spot
         )
         .clip(shape)
         .translucentBackdropEffect(
@@ -1323,7 +1283,7 @@ fun TranslucentCard(
             modifier = cardModifier,
             shape = shape,
             colors = CardDefaults.cardColors(containerColor = bg),
-            border = BorderStroke(1.15.dp, borderBrush)
+            border = BorderStroke(0.8.dp, borderBrush)
         ) {
             Box(
                 modifier = Modifier
@@ -1338,7 +1298,7 @@ fun TranslucentCard(
             modifier = cardModifier,
             shape = shape,
             colors = CardDefaults.cardColors(containerColor = bg),
-            border = BorderStroke(1.15.dp, borderBrush)
+            border = BorderStroke(0.8.dp, borderBrush)
         ) {
             Box(
                 modifier = Modifier
@@ -1564,316 +1524,161 @@ fun VerticalProductCard(
     isFavorite: Boolean = false,
     onToggleFavorite: (() -> Unit)? = null
 ) {
+    // Tarjeta al estilo de la app oficial: foto grande, nombre centrado,
+    // precio a la izquierda y botón "+" redondo (o contador) a la derecha.
     val view = currentPlatformView()
-    val scope = rememberCoroutineScope()
-    val brandAccent = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
-    val itemSubtotal = qtyInCart * product.price
-    val buttonPulse = remember { Animatable(1f) }
-    var isCardPressed by remember { mutableStateOf(false) }
+    val accent = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
+    val softAccent = accent.copy(alpha = if (darkMode) 0.22f else 0.10f)
+    var pressed by remember { mutableStateOf(false) }
     val pressScale by animateFloatAsState(
-        targetValue = if (isCardPressed) 0.97f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        targetValue = if (pressed) 0.97f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
         label = "product_card_press_scale"
     )
 
     TranslucentCard(
         darkMode = darkMode,
         isArca = isArca,
-        cornerRadius = 18.dp,
+        cornerRadius = 16.dp,
         modifier = modifier
-            .height(218.dp)
-            .graphicsLayer {
-                scaleX = pressScale
-                scaleY = pressScale
-            }
+            .height(232.dp)
+            .graphicsLayer { scaleX = pressScale; scaleY = pressScale }
             .pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
-                        isCardPressed = event.changes.any { it.pressed }
+                        pressed = event.changes.any { it.pressed }
                     }
                 }
             }
-            .clipToBounds()
             .testTag("product_card_${product.sku}")
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().padding(10.dp)) {
             Box(
                 modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = if (isCardPressed) 0.14f else 0.04f),
-                                Color.Transparent,
-                                brandAccent.copy(alpha = if (qtyInCart > 0) 0.05f else 0.02f)
-                            )
-                        )
-                    )
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-            Column(
-                modifier = Modifier
                     .fillMaxWidth()
+                    .height(104.dp)
                     .clickable {
                         performCrispHaptic(view, HapticStyle.TICK)
                         onOpenDetail()
-                    }
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val tagLeft = remember(product.isBravo, product.badge, isArca) {
-                        if (product.isBravo) {
-                            if (isArca) "ARCA" else "BRAVO"
-                        } else {
-                            product.badge.ifBlank { "MARCA" }.take(7)
-                        }
-                    }
-                    DiagonalMetadataStrip(
-                        items = listOf(tagLeft, product.unit),
-                        slashColor = brandAccent,
-                        fontSizeSp = 8f,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    if (onToggleFavorite != null) {
-                        Icon(
-                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            contentDescription = "Favorito",
-                            tint = if (isFavorite) brandAccent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
-                            modifier = Modifier
-                                .size(15.dp)
-                                .clickable {
-                                    performCrispHaptic(view, HapticStyle.CONFIRM)
-                                    onToggleFavorite()
-                                }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(3.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp)
-                        .padding(horizontal = 4.dp, vertical = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ProductArtworkView(
-                        product = product,
-                        cornerRadius = 12.dp,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(3.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(30.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = product.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 10.sp,
-                        lineHeight = 13.sp,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth()
+                ProductArtworkView(product = product, cornerRadius = 12.dp, modifier = Modifier.fillMaxSize())
+                if (onToggleFavorite != null) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                        tint = if (isFavorite) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                performCrispHaptic(view, HapticStyle.CONFIRM)
+                                onToggleFavorite()
+                            }
+                            .padding(5.dp)
                     )
                 }
             }
 
-            Column(
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = product.name,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                minLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 16.sp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clipToBounds()
+                    .clickable { onOpenDetail() }
+            )
+            Text(
+                text = product.unit,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.weight(1f))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(30.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "RD$${product.price}",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 11.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 2.dp)
-                    )
-
-                    if (qtyInCart > 0) {
-                        Row(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(brandAccent.copy(alpha = 0.10f))
-                                .border(1.dp, brandAccent.copy(alpha = 0.4f), CircleShape)
-                                .padding(horizontal = 2.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(if (darkMode) Color(0xFF0F172A) else Color.White)
-                                    .clickable {
-                                        HapticFeedbackManager.onDecrementOrRemove(view, isFullRemove = qtyInCart <= 1)
-                                        onDecrement()
-                                    }
-                                    .testTag("minus_${product.sku}"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Remove,
-                                    contentDescription = "Restar uno",
-                                    tint = brandAccent,
-                                    modifier = Modifier.size(11.dp)
-                                )
-                            }
-                            Text(
-                                text = qtyInCart.toString(),
-                                color = brandAccent,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 10.sp,
-                                modifier = Modifier.padding(horizontal = 2.dp)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .graphicsLayer {
-                                        scaleX = buttonPulse.value
-                                        scaleY = buttonPulse.value
-                                    }
-                                    .clip(CircleShape)
-                                    .background(brandAccent)
-                                    .clickable {
-                                        HapticFeedbackManager.onAddToCart(view)
-                                        onIncrement()
-                                        scope.launch {
-                                            buttonPulse.snapTo(1.22f)
-                                            buttonPulse.animateTo(
-                                                targetValue = 1f,
-                                                animationSpec = spring(
-                                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                    stiffness = Spring.StiffnessMedium
-                                                )
-                                            )
-                                        }
-                                    }
-                                    .testTag("plus_${product.sku}"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Add,
-                                    contentDescription = "Agregar otro",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(11.dp)
-                                )
-                            }
-                        }
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(25.dp)
-                                .graphicsLayer {
-                                    scaleX = buttonPulse.value
-                                    scaleY = buttonPulse.value
-                                }
-                                .clip(CircleShape)
-                                .background(if (darkMode) Color(0xFF1E293B) else Color.White)
-                                .border(1.4.dp, brandAccent, CircleShape)
-                                .clickable {
-                                    HapticFeedbackManager.onAddToCart(view)
-                                    onIncrement()
-                                    scope.launch {
-                                        buttonPulse.snapTo(1.22f)
-                                        buttonPulse.animateTo(
-                                            targetValue = 1f,
-                                            animationSpec = spring(
-                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                stiffness = Spring.StiffnessMedium
-                                            )
-                                        )
-                                    }
-                                }
-                                .testTag("add_${product.sku}"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Add,
-                                contentDescription = "Agregar al carrito",
-                                tint = brandAccent,
-                                modifier = Modifier.size(14.dp)
-                            )
-                        }
-                    }
-                }
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 2.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+                Text(
+                    text = formatRd(product.price),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
                 )
-
-                if (qtyInCart > 0) {
-                    DiagonalMetadataStrip(
-                        items = listOf("${qtyInCart}x", "RD$$itemSubtotal"),
-                        slashColor = brandAccent,
-                        fontSizeSp = 8f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (qtyInCart <= 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(softAccent)
+                            .clickable {
+                                performCrispHaptic(view, HapticStyle.CONFIRM)
+                                onIncrement()
+                            }
+                            .testTag("add_${product.sku}"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Agregar ${product.name}", tint = accent, modifier = Modifier.size(20.dp))
+                    }
                 } else {
-                    val cleanCategory = remember(product.category) { compactCategoryCardLabel(product.category) }
-                    val isLongCategory = cleanCategory.length > 11
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .height(32.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(softAccent),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = cleanCategory,
-                            color = Color(0xFF10B981),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = if (isLongCategory) 6.8.sp else 7.4.sp,
-                            maxLines = 1,
-                            softWrap = false,
-                            overflow = TextOverflow.Clip,
-                            modifier = Modifier.weight(1f, fill = false)
+                        Icon(
+                            imageVector = Icons.Filled.Remove,
+                            contentDescription = "Quitar uno",
+                            tint = accent,
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    performCrispHaptic(view, HapticStyle.TICK)
+                                    onDecrement()
+                                }
+                                .padding(5.dp)
                         )
                         Text(
-                            text = if (isLongCategory) "●" else "● Stock",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 6.8.sp,
-                            maxLines = 1,
-                            modifier = Modifier.padding(start = 3.dp)
+                            text = qtyInCart.toString(),
+                            color = accent,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(horizontal = 2.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Agregar uno",
+                            tint = accent,
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    performCrispHaptic(view, HapticStyle.CONFIRM)
+                                    onIncrement()
+                                }
+                                .padding(5.dp)
                         )
                     }
                 }
             }
-        }
         }
     }
 }
@@ -2476,9 +2281,9 @@ fun TranslucentBottomDock(
     val navItems = remember {
         listOf(
             Triple(AppScreen.BRAVISIMA, Icons.Outlined.CreditCard, "Tarjeta"),
-            Triple(AppScreen.CATALOG, Icons.Outlined.GridView, "Catálogos"),
-            Triple(AppScreen.HOME, Icons.Outlined.Home, "Home"),
-            Triple(AppScreen.BRAVIA, Icons.Outlined.Search, "Buscar"),
+            Triple(AppScreen.CATALOG, Icons.Outlined.GridView, "Catálogo"),
+            Triple(AppScreen.HOME, Icons.Outlined.Home, "Inicio"),
+            Triple(AppScreen.BRAVIA, Icons.Outlined.AutoAwesome, "Brav IA"),
             Triple(AppScreen.ACCOUNT, Icons.Outlined.PersonOutline, "Perfil")
         )
     }
@@ -2487,7 +2292,7 @@ fun TranslucentBottomDock(
         // iOS 26: barra de pestañas con el vidrio líquido nativo de Apple
         val selectedIndex = navItems.indexOfFirst { it.first == activeTab }.coerceAtLeast(0)
         NativeGlassDock(
-            symbols = listOf("creditcard", "square.grid.2x2", "house", "magnifyingglass", "person"),
+            symbols = listOf("creditcard", "square.grid.2x2", "house", "sparkles", "person"),
             labels = navItems.map { it.third },
             selectedIndex = selectedIndex,
             accent = activeColor,
@@ -2500,6 +2305,31 @@ fun TranslucentBottomDock(
             },
             modifier = modifier.fillMaxWidth().height(70.dp)
         )
+        return
+    }
+
+    if (PlatformInfo.isAndroid) {
+        // Android: barra de navegación Material 3 con colores dinámicos del dispositivo
+        NavigationBar(
+            modifier = modifier.fillMaxWidth(),
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            tonalElevation = 3.dp
+        ) {
+            navItems.forEach { (screen, icon, label) ->
+                val selected = screen == activeTab
+                NavigationBarItem(
+                    selected = selected,
+                    onClick = {
+                        if (screen == AppScreen.BRAVIA) HapticFeedbackManager.onAssistantTrigger(view)
+                        else HapticFeedbackManager.onNavigationClick(view)
+                        onNavigate(screen)
+                    },
+                    icon = { Icon(icon, contentDescription = null) },
+                    label = { Text(label, maxLines = 1, fontSize = 12.sp) },
+                    modifier = Modifier.testTag("nav_${screen.name.lowercase()}")
+                )
+            }
+        }
         return
     }
 
@@ -3116,4 +2946,67 @@ fun PredictiveCatalogSearchBar(
     }
 }
 
-
+/**
+ * Barra roja del carrito, como en la app oficial: total a la izquierda y "Ver carrito" a la derecha.
+ * Rebota cada vez que se agrega un producto.
+ */
+@Composable
+fun CartSummaryBar(
+    itemCount: Int,
+    total: Double,
+    isArca: Boolean,
+    pulseTrigger: Long,
+    onOpenCart: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val view = currentPlatformView()
+    val scale = remember { Animatable(1f) }
+    LaunchedEffect(pulseTrigger) {
+        if (pulseTrigger == 0L) return@LaunchedEffect
+        scale.snapTo(1.05f)
+        scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+    }
+    val gradient = if (isArca) listOf(ArcaEmerald, ArcaTeal) else BravoCtaGradient
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
+            .shadow(8.dp, shape, spotColor = gradient.last().copy(alpha = 0.35f))
+            .clip(shape)
+            .background(Brush.horizontalGradient(gradient))
+            .clickable {
+                performCrispHaptic(view, HapticStyle.CONFIRM)
+                onOpenCart()
+            }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .testTag("cart_summary_bar"),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BadgedBox(badge = {
+            Badge(containerColor = Color.White, contentColor = gradient.last()) {
+                Text(itemCount.toString(), fontWeight = FontWeight.Bold)
+            }
+        }) {
+            Icon(Icons.Outlined.ShoppingCart, contentDescription = null, tint = Color.White)
+        }
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = formatRd(total),
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 17.sp,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = "Ver carrito",
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(Color.White.copy(alpha = 0.22f))
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
+}

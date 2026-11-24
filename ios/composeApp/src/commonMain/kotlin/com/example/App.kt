@@ -80,7 +80,7 @@ import com.example.ui.components.AppStartupSkeletonScreen
 import com.example.ui.components.BarcodeScannerModal
 import com.example.ui.components.BravoUnifiedIcon
 import com.example.ui.components.DeviceSupportsGpuBlur
-import com.example.ui.components.FloatingActionFabs
+import com.example.ui.components.CartSummaryBar
 import com.example.ui.components.HapticFeedbackManager
 import com.example.ui.components.LocalTranslucentHazeState
 import com.example.ui.components.OrderSuccessCelebrationOverlay
@@ -932,13 +932,13 @@ fun BravoVaApp(
                     }
                     }
 
-                    val showFabs = currentScreen in listOf(
+                    val showCartBar = cartTotals.count > 0 && currentScreen in listOf(
                         AppScreen.HOME,
                         AppScreen.CATALOG,
                         AppScreen.CATEGORY
                     )
                     AnimatedVisibility(
-                        visible = showFabs && areMenusVisible,
+                        visible = showCartBar && areMenusVisible,
                         enter = slideInVertically(
                             initialOffsetY = { it },
                             animationSpec = tween(240, easing = FastOutSlowInEasing)
@@ -948,17 +948,15 @@ fun BravoVaApp(
                             animationSpec = tween(220, easing = FastOutSlowInEasing)
                         ) + fadeOut(animationSpec = tween(180)),
                         modifier = Modifier
-                            .align(Alignment.BottomEnd)
+                            .align(Alignment.BottomCenter)
                             .navigationBarsPadding()
-                            .padding(end = 14.dp, bottom = 82.dp)
+                            .padding(start = 16.dp, end = 16.dp, bottom = if (PlatformInfo.isAndroid) 88.dp else 84.dp)
                     ) {
-                        FloatingActionFabs(
-                            cartCount = cartTotals.count,
+                        CartSummaryBar(
+                            itemCount = cartTotals.count,
+                            total = cartTotals.finalPay,
                             isArca = isArca,
-                            darkMode = darkMode,
                             pulseTrigger = cartPulseTrigger,
-                            lastCartFeedback = lastAddedCartFeedback,
-                            onOpenAi = { viewModel.navigateTo(AppScreen.BRAVIA) },
                             onOpenCart = { viewModel.navigateTo(AppScreen.CART) }
                         )
                     }
@@ -975,7 +973,8 @@ fun BravoVaApp(
                         ) + fadeOut(animationSpec = tween(180)),
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .navigationBarsPadding()
+                            // En Android la NavigationBar pinta su propio fondo bajo la barra de gestos.
+                            .then(if (PlatformInfo.isAndroid) Modifier else Modifier.navigationBarsPadding())
                     ) {
                         TranslucentBottomDock(
                             currentScreen = currentScreen,

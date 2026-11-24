@@ -67,9 +67,9 @@ final class BravoVaTourUITests: XCTestCase {
         app.swipeDown(); pause(1)
 
         let tabs: [(String, CGFloat, String)] = [
-            ("Catálogos", 0.32, "catalogo"),
+            ("Catálogo", 0.32, "catalogo"),
             ("Tarjeta", 0.14, "tarjeta_bravisima"),
-            ("Buscar", 0.68, "brav_ia"),
+            ("Brav IA", 0.68, "brav_ia"),
             ("Perfil", 0.86, "mi_cuenta"),
         ]
         for (label, x, name) in tabs {
@@ -81,7 +81,7 @@ final class BravoVaTourUITests: XCTestCase {
         tap(["Mis pedidos"], fallback: CGVector(dx: 0.27, dy: 0.25), wait: 3)
         pause(3); shot("mis_pedidos")
 
-        tap(["Home"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 3)
+        tap(["Inicio"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 3)
         pause(2)
         tap(["Carrito", "carrito"], fallback: CGVector(dx: 0.88, dy: 0.86), wait: 2)
         pause(3); shot("carrito")

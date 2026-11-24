@@ -1212,7 +1212,7 @@ fun ProductDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 132.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "detail_main_card", contentType = "product_card") {
