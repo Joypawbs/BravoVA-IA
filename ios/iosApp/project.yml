@@ -1,0 +1,66 @@
+name: iosApp
+options:
+  bundleIdPrefix: com.aistudio.bravova
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: "3.0"
+    CURRENT_PROJECT_VERSION: "3"
+    SWIFT_VERSION: "5.9"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "12.0.0"
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosApp
+    info:
+      path: iosApp/Info.plist
+      properties:
+        CFBundleDisplayName: BravoVa
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        CADisableMinimumFrameDurationOnPhone: true
+        ITSAppUsesNonExemptEncryption: false
+        NSCameraUsageDescription: "BravoVa usa la cámara para escanear códigos de barras de productos."
+        NSMicrophoneUsageDescription: "Brav IA usa el micrófono para que puedas dictar tus consultas por voz."
+        NSSpeechRecognitionUsageDescription: "Brav IA convierte tu voz en texto para responder tus consultas."
+        NSPhotoLibraryUsageDescription: "Adjunta fotos de productos o facturas para que Brav IA las analice."
+        NSLocationWhenInUseUsageDescription: "BravoVa usa tu ubicación para calcular la distancia y el tiempo de entrega desde la sucursal más cercana."
+        NSFaceIDUsageDescription: "Confirma pagos y canjes de tu Tarjeta Bravísima con Face ID."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.bravova.rdshop
+        PRODUCT_NAME: BravoVa
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        OTHER_LDFLAGS: ["$(inherited)", "-ObjC", "-lsqlite3"]
+        FRAMEWORK_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"]
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseAI
+      - package: Firebase
+        product: FirebaseAppCheck
+    preBuildScripts:
+      - name: Compile Kotlin Framework
+        basedOnDependencyAnalysis: false
+        script: |
+          if [ "YES" = "$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED" ]; then
+            echo "Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \"YES\""
+            exit 0
+          fi
+          cd "$SRCROOT/.."
+          ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode

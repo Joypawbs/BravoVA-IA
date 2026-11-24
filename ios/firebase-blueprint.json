@@ -1,0 +1,386 @@
+{
+  "entities": {
+    "UserProfileDocument": {
+      "title": "UserProfileDocument",
+      "description": "Represents the authenticated user's personal profile, fiscal NCF settings, and linked Tarjeta Bravísima identifier in BravoVa.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated user who owns this profile."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full display name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's contact email address (PII protected per owner)."
+        },
+        "phone": {
+          "type": "string",
+          "description": "User's contact phone number (PII protected per owner)."
+        },
+        "cedula": {
+          "type": "string",
+          "description": "Dominican national ID or document number (PII protected per owner)."
+        },
+        "bravisimaNumber": {
+          "type": "string",
+          "description": "Immutable linked Tarjeta Bravísima number (e.g., BRV-8842-9901-7234)."
+        },
+        "rncNit": {
+          "type": "string",
+          "description": "Taxpayer RNC identifier for fiscal invoices (NCF)."
+        },
+        "ncfType": {
+          "type": "string",
+          "description": "Preferred fiscal invoice type (e.g., 'B01 - Crédito Fiscal', 'B02 - Consumidor Final')."
+        },
+        "activeBranch": {
+          "type": "string",
+          "description": "Optional preferred Supermercados Bravo branch."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile record was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile record was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "email",
+        "phone",
+        "cedula",
+        "bravisimaNumber",
+        "rncNit",
+        "ncfType",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CartItemDocument": {
+      "title": "CartItemDocument",
+      "description": "Represents a single product line item in the authenticated user's active shopping cart synced across devices.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated user who owns this cart item."
+        },
+        "sku": {
+          "type": "string",
+          "description": "Product SKU identifier matching the document ID (e.g., 'BRV-001' or 'ARC-001')."
+        },
+        "qty": {
+          "type": "integer",
+          "description": "Quantity of the product in the cart (1 to 999)."
+        },
+        "storeMode": {
+          "type": "string",
+          "enum": ["BRAVO", "ARCA"],
+          "description": "Optional store origin ('BRAVO' or 'ARCA')."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the cart item was added (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the cart item quantity was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "sku",
+        "qty",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OrderDocument": {
+      "title": "OrderDocument",
+      "description": "Represents a purchase order in the user's purchase history on BravoVa, used for cross-device synchronization and Brav IA habit analysis.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated user who owns this order."
+        },
+        "status": {
+          "type": "string",
+          "description": "Current order delivery status (e.g., 'Envío preparado', 'Entregado')."
+        },
+        "badgeNum": {
+          "type": "integer",
+          "description": "Total item count in the order."
+        },
+        "date": {
+          "type": "string",
+          "description": "Human-readable date or relative timestamp label."
+        },
+        "total": {
+          "type": "number",
+          "description": "Total order amount in RD$."
+        },
+        "branch": {
+          "type": "string",
+          "description": "Supermercados Bravo branch that fulfilled the order."
+        },
+        "skus": {
+          "type": "array",
+          "description": "List of product SKUs included in the order (max 50)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the order record was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the order record was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "status",
+        "badgeNum",
+        "date",
+        "total",
+        "branch",
+        "skus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ShoppingListDocument": {
+      "title": "ShoppingListDocument",
+      "description": "Represents a user or Brav IA smart shopping list synchronized across devices.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated user who owns this shopping list."
+        },
+        "name": {
+          "type": "string",
+          "description": "Display title of the shopping list."
+        },
+        "skus": {
+          "type": "array",
+          "description": "List of product SKUs in the shopping list (max 50)."
+        },
+        "aiNote": {
+          "type": "string",
+          "description": "Optional note from Brav IA explaining why items were suggested from purchase history."
+        },
+        "isAiGenerated": {
+          "type": "boolean",
+          "description": "Whether the list was generated or auto-populated by Brav IA."
+        },
+        "updatedAtLabel": {
+          "type": "string",
+          "description": "Human-readable synchronization or AI status label."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the shopping list was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the shopping list was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "skus",
+        "isAiGenerated",
+        "updatedAtLabel",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BravisimaCardDocument": {
+      "title": "BravisimaCardDocument",
+      "description": "Represents the authenticated user's digital Tarjeta Bravísima loyalty card, balance, preferences, and security status synced in Firestore.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated user who owns this Bravísima card."
+        },
+        "cardNumber": {
+          "type": "string",
+          "description": "Formatted unique Tarjeta Bravísima identifier (e.g., BRV-8842-9901-7234)."
+        },
+        "holderName": {
+          "type": "string",
+          "description": "Cardholder display name."
+        },
+        "holderEmail": {
+          "type": "string",
+          "description": "Optional Google account email associated with the card."
+        },
+        "balance": {
+          "type": "integer",
+          "description": "Available redeemable balance in RD$."
+        },
+        "lifetimeEarned": {
+          "type": "integer",
+          "description": "Total accumulated cashback in RD$ used to determine loyalty tier."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "locked"],
+          "description": "Card security status (active or temporarily locked)."
+        },
+        "autoRedeemInCart": {
+          "type": "boolean",
+          "description": "Whether Bravísima balance is automatically applied during checkout."
+        },
+        "monthlyGoal": {
+          "type": "integer",
+          "description": "User's monthly cashback savings goal in RD$."
+        },
+        "preferredCategory": {
+          "type": "string",
+          "description": "Preferred store category for bonus cashback alerts."
+        },
+        "claimedPromoCodes": {
+          "type": "array",
+          "description": "Bounded list of promotional codes already redeemed on this card (max 20)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the card document was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the card document was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "cardNumber",
+        "holderName",
+        "balance",
+        "lifetimeEarned",
+        "status",
+        "autoRedeemInCart",
+        "monthlyGoal",
+        "preferredCategory",
+        "claimedPromoCodes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BravisimaMovementDocument": {
+      "title": "BravisimaMovementDocument",
+      "description": "Represents a loyalty cashback earn, redemption, or promotional bonus ledger entry on the user's Tarjeta Bravísima.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated user who owns this movement entry."
+        },
+        "title": {
+          "type": "string",
+          "description": "Movement title shown in the Bravísima ledger."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Branch or movement source context."
+        },
+        "dateLabel": {
+          "type": "string",
+          "description": "Human-readable date label."
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Signed movement amount in RD$ (positive for earn/bonus, negative for redeem)."
+        },
+        "movementType": {
+          "type": "string",
+          "enum": ["earn", "redeem", "bonus", "adjustment"],
+          "description": "Ledger classification."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Optional related order ID."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the movement was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the movement was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "subtitle",
+        "dateLabel",
+        "amount",
+        "movementType",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/profile/{profileId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfileDocument"
+      },
+      "description": "User-scoped personal profile, contact PII, fiscal NCF settings, and immutable Tarjeta Bravísima reference."
+    },
+    "/users/{userId}/cart/{cartItemId}": {
+      "schema": {
+        "$ref": "#/entities/CartItemDocument"
+      },
+      "description": "User-scoped shopping cart items synchronized across devices."
+    },
+    "/users/{userId}/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/OrderDocument"
+      },
+      "description": "User-scoped purchase history orders used for order tracking, re-ordering, and Brav IA frequency analysis."
+    },
+    "/users/{userId}/shoppingLists/{listId}": {
+      "schema": {
+        "$ref": "#/entities/ShoppingListDocument"
+      },
+      "description": "User-scoped shopping lists created manually or auto-populated by Brav IA based on purchase history."
+    },
+    "/users/{userId}/bravisimaCards/{cardId}": {
+      "schema": {
+        "$ref": "#/entities/BravisimaCardDocument"
+      },
+      "description": "User-scoped Tarjeta Bravísima loyalty card state, balance, lock toggle, and preferences."
+    },
+    "/users/{userId}/bravisimaMovements/{movementId}": {
+      "schema": {
+        "$ref": "#/entities/BravisimaMovementDocument"
+      },
+      "description": "User-scoped Tarjeta Bravísima cashback earn, promo bonus, and redemption history entries."
+    }
+  }
+}

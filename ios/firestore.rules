@@ -1,0 +1,367 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Hardened Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Schema Validation Helper: UserProfileDocument
+    function isValidUserProfile(data, pathUserId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == pathUserId &&
+             data.name is string &&
+             data.name.size() >= 1 &&
+             data.name.size() <= 100 &&
+             data.email is string &&
+             data.email.size() >= 3 &&
+             data.email.size() <= 160 &&
+             data.phone is string &&
+             data.phone.size() >= 3 &&
+             data.phone.size() <= 40 &&
+             data.cedula is string &&
+             data.cedula.size() >= 3 &&
+             data.cedula.size() <= 40 &&
+             data.bravisimaNumber is string &&
+             data.bravisimaNumber.size() >= 6 &&
+             data.bravisimaNumber.size() <= 32 &&
+             data.bravisimaNumber.matches('^BRV-[0-9A-Z\\-]+$') &&
+             data.rncNit is string &&
+             data.rncNit.size() >= 1 &&
+             data.rncNit.size() <= 40 &&
+             data.ncfType is string &&
+             data.ncfType.size() >= 1 &&
+             data.ncfType.size() <= 60 &&
+             (!('activeBranch' in data) || data.activeBranch == null || (data.activeBranch is string && data.activeBranch.size() >= 1 && data.activeBranch.size() <= 120)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Schema Validation Helper: CartItemDocument
+    function isValidCartItem(data, pathUserId, pathCartItemId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == pathUserId &&
+             data.sku is string &&
+             data.sku.size() >= 3 &&
+             data.sku.size() <= 40 &&
+             data.sku == pathCartItemId &&
+             data.sku.matches('^[A-Z0-9\\-]+$') &&
+             data.qty is int &&
+             data.qty >= 1 &&
+             data.qty <= 999 &&
+             (!('storeMode' in data) || data.storeMode == null || data.storeMode in ['BRAVO', 'ARCA']) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Schema Validation Helper: OrderDocument
+    function isValidOrder(data, pathUserId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == pathUserId &&
+             data.status is string &&
+             data.status.size() >= 1 &&
+             data.status.size() <= 80 &&
+             data.badgeNum is int &&
+             data.badgeNum >= 0 &&
+             data.badgeNum <= 500 &&
+             data.date is string &&
+             data.date.size() >= 1 &&
+             data.date.size() <= 80 &&
+             (data.total is int || data.total is float) &&
+             data.total >= 0 &&
+             data.total <= 1000000 &&
+             data.branch is string &&
+             data.branch.size() >= 1 &&
+             data.branch.size() <= 120 &&
+             data.skus is list &&
+             data.skus.size() <= 50 &&
+             (data.skus.size() == 0 || (data.skus[0] is string && data.skus[0].size() <= 40)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Schema Validation Helper: ShoppingListDocument
+    function isValidShoppingList(data, pathUserId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == pathUserId &&
+             data.name is string &&
+             data.name.size() >= 1 &&
+             data.name.size() <= 120 &&
+             data.skus is list &&
+             data.skus.size() <= 50 &&
+             (data.skus.size() == 0 || (data.skus[0] is string && data.skus[0].size() <= 40)) &&
+             (!('aiNote' in data) || data.aiNote == null || (data.aiNote is string && data.aiNote.size() <= 500)) &&
+             data.isAiGenerated is bool &&
+             data.updatedAtLabel is string &&
+             data.updatedAtLabel.size() >= 1 &&
+             data.updatedAtLabel.size() <= 120 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Schema Validation Helper: BravisimaCardDocument
+    function isValidBravisimaCard(data, pathUserId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == pathUserId &&
+             data.cardNumber is string &&
+             data.cardNumber.size() >= 6 &&
+             data.cardNumber.size() <= 32 &&
+             data.cardNumber.matches('^BRV-[0-9A-Z\\-]+$') &&
+             data.holderName is string &&
+             data.holderName.size() >= 1 &&
+             data.holderName.size() <= 100 &&
+             (!('holderEmail' in data) || data.holderEmail == null || (data.holderEmail is string && data.holderEmail.size() <= 160)) &&
+             data.balance is int &&
+             data.balance >= 0 &&
+             data.balance <= 1000000 &&
+             data.lifetimeEarned is int &&
+             data.lifetimeEarned >= 0 &&
+             data.lifetimeEarned <= 5000000 &&
+             data.status in ['active', 'locked'] &&
+             data.autoRedeemInCart is bool &&
+             data.monthlyGoal is int &&
+             data.monthlyGoal >= 100 &&
+             data.monthlyGoal <= 50000 &&
+             data.preferredCategory is string &&
+             data.preferredCategory.size() >= 1 &&
+             data.preferredCategory.size() <= 80 &&
+             data.claimedPromoCodes is list &&
+             data.claimedPromoCodes.size() <= 20 &&
+             (data.claimedPromoCodes.size() == 0 || (data.claimedPromoCodes[0] is string && data.claimedPromoCodes[0].size() <= 40)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Schema Validation Helper: BravisimaMovementDocument
+    function isValidBravisimaMovement(data, pathUserId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == pathUserId &&
+             data.title is string &&
+             data.title.size() >= 1 &&
+             data.title.size() <= 120 &&
+             data.subtitle is string &&
+             data.subtitle.size() >= 1 &&
+             data.subtitle.size() <= 120 &&
+             data.dateLabel is string &&
+             data.dateLabel.size() >= 1 &&
+             data.dateLabel.size() <= 80 &&
+             data.amount is int &&
+             data.amount >= -500000 &&
+             data.amount <= 500000 &&
+             data.movementType in ['earn', 'redeem', 'bonus', 'adjustment'] &&
+             (!('orderId' in data) || data.orderId == null || (data.orderId is string && data.orderId.size() <= 80)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // User-Scoped Subcollections (Zero-Trust Per-User Isolation)
+    match /users/{userId} {
+      // 1. User Profile & Fiscal / Bravisima Reference Isolation
+      match /profile/{profileId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(profileId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(profileId) &&
+                         incoming().keys().hasAll(['userId', 'name', 'email', 'phone', 'cedula', 'bravisimaNumber', 'rncNit', 'ncfType', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'name', 'email', 'phone', 'cedula', 'bravisimaNumber', 'rncNit', 'ncfType', 'activeBranch', 'createdAt', 'updatedAt']) &&
+                         isValidUserProfile(incoming(), userId);
+
+        allow update: if isSignedIn() &&
+                         isValidUserProfile(incoming(), userId) &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(profileId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().bravisimaNumber == existing().bravisimaNumber &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'email', 'phone', 'cedula', 'rncNit', 'ncfType', 'activeBranch', 'updatedAt']);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(profileId);
+      }
+
+      // 2. User Shopping Cart Isolation
+      match /cart/{cartItemId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(cartItemId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(cartItemId) &&
+                         incoming().keys().hasAll(['userId', 'sku', 'qty', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'sku', 'qty', 'storeMode', 'createdAt', 'updatedAt']) &&
+                         isValidCartItem(incoming(), userId, cartItemId);
+
+        allow update: if isSignedIn() &&
+                         isValidCartItem(incoming(), userId, cartItemId) &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(cartItemId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().sku == existing().sku &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['qty', 'storeMode', 'updatedAt']);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(cartItemId);
+      }
+
+      // 3. User Purchase Orders
+      match /orders/{orderId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(orderId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(orderId) &&
+                         incoming().keys().hasAll(['userId', 'status', 'badgeNum', 'date', 'total', 'branch', 'skus', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'status', 'badgeNum', 'date', 'total', 'branch', 'skus', 'createdAt', 'updatedAt']) &&
+                         isValidOrder(incoming(), userId);
+
+        allow update: if isSignedIn() &&
+                         isValidOrder(incoming(), userId) &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(orderId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'badgeNum', 'date', 'total', 'branch', 'skus', 'updatedAt']);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(orderId);
+      }
+
+      // 4. User Shopping Lists
+      match /shoppingLists/{listId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(listId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(listId) &&
+                         incoming().keys().hasAll(['userId', 'name', 'skus', 'isAiGenerated', 'updatedAtLabel', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'name', 'skus', 'aiNote', 'isAiGenerated', 'updatedAtLabel', 'createdAt', 'updatedAt']) &&
+                         isValidShoppingList(incoming(), userId);
+
+        allow update: if isSignedIn() &&
+                         isValidShoppingList(incoming(), userId) &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(listId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'skus', 'aiNote', 'isAiGenerated', 'updatedAtLabel', 'updatedAt']);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(listId);
+      }
+
+      // 5. Tarjeta Bravisima Digital Loyalty Card (Protected Balance, Lock & Card Number Immutability)
+      match /bravisimaCards/{cardId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(cardId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(cardId) &&
+                         incoming().keys().hasAll(['userId', 'cardNumber', 'holderName', 'balance', 'lifetimeEarned', 'status', 'autoRedeemInCart', 'monthlyGoal', 'preferredCategory', 'claimedPromoCodes', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'cardNumber', 'holderName', 'holderEmail', 'balance', 'lifetimeEarned', 'status', 'autoRedeemInCart', 'monthlyGoal', 'preferredCategory', 'claimedPromoCodes', 'createdAt', 'updatedAt']) &&
+                         isValidBravisimaCard(incoming(), userId);
+
+        allow update: if isSignedIn() &&
+                         isValidBravisimaCard(incoming(), userId) &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(cardId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().cardNumber == existing().cardNumber &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().lifetimeEarned >= existing().lifetimeEarned &&
+                         (
+                           incoming().diff(existing()).affectedKeys().hasOnly(['holderName', 'holderEmail', 'status', 'autoRedeemInCart', 'monthlyGoal', 'preferredCategory', 'updatedAt']) ||
+                           incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'lifetimeEarned', 'claimedPromoCodes', 'updatedAt']) ||
+                           incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'lifetimeEarned', 'status', 'autoRedeemInCart', 'holderName', 'holderEmail', 'monthlyGoal', 'preferredCategory', 'claimedPromoCodes', 'updatedAt'])
+                         );
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(cardId);
+      }
+
+      // 6. Tarjeta Bravisima Cashback & Redemption Movements
+      match /bravisimaMovements/{movementId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(movementId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(movementId) &&
+                         incoming().keys().hasAll(['userId', 'title', 'subtitle', 'dateLabel', 'amount', 'movementType', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'title', 'subtitle', 'dateLabel', 'amount', 'movementType', 'orderId', 'createdAt', 'updatedAt']) &&
+                         isValidBravisimaMovement(incoming(), userId);
+
+        allow update: if isSignedIn() &&
+                         isValidBravisimaMovement(incoming(), userId) &&
+                         request.auth.uid == userId &&
+                         isValidId(userId) &&
+                         isValidId(movementId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().amount == existing().amount &&
+                         incoming().movementType == existing().movementType &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['title', 'subtitle', 'dateLabel', 'updatedAt']);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(movementId);
+      }
+    }
+  }
+}

@@ -1,0 +1,132 @@
+package com.example.ui.theme
+
+import com.example.platform.*
+import com.example.resources.*
+import org.jetbrains.compose.resources.painterResource
+
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+/**
+ * Ultra-rounded, highly legible, and professional typography family combining
+ * Fredoka (geometric rounded display/UI weights), Varela Round (crisp rounded terminals),
+ * and Nunito (balanced multi-weight clarity) installed locally in res/font.
+ */
+val RoundedDisplayFont: FontFamily
+    @Composable get() = FontFamily(
+    Font(Res.font.varela_round, weight = FontWeight.Normal),
+    Font(Res.font.fredoka, weight = FontWeight.Medium),
+    Font(Res.font.fredoka, weight = FontWeight.SemiBold),
+    Font(Res.font.fredoka, weight = FontWeight.Bold),
+    Font(Res.font.fredoka, weight = FontWeight.ExtraBold),
+    Font(Res.font.fredoka, weight = FontWeight.Black)
+)
+
+val RoundedBodyFont: FontFamily
+    @Composable get() = FontFamily(
+    Font(Res.font.varela_round, weight = FontWeight.Normal),
+    Font(Res.font.fredoka, weight = FontWeight.Medium),
+    Font(Res.font.fredoka, weight = FontWeight.SemiBold),
+    Font(Res.font.fredoka, weight = FontWeight.Bold),
+    Font(Res.font.nunito, weight = FontWeight.ExtraBold),
+    Font(Res.font.nunito, weight = FontWeight.Black)
+)
+
+// Keep existing identifier names so every screen and component inherits the rounded, high-legibility font seamlessly
+val PlusJakartaSans: FontFamily
+    @Composable get() = RoundedDisplayFont
+val InterFont: FontFamily
+    @Composable get() = RoundedBodyFont
+
+val Typography: Typography
+    @Composable get() = Typography(
+    displayLarge = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.2).sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 25.sp,
+        lineHeight = 32.sp,
+        letterSpacing = (-0.1).sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 21.sp,
+        lineHeight = 28.sp,
+        letterSpacing = (-0.05).sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.05.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.5.sp,
+        lineHeight = 22.sp,
+        letterSpacing = 0.08.sp
+    ),
+    titleSmall = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 13.5.sp,
+        lineHeight = 19.sp,
+        letterSpacing = 0.1.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = RoundedBodyFont,
+        fontWeight = FontWeight.Medium,
+        fontSize = 15.sp,
+        lineHeight = 22.sp,
+        letterSpacing = 0.15.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = RoundedBodyFont,
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.5.sp,
+        lineHeight = 19.5.sp,
+        letterSpacing = 0.14.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = RoundedBodyFont,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 17.sp,
+        letterSpacing = 0.15.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 0.18.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.16.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = RoundedDisplayFont,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 11.sp,
+        lineHeight = 15.sp,
+        letterSpacing = 0.18.sp
+    )
+)
