@@ -99,6 +99,9 @@ def swipe_up():
 
 
 def main():
+    # Registro de errores del sistema por si algo falla durante el recorrido.
+    subprocess.Popen(["adb", "logcat", "-v", "time", "*:E"], stdout=open(OUT / "logcat_errores.txt", "w"),
+                     stderr=subprocess.DEVNULL)
     # Evita que los avisos "X no responde" del emulador tapen la app.
     adb("shell", "settings", "put", "global", "hide_error_dialogs", "1")
     adb("shell", "cmd", "uimode", "night", "no")
