@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.sp
 
 /**
  * Poppins es la tipografía geométrica que usa la app oficial de BravoVa.
- * Fredoka/Nunito quedan disponibles, pero toda la interfaz usa Poppins.
  */
 private val PoppinsFamily: FontFamily
     @Composable get() = FontFamily(
@@ -32,7 +31,7 @@ val RoundedDisplayFont: FontFamily
 val RoundedBodyFont: FontFamily
     @Composable get() = PoppinsFamily
 
-// Keep existing identifier names so every screen and component inherits the rounded, high-legibility font seamlessly
+// Nombres antiguos que siguen usando las pantallas; todos apuntan a Poppins.
 val PlusJakartaSans: FontFamily
     @Composable get() = RoundedDisplayFont
 val InterFont: FontFamily

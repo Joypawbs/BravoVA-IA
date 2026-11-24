@@ -378,8 +378,8 @@ private fun sampleSoftAiRedColor(normalizedPhase: Float): Color {
 }
 
 /**
- * Logo-inspired illuminating stars animation (matching the BravoVa red/amber 4-point star emblem)
- * displayed next to the personalized thinking text while Brav IA is processing or streaming.
+ * Estrellas animadas con los colores del logo (rojo y ámbar)
+ * que aparecen junto al texto de "pensando…" de Brav IA.
  */
 @Composable
 private fun BravIaLogoSparklingStars(
@@ -491,8 +491,8 @@ private fun BravIaLogoSparklingStars(
 }
 
 /**
- * Generates personalized thinking phrases that vary with each user message and cycle smoothly
- * while Brav IA is thinking.
+ * Frases de "pensando…" que cambian según lo que escribió el usuario,
+ * mientras Brav IA responde.
  */
 @Composable
 private fun BravIaPersonalizedThinkingRow(
@@ -590,8 +590,8 @@ private fun BravIaPersonalizedThinkingRow(
 }
 
 /**
- * Draws a single soft-colored luminous line that slowly traverses the rounded rectangle perimeter
- * of an AI message box, while casting soft ambient illumination onto the surrounding interface.
+ * Dibuja una línea de luz suave que recorre el borde del mensaje de la IA
+ * e ilumina un poco lo que tiene alrededor.
  */
 @Composable
 private fun Modifier.glowingRedAiContour(
@@ -952,7 +952,7 @@ fun BravIaChatScreen(
         }
     }
 
-    // Slow ambient soft-red illumination that affects the rest of the Brav IA interface
+    // Luz roja suave de fondo en la pantalla de Brav IA
     val uiAmbientTransition = rememberInfiniteTransition(label = "bravia_interface_ambient_glow")
     val uiColorPhase by uiAmbientTransition.animateFloat(
         initialValue = 0f,

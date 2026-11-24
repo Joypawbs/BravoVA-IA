@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.luminance
 val LocalActivePalette = staticCompositionLocalOf { FAVORITE_COLOR_PALETTES.first() }
 
 /**
- * Guarantees WCAG high-contrast legibility on any background or accent color
- * selected in the user's Android device settings.
+ * Devuelve blanco o casi negro según el fondo, para que el texto siempre se lea
+ * (también con los colores dinámicos de Android).
  */
 fun ensureHighContrastOnColor(background: Color): Color {
     return if (background.luminance() > 0.46f) {

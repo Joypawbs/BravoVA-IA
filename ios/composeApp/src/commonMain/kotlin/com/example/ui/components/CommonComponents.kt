@@ -492,7 +492,7 @@ private data class SparkleStarSpec(
     val isWarmGold: Boolean
 )
 
-// Well-delimited orbital positions around the 138.dp emblem inside a 240.dp container
+// Posiciones de las estrellas alrededor del emblema de 138.dp (lienzo de 240.dp)
 // (Emblem occupies 0.21..0.79; sparkles sit cleanly in the outer perimeter ring 0.09..0.91 without overlapping)
 private val STARTUP_SPARKLE_STARS = listOf(
     SparkleStarSpec(0.20f, 0.14f, 10.5f, 0.00f, true),
@@ -573,7 +573,7 @@ fun AppStartupSkeletonScreen(
             .testTag("startup_skeleton_screen"),
         contentAlignment = Alignment.Center
     ) {
-        // Smooth ambient background glow without RenderEffect edge mirroring
+        // Brillo de fondo suave (sin RenderEffect para evitar bordes reflejados)
         Canvas(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -640,7 +640,7 @@ fun AppStartupSkeletonScreen(
                     STARTUP_SPARKLE_STARS.forEach { star ->
                         val angle = masterPhase + star.phaseOffset * (2f * PI).toFloat()
                         val rawWave = ((sin(angle) + 1f) * 0.5f).coerceIn(0f, 1f)
-                        // Smoothstep easing for fluid, natural acceleration and deceleration
+                        // Suavizado smoothstep para que el movimiento acelere y frene natural
                         val twinkle = rawWave * rawWave * (3f - 2f * rawWave)
                         val scaleFactor = 0.52f + 0.48f * twinkle
 
@@ -682,7 +682,7 @@ fun AppStartupSkeletonScreen(
                             center = Offset(cx, cy)
                         )
 
-                        // Crisp 4-point diamond star silhouette
+                        // Estrella de cuatro puntas
                         starPath.reset()
                         starPath.moveTo(cx, cy - r)
                         starPath.quadraticTo(cx + waist, cy - waist, cx + r, cy)
@@ -701,7 +701,7 @@ fun AppStartupSkeletonScreen(
                             )
                         )
 
-                        // Crisp luminous core
+                        // Centro brillante
                         drawCircle(
                             color = Color.White.copy(alpha = (0.75f + 0.25f * twinkle).coerceIn(0f, 1f)),
                             radius = max(1.4f, r * 0.20f),
@@ -710,7 +710,7 @@ fun AppStartupSkeletonScreen(
                     }
                 }
 
-                // Central emblem with delimited internal specular sweep
+                // Emblema central con un brillo que lo recorre
                 Box(
                     modifier = Modifier
                         .size(138.dp)
@@ -1153,7 +1153,7 @@ fun BravoArcaSelectorMenuOverlay(
         modifier = modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Invisible outside tap target to dismiss the selector menu cleanly
+            // Zona invisible: tocar fuera cierra el menú
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1484,32 +1484,6 @@ fun ProductVectorIllustration(
     }
 }
 
-fun compactCategoryCardLabel(category: String): String {
-    return when (category.trim()) {
-        "Snacks y dulces" -> "Snacks"
-        "Cuidado personal" -> "Cuidado personal"
-        "Pescadería y mariscos" -> "Pescadería"
-        "Congelados y helados" -> "Congelados"
-        "Frutas y vegetales" -> "Frutas y veg."
-        "Lácteos y huevos" -> "Lácteos"
-        "Panes y galletas" -> "Panadería"
-        "Hogar y limpieza" -> "Hogar"
-        "Carne res y cerdo" -> "Carnes"
-        "Agua y refrescos" -> "Bebidas"
-        "Aceite y vinagres" -> "Despensa"
-        "Alimentación general" -> "Despensa"
-        "Productos Nuevos" -> "Nuevos"
-        "Alimentos Húmedos y Snacks" -> "Snacks Pet"
-        "Salud y Cuidado Veterinario" -> "Salud Vet"
-        "Hogar y Arena Sanitaria" -> "Higiene Pet"
-        "Accesorios y Paseo" -> "Accesorios"
-        "Juguetes y Confort" -> "Juguetes"
-        "Aves, Peces y Exóticos" -> "Exóticos"
-        "Farmacia y Suplementos" -> "Farmacia"
-        "Alimentos Secos" -> "Alimento Seco"
-        else -> category.trim()
-    }
-}
 
 @Composable
 fun VerticalProductCard(
@@ -1731,8 +1705,8 @@ fun SectionLineIcon(iconType: String, isArca: Boolean) {
 }
 
 /**
- * High-resolution unified vector icon resolver that replaces device-dependent emojis
- * with consistent Material Vector Icons of identical geometry and stroke weight.
+ * Devuelve el ícono vectorial que corresponde a cada clave, para no depender de emojis
+ * (todos con el mismo grosor de trazo).
  */
 @Composable
 fun BravoUnifiedIcon(
@@ -2107,153 +2081,6 @@ fun BravoAiPlasmaOrb(
     }
 }
 
-@Composable
-fun FloatingActionFabs(
-    cartCount: Int,
-    isArca: Boolean,
-    darkMode: Boolean,
-    onOpenAi: () -> Unit,
-    onOpenCart: () -> Unit,
-    modifier: Modifier = Modifier,
-    pulseTrigger: Long = 0L,
-    lastCartFeedback: Pair<Long, Int>? = null
-) {
-    val view = currentPlatformView()
-    val accent = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
-    val useRealHaze = LocalTranslucentHazeState.current != null && DeviceSupportsGpuBlur
-    val fabBg = if (useRealHaze) Color.Transparent else uniformMenuTranslucentContainerColor(darkMode)
-    val borderBrush = uniformMenuTranslucentBorderBrush(accent, darkMode)
-    val sheenBrush = uniformMenuTranslucentSheenBrush(darkMode, accent)
-
-    val cartScale = remember { Animatable(1f) }
-    val rippleProgress = remember { Animatable(1f) }
-    val feedbackAlpha = remember { Animatable(0f) }
-    val feedbackRise = remember { Animatable(0f) }
-
-    LaunchedEffect(pulseTrigger) {
-        if (pulseTrigger == 0L) return@LaunchedEffect
-        cartScale.snapTo(1.24f)
-        rippleProgress.snapTo(0f)
-        feedbackAlpha.snapTo(1f)
-        feedbackRise.snapTo(0f)
-        cartScale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
-        )
-    }
-
-    LaunchedEffect(pulseTrigger) {
-        if (pulseTrigger == 0L) return@LaunchedEffect
-        rippleProgress.animateTo(1f, animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing))
-    }
-
-    LaunchedEffect(lastCartFeedback?.first) {
-        if (lastCartFeedback == null) return@LaunchedEffect
-        feedbackRise.animateTo(-28f, animationSpec = tween(durationMillis = 950, easing = FastOutSlowInEasing))
-        feedbackAlpha.animateTo(0f, animationSpec = tween(durationMillis = 350))
-    }
-
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            if (lastCartFeedback != null && feedbackAlpha.value > 0.02f) {
-                Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = accent,
-                    shadowElevation = 6.dp,
-                    modifier = Modifier
-                        .graphicsLayer {
-                            translationY = feedbackRise.value
-                            alpha = feedbackAlpha.value
-                        }
-                        .testTag("cart_added_feedback_pill")
-                ) {
-                    Text(
-                        text = "+1 • RD$${lastCartFeedback.second}",
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 11.sp,
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                    )
-                }
-            }
-
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(52.dp)
-            ) {
-                if (rippleProgress.value < 0.99f) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val ringRadius = (size.minDimension * 0.44f) + (rippleProgress.value * 18.dp.toPx())
-                        drawCircle(
-                            color = accent.copy(alpha = (1f - rippleProgress.value) * 0.55f),
-                            radius = ringRadius,
-                            style = Stroke(width = 2.5.dp.toPx())
-                        )
-                    }
-                }
-                Box(
-                    contentAlignment = Alignment.TopEnd,
-                    modifier = Modifier.graphicsLayer {
-                        scaleX = cartScale.value
-                        scaleY = cartScale.value
-                    }
-                ) {
-                    // Botón flotante del carrito en vidrio líquido
-                    LiquidGlass(
-                        darkMode = darkMode,
-                        accent = accent,
-                        cornerRadius = 24.dp,
-                        elevation = 10.dp,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clickable {
-                                HapticFeedbackManager.onNavigationClick(view)
-                                onOpenCart()
-                            }
-                            .testTag("fab_cart")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.ShoppingCart,
-                            contentDescription = "Ver mi Carrito",
-                            tint = accent,
-                            modifier = Modifier.size(21.dp).align(Alignment.Center)
-                        )
-                    }
-
-                    if (cartCount > 0) {
-                        Box(
-                            modifier = Modifier
-                                .offset(x = 4.dp, y = (-4).dp)
-                                .clip(CircleShape)
-                                .background(accent)
-                                .border(2.dp, if (darkMode) Color(0xFF090D16) else Color.White, CircleShape)
-                                .padding(horizontal = 5.dp, vertical = 1.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = cartCount.toString(),
-                                color = Color.White,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 9.5.sp
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun TranslucentBottomDock(
@@ -2453,8 +2280,8 @@ fun TranslucentBottomDock(
 }
 
 /**
- * Full-screen emerald green order confirmation overlay with an animated white vector checkmark
- * and celebratory multi-note audio fanfare when an order is completed.
+ * Pantalla verde de pedido confirmado, con la marca de verificación animada
+ * y una pequeña melodía de celebración.
  */
 @Composable
 fun OrderSuccessCelebrationOverlay(
@@ -2566,7 +2393,7 @@ fun OrderSuccessCelebrationOverlay(
             }
         }
 
-        // Ambient expanding concentric rings
+        // Anillos que se expanden
         Box(
             modifier = Modifier
                 .size(250.dp)
@@ -2755,7 +2582,7 @@ fun PredictiveCatalogSearchBar(
     val primaryColor = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
     val view = currentPlatformView()
 
-    // Compute best inline predictive match from catalog as the user types
+    // Mientras se escribe, busca el producto del catálogo que mejor completa el texto
     val predictedProduct = remember(query, catalogProducts) {
         val clean = query.trim()
         if (clean.isEmpty()) {

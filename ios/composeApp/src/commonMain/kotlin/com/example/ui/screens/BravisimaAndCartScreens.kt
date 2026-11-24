@@ -3152,7 +3152,7 @@ fun DeliveryTrackingScreen(
                 }
             }
 
-            // 2. 100% Real Interactive Map with Estimated Speeds, Live Traffic & Auto-Updates
+            // 2. Mapa interactivo con velocidad estimada, tráfico y ETA
             item(key = "delivery_map", contentType = "map_card") {
                 val userLat = realLocationMetrics?.userLat ?: 18.4685
                 val userLng = realLocationMetrics?.userLng ?: -69.9442

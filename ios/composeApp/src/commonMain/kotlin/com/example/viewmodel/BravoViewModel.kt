@@ -3344,7 +3344,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     }
                 }
             }
-            // Never return random unrelated products if nothing matched the user's query!
+            // Si nada coincide con lo pedido, no devolver productos al azar
             else -> emptyList()
         }
     }
