@@ -37,6 +37,12 @@ final class BravoVaTourUITests: XCTestCase {
     /// Toca por texto; si no aparece, toca en la posición relativa indicada.
     private func tap(_ texts: [String], fallback: CGVector, wait: TimeInterval = 4) {
         for t in texts {
+            let exact = app.buttons[t]
+            if exact.waitForExistence(timeout: wait) && exact.isHittable {
+                exact.tap(); print("[tour] tap botón '\(t)'"); return
+            }
+        }
+        for t in texts {
             let e = element(containing: t)
             if e.waitForExistence(timeout: wait) && e.isHittable {
                 e.tap()
@@ -67,7 +73,7 @@ final class BravoVaTourUITests: XCTestCase {
             ("Perfil", 0.86, "mi_cuenta"),
         ]
         for (label, x, name) in tabs {
-            tap([label], fallback: CGVector(dx: x, dy: 0.945), wait: 3)
+            tap([label], fallback: CGVector(dx: x, dy: 0.92), wait: 3)
             pause(3); shot(name)
         }
 
@@ -75,7 +81,7 @@ final class BravoVaTourUITests: XCTestCase {
         tap(["Mis pedidos"], fallback: CGVector(dx: 0.27, dy: 0.25), wait: 3)
         pause(3); shot("mis_pedidos")
 
-        tap(["Home"], fallback: CGVector(dx: 0.5, dy: 0.945), wait: 3)
+        tap(["Home"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 3)
         pause(2)
         tap(["Carrito", "carrito"], fallback: CGVector(dx: 0.88, dy: 0.86), wait: 2)
         pause(3); shot("carrito")

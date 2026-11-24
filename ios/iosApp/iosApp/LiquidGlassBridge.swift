@@ -54,16 +54,10 @@ private extension Color {
     }
 }
 
-// MARK: - Contenedor que deja pasar los toques fuera del vidrio
+// MARK: - Contenedor de la vista SwiftUI
+// (SwiftUI dibuja los botones dentro de la vista del hosting, así que los toques deben llegarle a ella)
 
-final class PassthroughView: UIView {
-    weak var hostedView: UIView?
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        let hit = super.hitTest(point, with: event)
-        if hit === self || hit === hostedView { return nil }
-        return hit
-    }
-}
+final class PassthroughView: UIView {}
 
 final class GlassHostController<V: View>: UIViewController {
     let hosting: UIHostingController<V>
@@ -93,7 +87,6 @@ final class GlassHostController<V: View>: UIViewController {
             hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
             hosting.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-        (view as? PassthroughView)?.hostedView = hosting.view
         hosting.didMove(toParent: self)
     }
 }
