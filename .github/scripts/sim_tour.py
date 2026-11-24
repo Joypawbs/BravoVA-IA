@@ -3,7 +3,7 @@
 Usa idb para leer el árbol de accesibilidad y tocar elementos por su texto.
 Si un texto no aparece, toca por coordenadas relativas (mismo diseño que Android).
 """
-import json, os, subprocess, sys, time
+import json, os, shutil, subprocess, sys, time
 
 OUT = sys.argv[1]
 UDID = sys.argv[2]
@@ -33,7 +33,11 @@ def screen_size():
             return f["width"], f["height"]
     return 402, 874
 
+HAS_IDB = shutil.which("idb") is not None
+
 def tap_xy(x, y):
+    if not HAS_IDB:
+        log.write("sin idb: no se puede tocar\n"); return
     run("idb", "ui", "tap", "--udid", UDID, str(int(x)), str(int(y)))
 
 def tap_text(*texts, fallback=None):

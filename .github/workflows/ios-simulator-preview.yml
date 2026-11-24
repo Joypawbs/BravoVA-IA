@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       runner:
-        description: "Imagen de macOS (macos-14 o macos-15)"
-        default: macos-14
+        description: "Imagen de macOS (macos-latest o macos-15)"
+        default: macos-latest
 
 jobs:
   simulator:
-    runs-on: ${{ inputs.runner || 'macos-14' }}
+    runs-on: ${{ inputs.runner || 'macos-latest' }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +27,14 @@ jobs:
       - name: Install XcodeGen and idb
         run: |
           brew install xcodegen
-          brew tap facebook/fb && brew install idb-companion
-          python3 -m pip install --break-system-packages fb-idb || pipx install fb-idb
+          # idb permite tocar la pantalla del simulador; si no se instala, solo habrá capturas del arranque
+          brew tap facebook/fb || true
+          brew trust facebook/fb 2>/dev/null || true
+          HOMEBREW_NO_INSTALL_FROM_API=1 brew install facebook/fb/idb-companion \
+            || brew install --formula facebook/fb/idb-companion \
+            || echo "::warning::idb-companion no se pudo instalar"
+          python3 -m pip install --break-system-packages fb-idb || pipx install fb-idb || true
+          which idb idb_companion || true
       - name: Build simulator app
         working-directory: ios/iosApp
         run: |
