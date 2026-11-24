@@ -22,7 +22,22 @@ def adb(*args, capture=False):
     return result.stdout if capture else None
 
 
+def dismiss_system_dialogs():
+    """Cierra avisos del sistema (p. ej. "Pixel Launcher isn't responding") que tapan la app."""
+    for _ in range(3):
+        current = nodes()
+        if not any("isn't responding" in t or "no responde" in t for t, _, _, _ in current):
+            return
+        for text, desc, x, y in current:
+            if text in ("Wait", "Esperar"):
+                adb("shell", "input", "tap", str(x), str(y))
+                print("[tour] cerré un aviso del sistema", flush=True)
+                time.sleep(2)
+                break
+
+
 def shot(name):
+    dismiss_system_dialogs()
     global counter
     counter += 1
     path = OUT / f"{counter:02d}_{name}.png"
@@ -48,6 +63,7 @@ def nodes():
 
 def tap(labels, prefix=False, wait=2.0):
     """Toca el primer elemento cuyo texto o descripción coincide con alguna etiqueta."""
+    dismiss_system_dialogs()
     for _ in range(3):
         for text, desc, x, y in nodes():
             for label in labels:
@@ -69,6 +85,8 @@ def swipe_up():
 
 def main():
     adb("shell", "cmd", "uimode", "night", "no")
+    time.sleep(25)  # deja que el sistema termine de arrancar
+    dismiss_system_dialogs()
     adb("shell", "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")
     time.sleep(4); shot("splash")
     time.sleep(8); shot("inicio_sesion")
