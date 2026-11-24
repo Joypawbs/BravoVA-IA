@@ -97,6 +97,40 @@ window.BV_FB = {
   async updateOrderStatus(uid, id, o) {
     await updateDoc(doc(db, "users", uid, "orders", id), { status: o.status.slice(0, 80), date: o.date.slice(0, 80), updatedAt: serverTimestamp() });
   },
+  // Igual que BravoFirestoreRepository.saveShoppingList / deleteShoppingList
+  async saveList(uid, l) {
+    const ref = doc(db, "users", uid, "shoppingLists", l.id);
+    const base = { name: (l.name.trim() || "Mi Lista").slice(0, 120), skus: [...new Set(l.skus)].slice(0, 50), isAiGenerated: !!l.isAi, updatedAtLabel: (l.upd || "Sincronizada").slice(0, 120), updatedAt: serverTimestamp() };
+    if (l.note) base.aiNote = l.note.slice(0, 500);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) await setDoc(ref, { userId: uid, ...base, createdAt: serverTimestamp() });
+    else await updateDoc(ref, base);
+  },
+  async deleteList(uid, id) { await deleteDoc(doc(db, "users", uid, "shoppingLists", id)); },
+  // Igual que saveOrUpdateBravisimaCard: users/{uid}/bravisimaCards/primary
+  async saveCard(uid, c) {
+    const ref = doc(db, "users", uid, "bravisimaCards", "primary");
+    const snap = await getDoc(ref);
+    const base = { holderName: (c.holder.trim() || "Cliente Bravísimo").slice(0, 100), balance: Math.min(1000000, Math.max(0, c.balance)), lifetimeEarned: Math.min(5000000, Math.max(0, c.lifetime)), status: c.locked ? "locked" : "active", autoRedeemInCart: !!c.autoRedeem, monthlyGoal: Math.min(50000, Math.max(100, c.goal)), preferredCategory: (c.category || "Todo Bravo").slice(0, 80), claimedPromoCodes: [...new Set(c.codes)].slice(0, 20), updatedAt: serverTimestamp() };
+    if (c.email) base.holderEmail = c.email.slice(0, 160);
+    if (!snap.exists()) { await setDoc(ref, { userId: uid, cardNumber: c.number.slice(0, 32), ...base, createdAt: serverTimestamp() }); return c.number; }
+    const ex = snap.data(); base.lifetimeEarned = Math.max(base.lifetimeEarned, ex.lifetimeEarned || 0);
+    await updateDoc(ref, base); return ex.cardNumber || c.number;
+  },
+  async loadCard(uid) { const s = await getDoc(doc(db, "users", uid, "bravisimaCards", "primary")); return s.exists() ? s.data() : null; },
+  async recordMovement(uid, m) {
+    const p = { userId: uid, title: m.title.slice(0, 120), subtitle: m.subtitle.slice(0, 120), dateLabel: m.date.slice(0, 80), amount: Math.max(-500000, Math.min(500000, m.amount)), movementType: m.type, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
+    if (m.orderId) p.orderId = m.orderId.slice(0, 80);
+    await setDoc(doc(db, "users", uid, "bravisimaMovements", m.id), p);
+  },
+  // Igual que saveOrUpdateUserProfile: users/{uid}/profile/main
+  async saveProfile(uid, pr, branch) {
+    const ref = doc(db, "users", uid, "profile", "main");
+    const snap = await getDoc(ref);
+    const base = { name: (pr.name.trim() || "Cliente Bravísimo").slice(0, 100), email: (pr.email || "cliente@bravova.com.do").slice(0, 160), phone: (pr.phone || "809-555-0192").slice(0, 40), cedula: (pr.cedula || "001-1928374-5").slice(0, 40), rncNit: (pr.rnc || "131-88492-1").slice(0, 40), ncfType: (pr.ncf || "B01 - Crédito Fiscal").slice(0, 60), activeBranch: branch.slice(0, 120), updatedAt: serverTimestamp() };
+    if (!snap.exists()) await setDoc(ref, { userId: uid, ...base, bravisimaNumber: pr.bravisimaNumber, createdAt: serverTimestamp() });
+    else await updateDoc(ref, base);
+  },
   async loadCart(uid) {
     const snap = await getDocs(collection(db, "users", uid, "cart"));
     const out = {};

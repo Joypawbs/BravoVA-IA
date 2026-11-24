@@ -6,8 +6,9 @@
 <title>BravoVa — réplica web</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-<script type="module" src="firebase.js?v=6"></script>
-<script src="product_info.js?v=5"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+<script type="module" src="firebase.js?v=7"></script>
+<script src="product_info.js?v=7"></script>
 <style>
 /*
 VOICE: la app BravoVa tal cual, réplica fiel de la versión Android (Compose) en tamaño de teléfono.
@@ -220,6 +221,17 @@ svg.i{width:1em;height:1em;flex:none}
 .cchk{stroke-dasharray:1;stroke-dashoffset:1;animation:cdraw .52s .4s ease-out forwards}
 @keyframes cdraw{to{stroke-dashoffset:0}}
 .cfade{opacity:0;animation:cfade .36s .92s forwards}@keyframes cfade{to{opacity:1}}
+.mi{line-height:1;display:inline-flex;vertical-align:middle;flex:none;color:inherit;width:1em;height:1em;overflow:hidden;justify-content:center}
+.secic .mi{color:var(--primary)}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:800;color:var(--ink2)}
+.fld input,.fld select,.fld textarea{font:600 14px 'Nunito';color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:11px 12px;outline:0;resize:vertical}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.acct{height:112px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;color:var(--ink);border-radius:20px;transition:transform .15s}
+.acct:active{transform:scale(.97)}
+.accic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#E2E8F0;color:var(--primary)}
+:root.dark .accic{background:rgba(255,255,255,.08)}
+.scanlaser{position:absolute;left:30px;right:30px;height:2px;background:#EF4444;box-shadow:0 0 12px #EF4444;animation:slaser 1.9s linear infinite alternate}
+@keyframes slaser{from{top:8%}to{top:92%}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -308,9 +320,20 @@ const SECTIONS={
 const COMPACT={"Snacks y dulces":"Snacks","Pescadería y mariscos":"Pescadería","Congelados y helados":"Congelados","Frutas y vegetales":"Frutas y veg.","Lácteos y huevos":"Lácteos","Panes y galletas":"Panadería","Hogar y limpieza":"Hogar","Carne res y cerdo":"Carnes","Agua y refrescos":"Bebidas","Aceite y vinagres":"Despensa","Alimentación general":"Despensa","Productos Nuevos":"Nuevos","Alimentos Húmedos y Snacks":"Snacks Pet","Salud y Cuidado Veterinario":"Salud Vet","Hogar y Arena Sanitaria":"Higiene Pet","Accesorios y Paseo":"Accesorios","Juguetes y Confort":"Juguetes","Aves, Peces y Exóticos":"Exóticos","Farmacia y Suplementos":"Farmacia","Alimentos Secos":"Alimento Seco"};
 
 /* ---------------- state ---------------- */
-const S={screen:'splash',store:'bravo',dark:true,cart:{},favs:{},offerDay:0,query:'',storeMenu:false,guest:false,catQ:'',gridQ:'',branch:'Bravo Winston Churchill',bravBal:145,bravLocked:false,redeem:false,deliveryMode:'delivery',ncf:'B02',cards:[{id:'pm1',brand:'Visa',bank:'Popular',last4:'4821',exp:'09/28',def:true},{id:'pm2',brand:'Mastercard',bank:'BHD',last4:'9034',exp:'11/27',def:false}],orders:[]};
+const S={screen:'splash',store:'bravo',dark:true,cart:{},favs:{},offerDay:0,query:'',storeMenu:false,guest:false,catQ:'',gridQ:'',branch:'Bravo Winston Churchill',bravBal:145,bravLocked:false,redeem:false,deliveryMode:'delivery',ncf:'B02',cards:[{id:'pm1',brand:'Visa',bank:'Banreservas',last4:'4821',exp:'09/28',def:true},{id:'pm2',brand:'Mastercard',bank:'Banco Popular',last4:'9012',exp:'11/27',def:false}],orders:[],
+  card:{number:'BRV-8842-9901-7234',holder:'Cliente Bravísimo',email:null,lifetime:320,autoRedeem:false,goal:500,category:'Todo Bravo',codes:[]},
+  movs:[{id:'mov_seed_1',title:'Compra Bravo Churchill',subtitle:'Orden #ORD-88412 • Retorno 1%',date:'Hace 3 días',amount:24,type:'earn',orderId:'ORD-88412'},{id:'mov_seed_2',title:'Compra Bravo Enriquillo',subtitle:'Orden #ORD-87905 • Retorno 1%',date:'18 Mar',amount:19,type:'earn',orderId:'ORD-87905'},{id:'mov_seed_3',title:'Bono Marca Propia Bravo',subtitle:'Fidelidad Mensual',date:'Este mes',amount:102,type:'bonus'}],
+  addresses:[{id:'ad1',label:'Casa Principal',street:'Calle Polibio Díaz #14, Evaristo Morales',branch:'Bravo Winston Churchill',def:true},{id:'ad2',label:'Oficina Naco',street:'Av. Tiradentes esq. Salvador Sturla, Naco',branch:'Bravo Núñez de Cáceres',def:false}],
+  lists:[{id:'l1',name:'Mis Favoritos',skus:['BRV-001','BRV-009','BRV-017','BRV-093'],note:'Tus productos marcados con corazón para acceso rápido.',isAi:false,upd:'Sincronizada'},{id:'l2',name:'Compra Quincenal Habitual',skus:['BRV-001','BRV-053','BRV-075','BRV-009','BRV-093','BRV-096','BRV-055'],note:'Sugerida por Brav IA según tus productos más repetidos en tus últimas 4 órdenes.',isAi:true,upd:'Autocompletada por Brav IA'},{id:'l3',name:'Combo Hogar y Limpieza',skus:['BRV-017','BRV-018','BRV-020','BRV-021','BRV-022'],note:'Reposición mensual de limpieza detectada en tu historial de Bravo Churchill.',isAi:true,upd:'Lista inteligente'}],
+  push:{enabled:true,topics:{pedidos_tiempo_real:true,ofertas_exclusivas_bravo:true,ofertas_arca_petshop:true},feed:[{id:'fcm_init_1',order:true,title:'🛵 Pedido #ORD-88412 En Ruta (34 km/h)',body:'Carlos Rodríguez salió de Bravo Winston Churchill y está a 6 min de tu dirección en Piantini.',ts:'Hace 2 min',orderId:'ORD-88412',read:false},{id:'fcm_init_2',order:false,title:'🔥 Oferta Exclusiva Bravo: Salami Super Especial Induveca',body:'Llévate el Salami Super Especial 1.5 lb a RD$ 315.00 + doble retorno en tu Tarjeta Bravísima por hoy.',ts:'Hace 18 min',sku:'BRV-096',read:false},{id:'fcm_init_3',order:false,title:'🐾 Flash Deal El Arca: Alimento Adulto Cordero 15 lb',body:'15% de ahorro directo en nutrición premium para perro adulto (RD$ 1,850.00) con entrega express gratis.',ts:'Hace 1 hora',sku:'ARC-001',read:true}]}};
+const DEF_PROFILE={name:'Cliente Bravísimo',email:'cliente@bravova.com.do',phone:'809-555-0192',cedula:'001-1928374-5',bravisimaNumber:'BRV-8841-2026',rnc:'131-88492-1',ncf:'B01 - Crédito Fiscal'};
+const DEF_ORDERS=[{id:'ORD-88412',status:'Envío preparado',badgeNum:7,date:'Hoy, hace 20 min',total:1597,branch:'Bravo Winston Churchill',skus:['BRV-001','BRV-009','BRV-053','BRV-075','BRV-093','BRV-017']},{id:'ORD-87905',status:'Entregado',badgeNum:6,date:'Hace 4 días',total:1340,branch:'Bravo Núñez de Cáceres',skus:['BRV-001','BRV-075','BRV-096','BRV-094','BRV-053','BRV-009']},{id:'ORD-87210',status:'Entregado',badgeNum:6,date:'Hace 11 días',total:1480,branch:'Bravo Winston Churchill',skus:['BRV-001','BRV-053','BRV-055','BRV-093','BRV-017','BRV-020']},{id:'ORD-86540',status:'Entregado',badgeNum:5,date:'Hace 19 días',total:1825,branch:'Bravo Enriquillo',skus:['BRV-001','BRV-009','BRV-075','BRV-093','ARC-001','ARC-009']}];
+const SECMI={new_badge:'new_releases',oil_bottle:'water_drop',water_soda:'local_drink',plate_cutlery:'restaurant',baby_bottle:'local_drink',wine_glass:'local_bar',cow_meat:'local_dining',salami_deli:'kitchen',fresh_produce:'eco',cleaning_spray:'cleaning_services',milk_cheese:'egg',bakery_bread:'bakery_dining',fish_seafood:'set_meal',frozen_ice:'ac_unit',personal_care:'spa',snacks_candy:'cookie',kibble_bag:'pets',wet_food:'inventory_2',vet_cross:'medical_services',litter_box:'cleaning_services',leash:'pets',pet_toy:'sports_baseball',exotic_pets:'flutter_dash',pet_pharmacy:'medication'};
 try{const raw=localStorage.getItem('bravova_replica');if(raw)Object.assign(S,JSON.parse(raw),{screen:'splash',storeMenu:false,query:''})}catch(e){}
-const save=()=>{try{localStorage.setItem('bravova_replica',JSON.stringify({store:S.store,dark:S.dark,cart:S.cart,favs:S.favs,guest:S.guest,authed:S.authed,bravBal:S.bravBal,bravLocked:S.bravLocked,redeem:S.redeem,cards:S.cards,orders:S.orders,trackedOrder:S.trackedOrder}))}catch(e){}};
+if(!S.orders||!S.orders.length){S.orders=DEF_ORDERS.map(o=>({...o}));S.trackedOrder=S.trackedOrder||'ORD-88412'}
+if(S.cards&&S.cards[1]&&S.cards[1].last4==='9034'&&S.cards.length===2){S.cards=[{id:'pm1',brand:'Visa',bank:'Banreservas',last4:'4821',exp:'09/28',def:S.cards[0].def},{id:'pm2',brand:'Mastercard',bank:'Banco Popular',last4:'9012',exp:'11/27',def:S.cards[1].def}]}
+S.profile=Object.assign({},DEF_PROFILE,S.profile||{});if(!Object.keys(S.favs).length)(S.lists[0]?.skus||[]).forEach(k=>S.favs[k]=true);
+const save=()=>{try{localStorage.setItem('bravova_replica',JSON.stringify({store:S.store,dark:S.dark,cart:S.cart,favs:S.favs,guest:S.guest,authed:S.authed,bravBal:S.bravBal,bravLocked:S.bravLocked,redeem:S.redeem,cards:S.cards,orders:S.orders,trackedOrder:S.trackedOrder,card:S.card,movs:S.movs,addresses:S.addresses,lists:S.lists,push:S.push,profile:S.profile,branch:S.branch,gps:S.gps}))}catch(e){}};
 let PRODUCTS=[],BY_SKU={};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>document.getElementById(id);
@@ -363,7 +386,7 @@ window.chg=(sku,d,e)=>{e&&e.stopPropagation();const q=Math.max(0,(S.cart[sku]||0
   const p=BY_SKU[sku];if(d>0&&p)toast('cart',`${p.name.slice(0,28)} agregado`);
   document.querySelectorAll('#pc_'+sku).forEach(el=>{const w=document.createElement('div');w.innerHTML=productCard(p);const n=w.firstElementChild;el.replaceWith(n);if(d>0)n.querySelector('.qty .p, .add')?.classList.add('pulse')});
   updateCart()};
-window.toggleFav=(sku,e)=>{e.stopPropagation();S.favs[sku]=!S.favs[sku];if(!S.favs[sku])delete S.favs[sku];save();const p=BY_SKU[sku];toast(S.favs[sku]?'favOn':'fav',S.favs[sku]?'Agregado a favoritos':'Quitado de favoritos');document.querySelectorAll('#pc_'+sku).forEach(el=>{const w=document.createElement('div');w.innerHTML=productCard(p);el.replaceWith(w.firstElementChild)})};
+window.toggleFav=(sku,e)=>{e.stopPropagation();S.favs[sku]=!S.favs[sku];if(!S.favs[sku])delete S.favs[sku];save();const p=BY_SKU[sku];const l1=S.lists[0];if(l1){l1.skus=S.favs[sku]?[...new Set([...l1.skus,sku])]:l1.skus.filter(x=>x!==sku);persistList(l1)}toast(S.favs[sku]?'favOn':'fav',S.favs[sku]?'Agregado a favoritos':'Quitado de favoritos');document.querySelectorAll('#pc_'+sku).forEach(el=>{const w=document.createElement('div');w.innerHTML=productCard(p);el.replaceWith(w.firstElementChild)})};
 function cartCount(){return Object.values(S.cart).reduce((a,b)=>a+b,0)}
 function updateCart(){const n=cartCount();$('cartBadge').hidden=!n;$('cartBadge').textContent=n;if(n)$('cartBadge').parentElement.classList.remove('pulse'),void $('cartBadge').offsetWidth,$('cartBadge').parentElement.classList.add('pulse')}
 
@@ -415,7 +438,8 @@ window.signIn=async g=>{
   try{const r=await BV_FB.signInGoogle();S.authed=true;S.guest=false;save();toast('check',`Sesión verificada: ${r.user.displayName||r.user.email}`);go('home')}
   catch(e){toast('lock',e.code==='auth/unauthorized-domain'?'Dominio aún no autorizado en Firebase':'No se pudo iniciar sesión con Google')}
 };
-function hookFirebase(){BV_FB.onUser(async u=>{FB_USER=u;if(u){S.profile={name:u.displayName||'Cliente Bravísimo',email:u.email||'cliente@bravova.com.do'};
+function hookFirebase(){BV_FB.onUser(async u=>{FB_USER=u;if(u){S.profile=Object.assign({},DEF_PROFILE,S.profile,{name:(S.profile&&S.profile.name!==DEF_PROFILE.name&&S.profile.name)||u.displayName||'Cliente Bravísimo',email:u.email||'cliente@bravova.com.do'});S.card.email=u.email;S.guest=false;save();
+  BV_FB.loadCard(u.uid).then(cd=>{if(cd){S.card.number=cd.cardNumber||S.card.number;S.card.holder=cd.holderName||S.card.holder;S.card.lifetime=Math.max(S.card.lifetime,cd.lifetimeEarned||0);S.bravBal=cd.balance??S.bravBal;S.bravLocked=cd.status==='locked';S.card.autoRedeem=!!cd.autoRedeemInCart;S.card.goal=cd.monthlyGoal||S.card.goal;S.card.category=cd.preferredCategory||S.card.category;S.card.codes=cd.claimedPromoCodes||S.card.codes;save()}else{const h=Math.abs(jhash(u.uid));S.card.number=`BRV-${1000+h%9000}-${1000+(Math.trunc(h/7)+4219)%9000}-${1000+(Math.trunc(h/13)+7234)%9000}`;persistCard()}if(['bravisima','account','account_sub'].includes(S.screen))render()}).catch(e=>console.warn(e));
   try{const remote=await BV_FB.loadCart(u.uid);if(remote&&Object.keys(remote).length){S.cart=Object.assign({},remote,S.cart);save();updateCart();if(S.screen==='home')renderHome(true)}}catch(e){console.warn(e)}}})}
 if(window.BV_FB)hookFirebase();else window.addEventListener('bvfb-ready',hookFirebase);
 function syncCart(sku){if(FB_USER&&window.BV_FB)BV_FB.setCartQty(FB_USER.uid,sku,S.cart[sku]||0).catch(e=>console.warn('Firestore',e))}
@@ -426,7 +450,7 @@ function header(){
   return `<div class="hdr"><div class="row" style="justify-content:space-between">
     <button class="brandbtn" aria-label="Cambiar tienda" onclick="toggleStoreMenu()">${lg}<span style="color:var(--ink2);font-size:14px;display:flex;transform:rotate(${S.storeMenu?180:0}deg);transition:.2s">${ic('down')}</span></button>
     <button class="enruta" onclick="go('delivery')">${ic('truck','font-size:15px')}En ruta</button></div>
-    <label class="search">${ic('search','color:var(--ink2);font-size:17px')}<input id="q" type="search" value="${esc(S.query)}" placeholder="${isArca()?'Buscar productos, marcas o mascotas...':'Buscar productos, marcas o recetas...'}" aria-label="Buscar productos"><button class="iconbtn" aria-label="Escanear código" onclick="toast('scan','Escáner: próxima ronda')">${ic('scan')}</button></label>
+    <label class="search">${ic('search','color:var(--ink2);font-size:17px')}<input id="q" type="search" value="${esc(S.query)}" placeholder="${isArca()?'Buscar productos, marcas o mascotas...':'Buscar productos, marcas o recetas...'}" aria-label="Buscar productos"><button class="iconbtn" aria-label="Escanear código" onclick="openScanner()">${ic('scan')}</button></label>
     <div class="prog"><div id="prog"></div></div>
     <div class="storeMenu ${S.storeMenu?'open':''}" id="storeMenu">
       <button class="storeOpt ${!isArca()?'on':''}" onclick="setStore('bravo')">${logo('bravo',.8)}<span><b class="disp" style="font-size:13px">Supermercados Bravo</b><small>Los expertos en vender barato</small></span></button>
@@ -457,13 +481,13 @@ function homeBody(){
     return h+`<div class="grid3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 14px">${res.slice(0,90).map(productCard).join('')}</div>`;
   }
   const by={};storeProducts().forEach(p=>(by[p.cat]=by[p.cat]||[]).push(p));
-  return offersSection()+SECTIONS[S.store].filter(([n])=>by[n]).map(([n,t])=>`<section class="sec"><div class="sech"><div class="row" style="gap:10px"><span class="secic">${ic(SECIC[t]||'bag')}</span><div><div class="sect">${esc(n)}</div><div class="ul"></div></div></div><button class="vt" onclick="openCategory('${esc(n)}')">Ver todos${ic('chev','font-size:16px')}</button></div>
+  return offersSection()+SECTIONS[S.store].filter(([n])=>by[n]).map(([n,t])=>`<section class="sec"><div class="sech"><div class="row" style="gap:10px"><span class="secic">${mi(SECMI[t]||(isArca()?'pets':'shopping_cart'),21)}</span><div><div class="sect">${esc(n)}</div><div class="ul"></div></div></div><button class="vt" onclick="openCategory('${esc(n)}')">Ver todos${ic('chev','font-size:16px')}</button></div>
     <div class="hscroll">${by[n].map(productCard).join('')}</div></section>`).join('')
   +`<div class="tcard aura" style="margin:16px 14px 28px;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer" onclick="go('bravia')">
      <div class="row" style="gap:10px"><span class="orb"></span><div><div class="sect" style="font-size:16.5px">${isArca()?'Asesoría Nutricional Brav IA':'Compra y Pedidos con Brav IA'}</div><div class="ul"></div></div></div>
      <p style="margin:0;font-size:12px;color:var(--ink2);font-weight:600">Brav IA conoce los 750 artículos del catálogo, calcula recetas exactas y puede pedir por ti con tu confirmación.</p>
      <button class="pbtn" onclick="event.stopPropagation();go('bravia')">${ic('spark')} Abrir Asistente Brav IA</button>
-     <button class="chip" style="height:auto;padding:10px 14px;justify-content:center;font-size:12px" onclick="event.stopPropagation();toast('list','Mis Listas: próxima ronda')">${ic('list')} Gestionar Mis Listas Inteligentes (Historial Brav IA)</button>
+     <button class="chip" style="height:auto;padding:10px 14px;justify-content:center;font-size:12px" onclick="event.stopPropagation();openSub('listas')">${ic('list')} Gestionar Mis Listas Inteligentes (Historial Brav IA)</button>
    </div>`;
 }
 function renderHome(keepScroll){
@@ -580,7 +604,7 @@ function catalogBody(){
   const secs=SECTIONS[S.store].filter(([n])=>by[n]).filter(([n])=>!q||n.toLowerCase().includes(q)||by[n].some(p=>p.name.toLowerCase().includes(q)));
   return (q?'':offersSection())
    +`<div style="padding:4px 14px;text-align:center"><div class="sect" style="font-size:17px">${isArca()?'Departamentos El Arca Petshop':'Pasillos Oficiales Supermercados Bravo'}</div><div class="ul" style="margin:3px auto 0"></div></div>`
-   +(secs.length?secs.map(([n,t])=>`<div class="tcard seccard" role="button" tabindex="0" onclick="openCategory('${esc(n)}')"><span class="secic" style="width:42px;height:42px;border-radius:13px;font-size:21px">${ic(SECIC[t]||'bag')}</span>
+   +(secs.length?secs.map(([n,t])=>`<div class="tcard seccard" role="button" tabindex="0" onclick="openCategory('${esc(n)}')"><span class="secic" style="width:42px;height:42px;border-radius:13px;font-size:21px">${mi(SECMI[t]||(isArca()?'pets':'shopping_cart'),21)}</span>
       <div style="flex:1"><div class="disp" style="font-weight:700;font-size:15px">${esc(n)}</div><div style="margin-top:3px">${metaStrip([`${by[n].length} arts.`,'Pasillo oficial'],11)}</div></div>
       <span style="color:var(--ink2);font-size:20px;display:flex">${ic('chev')}</span></div>`).join(''):emptyCard(`Sin resultados para "${S.catQ.trim()}"`,'Prueba otra palabra clave o consulta opciones disponibles en el catálogo con Brav IA.'));
 }
@@ -721,7 +745,7 @@ function renderCart(keep){
 window.cartQty=(sku,d)=>{chg(sku,d);renderCart(true)};
 window.emptyCart=()=>{Object.keys(S.cart).forEach(sku=>{delete S.cart[sku];syncCart(sku)});save();updateCart();toast('trash','Carrito vaciado');renderCart()};
 window.setDelivery=m=>{S.deliveryMode=m;renderCart(true)};
-function bioReq(r,onOk){const t=cartTotals();S.bio=Object.assign({amount:t.finalPay,cashback:t.gen,payLabel:'',deliveryLabel:deliverySummary(),state:'idle',msg:r.description},r,{onOk});renderCart(true)}
+function bioReq(r,onOk){const t=cartTotals();S.bio=Object.assign({amount:t.finalPay,cashback:t.gen,payLabel:'',deliveryLabel:deliverySummary(),state:'idle',msg:r.description},r,{onOk});rerender()}
 window.addCard=()=>bioReq({op:'CRD',title:'Vincular Nueva Tarjeta',subtitle:'Verificación biométrica requerida',description:'Autoriza con tu huella digital para registrar un nuevo método de pago en el checkout.',badge:'SEGURIDAD DE MÉTODO DE PAGO',payLabel:'Nueva Tarjeta Crédito / Débito'},()=>{const l4=String(1000+Math.floor(Math.random()*9000));S.cards.forEach(c=>c.def=false);S.cards.push({id:'pm_'+Date.now(),brand:'Visa',bank:'BHD',last4:l4,exp:'08/29',def:true});save();toast('ccard',`Nueva tarjeta •••• ${l4} agregada`)});
 window.pickCard=id=>{const c=S.cards.find(x=>x.id===id);if(!c||c===activeCard())return;bioReq({op:'CRD',title:'Cambiar Método de Pago',subtitle:`${c.brand} •••• ${c.last4} • Exp ${c.exp}`,description:'Confirma tu huella digital para autorizar el cambio de tarjeta predeterminada en este pedido.',badge:'CAMBIO DE TARJETA EN CHECKOUT',payLabel:`${c.brand} •••• ${c.last4}`},()=>{S.cards.forEach(x=>x.def=x.id===id);save();toast('ccard','Método de pago actualizado')})};
 window.toggleRedeem=()=>{if(S.bravLocked){unlockCard();return}if(S.redeem){S.redeem=false;save();renderCart(true);return}if(S.bravBal<=0)return;
@@ -744,18 +768,19 @@ function bioDialog(){
     <div class="row" style="gap:10px;width:100%"><button class="obtn" style="flex:1;font-size:12px" ${busy?'disabled':''} onclick="bioCancel()">Cancelar</button><button class="pbtn" style="flex:1;font-size:12px" ${busy?'disabled':''} onclick="bioVerify()">${ic('finger','font-size:16px')} Verificar Huella</button></div>
   </div></div>`;
 }
-window.bioCancel=()=>{S.bio=null;renderCart(true)};
+window.bioCancel=()=>{S.bio=null;rerender()};
+function rerender(){({cart:renderCart,bravisima:renderBravisima,account_sub:renderSub})[S.screen]?.(true)}
 async function bioToken(op,amount){
   const payload=`${{PAY:'CHECKOUT_PAY',BRV:'BRAVISIMA_REDEEM',ULK:'BRAVISIMA_SECURITY',CRD:'PAYMENT_METHOD_AUTH'}[op]||op}:${amount}:0:${Date.now()}`;
   try{const h=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(payload)));return `BIO-${op}-${[...h.slice(0,3)].map(x=>x.toString(16).padStart(2,'0').toUpperCase()).join('')}`}
   catch(e){return `BIO-${op}-${String(Date.now()%1e6).padStart(6,'0')}`}
 }
 window.bioVerify=async()=>{const b=S.bio;if(!b||b.state==='scanning'||b.state==='verified')return;
-  b.state='scanning';b.msg='Validando firma biométrica y criptograma de seguridad...';renderCart(true);
+  b.state='scanning';b.msg='Validando firma biométrica y criptograma de seguridad...';rerender();
   await new Promise(r=>setTimeout(r,420));const tok=await bioToken(b.op,b.amount);
-  if(S.bio!==b)return;b.state='verified';b.token=tok;b.msg=`¡Identidad verificada! Token ${tok}`;renderCart(true);
+  if(S.bio!==b)return;b.state='verified';b.token=tok;b.msg=`¡Identidad verificada! Token ${tok}`;rerender();
   await new Promise(r=>setTimeout(r,650));if(S.bio!==b)return;
-  S.bio=null;S.lastBio=tok;toast('check',`BiometricPrompt verificado (${tok})`);b.onOk();if(S.screen==='cart')renderCart(true);
+  S.bio=null;S.lastBio=tok;toast('check',`BiometricPrompt verificado (${tok})`);b.onOk();rerender();
 };
 function completeCheckout(){
   const t=cartTotals();if(!t.count)return;
@@ -764,7 +789,11 @@ function completeCheckout(){
   const order={id,status:'Envío preparado',badgeNum:t.count,date:'Hace un instante',total:t.finalPay,branch:S.branch,skus:Object.keys(S.cart)};
   S.orders=[order,...(S.orders||[])];S.trackedOrder=id;
   if(FB_USER&&window.BV_FB){const uid=FB_USER.uid;BV_FB.clearCart(uid).catch(e=>console.warn('Firestore',e));BV_FB.createOrder(uid,order).catch(e=>console.warn('Firestore',e))}
-  S.cart={};S.redeem=false;S.lastBio=null;save();updateCart();
+  S.card.lifetime+=t.gen;
+  if(t.gen>0)addMovement({id:`mov_earn_${id}_${Date.now()}`,title:`Compra ${S.branch}`,subtitle:`Orden #${id} • Retorno 1%`,date:'Hace un instante',amount:t.gen,type:'earn',orderId:id});
+  if(t.redeemed>0)addMovement({id:`mov_redeem_${id}_${Date.now()+1}`,title:'Canje en Carrito',subtitle:`Orden #${id} • Descuento aplicado`,date:'Hace un instante',amount:-t.redeemed,type:'redeem',orderId:id});
+  persistCard();
+  S.cart={};S.redeem=S.card.autoRedeem&&!S.bravLocked;S.lastBio=null;save();updateCart();
   const st=STAGES[1],m=metrics(st);S.celebrate={id,total:t.finalPay,branch:S.branch,eta:m.eta,km:m.road};syncTel(st,false);BANNER=null;
   toast('check',`¡Pedido confirmado! +RD$ ${t.gen} en tu Tarjeta Bravísima`);
   go('delivery');$('overlay').innerHTML=celebration();setTimeout(endCelebrate,3500);
@@ -976,6 +1005,275 @@ function celebration(){const c=S.celebrate,cols=['#D9232A','#F59E0B','#10B981','
      <div style="font-weight:800;font-size:16px;color:rgba(255,255,255,.92)">Orden ${esc(c.id)} • RD$${fmt(c.total)}</div>
      <div class="row" style="gap:10px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;text-align:left">${ic('locate','font-size:22px')}<div><div style="font-weight:800;font-size:13px">${esc(c.branch)} • ${c.km} km</div><div style="font-size:11.5px;font-weight:700;opacity:.9">Llegada estimada por GPS: ~${c.eta} min</div></div></div></div></div></div>`}
 window.endCelebrate=()=>{if(!S.celebrate)return;S.celebrate=null;const el=document.querySelector('.celeb');if(el){el.style.opacity=0;setTimeout(()=>el.remove(),260)}};
+/* ================= RONDA 4: Bravísima, Mi cuenta, Listas, Escáner ================= */
+const mi=(n,sz=20,o)=>`<span class="${o?'material-icons-outlined':'material-icons'} mi" style="font-size:${sz}px" aria-hidden="true">${n}</span>`;
+const jhash=s=>{let h=0;for(const ch of s)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return h};
+const TIERS=[['Clásica',0,250,'1% de retorno en todas tus compras Bravo'],['Plata',250,750,'1% de retorno + acceso anticipado a ofertas del día'],['Oro',750,2000,'1% de retorno + prioridad en entregas Express GPS'],['Platino',2000,null,'Nivel máximo Bravo • Beneficios VIP y bonos dobles']];
+const tierOf=l=>TIERS[l>=2000?3:l>=750?2:l>=250?1:0];
+function persistCard(){save();if(FB_USER&&window.BV_FB)BV_FB.saveCard(FB_USER.uid,{...S.card,balance:S.bravBal,locked:S.bravLocked}).then(n=>{if(n&&n!==S.card.number){S.card.number=n;save()}}).catch(e=>console.warn('Firestore',e))}
+function addMovement(m){S.movs=[m,...S.movs];save();if(FB_USER&&window.BV_FB)BV_FB.recordMovement(FB_USER.uid,m).catch(e=>console.warn('Firestore',e))}
+
+/* ---------- Tarjeta Bravísima (BravisimaScreen) ---------- */
+function renderBravisima(keep){
+  const prev=keep&&$('mainScroll')?$('mainScroll').scrollTop:0;
+  const c=S.card,bal=S.bravBal,lk=S.bravLocked,tr=tierOf(c.lifetime),t=cartTotals(),guest=!FB_USER;
+  const num=c.number,shown=S.maskCard&&num.length>=4?`BRV-••••-••••-${num.slice(-4)}`:num;
+  const seed=Math.abs(jhash(num)),bars=Array.from({length:32},(_,i)=>1+((Math.trunc(seed/(i+1))+i*5)%3));
+  const tp=tr[2]&&tr[2]>tr[1]?Math.min(1,Math.max(0,(c.lifetime-tr[1])/(tr[2]-tr[1]))):1,gp=Math.min(1,Math.max(0,bal/c.goal));
+  const bar=(v,col)=>`<div style="height:7px;border-radius:9px;background:color-mix(in srgb,var(--primary) 14%,transparent);overflow:hidden"><div style="height:100%;width:${Math.round(v*100)}%;background:${col||'linear-gradient(90deg,var(--amber),var(--primary))'};border-radius:9px"></div></div>`;
+  const grad=lk?'linear-gradient(135deg,#334155,#1E293B,#0F172A)':`linear-gradient(135deg,var(--primary),#991B1B,#4C0519)`;
+  const ed=S.editCard||{holder:c.holder,goal:c.goal,category:c.category};
+  $('screen').className='view';
+  $('screen').innerHTML=`<div class="caphdr tcard" style="flex-direction:row;align-items:center;gap:10px;padding:8px 10px"><button class="backbtn" style="width:36px;height:36px" aria-label="Volver" onclick="back()">${ic('back')}</button>
+     <div style="flex:1;text-align:center"><div class="sect" style="font-size:17px">Tarjeta Bravísima</div><div class="ul" style="margin:3px auto 0"></div></div>
+     <span style="padding:5px 9px;border-radius:999px;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);font:800 10.5px 'Nunito'">${tr[0]}</span></div>
+   <div class="scroll" id="mainScroll" style="padding-top:78px;display:flex;flex-direction:column;gap:12px">
+   ${guest?`<div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px"><div class="row" style="gap:10px">${ic('shield','font-size:22px;color:var(--primary)')}<div><div class="disp" style="font-weight:600;font-size:14.5px">Vincula tu cuenta Google</div><div style="font-size:11.5px;font-weight:600;color:var(--ink2)">Inicia sesión con tu cuenta de Google para sincronizar y gestionar tu Tarjeta Bravísima en todos tus dispositivos.</div></div></div>
+      <button class="pbtn" style="height:42px;font-size:13px" onclick="signIn(false).then(()=>S.screen==='bravisima'||1)">${ic('spark')} Iniciar sesión con Google</button></div>`
+   :`<div class="tcard" style="margin:0 14px;padding:12px 14px;display:flex;align-items:center;gap:10px"><span style="width:36px;height:36px;border-radius:50%;background:rgba(5,150,105,.14);color:#059669;display:flex;align-items:center;justify-content:center;font-size:18px">${ic('cloud')}</span>
+      <div style="flex:1"><div class="disp" style="font-weight:600;font-size:13.5px">${esc(S.profile?.name||c.holder)}</div><div style="font-size:11px;font-weight:700;color:var(--ink2)">${esc(c.email||S.profile?.email||'')} • Cuenta Google Activa</div></div>
+      <button class="chip alt" style="height:30px;color:var(--ink)" onclick="signOutGoogle()">${ic('back')}Salir</button></div>`}
+   <div style="margin:0 14px;border-radius:24px;padding:18px;background:${grad};color:#fff;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 40px rgba(0,0,0,.25)">
+     <div class="meta" style="font-size:10px;color:rgba(255,255,255,.88)">${['NIVEL '+tr[0].toUpperCase(),lk?'BLOQUEADA':'ACTIVA','1% Cashback'].map(esc).join('<i style="color:#FDE68A">/</i>')}</div>
+     <div><div class="disp" style="font-weight:700;font-size:24px">Bravísima Digital</div><div style="font-size:13px;font-weight:700;opacity:.9">${esc(c.holder)}</div></div>
+     <div style="background:#fff;border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer" onclick="openScanner()">
+       <div style="display:flex;align-items:flex-end;gap:2px;height:42px">${bars.map((w,i)=>`<span style="width:${w*1.6}px;height:100%;background:${lk?'#94A3B8':'#111827'};margin-right:${i%3?1.5:2.5}px;border-radius:1px"></span>`).join('')}</div>
+       <div class="row" style="justify-content:space-between" onclick="event.stopPropagation()"><span style="font:800 13px 'Nunito';color:#0F172A;letter-spacing:.5px">${esc(shown)}</span>
+         <span class="row" style="gap:6px"><button class="iconbtn" style="background:#F1F5F9;color:#1E293B" aria-label="${S.maskCard?'Mostrar':'Ocultar'} número" onclick="S.maskCard=!S.maskCard;renderBravisima(true)">${mi(S.maskCard?'visibility':'visibility_off',16)}</button><button class="iconbtn" style="background:#F1F5F9;color:#1E293B" aria-label="Copiar número" onclick="copyCard()">${mi('content_copy',15)}</button></span></div></div>
+     <div><div style="font-size:11.5px;font-weight:800;opacity:.85">${lk?'BALANCE PROTEGIDO':'BALANCE DISPONIBLE'}</div><div class="disp" style="font-weight:700;font-size:28px">RD$ ${fmt(bal)}.00</div></div>
+     <div class="row" style="gap:10px"><button class="obtn" style="flex:1;height:42px;background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:#fff;font-size:12.5px" onclick="openScanner()">${mi('qr_code_scanner',18)} Escanear</button>
+       <button class="obtn" style="flex:1;height:42px;background:${lk?'rgba(255,255,255,.4)':'#fff'};border:0;color:#1E293B;font-size:12.5px" ${lk?'disabled':''} onclick="S.redeem=true;save();go('cart')">${lk?'Bloqueada':'Canjear en carrito'}</button></div>
+   </div>
+   <div class="tcard" style="margin:0 14px;padding:18px;display:flex;flex-direction:column;gap:12px">
+     <div><div class="sect" style="font-size:16px">Gestionar Tarjeta Bravísima</div><div class="ul"></div></div>
+     <div class="row" style="justify-content:space-between"><span class="disp" style="font-weight:600;font-size:13px">Nivel ${tr[0]} • RD$ ${fmt(c.lifetime)}</span><span style="font-size:11.5px;font-weight:800;color:var(--primary)">${tr[2]?`Meta: RD$ ${tr[2]}`:'Nivel Máximo'}</span></div>
+     ${bar(tp)}
+     <div style="font-size:12.5px;font-weight:600;color:var(--ink2)">${tr[3]} • Meta mensual: RD$ ${fmt(bal)} / RD$ ${fmt(c.goal)} (${Math.round(gp*100)}%)</div>
+     <div class="row" style="gap:12px;cursor:pointer" onclick="toggleCardLock()">${ic(lk?'lock':'lockopen',`font-size:22px;color:${lk?'#D9232A':'#10B981'}`)}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px">${lk?'Tarjeta bloqueada':'Seguridad de tarjeta activa'}</div><div style="font-size:12.5px;font-weight:600;color:var(--ink2)">${lk?'Canjes y códigos pausados temporalmente':'Toca para bloquear temporalmente tu Bravísima'}</div></div><span class="sw ${lk?'on':''}" style="${lk?'background:#D9232A':''}"></span></div>
+     <div class="row" style="gap:12px">${ic('ccard','font-size:22px;color:var(--primary)')}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px">Canje automático en carrito</div><div style="font-size:12.5px;font-weight:600;color:var(--ink2)">Aplica tu balance Bravísima al pagar automáticamente</div></div><button class="sw ${c.autoRedeem?'on':''}" role="switch" aria-checked="${!!c.autoRedeem}" aria-label="Canje automático en carrito" onclick="toggleAutoRedeem()"></button></div>
+     <button class="row" style="gap:10px;border:0;background:none;padding:4px 0;color:var(--ink);text-align:left" onclick="S.editCard=S.editCard?null:{holder:S.card.holder,goal:S.card.goal,category:S.card.category};renderBravisima(true)">${mi('edit',19)}<span class="disp" style="flex:1;font-weight:600;font-size:13px">Personalizar titular, meta y pasillo favorito</span>${mi(S.editCard?'expand_less':'expand_more',22)}</button>
+     ${S.editCard?`<label class="fld"><span>Nombre en Tarjeta Bravísima</span><input value="${esc(ed.holder)}" oninput="S.editCard.holder=this.value"></label>
+       <div style="font-size:12px;font-weight:800">Meta mensual de ahorro: RD$ ${fmt(ed.goal)}</div><div class="row" style="gap:6px;flex-wrap:wrap">${[300,500,1000,2000].map(g=>`<button class="ncf ${ed.goal===g?'on':''}" style="flex:0 0 auto;padding:7px 12px;font-size:11.5px" onclick="S.editCard.goal=${g};renderBravisima(true)">RD$ ${g}</button>`).join('')}</div>
+       <div style="font-size:12px;font-weight:800">Categoría preferida de bonos</div><div class="row" style="gap:6px;flex-wrap:wrap">${['Todo Bravo','Despensa','Carnes y Frescos','El Arca Mascotas'].map(g=>`<button class="ncf ${ed.category===g?'on':''}" style="flex:0 0 auto;padding:7px 12px;font-size:11.5px" onclick="S.editCard.category='${g}';renderBravisima(true)">${g}</button>`).join('')}</div>
+       <button class="pbtn" style="height:42px;font-size:12.5px" onclick="saveCardSettings()">${guest?'Guardar en mi Dispositivo':'Guardar Cambios en mi Cuenta'}</button>`:''}
+   </div>
+   <div class="tcard" style="margin:0 14px;padding:18px;display:flex;flex-direction:column;gap:10px">
+     <div class="sect" style="font-size:15.5px">Activar Código Promocional</div>
+     <div class="row" style="gap:8px"><label class="search" style="flex:1;height:44px">${mi('local_offer',17)}<input id="promoIn" placeholder="Ej. BRAVO25" aria-label="Código promocional" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')redeemPromo()"></label><button class="pbtn" style="width:auto;padding:0 18px;height:44px;font-size:12.5px" onclick="redeemPromo()">Aplicar</button></div>
+     <div class="row" style="gap:6px;flex-wrap:wrap">${[['BRAVO25','+RD$ 25'],['BRAVISIMA50','+RD$ 50'],['ARCA20','+RD$ 20']].map(([k,r])=>{const done=c.codes.includes(k);return `<button class="chip ${done?'alt':''}" style="height:30px;font-size:12px;${done?'color:#059669':''}" ${done?'disabled':''} onclick="redeemPromo('${k}')">${done?`${k} ✓ Canjeado`:`${k} (${r})`}</button>`}).join('')}</div>
+   </div>
+   <div class="tcard" style="margin:0 14px;padding:18px;display:flex;flex-direction:column;gap:10px">
+     <div class="row" style="justify-content:space-between"><span class="sect" style="font-size:16px">Progreso en tu carrito actual</span>${metaStrip([`+RD$ ${t.gen}`,'Hoy'],11)}</div>
+     <div style="font-size:12.5px;font-weight:600;color:var(--ink2)">Recibes RD$ 1.00 de retorno automático por cada RD$ 100.00 en compras.</div>
+     ${bar((t.subtotal%100)/100,'#059669')}
+     ${metaStrip(['Próximo peso',`Faltan RD$ ${Math.round(100-t.subtotal%100)}`],11)}
+   </div>
+   <div class="tcard" style="margin:0 14px;padding:18px;display:flex;flex-direction:column;gap:10px">
+     <div class="sect" style="font-size:16px">Movimientos recientes (${S.movs.length})</div>
+     ${S.movs.length?S.movs.map(m=>`<div class="row" style="gap:10px;padding:8px 0;border-top:1px solid var(--border)"><div style="flex:1"><div class="disp" style="font-weight:600;font-size:14.5px">${esc(m.title)}</div>${metaStrip([m.date,m.subtitle],12,'wrap')}</div><span class="disp" style="font-weight:700;font-size:14.5px;color:${m.amount>=0?(S.dark?'#34D399':'#047857'):(S.dark?'#FCA5A5':'#991B1B')}">${m.amount>=0?`+RD$ ${fmt(m.amount)}.00`:`-RD$ ${fmt(-m.amount)}.00`}</span></div>`).join(''):`<div style="font-size:12.5px;font-weight:600;color:var(--ink2)">Aún no hay movimientos registrados en tu Tarjeta Bravísima.</div>`}
+   </div></div>${S.bio?bioDialog():''}`;
+  const sc=$('mainScroll');sc.scrollTop=prev;bindScroll(sc);
+}
+window.copyCard=()=>{try{navigator.clipboard.writeText(S.card.number)}catch(e){}toast('check',`Número ${S.card.number} copiado`)};
+window.toggleCardLock=()=>{const lk=S.bravLocked;bioReq({op:'ULK',title:lk?'Desbloquear Tarjeta Bravísima':'Bloquear Tarjeta Bravísima',subtitle:`Balance protegido: RD$ ${fmt(S.bravBal)}.00`,description:lk?'Confirma tu huella digital para reactivar canjes y uso de tu Tarjeta Bravísima.':'Confirma tu huella digital para proteger y pausar temporalmente tu Tarjeta Bravísima.',badge:'SEGURIDAD TARJETA BRAVÍSIMA',amount:S.bravBal,payLabel:'Tarjeta Bravísima Digital',deliveryLabel:`Nivel ${tierOf(S.card.lifetime)[0]}`},()=>{S.bravLocked=!lk;if(S.bravLocked){S.redeem=false;S.card.autoRedeem=false}persistCard();toast(S.bravLocked?'lock':'check',S.bravLocked?'Tarjeta Bravísima bloqueada temporalmente':'Tarjeta Bravísima activada y lista')})};
+window.toggleAutoRedeem=()=>{if(S.bravLocked){toast('lock','Desbloquea tu Tarjeta Bravísima para activar el canje automático.');return}S.card.autoRedeem=!S.card.autoRedeem;S.redeem=S.card.autoRedeem;persistCard();toast('spark',S.card.autoRedeem?'Canje automático en carrito activado':'Canje automático desactivado');renderBravisima(true)};
+window.saveCardSettings=()=>{const e=S.editCard;S.card.holder=e.holder.trim()||'Cliente Bravísimo';S.card.goal=e.goal;S.card.category=e.category;S.editCard=null;persistCard();toast('check','Configuración de Tarjeta Bravísima guardada');renderBravisima(true)};
+window.redeemPromo=k=>{const code=(k||$('promoIn').value||'').trim().toUpperCase();
+  if(!code){toast('offer','Ingresa un código promocional Bravísima.');return}
+  if(S.bravLocked){toast('lock','Desbloquea tu tarjeta antes de aplicar bonos promocionales.');return}
+  if(S.card.codes.includes(code)){toast('offer',`El código ${code} ya fue canjeado en tu Tarjeta Bravísima.`);return}
+  const amt={BRAVO25:25,BRAVISIMA50:50,ARCA20:20,VIP30:30}[code];if(!amt){toast('offer','Código no reconocido. Prueba: BRAVO25, BRAVISIMA50 o ARCA20.');return}
+  S.bravBal+=amt;S.card.lifetime+=amt;S.card.codes=[...new Set([...S.card.codes,code])].slice(0,20);
+  addMovement({id:'mov_promo_'+Date.now(),title:`Bono Promocional ${code}`,subtitle:'Acreditado a Tarjeta Bravísima',date:'Hace un instante',amount:amt,type:'bonus'});persistCard();
+  toast('spark',`¡Código ${code} aplicado! +RD$ ${amt}.00 en Bravísima`);renderBravisima(true)};
+window.signOutGoogle=async()=>{try{await BV_FB.signOut()}catch(e){}FB_USER=null;S.guest=true;S.profile=Object.assign({},DEF_PROFILE);save();toast('user','Sesión de Google cerrada • Modo Invitado');render()};
+
+/* ---------- Escáner (BarcodeScannerModal) ---------- */
+const SCAN_CHIPS=[['BRV-001','🍖 Salami ($499)','7460112299014'],['BRV-017','🧻 Papel Bravo ($379)','7460112299021'],['BRV-089','🍞 Pan Viga ($99)','7460112299038'],['ARC-001','🐾 Alimento Arca ($620)','7460112299045']];
+let SCAN_STREAM=null;
+window.openScanner=()=>{S.scanSku=S.scanSku||'BRV-001';drawScanner();startCam()};
+function drawScanner(){const p=BY_SKU[S.scanSku],ean=(SCAN_CHIPS.find(c=>c[0]===S.scanSku)||[])[2]||'7460112299014';
+  let host=$('scanModal');if(!host){host=document.createElement('div');host.id='scanModal';$('overlay').appendChild(host)}
+  host.innerHTML=`<div class="modal" style="background:rgba(9,13,22,.44)" onclick="if(event.target===this)closeScanner()"><div role="dialog" aria-label="Escáner Óptico BravoVa" style="width:100%;max-width:400px;border-radius:28px;background:rgba(15,23,42,.82);border:1.2px solid rgba(255,255,255,.22);backdrop-filter:blur(20px);padding:16px;display:flex;flex-direction:column;gap:14px;color:#F8FAFC">
+   <div class="row" style="justify-content:space-between"><div><div class="disp" style="font-weight:700;font-size:16px">Escáner Óptico BravoVa</div><div style="font-size:11.5px;font-weight:600;color:#CBD5E1">Apunta al código de barras EAN-13 del producto</div></div>
+     <div class="row" style="gap:6px"><button class="iconbtn" style="background:rgba(255,255,255,.1);color:${S.torch?'#FDE68A':'#fff'}" aria-label="Linterna" onclick="toggleTorch()">${mi(S.torch?'flashlight_on':'flashlight_off',17)}</button><button class="iconbtn" style="background:rgba(255,255,255,.1);color:#fff" aria-label="Cerrar escáner" onclick="closeScanner()">${ic('close')}</button></div></div>
+   <div style="position:relative;height:230px;border-radius:20px;overflow:hidden;background:#020617">
+     <video id="scanVid" playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;${SCAN_STREAM?'':'display:none'}"></video>
+     ${!SCAN_STREAM&&p?`<div style="position:absolute;inset:20px 60px">${artwork(p,190,16,'margin:0;background:#0B1220')}</div>`:''}
+     <div style="position:absolute;inset:34px 30px;border:2px solid rgba(255,255,255,.75);border-radius:16px"></div>
+     <div class="scanlaser"></div>
+     <div style="position:absolute;left:0;right:0;bottom:10px;text-align:center;font:800 11px 'Nunito';color:#34D399;text-shadow:0 1px 4px #000">EAN-13 DETECTADO: ${ean}</div></div>
+   <div style="font:900 10.5px 'Nunito';color:#94A3B8;letter-spacing:.4px">PRUEBA RÁPIDA DE PRODUCTOS:</div>
+   <div class="row" style="gap:6px;flex-wrap:wrap">${SCAN_CHIPS.map(([s,l])=>`<button class="chip" style="height:30px;font-size:11px;${s===S.scanSku?'background:var(--primary);color:#fff;border-color:var(--primary)':'background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)'}" onclick="S.scanSku='${s}';drawScanner()">${l}</button>`).join('')}</div>
+   ${p?`<div class="row" style="gap:10px;padding:10px;border-radius:18px;background:rgba(255,255,255,.08)"><div style="width:56px;flex:none">${artwork(p,52,12,'margin:0')}</div><div style="flex:1"><div style="font-weight:800;font-size:12.5px;line-height:1.25">${esc(p.name)}</div><div style="font-size:10.5px;font-weight:700;color:#CBD5E1">${esc(p.unit)} • SKU ${p.sku}</div><div class="disp" style="font-weight:700;font-size:15px;color:#FCA5A5">RD$ ${p.price}.00</div></div></div>
+   <div class="row" style="gap:8px"><button class="obtn" style="flex:1;height:42px;background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)" onclick="closeScanner();openProduct('${p.sku}')">Detalles</button><button class="pbtn" style="flex:1;height:42px" onclick="chg('${p.sku}',1);closeScanner()">${ic('cart')} Agregar</button></div>`:''}
+  </div></div>`;
+  const v=$('scanVid');if(v&&SCAN_STREAM){v.srcObject=SCAN_STREAM;v.play().catch(()=>{})}}
+async function startCam(){if(SCAN_STREAM||!navigator.mediaDevices?.getUserMedia)return;try{SCAN_STREAM=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});if($('scanModal'))drawScanner();scanLoop()}catch(e){}}
+async function scanLoop(){if(!('BarcodeDetector' in window))return;const bd=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','code_128']});
+  while(SCAN_STREAM&&$('scanVid')){try{const r=await bd.detect($('scanVid'));if(r[0]){const hit=SCAN_CHIPS.find(c=>c[2]===r[0].rawValue);if(hit&&hit[0]!==S.scanSku){S.scanSku=hit[0];drawScanner()}}}catch(e){}await new Promise(r=>setTimeout(r,400))}}
+window.toggleTorch=()=>{S.torch=!S.torch;try{SCAN_STREAM?.getVideoTracks()[0]?.applyConstraints({advanced:[{torch:S.torch}]})}catch(e){}drawScanner()};
+window.closeScanner=()=>{SCAN_STREAM?.getTracks().forEach(t=>t.stop());SCAN_STREAM=null;S.torch=false;$('scanModal')?.remove()};
+
+/* ---------- Mi cuenta (AccountGridScreen) ---------- */
+const ACC=[['pedidos','Mis pedidos','local_shipping'],['perfil','Mi perfil','account_circle'],['pagos','Métodos de pago','credit_card'],['direcciones','Direcciones','location_on'],['listas','Mis listas','format_list_bulleted'],['ajustes','Ajustes','settings'],['soporte','Soporte','chat_bubble_outline'],['ayuda','Ayuda','help_outline']];
+function renderAccount(){
+  const guest=!FB_USER;
+  $('screen').className='view';
+  $('screen').innerHTML=topBar('Mi cuenta',cartBtn()).replace('font-size:16px">Mi cuenta','font-size:18px">Mi cuenta')+`<div class="scroll" id="mainScroll" style="padding-top:80px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px">${ACC.map(([k,l,i])=>`<button class="tcard acct" onclick="openSub('${k}')"><span class="accic">${mi(i,24,1)}</span><span class="disp" style="font-weight:600;font-size:15.5px">${l}</span></button>`).join('')}</div>
+    <div class="tcard" style="margin:0 14px;padding:14px;display:flex;align-items:center;gap:10px"><span style="width:36px;height:36px;border-radius:50%;background:rgba(5,150,105,.14);color:#059669;display:flex;align-items:center;justify-content:center;font-size:18px">${ic('cloud')}</span>
+      <div style="flex:1"><div style="font-weight:800;font-size:13.5px">${guest?'Modo Invitado • Sesión en Dispositivo':esc(S.profile?.email||'')}</div><div style="font-size:11px;font-weight:700;color:var(--ink2)">${guest?'Catálogo oficial al día • Sin cuenta Google':'Sincronizado con tu cuenta de Google'}</div></div>
+      <button class="chip alt" style="height:30px;color:var(--ink)" onclick="${guest?'signIn(false)':'signOutGoogle()'}">${ic('back')}${guest?'Conectar Google':'Salir'}</button></div></div>`;
+  bindScroll($('mainScroll'));
+}
+window.openSub=k=>{S.sub=k;go('account_sub')};
+function field(label,id,val){return `<label class="fld"><span>${label}</span><input id="${id}" value="${esc(val||'')}"></label>`}
+function renderSub(keep){
+  const prev=keep&&$('mainScroll')?$('mainScroll').scrollTop:0,k=S.sub,title=(ACC.find(a=>a[0]===k)||[,'Mi cuenta'])[1],pr=S.profile,guest=!FB_USER;
+  let b='';
+  if(k==='pedidos'){const top=S.orders[0],ts=stageOf(top?.status);
+    b=`<div style="padding:0 14px">${metaStrip(['Cuenta Google',guest?'Modo invitado • Guardado en este dispositivo':'Sincronizado con tu cuenta de Google'],10.5)}</div>
+     <div class="tcard" style="margin:0 14px;padding:14px;display:flex;align-items:center;gap:10px;border:1px solid color-mix(in srgb,var(--primary) 30%,transparent)"><span class="secic" style="width:40px;height:40px">${ic('truck')}</span><div style="flex:1"><div class="disp" style="font-weight:600;font-size:13.5px">Pedido #${top?.id||'ORD-88412'} • ${ts.status}</div>${metaStrip([top?.branch||'Av. Winston Churchill',`Avance ${ts.pct}%`,'Seguimiento en vivo'],10)}</div><button class="chip" style="height:30px" onclick="S.trackedOrder='${top?.id||''}';save();go('delivery')">Ver progreso</button></div>
+     ${S.orders.map(o=>{const st=stageOf(o.status);return `<div class="tcard" style="margin:0 14px;padding:14px;display:flex;flex-direction:column;gap:8px"><div class="row" style="justify-content:space-between"><span class="disp" style="font-weight:700;font-size:15px">Orden ${esc(o.id)}</span><span style="padding:3px 9px;border-radius:99px;font:800 10.5px 'Nunito';${st.k==='DELIVERED'?'background:rgba(5,150,105,.14);color:#059669':'background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary)'}">${st.status} • ${st.pct}%</span></div>
+       ${metaStrip([o.date,o.branch,`${o.badgeNum} artículos`],10.5,'wrap')}
+       <div class="row" style="justify-content:space-between"><span class="disp" style="font-weight:700;font-size:17px;color:var(--primary)">RD$ ${fmt(o.total)}.00</span><span class="row" style="gap:6px"><button class="chip" style="height:30px" onclick="S.trackedOrder='${o.id}';save();syncTel(stageOf('${esc(o.status)}'),false);go('delivery')">${ic('truck')}Seguir envío</button><button class="chip alt" style="height:30px;color:var(--ink)" onclick="reorder('${o.id}')">${ic('refresh')}Repetir</button></span></div></div>`}).join('')}`}
+  else if(k==='perfil')b=`<div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px">${field('Nombre completo','pfN',pr.name)}${field('Teléfono móvil (RD)','pfP',pr.phone)}${field('Cédula / RNC','pfR',pr.rnc)}
+      <label class="fld"><span>Tipo de Comprobante Fiscal (NCF)</span><select id="pfT">${['B01 - Crédito Fiscal','B02 - Consumidor Final'].map(o=>`<option ${pr.ncf===o?'selected':''}>${o}</option>`).join('')}</select></label>
+      <button class="pbtn" onclick="saveProfile()">Guardar Cambios</button>
+      <button class="obtn" onclick="${guest?'signIn(false)':'signOutGoogle()'}">${guest?'Iniciar sesión con Google (Salir de Modo Invitado)':`Cerrar sesión de Google (${esc(pr.email)})`}</button></div>`;
+  else if(k==='pagos')b=S.cards.map(c=>`<button class="tcard ccard" style="text-align:left;color:var(--ink);${c.def?'border:1.4px solid var(--primary)':''}" onclick="pickCardAcc('${c.id}')">${ic('ccard','font-size:24px;color:var(--primary)')}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px">${esc(c.brand)} ${esc(c.bank)} •••• ${c.last4}</div>${metaStrip([`Vence ${c.exp}`,c.def?'Predeterminada':'Secundaria'],10.5)}</div>${c.def?ic('checkc','font-size:20px;color:var(--primary)'):''}</button>`).join('')+`<div style="padding:0 14px"><button class="pbtn" onclick="addCardAcc()">+ Vincular Nueva Tarjeta Bancaria</button></div>`;
+  else if(k==='direcciones')b=S.addresses.map(a=>`<button class="tcard ccard" style="text-align:left;color:var(--ink);${a.def?'border:1.4px solid var(--primary)':''}" onclick="setAddress('${a.id}')">${mi('location_on',24)}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px">${esc(a.label)}</div>${metaStrip([a.street,a.branch],10.5,'wrap')}</div>${a.def?ic('checkc','font-size:20px;color:var(--primary)'):''}</button>`).join('');
+  else if(k==='listas')b=listsBody();
+  else if(k==='ajustes')b=settingsBody();
+  else if(k==='soporte'){const br=S.branch,cats=[['SUGERENCIA_PRODUCTO','Producto'],['MEJORA_UI_UX','Mejora App'],['REPORTE_SOPORTE','Soporte'],['FELICITACION','Felicitación']],sg=S.sugg||(S.sugg={cat:'SUGERENCIA_PRODUCTO',pri:'MEDIA'});
+    const sp=[[`Tengo un producto dañado o vencido en mi orden de ${br} y deseo reposición sin costo o nota de crédito en mi Tarjeta Bravísima.`,'1. Reportar Producto Dañado / Vencido (Foto)'],['Quiero auditar mediante OCR una foto de mi factura o ticket NCF (B01/B02) para verificar ITBIS (18%/16%), descuentos y puntos Bravísima.','2. Auditar Factura o Ticket NCF (OCR)'],['Voy a subir una foto de un ingrediente de mi alacena o etiqueta de mascota para buscar su equivalente exacto en el catálogo Bravo o El Arca.','3. Identificar Alacena o Etiqueta de Mascota']];
+    b=`<div class="tcard aura" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px;border-radius:18px"><div class="row" style="gap:8px"><span class="orb" style="width:28px;height:28px"></span><span class="disp" style="font-weight:600;font-size:14.5px">Brav IA Soporte • Visión Multimodal y Calidad</span></div>
+       <div style="font-size:12px;font-weight:600;color:var(--ink2)">Adjunta fotos directamente en Brav IA para auditoría técnica instantánea en ${esc(br)}:</div>
+       ${sp.map(([q,l],i)=>`<button class="obtn" style="justify-content:flex-start;height:auto;min-height:42px;padding:8px 14px;font-size:12px;text-align:left" onclick="supportAsk(${i})">${l}</button>`).join('')}</div>
+     <div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px"><div class="disp" style="font-weight:600;font-size:14.5px">Buzón de Sugerencias y Mejora Continua</div>${metaStrip(['Destino: bezaleelpatrocino0@gmail.com',br],10,'wrap')}
+       <div class="row" style="gap:6px;flex-wrap:wrap">${cats.map(([c,l])=>`<button class="ncf ${sg.cat===c?'on':''}" style="flex:0 0 auto;padding:7px 12px" onclick="S.sugg.cat='${c}';keepSugg();renderSub(true)">${l}</button>`).join('')}</div>
+       <div class="row" style="gap:6px"><span style="font-size:11px;font-weight:800">Prioridad:</span>${['ALTA','MEDIA','BAJA'].map(p=>`<button class="ncf ${sg.pri===p?'on':''}" style="flex:0 0 auto;padding:6px 12px" onclick="S.sugg.pri='${p}';keepSugg();renderSub(true)">${p}</button>`).join('')}</div>
+       ${field('Asunto ejecutivo (opcional)','sgS',sg.subj)}<label class="fld"><span>Escribe tu sugerencia, producto deseado o reporte...</span><textarea id="sgB" rows="4">${esc(sg.body||'')}</textarea></label>
+       <button class="pbtn" onclick="sendSuggestion()">${ic('sendi')} Enviar a bezaleelpatrocino0@gmail.com</button></div>
+     <div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px"><div class="row" style="gap:8px">${mi('support_agent',22)}<span class="disp" style="font-weight:600;font-size:14.5px">Centro de Atención al Cliente Bravo</span></div>
+       <div style="font-size:12px;font-weight:600;color:var(--ink2)">Horario de atención: Lunes a Sábado de 7:00 AM a 10:00 PM (Domingos cerrados por valores familiares). Delivery express en 8–12 minutos en el polígono central.</div>
+       <a class="pbtn" style="text-decoration:none;background:#16A34A;color:#fff" href="https://wa.me/18095402728" target="_blank" rel="noopener" onclick="toast('chat','Conectando con WhatsApp Bravo (809-540-2728)...')">Chatear por WhatsApp</a>
+       <a class="obtn" style="text-decoration:none" href="tel:+18095402728" onclick="toast('phone','Marcando a Servicio al Cliente (809-540-2728)...')">Llamar al (809) 540-2728</a></div>`}
+  else if(k==='ayuda'){const faq=[['¿Cómo funciona el 1% de la Tarjeta Bravísima?',`Retorno exacto del 1% (RD$ 1.00 por cada RD$ 100.00 de compra), canje directo en carrito o caja presentando el código de barras ${pr.bravisimaNumber}.`],['¿Cuáles son los horarios y tiempos de entrega?','Lunes a Sábado de 7:00 AM a 10:00 PM (Domingos cerrados por valores familiares). Delivery express en 8-12 minutos en el polígono central.'],['¿Cómo funciona la Facturación Fiscal (NCF)?','Emitimos Comprobantes B01 (Crédito Fiscal para empresas/RNC) y B02 (Consumidor Final) con desglose exacto de ITBIS (18%/16%).'],['¿Qué hace Brav IA y Brav IA Soporte?','Brav IA verifica recetas en vivo en la web con medidas exactas, cumple matemáticamente tu presupuesto en RD$, audita fotos de productos/facturas NCF y envía sugerencias a bezaleelpatrocino0@gmail.com.']];
+    b=faq.map(([q,a])=>`<div class="tcard" style="margin:0 14px;padding:16px"><div class="disp" style="font-weight:600;font-size:14px;margin-bottom:6px">${q}</div><div style="font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.5">${esc(a)}</div></div>`).join('')}
+  $('screen').className='view';
+  $('screen').innerHTML=topBar(title,cartBtn())+`<div class="scroll" id="mainScroll" style="padding-top:80px;display:flex;flex-direction:column;gap:12px">${b}</div>${S.bio?bioDialog():''}`;
+  const sc=$('mainScroll');sc.scrollTop=prev;bindScroll(sc);
+}
+window.reorder=id=>{const o=S.orders.find(x=>x.id===id);if(!o)return;o.skus.forEach(s=>BY_SKU[s]&&chg(s,1));go('cart')};
+window.saveProfile=()=>{const p=S.profile;p.name=$('pfN').value.trim()||p.name;p.phone=$('pfP').value.trim()||p.phone;p.rnc=$('pfR').value.trim()||p.rnc;p.ncf=$('pfT').value;save();
+  if(FB_USER&&window.BV_FB)BV_FB.saveProfile(FB_USER.uid,p,S.branch).catch(e=>console.warn('Firestore',e));toast('check','Perfil actualizado correctamente')};
+window.pickCardAcc=id=>{S.cards.forEach(c=>c.def=c.id===id);save();toast('ccard','Método de pago actualizado');renderSub(true)};
+window.addCardAcc=()=>{const l4=String(1000+Math.floor(Math.random()*9000));S.cards.forEach(c=>c.def=false);S.cards.push({id:'pm_'+Date.now(),brand:'Visa',bank:'BHD',last4:l4,exp:'08/29',def:true});save();toast('ccard',`Nueva tarjeta •••• ${l4} agregada`);renderSub(true)};
+window.setAddress=id=>{let br=S.branch;S.addresses.forEach(a=>{a.def=a.id===id;if(a.def)br=a.branch});setBranch(br)};
+window.setBranch=b=>{S.branch=b;save();const m=metrics(stageOf(trackedOrder()?.status));toast('store',`Sucursal guardada: ${b} (${m.road} km)`);renderSub(true)};
+window.keepSugg=()=>{if($('sgS'))S.sugg.subj=$('sgS').value;if($('sgB'))S.sugg.body=$('sgB').value};
+window.supportAsk=i=>{const br=S.branch,q=[`Tengo un producto dañado o vencido en mi orden de ${br} y deseo reposición sin costo o nota de crédito en mi Tarjeta Bravísima.`,'Quiero auditar mediante OCR una foto de mi factura o ticket NCF (B01/B02) para verificar ITBIS (18%/16%), descuentos y puntos Bravísima.','Voy a subir una foto de un ingrediente de mi alacena o etiqueta de mascota para buscar su equivalente exacto en el catálogo Bravo o El Arca.'][i];go('bravia');const inp=$('chatIn');if(inp){inp.value=q;inp.focus()}};
+window.sendSuggestion=()=>{keepSugg();const sg=S.sugg,body=(sg.body||'').trim();if(!body){toast('bell','Escribe el detalle de tu sugerencia antes de enviar');return}
+  const p=S.profile,payload={to_email:'bezaleelpatrocino0@gmail.com',from_user:p.name,user_contact:`${p.email} | ${p.phone}`,active_branch:S.branch,active_store:isArca()?'arca':'bravo',category:sg.cat,priority:sg.pri,subject:(sg.subj||'').trim()||`[BravoVa Feedback] ${body.slice(0,50)}`,summary_body:body,timestamp_iso:new Date().toISOString()};
+  fetch('https://formsubmit.co/ajax/bezaleelpatrocino0@gmail.com',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+  S.sugg={cat:sg.cat,pri:sg.pri};toast('check','Sugerencia enviada a bezaleelpatrocino0@gmail.com');renderSub(true)};
+
+/* ---------- Ajustes + Notificaciones push (FcmPushControlAndFeedCard) ---------- */
+function settingsBody(){const pu=S.push,unread=pu.feed.filter(f=>!f.read).length,perm='Notification' in window?Notification.permission:'denied';
+  const tog=(on,fn,lbl)=>`<button class="sw ${on?'on':''}" role="switch" aria-checked="${!!on}" aria-label="${lbl}" onclick="${fn}"></button>`;
+  return `<div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:14px">
+     <div class="row" style="gap:12px">${ic(S.dark?'moon':'sun','font-size:22px;color:var(--primary)')}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px">Modo oscuro</div>${metaStrip(['Guardado local',S.dark?'Activo':'Inactivo'],10.5)}</div>${tog(S.dark,'toggleDark()','Modo oscuro')}</div>
+     <div class="row" style="gap:12px">${ic('bell','font-size:22px;color:var(--primary)')}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px">Alertas de Ofertas y Delivery</div><div style="font-size:11.5px;font-weight:600;color:var(--ink2)">Notificaciones de tu pedido en tiempo real</div></div>${tog(pu.enabled,'togglePush()','Alertas de Ofertas y Delivery')}</div>
+     <div class="row" style="gap:12px">${mi('cloud_sync',22)}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px">Catálogo de Productos y Modo Sin Conexión</div><div style="font-size:11.5px;font-weight:600;color:var(--ink2)">${navigator.onLine?'Sincronizado en el dispositivo':'Modo sin conexión activo'} • ${PRODUCTS.length} productos</div></div><button class="chip" style="height:30px" onclick="syncCatalog()">Sincronizar</button></div></div>
+   <div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+     <div class="row" style="justify-content:space-between;gap:8px"><div>${metaStrip(['ALERTAS EN TIEMPO REAL','Google Sync'],10)}<div class="disp" style="font-weight:600;font-size:15px">Canales Push: Ofertas y Pedidos</div></div><button class="chip ${perm==='granted'?'':'alt'}" style="height:30px;${perm==='granted'?'':'color:var(--ink)'}" onclick="askNotif()">${ic('bell')}${perm==='granted'?'Alertas Activas':'Activar Permiso'}</button></div>
+     <div style="padding:8px 10px;border-radius:12px;background:rgba(5,150,105,.12);color:#059669;font:900 10px 'Nunito'">● CANAL DE NOTIFICACIONES EN VIVO ACTIVO</div>
+     ${TOPICS.map(([k,t,s])=>`<div class="row" style="gap:10px"><div style="flex:1"><div style="font-weight:800;font-size:12.5px">${t}</div><div style="font-size:11px;font-weight:600;color:var(--ink2)">${s}</div></div>${tog(pu.topics[k],`toggleTopic('${k}')`,t)}</div>`).join('')}
+     <div class="row" style="gap:8px"><button class="pbtn" style="flex:1;height:40px;font-size:12px" onclick="offerPushTest()">${ic('offer')} Probar Oferta Push</button><button class="obtn" style="flex:1;height:40px;font-size:12px" onclick="orderPushTest()">${ic('truck')} Estado Pedido Push</button></div>
+     <div class="row" style="justify-content:space-between;margin-top:4px"><div><div class="disp" style="font-weight:600;font-size:14px">Bandeja de Alertas Push (${unread} nuevas)</div>${metaStrip(['Toca una alerta para abrir la oferta o el mapa en vivo'],10)}</div><button class="chip alt" style="height:28px;color:var(--ink)" onclick="S.push.feed.forEach(f=>f.read=true);save();toast('check','Todas las notificaciones marcadas como leídas');renderSub(true)">${ic('check')}Leídas</button></div>
+     ${pu.feed.map(f=>`<button class="row" style="gap:10px;text-align:left;padding:10px;border-radius:14px;border:1px solid ${f.read?'var(--border)':'color-mix(in srgb,var(--primary) 40%,transparent)'};background:${f.read?'transparent':'color-mix(in srgb,var(--primary) 7%,transparent)'};color:var(--ink)" onclick="openPush('${f.id}')"><span class="secic" style="width:34px;height:34px;font-size:17px">${ic(f.order?'truck':'offer')}</span><div style="flex:1"><div style="font:900 9.5px 'Nunito';color:var(--primary)">${f.order?'PEDIDO EN TIEMPO REAL':'OFERTA EXCLUSIVA'} • ${esc(f.ts)}</div><div style="font-weight:800;font-size:12.5px">${esc(f.title)}</div><div style="font-size:11px;font-weight:600;color:var(--ink2)">${esc(f.body)}</div></div></button>`).join('')}</div>
+   <div class="tcard" style="margin:0 14px;padding:16px;display:flex;gap:12px;align-items:flex-start">${mi('palette',22)}<div><div class="disp" style="font-weight:600;font-size:14px">Color Automático del Dispositivo</div><div style="font-size:11.5px;font-weight:600;color:var(--ink2)">Sincronizado con el color elegido en los ajustes de tu Android (Material You) con contraste y legibilidad garantizados.</div></div></div>
+   <div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:8px"><div class="disp" style="font-weight:600;font-size:14.5px">Sucursal Preferida</div>
+     ${['Bravo Winston Churchill','Bravo Enriquillo','Bravo Núñez de Cáceres','Bravo Los Próceres','Bravo San Isidro','Bravo Santiago'].map(b=>`<button class="opt ${S.branch===b?'on':''}" style="flex:none" onclick="setBranch('${b}')">${mi('storefront',19)}<b>${b}</b></button>`).join('')}</div>`}
+const TOPICS=[['pedidos_tiempo_real','Estado de Pedidos en Tiempo Real','Confirmación, empaque, salida del repartidor y llegada a tu puerta'],['ofertas_exclusivas_bravo','Ofertas Exclusivas Supermercados Bravo','Descuentos relámpago en carnes, frescos, despensa y retornos Bravísima'],['ofertas_arca_petshop','Promociones El Arca Petshop','Alertas de alimentos premium, snacks y farmacia veterinaria']];
+function pushNotify(rec){S.push.feed=[rec,...S.push.feed].slice(0,30);save();
+  try{if(S.push.enabled&&'Notification' in window&&Notification.permission==='granted')new Notification(rec.title,{body:rec.body,icon:'img/ic_launcher_art.png'})}catch(e){}}
+window.askNotif=async()=>{if(!('Notification' in window)){toast('bell','Este navegador no admite notificaciones');return}await Notification.requestPermission();renderSub(true)};
+window.togglePush=()=>{S.push.enabled=!S.push.enabled;save();toast('bell',S.push.enabled?'Notificaciones en vivo activadas':'Notificaciones en vivo pausadas');renderSub(true)};
+window.toggleTopic=k=>{S.push.topics[k]=!S.push.topics[k];if(S.push.topics[k])S.push.enabled=true;save();toast('bell',S.push.topics[k]?'Canal de alertas activado':'Canal de alertas silenciado');renderSub(true)};
+let offerIdx=0,orderIdx=0;
+window.offerPushTest=()=>{const d=dailyOffers(),o=d.offers.length?d.offers[offerIdx++%d.offers.length]:null,m=metrics();
+  const title=o?`Oferta del Día (${o.label}): -${o.pct}% en ${o.p.name}`:'Oferta del Día Bravo: Pollo Fresco Entero';
+  pushNotify({id:'fcm_'+Date.now(),order:false,title,body:o?`Hoy baja de RD$ ${o.orig} a solo RD$ ${o.p.price} en ${S.branch} (${m.road} km de ti).`:`Hoy a solo RD$ 185.00/lb en ${S.branch} + doble retorno en tu Tarjeta Bravísima.`,ts:'Ahora',sku:o?o.p.sku:'BRV-075',read:false});toast('offer',title);if(S.screen==='account_sub')renderSub(true)};
+window.orderPushTest=()=>{const o=trackedOrder(),st=[STAGES[1],STAGES[2],STAGES[3],STAGES[4]][orderIdx++%4],m=metrics(st);setOrderStage(st,false);
+  const title=`Pedido #${o?o.id:'ORD-88412'}: ${st.status} (${m.road} km)`;pushNotify({id:'fcm_'+Date.now(),order:true,title,body:`${st.desc} (${o?o.branch:S.branch} • ETA GPS: ~${m.eta} min • ${st.pct}%).`,ts:'Ahora',orderId:o?.id,read:false});toast('truck',title);if(S.screen==='account_sub')renderSub(true)};
+window.openPush=id=>{const f=S.push.feed.find(x=>x.id===id);if(!f)return;f.read=true;save();if(f.order){if(f.orderId)S.trackedOrder=f.orderId;go('delivery')}else if(f.sku&&BY_SKU[f.sku])openProduct(f.sku);else go('home')};
+window.syncCatalog=()=>{fetch('products.json',{cache:'reload'}).then(r=>r.json()).then(rows=>{toast('cloud',`Catálogo oficial al día • ${rows.length} productos`)}).catch(()=>toast('cloud','Modo sin conexión activo • Usando catálogo guardado'))};
+
+/* ---------- Mis listas (ShoppingListsManagerSection) ---------- */
+function freqStats(){const c=new Map(),last=new Map();S.orders.forEach(o=>o.skus.forEach(s=>{c.set(s,(c.get(s)||0)+1);if(!last.has(s))last.set(s,o.date)}));
+  (S.lists[0]?.skus||[]).forEach(s=>{if(!c.has(s)){c.set(s,1);last.set(s,'En Mis Favoritos')}});
+  return [...c.entries()].sort((a,b)=>b[1]-a[1]).map(([s,n])=>BY_SKU[s]&&{p:BY_SKU[s],n,last:last.get(s)||'Compra reciente'}).filter(Boolean)}
+function listsBody(){const st=freqStats(),presets=[['✨ Mi Compra Habitual','Productos más comprados en todo mi historial de órdenes más básicos de despensa'],['🍳 Desayunos y Cena','Mis productos habituales de desayuno y cena dominicana según mi historial'],['🧹 Reposición Hogar','Productos de limpieza y hogar basados en mis compras pasadas'],['🐾 Mascota El Arca','Alimentos, snacks y cuidado de mascotas según mi historial']];
+  const nf=S.newList||(S.newList={name:'',ai:true});
+  return `<div class="tcard aura" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px;border-radius:20px">
+     <div class="row" style="gap:10px"><span class="orb" style="width:34px;height:34px"></span><div>${metaStrip(['BRAV IA • HISTORIAL INTELIGENTE',`${S.orders.length} órdenes analizadas`],10)}<div class="disp" style="font-weight:600;font-size:15px">Autocompletado según tus compras</div></div></div>
+     <div style="font-size:12px;font-weight:600;color:var(--ink2)">Brav IA analiza los productos que más repites en tus órdenes pasadas y arma o completa tus listas automáticamente.</div>
+     <div style="font:900 10px 'Nunito';color:var(--primary);letter-spacing:.3px">TUS MÁS COMPRADOS DETECTADOS</div>
+     <div class="hscroll" style="padding:0">${st.slice(0,8).map(x=>`<div class="tcard" style="width:116px;padding:8px;border-radius:14px;cursor:pointer" onclick="openProduct('${x.p.sku}')">${artwork(x.p,56,10,'margin:0 0 6px')}<div style="font-size:10.5px;font-weight:800;height:27px;overflow:hidden;line-height:1.25">${esc(x.p.name)}</div><div style="font-size:9.5px;font-weight:700;color:var(--ink2)">Comprado ${x.n}x • RD$ ${x.p.price}</div></div>`).join('')}</div>
+     <div style="font:900 10px 'Nunito';color:var(--ink2);letter-spacing:.3px">GENERAR LISTA INTELIGENTE CON 1 TOQUE</div>
+     <div class="row" style="gap:6px;flex-wrap:wrap">${presets.map(([l,f],i)=>`<button class="chip" style="height:30px" onclick="createList(${JSON.stringify(l.replace(/^\S+ /,'')).replace(/"/g,'&quot;')},true,${JSON.stringify(f).replace(/"/g,'&quot;')})">${l}</button>`).join('')}</div></div>
+   <div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+     <div class="disp" style="font-weight:600;font-size:14.5px">Crear nueva lista de compras</div>
+     <label class="search" style="height:44px">${ic('list','color:var(--ink2)')}<input id="nlName" value="${esc(nf.name)}" placeholder="Ej: Compra Semanal, Cena Familiar, Despensa..." aria-label="Nombre de la lista" oninput="S.newList.name=this.value"></label>
+     <div class="row" style="gap:10px"><div style="flex:1"><div style="font-weight:800;font-size:12.5px">Autocompletar con Brav IA</div><div style="font-size:11px;font-weight:600;color:var(--ink2)">Llena la lista automáticamente según tu historial de compras</div></div><button class="sw ${nf.ai?'on':''}" role="switch" aria-checked="${nf.ai}" aria-label="Autocompletar con Brav IA" onclick="S.newList.ai=!S.newList.ai;renderSub(true)"></button></div>
+     <button class="pbtn" onclick="createList(S.newList.name||(S.newList.ai?'Compra Sugerida por Historial':'Mi Lista Personalizada'),S.newList.ai,'');S.newList={name:'',ai:S.newList.ai}">${nf.ai?'✨ Crear y Autocompletar con Brav IA':'+ Crear Lista Personalizada'}</button></div>
+   ${S.lists.map(listCard).join('')}`}
+function listCard(l){const ps=l.skus.map(s=>BY_SKU[s]).filter(Boolean),tot=ps.reduce((a,p)=>a+p.price,0),open=S.expList===l.id,busy=S.aiList===l.id,q=(S.listQ||{})[l.id]||'';
+  const st=freqStats().filter(x=>!l.skus.includes(x.p.sku)).slice(0,6);
+  const res=q.trim()?PRODUCTS.filter(p=>`${p.name} ${p.cat} ${p.badge}`.toLowerCase().includes(q.trim().toLowerCase())&&!l.skus.includes(p.sku)).slice(0,6):[];
+  return `<div class="tcard" style="margin:0 14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+    <div class="row" style="gap:8px">${S.renList===l.id?`<input id="ren_${l.id}" value="${esc(l.name)}" style="flex:1;font:600 15px 'Fredoka';border:1px solid var(--border);border-radius:10px;padding:6px 10px;background:var(--surface);color:var(--ink)" onkeydown="if(event.key==='Enter')renameList('${l.id}')"><button class="iconbtn" aria-label="Guardar nombre" onclick="renameList('${l.id}')">${ic('check')}</button>`
+      :`<span class="disp" style="flex:1;font-weight:600;font-size:15.5px">${esc(l.name)}</span>${l.isAi?`<span style="padding:3px 8px;border-radius:99px;background:color-mix(in srgb,var(--amber) 18%,transparent);color:#B45309;font:900 10px 'Nunito'">✨ Brav IA</span>`:''}<button class="iconbtn" style="color:var(--ink2)" aria-label="Renombrar lista" onclick="S.renList='${l.id}';renderSub(true)">${mi('edit',15)}</button>${l.id!=='l1'?`<button class="iconbtn" style="color:#BE123C" aria-label="Eliminar lista" onclick="deleteList('${l.id}')">${ic('trash')}</button>`:''}`}</div>
+    ${metaStrip([`${ps.length} productos`,`RD$ ${fmt(tot)}.00`,l.upd],10.5,'wrap')}
+    ${l.note?`<div class="tip" style="font-size:11px">${esc(l.note)}</div>`:''}
+    ${busy?`<div class="row" style="gap:8px;font-size:11.5px;font-weight:700;color:var(--primary)"><span class="dots"><span></span><span></span><span></span></span>Brav IA está analizando tu historial de compras para autocompletar esta lista...</div>`:''}
+    <div class="row" style="gap:6px">${ps.slice(0,5).map(p=>`<div style="width:44px;height:44px;flex:none">${artwork(p,44,10,'margin:0')}</div>`).join('')}${ps.length>5?`<span class="secic" style="width:44px;height:44px;font:800 12px 'Nunito'">+${ps.length-5}</span>`:''}</div>
+    <div class="row" style="gap:8px"><button class="obtn" style="flex:1;height:40px;font-size:12px" ${busy?'disabled':''} onclick="populateList('${l.id}')">${ic('spark','color:var(--amber)')} ${ps.length?'Completar con IA':'Autocompletar IA'}</button><button class="pbtn" style="flex:1;height:40px;font-size:12px" onclick="listToCart('${l.id}')">${ic('cart')} Cargar (${ps.length})</button></div>
+    <button class="chip alt" style="height:30px;justify-content:center;color:var(--ink)" onclick="S.expList=S.expList==='${l.id}'?null:'${l.id}';renderSub(true)">${open?'Ocultar productos y editor':`Ver y editar productos de la lista (${ps.length})`}</button>
+    ${open?`${ps.length?ps.map(p=>`<div class="row" style="gap:10px;padding:6px 0;border-top:1px solid var(--border)"><div style="width:42px;flex:none;cursor:pointer" onclick="openProduct('${p.sku}')">${artwork(p,42,10,'margin:0')}</div><div style="flex:1"><div style="font-size:12px;font-weight:800;line-height:1.25">${esc(p.name)}</div>${metaStrip([`RD$ ${p.price}.00`,p.unit,p.cat],9.5)}</div><button class="iconbtn" aria-label="Agregar al carrito" onclick="chg('${p.sku}',1)">${ic('cart')}</button><button class="iconbtn" style="color:#BE123C" aria-label="Quitar de la lista" onclick="listRemove('${l.id}','${p.sku}')">${ic('close')}</button></div>`).join(''):`<div class="tip">Esta lista está vacía. Toca "Autocompletar IA" arriba para llenarla según tu historial de compras o busca productos abajo.</div>`}
+      ${st.length?`<div style="font:900 9.5px 'Nunito';color:var(--ink2)">SUGERIDOS DE TU HISTORIAL DE COMPRAS (+ AGREGAR)</div><div class="row" style="gap:6px;flex-wrap:wrap">${st.map(x=>`<button class="chip" style="height:auto;min-height:28px;padding:4px 10px;font-size:10.5px" onclick="listAdd('${l.id}','${x.p.sku}')">${esc(x.p.name)} (${x.n}x)</button>`).join('')}</div>`:''}
+      <label class="search" style="height:42px">${ic('search','color:var(--ink2)')}<input id="lq_${l.id}" value="${esc(q)}" placeholder="Buscar producto para agregar a &quot;${esc(l.name)}&quot;..." oninput="(S.listQ=S.listQ||{})['${l.id}']=this.value;clearTimeout(window._lqt);window._lqt=setTimeout(()=>{renderSub(true);const e=$('lq_${l.id}');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},300)"></label>
+      ${res.map(p=>`<div class="row" style="gap:10px"><div style="width:40px;flex:none">${artwork(p,40,10,'margin:0')}</div><div style="flex:1"><div style="font-size:12px;font-weight:800">${esc(p.name)}</div><div style="font-size:10px;font-weight:700;color:var(--ink2)">RD$ ${p.price}.00 • ${esc(p.unit)}</div></div><button class="chip" style="height:28px;font-size:11px" onclick="listAdd('${l.id}','${p.sku}')">+ Agregar</button></div>`).join('')}`:''}
+  </div>`}
+function persistList(l){save();if(FB_USER&&window.BV_FB)BV_FB.saveList(FB_USER.uid,l).catch(e=>console.warn('Firestore',e))}
+window.createList=(name,ai,focus)=>{const l={id:'list_'+Date.now(),name:(name||'').trim()||'Mi Lista Personalizada',skus:[],note:ai?'Analizando tu historial de compras con Brav IA...':null,isAi:!!ai,upd:ai?'Autocompletando con Brav IA...':'Creada ahora'};
+  S.lists=[S.lists[0],l,...S.lists.slice(1)];persistList(l);if(ai)populateList(l.id,focus||l.name);else toast('list',`Lista "${l.name}" creada y sincronizada`);renderSub(true)};
+window.deleteList=id=>{if(id==='l1'){toast('bell','La lista Mis Favoritos es principal y no se elimina');return}const l=S.lists.find(x=>x.id===id);S.lists=S.lists.filter(x=>x.id!==id);save();if(FB_USER&&window.BV_FB)BV_FB.deleteList(FB_USER.uid,id).catch(()=>{});toast('trash',`Lista "${l?.name||''}" eliminada de tus dispositivos`);renderSub(true)};
+window.renameList=id=>{const v=($('ren_'+id)?.value||'').trim();S.renList=null;if(!v){renderSub(true);return}const l=S.lists.find(x=>x.id===id);l.name=v;l.upd='Sincronizada con tu cuenta';persistList(l);toast('check',`Lista renombrada a "${v}"`);renderSub(true)};
+window.listAdd=(id,sku)=>{const l=S.lists.find(x=>x.id===id),p=BY_SKU[sku];if(!l||!p)return;if(l.skus.includes(sku)){toast('bell',`${p.name} ya está en ${l.name}`);return}l.skus.push(sku);l.upd='Sincronizada con tu cuenta';if(id==='l1')S.favs[sku]=true;persistList(l);toast('check',`${p.name} agregado y sincronizado`);renderSub(true)};
+window.listRemove=(id,sku)=>{const l=S.lists.find(x=>x.id===id);l.skus=l.skus.filter(s=>s!==sku);l.upd='Sincronizada con tu cuenta';if(id==='l1')delete S.favs[sku];persistList(l);if(BY_SKU[sku])toast('trash',`${BY_SKU[sku].name} quitado de la lista`);renderSub(true)};
+window.listToCart=id=>{const l=S.lists.find(x=>x.id===id);if(!l.skus.length){toast('bell','Esta lista aún no tiene productos');return}l.skus.forEach(s=>BY_SKU[s]&&chg(s,1));toast('cart',`${l.skus.length} productos de "${l.name}" cargados al carrito`);go('cart')};
+function listFallback(name,existing){const lo=name.toLowerCase(),top=freqStats().map(x=>x.p.sku),cat=s=>(BY_SKU[s]?.cat||'').toLowerCase();let sel;
+  if(/desayuno|cena|fresco/.test(lo))sel=[...existing,...top.filter(s=>/fruta|huevo|lácteo|embutido|pan|carne/.test(cat(s))),'BRV-001','BRV-009','BRV-093','BRV-096','BRV-094','BRV-037'].filter((v,i,a)=>a.indexOf(v)===i).slice(0,8);
+  else if(/limpieza|hogar/.test(lo))sel=[...existing,...top.filter(s=>/hogar|limpieza/.test(cat(s))),'BRV-017','BRV-018','BRV-020','BRV-021','BRV-022'].filter((v,i,a)=>a.indexOf(v)===i).slice(0,7);
+  else if(/mascota|perro|gato|arca/.test(lo))sel=[...existing,...top.filter(s=>s.startsWith('ARC-')),'ARC-001','ARC-009','ARC-012','ARC-015','ARC-021'].filter((v,i,a)=>a.indexOf(v)===i).slice(0,6);
+  else sel=[...existing,...top.slice(0,7),'BRV-055','BRV-098','BRV-083'].filter((v,i,a)=>a.indexOf(v)===i).slice(0,9);
+  sel=sel.filter(s=>BY_SKU[s]);const names=sel.slice(0,4).map(s=>BY_SKU[s].name).join(', ');
+  return [sel,`Autocompletada por Brav IA analizando tus ${S.orders.length} órdenes recientes: prioriza tus compras más repetidas (${names}) más básicos complementarios.`]}
+window.populateList=async(id,focus)=>{const l=S.lists.find(x=>x.id===id);if(!l||S.aiList)return;S.aiList=id;if(S.screen==='account_sub')renderSub(true);
+  const f=(focus||'').trim()||l.name,st=freqStats();
+  const hist=`ÓRDENES RECIENTES DEL CLIENTE:\n${S.orders.map(o=>`- Orden ${o.id} (${o.date}, ${o.branch}, Total RD$ ${Math.trunc(o.total)}): ${o.skus.map(s=>BY_SKU[s]&&`${BY_SKU[s].name} [${s}]`).filter(Boolean).join(', ')}`).join('\n')}\n\nFRECUENCIA DE COMPRA HABITUAL:\n${st.map(x=>`- [${x.p.sku}] ${x.p.name} (${x.p.cat}, RD$ ${x.p.price}): comprado ${x.n} veces (última vez: ${x.last})`).join('\n')}`;
+  const prompt=`Eres Brav IA, el asistente inteligente de compras de Supermercados Bravo y El Arca Petshop.\nAUTOCOMPLETA la lista de compras "${l.name}" (Enfoque: ${f}) en base al historial del cliente.\nPRODUCTOS ACTUALES EN LA LISTA: ${l.skus.join(', ')||'Ninguno'}\n\n${hist}\n\nINSTRUCCIONES:\n1. Selecciona entre 6 y 9 productos del catálogo combinando sus compras más repetidas con 2 o 3 complementos útiles para "${l.name}".\n2. Primera línea: "NOTA: <explicación cálida y directa de máximo 200 caracteres>".\n3. Segunda línea: SKUS: ["SKU1", "SKU2", "SKU3", ...]\n\nCATÁLOGO OFICIAL PRIORIZADO:\n${catalogContext(f)}`;
+  let skus,note;
+  try{let t='';await Promise.race([(async()=>{for await(const c of BV_FB.generate(prompt))t+=c})(),new Promise((_,r)=>setTimeout(()=>r('timeout'),45000))]);
+    const m=t.match(/SKUS:\s*\[([^\]]*)\]/),parsed=m?[...m[1].matchAll(/"([A-Z]{3}-\d+)"/g)].map(x=>x[1]).filter(s=>BY_SKU[s]):[];
+    const nl=t.replace(/SKUS:\s*\[[^\]]*\]/,'').split('\n').map(x=>x.replace(/^[*\s]*NOTA:\s*/i,'').replace(/\*\*/g,'').trim()).find(x=>x.length>12);
+    if(parsed.length>=3){skus=[...new Set([...l.skus,...parsed])].slice(0,10);note=nl||`Autocompletada por Brav IA a partir de tus ${S.orders.length} compras recientes y hábitos de consumo.`}else[skus,note]=listFallback(f,l.skus)}
+  catch(e){[skus,note]=listFallback(f,l.skus)}
+  Object.assign(l,{skus,note,isAi:true,upd:'Autocompletada por Brav IA • Sincronizada'});S.aiList=null;persistList(l);toast('spark',`Brav IA completó "${l.name}" con ${skus.length} productos`);if(S.screen==='account_sub')renderSub(true)};
 /* ---------------- dock + router ---------------- */
 const TABS=[['bravisima','card','Tarjeta'],['catalog','grid','Catálogos'],['home','home','Home'],['bravia','search','Buscar'],['account','person','Perfil']];
 function activeTab(){return {bravisima:'bravisima',catalog:'catalog',category:'catalog',product:'catalog',home:'home',cart:'home',delivery:'home',bravia:'bravia',account:'account',account_sub:'account'}[S.screen]}
@@ -987,7 +1285,7 @@ function render(){
   const inApp=!['splash','auth'].includes(s);
   $('dock').classList.toggle('hide',!inApp);$('fabs').classList.toggle('hide',!(inApp&&['home','catalog','category'].includes(s)));
   if(inApp)renderDock();
-  if(s==='splash')renderSplash();else if(s==='auth')renderAuth();else if(s==='home')renderHome();else if(s==='bravia')renderBravIA();else if(s==='catalog')renderCatalog();else if(s==='category')renderCategory();else if(s==='product')renderProduct();else if(s==='cart')renderCart();else if(s==='delivery')renderDelivery();else renderPlaceholder(...TITLES[s]);
+  if(s==='splash')renderSplash();else if(s==='auth')renderAuth();else if(s==='home')renderHome();else if(s==='bravia')renderBravIA();else if(s==='catalog')renderCatalog();else if(s==='category')renderCategory();else if(s==='product')renderProduct();else if(s==='cart')renderCart();else if(s==='delivery')renderDelivery();else if(s==='bravisima')renderBravisima();else if(s==='account')renderAccount();else if(s==='account_sub')renderSub();else renderPlaceholder(...TITLES[s]);
   updateCart();
 }
 $('icAi').innerHTML=ic('spark');$('icCart').innerHTML=ic('cart');
