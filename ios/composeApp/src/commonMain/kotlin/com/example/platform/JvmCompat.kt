@@ -56,6 +56,7 @@ class TimeZone private constructor(val id: String) {
 }
 
 class Date(val time: Long = System.currentTimeMillis()) {
+    @kotlin.jvm.JvmName("getTimeMillis")
     fun getTime(): Long = time
 }
 
