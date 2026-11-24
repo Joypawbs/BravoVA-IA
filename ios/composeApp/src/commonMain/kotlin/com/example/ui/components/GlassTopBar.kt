@@ -122,7 +122,19 @@ fun GlassTopBar(
             spec = spec,
             onBack = { onBack?.invoke() },
             onAction = { i -> actions.getOrNull(i)?.onClick?.invoke() },
-            modifier = modifier.fillMaxWidth().padding(top = 4.dp).height(60.dp)
+            // Desvanecido detrás de la barra (como el "scroll edge effect" de iOS 26)
+            modifier = modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
+                            MaterialTheme.colorScheme.background.copy(alpha = 0f)
+                        )
+                    )
+                )
+                .padding(top = 4.dp)
+                .height(60.dp)
         )
         return
     }

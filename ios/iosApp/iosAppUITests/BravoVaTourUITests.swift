@@ -63,6 +63,14 @@ final class BravoVaTourUITests: XCTestCase {
 
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
+
+        // Detalle de producto y vuelta al inicio
+        tap(["Café Soluble"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
+        pause(3); shot("detalle_producto")
+        tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
+        pause(2)
+        tap(["Agregar Café"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)
+        pause(2); shot("home_con_carrito")
         app.swipeUp(); pause(2); shot("home_ofertas")
         app.swipeDown(); pause(1)
 

@@ -24,6 +24,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -1902,8 +1903,8 @@ fun BravIaChatScreen(
             GlassTopBar(
                 darkMode = darkMode,
                 accent = primaryColor,
-                title = if (isArca) "Brav IA • El Arca & Soporte" else "Brav IA • Chef, Asesor & Soporte",
-                subtitle = if (isGenerating) "Verificando web, presupuesto y visión..." else "Recetas Web • Visión Multimodal • RD$$budgetAmount",
+                title = "Brav IA",
+                subtitle = if (isGenerating) "Pensando…" else if (isArca) "Asesor de El Arca" else "Tu chef y asistente de compras",
                 onBack = {
                     HapticFeedbackManager.onNavigationClick(view)
                     onBack()
@@ -2626,7 +2627,7 @@ fun AccountGridScreen(
             AccountTileItem(AccountSubScreen.AJUSTES, "Ajustes", Icons.Outlined.Settings),
             AccountTileItem(AccountSubScreen.SOPORTE, "Soporte", Icons.Outlined.ChatBubbleOutline),
             AccountTileItem(AccountSubScreen.AYUDA, "Ayuda", Icons.AutoMirrored.Outlined.HelpOutline)
-        ).chunked(2)
+        )
     }
 
     val hazeState = LocalTranslucentHazeState.current
@@ -2643,72 +2644,60 @@ fun AccountGridScreen(
             contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(
-                items = tileRows,
-                key = { pair -> pair.first().subScreen.key },
-                contentType = { "account_tile_row" }
-            ) { pair ->
-                Row(
+            // Lista agrupada (estilo ajustes de iOS / Android) en lugar de casillas grandes.
+            item(key = "account_menu", contentType = "account_menu") {
+                TranslucentCard(
+                    darkMode = darkMode,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(horizontal = 16.dp)
                 ) {
-                    pair.forEach { tile ->
-                        TranslucentCard(
-                        darkMode = darkMode,
-                        cornerRadius = 24.dp,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(136.dp)
-                            .testTag("account_tile_${tile.subScreen.key}"),
-                        onClick = { onOpenSubScreen(tile.subScreen) }
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Canvas(modifier = Modifier.fillMaxSize()) {
-                                val wavePath = Path().apply {
-                                    moveTo(0f, size.height * 0.45f)
-                                    cubicTo(
-                                        size.width * 0.35f, size.height * 0.25f,
-                                        size.width * 0.65f, size.height * 0.72f,
-                                        size.width, size.height * 0.50f
-                                    )
+                    Column {
+                        tileRows.forEachIndexed { index, tile ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        HapticFeedbackManager.onNavigationClick(view)
+                                        onOpenSubScreen(tile.subScreen)
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 13.dp)
+                                    .testTag("account_tile_${tile.subScreen.key}"),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(primaryColor.copy(alpha = if (darkMode) 0.20f else 0.10f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(tile.icon, contentDescription = null, tint = primaryColor, modifier = Modifier.size(19.dp))
                                 }
-                                drawPath(
-                                    path = wavePath,
-                                    color = if (darkMode) Color.White.copy(alpha = 0.08f) else Color(0xFFE2E8F0),
-                                    style = Stroke(
-                                        width = 3.5f,
-                                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-                                    )
+                                Spacer(Modifier.width(14.dp))
+                                Text(
+                                    text = tile.title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-
-                            Icon(
-                                imageVector = tile.icon,
-                                contentDescription = tile.title,
-                                tint = primaryColor,
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(top = 18.dp, end = 18.dp)
-                                    .size(34.dp)
-                            )
-
-                            Text(
-                                text = tile.title,
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 15.5.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(start = 16.dp, bottom = 16.dp, end = 12.dp)
-                            )
+                            if (index < tileRows.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(start = 64.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
         item(key = "firestore_account_sync_card", contentType = "firestore_sync") {
             TranslucentCard(

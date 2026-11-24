@@ -74,8 +74,10 @@ def main():
     time.sleep(8); shot("inicio_sesion")
     tap(["Continuar como Invitado", "Invitado"], prefix=True, wait=5)
     shot("home")
+    if tap(["Café Soluble"], prefix=True, wait=3):
+        shot("detalle_producto")
+        adb("shell", "input", "keyevent", "4"); time.sleep(2)
     swipe_up(); shot("home_secciones")
-    swipe_up(); swipe_up()
     tap(["Agregar "], prefix=True, wait=1)
     tap(["Agregar "], prefix=True, wait=1)
     shot("home_con_carrito")

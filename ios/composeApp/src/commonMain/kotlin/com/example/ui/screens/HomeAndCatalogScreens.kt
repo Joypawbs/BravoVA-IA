@@ -73,6 +73,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onSizeChanged
@@ -606,7 +607,7 @@ fun HomeScreen(
                                         text = if (isArca) {
                                             "Asesoría Nutricional Brav IA"
                                         } else {
-                                            "Compra y Pedidos con Brav IA"
+                                            "Compra con Brav IA"
                                         },
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
@@ -622,7 +623,7 @@ fun HomeScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             AnimatedPurchaseButton(
-                                text = "Abrir Asistente Brav IA",
+                                text = "Abrir Brav IA",
                                 icon = Icons.Default.AutoAwesome,
                                 primaryColor = primaryColor,
                                 onClick = {
@@ -658,7 +659,7 @@ fun HomeScreen(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "Gestionar Mis Listas Inteligentes (Historial Brav IA)",
+                                        text = "Mis listas inteligentes",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
@@ -806,7 +807,7 @@ fun CatalogScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = if (isArca) "Departamentos El Arca Petshop" else "Pasillos Oficiales Supermercados Bravo",
+                        text = if (isArca) "Departamentos" else "Pasillos",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 17.sp,
@@ -880,62 +881,33 @@ fun CatalogScreen(
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height }
         ) {
-            FloatingHeaderCapsule(darkMode = darkMode) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(if (isCatalogScrolled) 5.dp else 8.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = if (isArca) "Catálogo El Arca Petshop" else "Catálogo Supermercados Bravo",
-                            fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = if (isCatalogScrolled) 15.sp else 16.5.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+            val headerBg = MaterialTheme.colorScheme.background
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(headerBg, headerBg.copy(alpha = 0.94f), headerBg.copy(alpha = 0f))))
+            ) {
+                GlassTopBar(
+                    darkMode = darkMode,
+                    accent = primaryColor,
+                    title = if (isArca) "Catálogo El Arca" else "Catálogo"
+                )
+                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp)) {
+                        PredictiveCatalogSearchBar(
+                            query = localFilter,
+                            onQueryChange = { localFilter = it },
+                            catalogProducts = allProducts,
+                            onSelectPredictedProduct = { prod ->
+                                localFilter = prod.name
+                                debouncedFilter = prod.name
+                                onFilterQueryChange(prod.name)
+                            },
+                            placeholderText = "Buscar productos o marcas",
+                            darkMode = darkMode,
+                            isArca = isArca,
+                            testTag = "catalog_filter_input",
+                            onFocusChanged = { isFilterFocused = it }
                         )
-                        BravoUnderline(isArca = isArca)
-                    }
-
-                    PredictiveCatalogSearchBar(
-                        query = localFilter,
-                        onQueryChange = { localFilter = it },
-                        catalogProducts = allProducts,
-                        onSelectPredictedProduct = { prod ->
-                            localFilter = prod.name
-                            debouncedFilter = prod.name
-                            onFilterQueryChange(prod.name)
-                        },
-                        placeholderText = "Buscar departamentos, marcas o productos...",
-                        darkMode = darkMode,
-                        isArca = isArca,
-                        testTag = "catalog_filter_input",
-                        onFocusChanged = { isFilterFocused = it }
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(2.5.dp)
-                            .clip(CircleShape)
-                            .background(primaryColor.copy(alpha = 0.12f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(catalogScrollProgress.coerceAtLeast(0.06f))
-                                .height(2.5.dp)
-                                .clip(CircleShape)
-                                .background(primaryColor)
-                        )
-                    }
                 }
             }
         }
@@ -1075,54 +1047,24 @@ fun CategoryGridScreen(
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height }
         ) {
-            FloatingHeaderCapsule(darkMode = darkMode) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(if (isCategoryScrolled) 5.dp else 8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        IconButton(
-                            onClick = {
-                                HapticFeedbackManager.onNavigationClick(view)
-                                onBack()
-                            },
-                            modifier = Modifier
-                                .size(38.dp)
-                                .testTag("category_back_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Volver al catálogo",
-                                tint = primaryColor
-                            )
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = categoryName,
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = if (isCategoryScrolled) 14.5.sp else 16.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = TextAlign.Center
-                            )
-                            BravoUnderline(isArca = isArca)
-                        }
-
-                        Spacer(modifier = Modifier.size(38.dp))
-                    }
-
+            val headerBg = MaterialTheme.colorScheme.background
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(headerBg, headerBg.copy(alpha = 0.94f), headerBg.copy(alpha = 0f))))
+            ) {
+                GlassTopBar(
+                    darkMode = darkMode,
+                    accent = primaryColor,
+                    title = categoryName,
+                    onBack = {
+                        HapticFeedbackManager.onNavigationClick(view)
+                        onBack()
+                    },
+                    backLabel = "Volver al catálogo",
+                    backTestTag = "category_back_button"
+                )
+                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp)) {
                     PredictiveCatalogSearchBar(
                         query = localQuery,
                         onQueryChange = { localQuery = it },
@@ -1132,28 +1074,12 @@ fun CategoryGridScreen(
                             debouncedQuery = prod.name
                             onSearchQueryChange(prod.name)
                         },
-                        placeholderText = "Buscar dentro de $categoryName...",
+                        placeholderText = "Buscar en $categoryName",
                         darkMode = darkMode,
                         isArca = isArca,
                         testTag = "category_search_input",
                         onFocusChanged = { isSearchFocused = it }
                     )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(2.5.dp)
-                            .clip(CircleShape)
-                            .background(primaryColor.copy(alpha = 0.12f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(categoryScrollProgress.coerceAtLeast(0.06f))
-                                .height(2.5.dp)
-                                .clip(CircleShape)
-                                .background(primaryColor)
-                        )
-                    }
                 }
             }
         }
@@ -1370,7 +1296,7 @@ fun ProductDetailScreen(
                                 modifier = Modifier.size(15.dp)
                             )
                             Text(
-                                text = "Descripción Precisa y Ficha (${product.category})",
+                                text = "Descripción",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 12.5.sp,
@@ -1449,7 +1375,7 @@ fun ProductDetailScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Nutrición, Calorías Exactas e Ingredientes",
+                            text = "Nutrición e ingredientes",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 14.5.sp,
@@ -1508,7 +1434,7 @@ fun ProductDetailScreen(
 
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(
-                            text = "Ingredientes investigados:",
+                            text = "Ingredientes",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp,
@@ -1760,7 +1686,7 @@ fun ProductDetailScreen(
                                 fontSizeSp = 10f
                             )
                             Text(
-                                text = "Consultar recetas, alergias o dietas con este producto",
+                                text = "Pregúntale a Brav IA por recetas o alergias",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.5.sp,
@@ -1846,7 +1772,7 @@ private fun DailyRotatingOffersCarouselSection(
                     modifier = Modifier.size(17.dp)
                 )
                 Text(
-                    text = "Ofertas que Rotan Día a Día",
+                    text = "Ofertas del día",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 17.sp,
