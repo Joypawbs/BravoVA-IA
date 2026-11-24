@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
-<script type="module" src="firebase.js?v=7"></script>
-<script src="product_info.js?v=7"></script>
+<script type="module" src="firebase.js?v=8"></script>
+<script src="product_info.js?v=8"></script>
 <style>
 /*
 VOICE: la app BravoVa tal cual, réplica fiel de la versión Android (Compose) en tamaño de teléfono.
@@ -504,7 +504,7 @@ function renderPlaceholder(title,msg){
   $('screen').innerHTML=`<div class="hdr"><div class="row" style="justify-content:center;padding:10px 0"><div style="text-align:center"><div class="sect" style="font-size:19px">${esc(title)}</div><div class="ul" style="margin:4px auto 0"></div></div></div></div><div class="scroll"><div class="placeholder"><span class="orb" style="width:56px;height:56px"></span><div class="disp" style="font-size:16px;color:var(--ink)">${esc(title)}</div><div style="font-size:13px;max-width:260px">${esc(msg)}</div><button class="pbtn" style="max-width:240px" onclick="go('home')">Volver al inicio</button></div></div>`;
 }
 /* ---------------- Brav IA (Firebase AI Logic, mismo prompt que la app) ---------------- */
-S.chat=S.chat||[];S.budget=S.budget||1500;
+S.chat=S.chat||[];S.budget=Math.min(3500,Math.max(400,S.budget||1200));
 function catalogContext(q){
   const words=q.toLowerCase().split(/[^a-záéíóúñü0-9]+/).filter(w=>w.length>2);
   const score=p=>words.reduce((a,w)=>a+(p.name.toLowerCase().includes(w)?3:0)+(p.cat.toLowerCase().includes(w)?1:0),0);
@@ -547,38 +547,116 @@ ${catalogContext(q)}
 Solicitud actual del cliente (${first}): ${q}`;
 }
 function fmtAi(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}
-function chatMsgHtml(m){
+function parseSteps(raw){const re=/^\s*(?:\*\*?)?(?:Paso\s*\d+|Step\s*\d+|\d+[\.\)])(?:\*\*?)?[:\-\s]+(.+)$/i;return raw.split('\n').map(l=>{const m=l.trim().match(re);return m?m[1].replace(/\*\*/g,'').trim():null}).filter(x=>x&&x.length>8)}
+const normQ=q=>q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function isOrderIntent(q){q=normQ(q);return ['pedir por mi','pide por mi','pideme','hacer pedido','haz el pedido','hazme el pedido','hazme un pedido','realizar pedido','ordenar','ordename','ordena por mi','comprame','comprar por mi','encargame','encargar','quiero pedir','quiero ordenar','confirmar pedido','enviar pedido','pide esto'].some(x=>q.includes(x))||(q.includes('pide')&&['carrito','compra','orden','super','lista'].some(x=>q.includes(x)))}
+function chatMsgHtml(m,i){
   if(m.s==='u')return `<div class="msg u">${esc(m.t)}${m.img?'<br><small>📷 Imagen adjunta</small>':''}</div>`;
-  const chips=(m.skus||[]).map(k=>BY_SKU[k]).filter(Boolean);
-  return `<div class="msg a tcard"><span class="lbl">${esc(m.label||'Brav IA • Chef Ejecutivo & Asesor Oficial')}</span>${m.loading&&!m.t?'<span class="dots"><span></span><span></span><span></span></span>':fmtAi(m.t)}
-   ${chips.length?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">${chips.map(p=>`<div class="row" style="gap:8px"><div style="width:38px;flex:none">${artwork(p,38,10)}</div><div style="flex:1"><div class="disp" style="font-weight:600;font-size:12.5px">${esc(p.name)}</div><div style="font-size:10.5px;color:var(--ink2)"><b style="color:var(--primary)">RD$ ${p.price}</b> · ${esc(p.unit)} · ${esc(p.cat)}</div></div><button class="add" aria-label="Agregar" onclick="chg('${p.sku}',1,event)">${ic('add')}</button></div>`).join('')}
-   <button class="pbtn" style="height:38px;font-size:12.5px" onclick="${chips.map(p=>`chg('${p.sku}',1)`).join(';')}">${ic('cart')} Agregar todo al carrito</button></div>`:''}</div>`;
+  const ps=(m.skus||[]).map(k=>BY_SKU[k]).filter(Boolean),tot=ps.reduce((a,p)=>a+p.price,0),cb=Math.floor(tot/100),steps=m.loading?[]:parseSteps(m.t||''),eta=metrics(STAGES[1]).eta;
+  const speaking=S.ttsMsg===i;
+  return `<div class="msg a tcard" style="max-width:96%"><span class="lbl">${esc(m.label||'Brav IA • Chef Ejecutivo & Asesor Oficial')}</span>
+   ${m.loading&&!m.t?`<div class="row" style="gap:8px"><span class="orb" style="width:22px;height:22px"></span><span style="flex:1;font-size:12px;font-weight:700;color:var(--ink2)">Respondiendo de forma personalizada para ti...</span><button class="cbtn" onclick="pauseGen()">${ic('pause')}Pausar</button></div>`
+     :fmtAi(m.t)+(m.loading?` <button class="cbtn" style="display:inline-flex;margin-top:6px" onclick="pauseGen()">${ic('pause')}Pausar</button>`:'')}
+   ${steps.length?`<div class="row" style="gap:8px;margin-top:10px;padding:8px 10px;border-radius:14px;background:color-mix(in srgb,var(--primary) 9%,transparent);border:1px solid color-mix(in srgb,var(--primary) 25%,transparent)">${ic('spark','color:var(--amber)')}<span style="flex:1;font-size:11.5px;font-weight:800">Guía de voz lista (${steps.length} pasos enumerados arriba)</span>
+      ${speaking?`<button class="cbtn" onclick="stopTts()">${ic('pause')}Pausar</button>`:`<button class="cbtn" onclick="speakSteps(${i})">${mi('volume_up',14)}Narrar Pasos</button>`}</div>`:''}
+   ${!m.loading&&m.t&&!steps.length?`<div style="margin-top:8px"><button class="cbtn" onclick="${speaking?'stopTts()':`speakMsg(${i})`}">${speaking?ic('pause')+'Pausar voz':mi('volume_up',14)+'Escuchar en voz'}</button></div>`:''}
+   ${ps.length?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><div class="disp" style="font-weight:600;font-size:12.5px">Artículos del Catálogo (${ps.length})</div>
+     ${ps.map(p=>`<div class="row" style="gap:8px"><div style="width:40px;flex:none;cursor:pointer" onclick="openProduct('${p.sku}')">${artwork(p,40,10,'margin:0')}</div><div style="flex:1;cursor:pointer" onclick="openProduct('${p.sku}')"><div class="disp" style="font-weight:600;font-size:12.5px;line-height:1.2">${esc(p.name)}</div>${metaStrip([`RD$ ${p.price}.00`,p.unit,p.cat],9.5)}</div><button class="add" aria-label="Agregar" onclick="chg('${p.sku}',1,event)">${ic('add')}</button></div>`).join('')}
+     ${m.confirmed?`<button class="row" style="gap:10px;padding:12px;border-radius:16px;border:1px solid rgba(16,185,129,.4);background:rgba(16,185,129,.12);color:var(--ink);text-align:left" onclick="S.trackedOrder='${m.orderId}';save();go('delivery')">${ic('checkc','font-size:22px;color:#10B981')}<div style="flex:1"><div class="disp" style="font-weight:600;font-size:13px">Pedido Confirmado #${esc(m.orderId||'ORD')}</div><div style="font-size:10.5px;font-weight:700;color:var(--ink2)">Toca para ver seguimiento GPS en tiempo real</div></div><b class="disp" style="color:#059669">RD$ ${fmt(tot)}</b></button>`
+     :m.confirm?`<div style="padding:12px;border-radius:16px;border:1.4px solid var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);display:flex;flex-direction:column;gap:8px"><div class="disp" style="font-weight:600;font-size:13.5px">Confirmación Manual de Pedido</div>${metaStrip([S.branch,`${ps.length} artículos`,`ETA GPS ~${eta} min`],10,'wrap')}
+        <div class="row" style="justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--ink2)">Total a autorizar (+RD$ ${cb} Bravísima)</span><b class="disp" style="font-size:17px;color:var(--primary)">RD$ ${fmt(tot)}.00</b></div>
+        <div class="row" style="gap:8px"><button class="obtn" style="flex:1;height:40px;font-size:12px" onclick="cancelChatOrder(${i})">Cancelar</button><button class="pbtn" style="flex:2;height:40px;font-size:12px" onclick="confirmChatOrder(${i})">${ic('finger')} Confirmar Pedido • RD$ ${fmt(tot)}</button></div></div>`
+     :`<div class="row" style="gap:8px"><button class="obtn" style="flex:1;height:38px;font-size:12px" onclick="saveChatList(${i})">${ic('list')} Guardar Lista</button><button class="pbtn" style="flex:2;height:38px;font-size:12px" onclick="addChatBundle(${i})">${ic('cart')} Agregar (${ps.length}) • RD$ ${fmt(tot)}</button></div>
+        <button class="chip" style="height:auto;min-height:34px;padding:6px 12px;justify-content:center;font-size:11.5px" onclick="requestChatOrder(${i})">${ic('spark')} Pedir por mí con Brav IA (Confirmación Manual • RD$ ${fmt(tot)})</button>`}</div>`:''}</div>`;
 }
+const QUICK={arca:[['Pedir por mí (Confirmación)','Pide por mí un combo esencial para mi mascota en El Arca Petshop con confirmación manual en el chat.'],['Dieta Perro Adulto','Recomiéndame el mejor alimento y snacks para un perro adulto de 15 kg bajo mi presupuesto.'],['Combo Gatos','Arma un combo mensual para mi gato con alimento de salmón, arena sanitaria y paté bajo mi presupuesto.'],['Salud y Parásitos','¿Qué productos de farmacia veterinaria me recomiendas para prevención de pulgas, garrapatas e higiene dental?'],['Enviar Sugerencia','Sugiero agregar más variedad de juguetes interactivos hipoalergénicos para cachorros en El Arca.']],
+ bravo:[['Pasos: Pizza Casera','Explícame paso a paso cómo hacer una pizza casera con medidas exactas, temperaturas en °C/°F y presupuesto verificado.'],['Dieta Sin Lactosa','Recomiéndame una receta completa sin lactosa con productos del catálogo e indica sus calorías exactas y presupuesto.'],['Sin Gluten (Celíacos)','Dame una receta 100% libre de gluten con ingredientes verificados del catálogo y sus calorías exactas.'],['Keto y Calorías','Ármame una receta alta en proteína y baja en carbohidratos (Keto) detallando las calorías de cada ingrediente.'],['Pedir por mí (Confirmación)','Hazme el pedido de mi compra habitual del supermercado con confirmación manual aquí en el chat.'],['Facturación NCF y Horarios','Explícame cómo funcionan los comprobantes B01 y B02, los horarios de tienda y el retorno del 1% de la Tarjeta Bravísima.'],['Enviar Sugerencia','Sugiero agregar más opciones de postres artesanales sin azúcar marca Bravo en la sucursal.']]};
+const VQUICK=[['🎤 "Dime los pasos para preparar Mangú"','Dame los pasos exactos y al grano para preparar un Mangú con Los Tres Golpes.'],['🎤 "¿Cómo preparo un Sancocho?"','Explícame paso a paso y directo al grano cómo preparar un Sancocho Dominicano y qué ingredientes necesito.'],['🎤 "Receta rápida con pollo"','Dame los pasos concisos para preparar una receta rápida con pechuga de pollo y arroz Bravo.']];
 function renderBravIA(){
+  const keepIn=$('chatIn')?$('chatIn').value:'',focus=document.activeElement&&document.activeElement.id==='chatIn';
   $('screen').className='view';
+  const gen=S.chat.some(m=>m.loading),t=cartTotals(),v=S.voice;
   const welcome=`<div style="border-left:3px solid var(--primary);padding-left:10px"><div class="disp" style="font-weight:600;font-size:15.5px">¡Hola, qué alegría tenerte por aquí!</div><div style="font-size:13px;color:var(--ink2);font-weight:600;margin-top:4px">Soy Brav IA, tu chef y asistente personal de compras.</div></div>
    <div style="border-left:3px solid var(--primary);padding-left:10px" class="disp"><b style="font-weight:600;font-size:15px">¿En qué puedo ayudarte hoy?</b></div>
    ${[['Recetas e instrucciones paso a paso:','pídeme cualquier plato y te daré todos los ingredientes exactos con sus precios en RD$ y pasos numerados.'],['Catálogo oficial completo:','consulta al instante los 750 productos de Supermercados Bravo y El Arca Petshop.'],['Pedidos asistidos en el chat:','puedo armar y pedir tu compra directamente con tu confirmación manual.']].map((c,i)=>`<div class="row" style="gap:10px;align-items:flex-start"><span style="flex:none;width:24px;height:24px;border-radius:50%;background:var(--primary);color:var(--onPrimary);font:700 12px 'Fredoka';display:flex;align-items:center;justify-content:center">${i+1}</span><p style="margin:0;font-size:13px;font-weight:600;line-height:1.45"><b>${c[0]}</b> ${c[1]}</p></div>`).join('')}`;
-  $('screen').innerHTML=`<div class="chathdr tcard"><button class="cbtn" style="border:0;background:none;font-size:20px" aria-label="Volver" onclick="go('home')">${ic('chev','transform:rotate(180deg)')}</button><span class="orb" style="width:30px;height:30px"></span>
-    <div style="flex:1"><div class="disp" style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Brav IA · Chef, Asesor &amp; Soporte</div><div style="font-size:10.5px;color:#10B981;font-weight:800">● Recetas web · Visión multimodal</div></div>
-    <button class="cbtn" onclick="speakLast()">Voz</button><button class="cbtn" onclick="cycleBudget()">RD$ ${S.budget}</button></div>
-    <div class="scroll" id="chatScroll" style="padding:16px 16px 160px;display:flex;flex-direction:column;gap:14px">${welcome}${S.chat.map(chatMsgHtml).join('')}</div>
-    <div class="inbar tcard"><label class="cbtn" style="border:0;background:none;color:var(--primary);font-size:18px;cursor:pointer" aria-label="Adjuntar foto">${ic('scan')}<input type="file" accept="image/*" hidden onchange="attachImg(this)"></label>
-    <input id="chatIn" placeholder="${S.pendImg?'Describe tu foto o toca Enviar para auditar...':'Receta web, foto NCF/calidad o sugerencia...'}" aria-label="Mensaje para Brav IA" onkeydown="if(event.key==='Enter')sendChat()"><button class="send" aria-label="Enviar" onclick="sendChat()">${ic('chev')}</button></div>`;
-  const sc=$('chatScroll');sc.scrollTop=sc.scrollHeight;
+  const budget=`<div class="tcard" style="padding:14px;border-radius:20px;display:flex;flex-direction:column;gap:6px">
+     <div style="text-align:center"><div class="disp" style="font-weight:600;font-size:15.5px">Presupuesto Meta en RD$</div><div class="ul" style="margin:3px auto 0"></div></div>
+     <div class="row" style="justify-content:space-between;gap:6px"><span class="disp" id="budgetLbl" style="font-weight:700;font-size:20px;color:var(--primary)">RD$ ${fmt(S.budget)}</span>
+       <span class="row" style="gap:6px"><button class="chip alt" style="height:34px;font-size:11px;background:none;border:1.2px solid color-mix(in srgb,var(--primary) 55%,transparent)" onclick="openSub('listas')">Mis Listas</button><button class="chip" style="height:34px;font-size:11.5px;background:none;border:1.5px solid var(--primary)" ${gen?'disabled':''} onclick="applyBudget(false)">Armar</button><button class="chip alt" style="height:34px;font-size:11.5px;color:var(--primary);background:none" ${gen?'disabled':''} onclick="applyBudget(true)">Ajustar</button></span></div>
+     <input type="range" min="400" max="3500" step="50" value="${S.budget}" aria-label="Presupuesto meta" style="accent-color:var(--primary);width:100%" oninput="S.budget=+this.value;$('budgetLbl').textContent='RD$ '+fmt(S.budget);save()">
+     <div class="hscroll" style="padding:0;gap:6px"><label class="chip" style="height:30px;font-size:11.5px;cursor:pointer;background:color-mix(in srgb,var(--primary) 16%,transparent);border:1.2px solid var(--primary)">${mi('photo_camera',14)}Soporte Visual (Foto / NCF)<input type="file" accept="image/*" hidden onchange="attachImg(this)"></label>
+       ${QUICK[S.store].map(([l,p],k)=>`<button class="chip alt" style="height:30px;font-size:11.5px;color:var(--ink)" ${gen?'disabled':''} onclick="quickAsk('${S.store}',${k})">${l}</button>`).join('')}</div></div>`;
+  const voice=v?`<div class="tcard aura" style="position:absolute;left:12px;right:12px;top:72px;z-index:7;border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:8px">
+     <div class="row" style="gap:10px"><span class="orb" style="width:30px;height:30px;${v.listening?'':'animation-duration:9s'}"></span><div style="flex:1"><div class="disp" style="font-weight:600;font-size:12px">${v.paused?'Brav IA Live • En Pausa':'Brav IA Live • Voz en Tiempo Real'}</div><div id="voiceLbl" style="font-size:11px;font-weight:700;color:var(--ink2)">${esc(v.label)}</div></div>
+       <button class="cbtn" onclick="voicePause()">${ic(v.paused?'play':'pause')}${v.paused?'Reanudar':'Pausar'}</button><button class="cbtn" style="background:var(--primary);color:var(--onPrimary);border:0" onclick="voiceListen()">${mi('mic',14)}Hablar</button><button class="cbtn" aria-label="Cerrar modo voz" onclick="voiceOff()">${ic('close')}</button></div>
+     <div class="hscroll" style="padding:0;gap:6px">${VQUICK.map(([l],k)=>`<button class="chip alt" style="height:28px;font-size:11px;color:var(--ink)" onclick="voiceQuick(${k})">${esc(l)}</button>`).join('')}</div></div>`:'';
+  $('screen').innerHTML=`<div class="chathdr tcard"><button class="cbtn" style="border:0;background:none;font-size:20px" aria-label="Volver" onclick="back()">${ic('back')}</button><span class="orb" style="width:30px;height:30px"></span>
+    <div style="flex:1;min-width:0"><div class="disp" style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isArca()?'Brav IA • El Arca &amp; Soporte':'Brav IA • Chef, Asesor &amp; Soporte'}</div><div style="font-size:10.5px;color:${gen?'var(--amber)':'#10B981'};font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${gen?'Verificando web, presupuesto y visión...':`Recetas Web • Visión Multimodal • RD$ ${S.budget}`}</div></div>
+    <button class="cbtn" style="${v?'background:var(--primary);color:var(--onPrimary);border:0':''}" onclick="${v?'voiceOff()':'voiceOn()'}">${mi('graphic_eq',14)}Voz</button><button class="cbtn" onclick="go('cart')">${ic('cart')}RD$${fmt(t.finalPay)}</button></div>
+    ${voice}
+    <div class="scroll" id="chatScroll" style="padding:${v?150:16}px 14px 160px;display:flex;flex-direction:column;gap:12px">${budget}${welcome}${S.chat.map(chatMsgHtml).join('')}</div>
+    ${S.pendImg?`<div class="tcard row" style="position:absolute;left:12px;right:12px;bottom:calc(132px + env(safe-area-inset-bottom));z-index:28;gap:10px;padding:8px 10px;border-radius:16px"><img src="data:${S.pendImg.mime};base64,${S.pendImg.data}" alt="Imagen adjunta" style="width:44px;height:44px;border-radius:10px;object-fit:cover"><div style="flex:1"><div style="font-weight:800;font-size:12px">Imagen adjunta • Brav IA Soporte Multimodal</div><div style="font-size:10.5px;font-weight:600;color:var(--ink2)">Lista para auditar producto dañado/vencido, factura NCF o alacena</div></div><button class="iconbtn" aria-label="Quitar imagen" onclick="S.pendImg=null;renderBravIA()">${ic('close')}</button></div>`:''}
+    <div class="inbar tcard"><label class="cbtn" style="border:0;background:none;color:var(--primary);font-size:18px;cursor:pointer" aria-label="Adjuntar foto">${mi('add_photo_alternate',20)}<input type="file" accept="image/*" hidden onchange="attachImg(this)"></label>
+    <input id="chatIn" placeholder="${S.pendImg?'Describe tu foto o toca Enviar para auditar...':isArca()?'Receta/dieta mascota, foto o sugerencia...':'Receta web, foto NCF/calidad o sugerencia...'}" aria-label="Mensaje para Brav IA" onkeydown="if(event.key==='Enter')sendChat()">
+    ${gen?`<button class="send" aria-label="Pausar" onclick="pauseGen()">${ic('pause')}</button>`:`<button class="send" aria-label="Enviar" onclick="sendChat()">${ic('sendi')}</button>`}</div>${S.bio?bioDialog():''}`;
+  const sc=$('chatScroll');sc.scrollTop=sc.scrollHeight;if(keepIn)$('chatIn').value=keepIn;if(focus)$('chatIn').focus();
 }
-window.cycleBudget=()=>{const b=[500,1000,1500,2500,5000];S.budget=b[(b.indexOf(S.budget)+1)%b.length];toast('offer',`Presupuesto: RD$ ${S.budget}`);renderBravIA()};
-window.speakLast=()=>{const m=[...S.chat].reverse().find(x=>x.s==='a'&&x.t);if(!m)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(m.t.replace(/\*|SKUS:.*$/gs,''));u.lang='es-DO';speechSynthesis.speak(u)}catch(e){}};
+window.quickAsk=(st,k)=>{const inp=$('chatIn');inp.value=QUICK[st][k][1];sendChat()};
+window.applyBudget=opt=>{const lim=S.budget,arca=isArca(),ess=arca?['ARC-001','ARC-009','ARC-012','ARC-015','ARC-021','ARC-025','ARC-028','ARC-010']:['BRV-053','BRV-055','BRV-075','BRV-096','BRV-009','BRV-098','BRV-020','BRV-019','BRV-002','BRV-037'];
+  const ch=[];let sum=0;for(const s of ess){const p=BY_SKU[s];if(p&&sum+p.price<=lim){ch.push(s);sum+=p.price}}
+  Object.keys(S.cart).forEach(k=>{delete S.cart[k];syncCart(k)});ch.forEach(s=>{S.cart[s]=1;syncCart(s)});save();updateCart();
+  const store=arca?'El Arca Petshop':'Supermercados Bravo';
+  S.chat.push({s:'u',t:opt?`Ajustar mi carrito actual para no pasarme de RD$ ${lim}`:`Armar una compra inteligente dentro de RD$ ${lim}`},{s:'a',t:`¡Con mucho gusto! Te armé una selección de **${ch.length} productos esenciales de ${store}** por **RD$ ${sum}.00** (ahorras **RD$ ${lim-sum}** respecto a tu meta de RD$ ${lim} y sumas **+RD$ ${Math.floor(sum/100)}** en Bravísima). También puedes guardarla como lista de compras con un toque.`,skus:ch,label:'Planificador Inteligente de Presupuesto'});
+  toast('offer',`Carrito ajustado a RD$ ${sum}.00`);renderBravIA()};
+window.pauseGen=()=>{const m=S.chat.find(x=>x.loading);if(!m)return;m.abort=true;m.loading=false;if(!m.t)m.t='**Generación en pausa:**\n• Detuve la respuesta inmediatamente a tu solicitud.\n• Puedes escribir otra consulta, adjuntar una foto o tocar una sugerencia cuando desees continuar.';toast('bell','Respuesta de Brav IA pausada');renderBravIA()};
+window.addChatBundle=i=>{const m=S.chat[i];(m.skus||[]).forEach(s=>BY_SKU[s]&&chg(s,1));toast('check','Ingredientes y productos agregados al carrito');renderBravIA()};
+window.saveChatList=i=>{const m=S.chat[i];if(!m.skus?.length)return;const first=(m.t||'').split('\n').map(x=>x.replace(/\*\*/g,'').trim()).find(x=>x)?.slice(0,34);const name=first&&first.length>6?`Lista IA: ${first}`:`Selección Brav IA (${m.skus.length} art.)`;
+  const l={id:'list_'+Date.now(),name,skus:[...new Set(m.skus)],note:'Guardada directamente desde tu conversación con Brav IA.',isAi:true,upd:'Creada por Brav IA • Sincronizada'};S.lists=[S.lists[0],l,...S.lists.slice(1)];persistList(l);toast('list',`Lista guardada: "${name}"`)};
+window.requestChatOrder=i=>{const m=S.chat[i];if(!m.skus?.length){toast('bell','Este mensaje no contiene artículos para pedir');return}m.confirm=true;toast('cart','Revisa el resumen en el chat y toca Confirmar Pedido');renderBravIA()};
+window.cancelChatOrder=i=>{S.chat[i].confirm=false;toast('bell','Confirmación de pedido cancelada en el chat');renderBravIA()};
+window.confirmChatOrder=i=>{const m=S.chat[i],ps=(m.skus||[]).map(s=>BY_SKU[s]).filter(Boolean);if(!ps.length){toast('bell','No hay artículos válidos para procesar el pedido');return}
+  const tot=ps.reduce((a,p)=>a+p.price,0),card=cardSummary();
+  bioReq({op:'BIA',title:'Confirmar Pedido Brav IA',subtitle:`Total RD$ ${tot}.00 • ${ps.length} artículo(s)`,description:`Autoriza con tu huella digital el pago con ${card} y el despacho inmediato de tu compra preparada por Brav IA.`,badge:'AUTORIZACIÓN BIOMÉTRICA BRAV IA',amount:tot,cashback:Math.floor(tot/100),payLabel:card,deliveryLabel:`Delivery Express • ${S.branch}`},()=>{
+    ps.forEach(p=>{S.cart[p.sku]=Math.max(1,S.cart[p.sku]||0);syncCart(p.sku)});save();
+    const before=S.orders[0]?.id;completeCheckout();const o=S.orders[0];if(!o||o.id===before)return;const mm=metrics(STAGES[1]);
+    m.confirm=false;m.confirmed=true;m.orderId=o.id;
+    S.chat.push({s:'a',t:`¡Pedido **#${o.id}** confirmado manualmente con éxito! Se enviaron **${o.badgeNum} artículos** desde **${S.branch}** por **RD$ ${Math.trunc(o.total)}.00** (Ruta GPS: ${mm.road} km • ETA ~${mm.eta} min).`,skus:ps.map(p=>p.sku),label:`Brav IA • Pedido Confirmado #${o.id}`,confirmed:true,orderId:o.id});save()})};
+/* ---------- Voz (TextToSpeech + SpeechRecognizer → Web Speech API) ---------- */
+function cleanSpeech(t){return (t||'').replace(/SKUS:.*$/s,'').replace(/[*#_`>]/g,'').replace(/\[[A-Z]{3}-\d+\]/g,'').trim()}
+function speak(text,idx){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(cleanSpeech(text));u.lang='es-DO';const vs=speechSynthesis.getVoices().find(v=>/^es/i.test(v.lang));if(vs)u.voice=vs;S.ttsMsg=idx;u.onend=u.onerror=()=>{S.ttsMsg=null;if(S.screen==='bravia')renderBravIA();if(S.voice&&!S.voice.paused)setTimeout(voiceListen,350)};speechSynthesis.speak(u);if(S.screen==='bravia')renderBravIA()}catch(e){toast('bell','La voz no está disponible en este navegador')}}
+window.speakMsg=i=>speak(S.chat[i].t,i);
+window.speakSteps=i=>speak(parseSteps(S.chat[i].t).map((s,k)=>`Paso ${k+1}: ${s}`).join('. '),i);
+window.stopTts=()=>{try{speechSynthesis.cancel()}catch(e){}S.ttsMsg=null;renderBravIA()};
 window.attachImg=inp=>{const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{S.pendImg={data:String(r.result).split(',')[1],mime:f.type};toast('check','Foto adjunta para Brav IA');renderBravIA()};r.readAsDataURL(f)};
+window.speakLast=()=>{const i=S.chat.map(m=>m.s).lastIndexOf('a');if(i>=0)speakMsg(i)};
+let REC=null;
+function setVoiceLbl(t){if(S.voice){S.voice.label=t;const e=$('voiceLbl');if(e)e.textContent=t}}
+window.voiceOn=()=>{S.voice={paused:false,listening:false,label:'Modo Voz Activo • Toca Hablar o elige una consulta',lastSpoken:S.chat.length};renderBravIA();voiceListen()};
+window.voiceOff=()=>{try{REC&&REC.abort()}catch(e){}try{speechSynthesis.cancel()}catch(e){}S.voice=null;S.ttsMsg=null;renderBravIA()};
+window.voicePause=()=>{const v=S.voice;if(!v)return;v.paused=!v.paused;if(v.paused){try{REC&&REC.abort()}catch(e){}try{speechSynthesis.cancel()}catch(e){}v.label='Modo voz en pausa • Toca Reanudar para continuar';renderBravIA()}else{v.label='Reanudando escucha...';renderBravIA();voiceListen()}};
+window.voiceQuick=k=>{const inp=$('chatIn');inp.value=VQUICK[k][1];setVoiceLbl(`Consulta enviada: "${VQUICK[k][1]}"`);sendChat()};
+window.voiceListen=()=>{const v=S.voice;if(!v||v.paused)return;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setVoiceLbl('Voz en vivo lista • Dicta tu receta o consulta');toast('bell','El reconocimiento de voz no está disponible en este navegador');return}
+  try{REC&&REC.abort()}catch(e){}try{speechSynthesis.cancel()}catch(e){}
+  REC=new SR();REC.lang='es-DO';REC.interimResults=true;REC.maxAlternatives=1;
+  REC.onstart=()=>{v.listening=true;setVoiceLbl('Escuchando tu voz... (puedes hablar ahora)')};
+  REC.onresult=e=>{const r=e.results[e.results.length-1],t=r[0].transcript.trim();if(!r.isFinal){setVoiceLbl(`Escuchando: "${t}..."`);return}setVoiceLbl(`Escuchado: "${t}"`);const inp=$('chatIn');if(inp&&t){inp.value=t;sendChat()}};
+  REC.onerror=()=>{v.listening=false;setVoiceLbl(v.paused?'Modo voz en pausa • Toca Reanudar cuando gustes':'Listo para escucharte • Toca Hablar o un chip rápido')};
+  REC.onend=()=>{v.listening=false};
+  try{REC.start()}catch(e){}};
 window.sendChat=async()=>{
-  const inp=$('chatIn');const q=(inp.value||'').trim();if(!q&&!S.pendImg)return;
+  const inp=$('chatIn');const q=(inp.value||'').trim();if(!q&&!S.pendImg)return;if(S.chat.some(m=>m.loading))return;inp.value='';
   const img=S.pendImg;S.pendImg=null;S.chat.push({s:'u',t:q||'Analiza esta imagen',img:!!img});
-  const m={s:'a',t:'',loading:true,label:img?'Brav IA Soporte • Auditoría Visual Multimodal':'Brav IA • Chef Ejecutivo & Asesor Oficial'};S.chat.push(m);renderBravIA();
+  const order=isOrderIntent(q),sugg=/sugier|sugerencia|recomiendo agregar|deberían agregar/i.test(q);
+  const m={s:'a',t:'',loading:true,label:img?'Brav IA Soporte • Auditoría Visual Multimodal':'Brav IA • Chef Ejecutivo & Asesor Oficial'};S.chat.push(m);const idx=S.chat.length-1;renderBravIA();
   if(!window.BV_FB){m.loading=false;m.t='Conectando con Gemini… intenta de nuevo en unos segundos.';renderBravIA();return}
-  try{for await(const t of BV_FB.generate(systemPrompt(q||'Analiza esta imagen',!!img),img&&img.data,img&&img.mime)){m.t+=t;const last=$('chatScroll')?.lastElementChild;if(last&&S.screen==='bravia'){last.outerHTML=chatMsgHtml(m);$('chatScroll').scrollTop=$('chatScroll').scrollHeight}}
-    const mm=m.t.match(/SKUS:\s*\[([^\]]*)\]/);if(mm){m.skus=[...mm[1].matchAll(/"([A-Z]{3}-\d+)"/g)].map(x=>x[1]);m.t=m.t.replace(/SKUS:\s*\[[^\]]*\]/,'').trim()}
-  }catch(e){m.t='No pude conectar con Gemini en este momento. Intenta de nuevo en unos segundos.';console.warn(e)}
-  m.loading=false;if(S.screen==='bravia')renderBravIA();
+  try{for await(const t of BV_FB.generate(systemPrompt(q||'Analiza esta imagen',!!img),img&&img.data,img&&img.mime)){if(m.abort)break;m.t+=t;const el=$('chatScroll')?.children[$('chatScroll').children.length-1];if(el&&S.screen==='bravia'){const w=document.createElement('div');w.innerHTML=chatMsgHtml({...m,t:m.t.replace(/SKUS:\s*\[[^\]]*\]?/,'').replace(/SUGGESTION_MAIL_PAYLOAD:[\s\S]*$/,'')},idx);el.replaceWith(w.firstElementChild);$('chatScroll').scrollTop=$('chatScroll').scrollHeight}}
+    const mm=m.t.match(/SKUS:\s*\[([^\]]*)\]/);if(mm){m.skus=[...mm[1].matchAll(/"([A-Z]{3}-\d+)"/g)].map(x=>x[1]).filter(s=>BY_SKU[s]);m.t=m.t.replace(/SKUS:\s*\[[^\]]*\]/,'').trim()}
+    const sp=m.t.match(/SUGGESTION_MAIL_PAYLOAD:\s*(\{[\s\S]*?\})\s*$/);if(sp){m.t=m.t.replace(/SUGGESTION_MAIL_PAYLOAD:[\s\S]*$/,'').trim();try{const pl=JSON.parse(sp[1]);fetch('https://formsubmit.co/ajax/bezaleelpatrocino0@gmail.com',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(pl)}).catch(()=>{});m.label='Brav IA Soporte • Enviado a bezaleelpatrocino0@gmail.com'}catch(e){}}
+    else if(sugg&&!m.skus?.length)m.label='Brav IA Soporte • Enviado a bezaleelpatrocino0@gmail.com';
+    if(order&&m.skus?.length){m.confirm=true;m.label='Brav IA • Pedido Listo para Confirmación Manual'}
+  }catch(e){if(!m.abort)m.t='No pude conectar con Gemini en este momento. Intenta de nuevo en unos segundos.';console.warn(e)}
+  if(m.abort&&!m.t)m.t='**Generación en pausa:**\n• Detuve la respuesta inmediatamente a tu solicitud.';
+  m.loading=false;if(S.screen==='bravia'){renderBravIA();if(S.voice&&!S.voice.paused&&!m.abort)speak(m.t,idx)}
 };
 window.openProduct=sku=>{S.product=sku;go('product')};
 window.openCategory=n=>{S.category=n;go('category')};
@@ -769,9 +847,9 @@ function bioDialog(){
   </div></div>`;
 }
 window.bioCancel=()=>{S.bio=null;rerender()};
-function rerender(){({cart:renderCart,bravisima:renderBravisima,account_sub:renderSub})[S.screen]?.(true)}
+function rerender(){({cart:renderCart,bravisima:renderBravisima,account_sub:renderSub,bravia:renderBravIA})[S.screen]?.(true)}
 async function bioToken(op,amount){
-  const payload=`${{PAY:'CHECKOUT_PAY',BRV:'BRAVISIMA_REDEEM',ULK:'BRAVISIMA_SECURITY',CRD:'PAYMENT_METHOD_AUTH'}[op]||op}:${amount}:0:${Date.now()}`;
+  const payload=`${{PAY:'CHECKOUT_PAY',BRV:'BRAVISIMA_REDEEM',ULK:'BRAVISIMA_SECURITY',CRD:'PAYMENT_METHOD_AUTH',BIA:'BRAVIA_ORDER_PAY'}[op]||op}:${amount}:0:${Date.now()}`;
   try{const h=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(payload)));return `BIO-${op}-${[...h.slice(0,3)].map(x=>x.toString(16).padStart(2,'0').toUpperCase()).join('')}`}
   catch(e){return `BIO-${op}-${String(Date.now()%1e6).padStart(6,'0')}`}
 }
@@ -782,7 +860,7 @@ window.bioVerify=async()=>{const b=S.bio;if(!b||b.state==='scanning'||b.state===
   await new Promise(r=>setTimeout(r,650));if(S.bio!==b)return;
   S.bio=null;S.lastBio=tok;toast('check',`BiometricPrompt verificado (${tok})`);b.onOk();rerender();
 };
-function completeCheckout(){
+function completeCheckout(opt={}){
   const t=cartTotals();if(!t.count)return;
   S.bravBal=Math.max(0,S.bravBal-t.redeemed+t.gen);
   const id='ORD-'+(10000+Math.floor(Math.random()*90000));
@@ -796,7 +874,7 @@ function completeCheckout(){
   S.cart={};S.redeem=S.card.autoRedeem&&!S.bravLocked;S.lastBio=null;save();updateCart();
   const st=STAGES[1],m=metrics(st);S.celebrate={id,total:t.finalPay,branch:S.branch,eta:m.eta,km:m.road};syncTel(st,false);BANNER=null;
   toast('check',`¡Pedido confirmado! +RD$ ${t.gen} en tu Tarjeta Bravísima`);
-  go('delivery');$('overlay').innerHTML=celebration();setTimeout(endCelebrate,3500);
+  if(!opt.stay)go('delivery');$('overlay').innerHTML=celebration();setTimeout(endCelebrate,3500);
   setTimeout(()=>{if(trackedOrder()&&trackedOrder().id===id){setOrderStage(STAGES[2],false);if(S.screen==='delivery')renderDelivery(true)}},4500);
 }
 /* ================= RONDA 3: Seguimiento en vivo (DeliveryTrackingScreen) ================= */
