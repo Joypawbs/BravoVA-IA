@@ -360,7 +360,10 @@ actual object BiometricPlatform {
 /*  Push: local notifications (FCM for iOS needs APNs setup, see README) */
 /* ------------------------------------------------------------------ */
 
-private object ForegroundNotificationDelegate : NSObject(), UNUserNotificationCenterDelegateProtocol {
+// Kotlin/Native no permite `object` que herede de NSObject: clase + instancia única retenida
+private val foregroundNotificationDelegate: ForegroundNotificationDelegateImpl by lazy { ForegroundNotificationDelegateImpl() }
+
+private class ForegroundNotificationDelegateImpl : NSObject(), UNUserNotificationCenterDelegateProtocol {
     override fun userNotificationCenter(
         center: UNUserNotificationCenter,
         willPresentNotification: UNNotification,
@@ -382,7 +385,7 @@ actual object PushPlatform {
 
     actual fun ensureChannels(context: PlatformContext) {
         val center = UNUserNotificationCenter.currentNotificationCenter()
-        if (center.delegate == null) center.delegate = ForegroundNotificationDelegate
+        if (center.delegate == null) center.delegate = foregroundNotificationDelegate
         NotificationPermissionCache.refresh()
     }
 
