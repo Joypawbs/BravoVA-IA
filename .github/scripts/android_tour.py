@@ -47,7 +47,11 @@ def shot(name):
 
 
 def nodes():
-    adb("shell", "uiautomator", "dump", "/sdcard/ui.xml")
+    adb("shell", "rm", "-f", "/sdcard/ui.xml")
+    try:
+        subprocess.run(["adb", "shell", "uiautomator", "dump", "/sdcard/ui.xml"], capture_output=True, timeout=20)
+    except subprocess.TimeoutExpired:
+        return []
     xml = adb("shell", "cat", "/sdcard/ui.xml", capture=True) or ""
     found = []
     for m in re.finditer(r'<node [^>]*>', xml):
@@ -61,19 +65,30 @@ def nodes():
     return found
 
 
-def tap(labels, prefix=False, wait=2.0):
-    """Toca el primer elemento cuyo texto o descripción coincide con alguna etiqueta."""
+def screen_size():
+    out = adb("shell", "wm", "size", capture=True) or ""
+    m = re.search(r"(\d+)x(\d+)", out)
+    return (int(m.group(1)), int(m.group(2))) if m else (1080, 2400)
+
+
+def tap(labels, prefix=False, wait=2.0, fallback=None):
+    """Toca por texto; si uiautomator no ve la app (animaciones sin fin), usa la posición relativa."""
     dismiss_system_dialogs()
-    for _ in range(3):
-        for text, desc, x, y in nodes():
-            for label in labels:
-                hit = (text.startswith(label) or desc.startswith(label)) if prefix else label in (text, desc)
-                if hit:
-                    adb("shell", "input", "tap", str(x), str(y))
-                    print(f"[tour] tap '{label}' en ({x},{y})", flush=True)
-                    time.sleep(wait)
-                    return True
-        time.sleep(2)
+    for text, desc, x, y in nodes():
+        for label in labels:
+            hit = (text.startswith(label) or desc.startswith(label)) if prefix else label in (text, desc)
+            if hit:
+                adb("shell", "input", "tap", str(x), str(y))
+                print(f"[tour] tap '{label}' en ({x},{y})", flush=True)
+                time.sleep(wait)
+                return True
+    if fallback:
+        w, h = screen_size()
+        x, y = int(w * fallback[0]), int(h * fallback[1])
+        adb("shell", "input", "tap", str(x), str(y))
+        print(f"[tour] tap por posición {fallback} para {labels}", flush=True)
+        time.sleep(wait)
+        return True
     print(f"[tour] no encontré {labels}", flush=True)
     return False
 
@@ -84,13 +99,15 @@ def swipe_up():
 
 
 def main():
+    # Evita que los avisos "X no responde" del emulador tapen la app.
+    adb("shell", "settings", "put", "global", "hide_error_dialogs", "1")
     adb("shell", "cmd", "uimode", "night", "no")
-    time.sleep(25)  # deja que el sistema termine de arrancar
+    time.sleep(25)
     dismiss_system_dialogs()
     adb("shell", "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")
     time.sleep(4); shot("splash")
     time.sleep(8); shot("inicio_sesion")
-    tap(["Continuar como Invitado", "Invitado"], prefix=True, wait=5)
+    tap(["Continuar como Invitado", "Invitado"], prefix=True, wait=6, fallback=(0.5, 0.77))
     shot("home")
     if tap(["Café Soluble"], prefix=True, wait=3):
         shot("detalle_producto")
@@ -100,24 +117,24 @@ def main():
     tap(["Agregar "], prefix=True, wait=1)
     shot("home_con_carrito")
 
-    for label, name in [("Catálogo", "catalogo"), ("Tarjeta", "tarjeta_bravisima"),
-                        ("Brav IA", "brav_ia"), ("Perfil", "mi_cuenta")]:
-        tap([label], wait=3)
+    tabs = [("Catálogo", 0.3, "catalogo"), ("Tarjeta", 0.1, "tarjeta_bravisima"),
+            ("Brav IA", 0.7, "brav_ia"), ("Perfil", 0.9, "mi_cuenta")]
+    for label, x, name in tabs:
+        tap([label], wait=3, fallback=(x, 0.955))
         shot(name)
 
-    tap(["Mis pedidos"], wait=3); shot("mis_pedidos")
+    tap(["Mis pedidos"], wait=3, fallback=(0.4, 0.115)); shot("mis_pedidos")
     adb("shell", "input", "keyevent", "4"); time.sleep(2)
-    tap(["Inicio"], wait=3)
-    tap(["Ver carrito"], wait=3); shot("carrito")
+    tap(["Inicio"], wait=3, fallback=(0.5, 0.955))
+    tap(["Ver carrito"], wait=3, fallback=(0.5, 0.865)); shot("carrito")
     adb("shell", "input", "keyevent", "4"); time.sleep(2)
 
     # Modo oscuro del sistema: la app debe seguirlo sola.
     adb("shell", "cmd", "uimode", "night", "yes"); time.sleep(4)
-    tap(["Inicio"], wait=3); shot("home_oscuro")
-    tap(["Catálogo"], wait=3); shot("catalogo_oscuro")
+    tap(["Inicio"], wait=3, fallback=(0.5, 0.955)); shot("home_oscuro")
+    tap(["Catálogo"], wait=3, fallback=(0.3, 0.955)); shot("catalogo_oscuro")
+    tap(["Perfil"], wait=3, fallback=(0.9, 0.955)); shot("mi_cuenta_oscuro")
     adb("shell", "cmd", "uimode", "night", "no")
-
-    (OUT / "ui_final.txt").write_text("\n".join(f"{t} | {d} | {x},{y}" for t, d, x, y in nodes()))
 
 
 if __name__ == "__main__":
