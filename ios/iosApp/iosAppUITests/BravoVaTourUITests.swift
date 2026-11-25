@@ -54,6 +54,14 @@ final class BravoVaTourUITests: XCTestCase {
         app.coordinate(withNormalizedOffset: fallback).tap()
     }
 
+    /// El simulador muestra un aviso del teclado ("Speed up your typing…") que tapa la app.
+    private func dismissKeyboardTips() {
+        for label in ["Continue", "Continuar"] {
+            let b = app.buttons[label]
+            if b.waitForExistence(timeout: 1) { b.tap(); pause(1) }
+        }
+    }
+
     private func pause(_ s: TimeInterval) { _ = XCTWaiter.wait(for: [expectation(description: "pausa")], timeout: s) }
 
     func testRecorridoCompleto() throws {
@@ -81,13 +89,19 @@ final class BravoVaTourUITests: XCTestCase {
         let search = app.descendants(matching: .any).matching(identifier: "home_search_input").firstMatch
         if search.waitForExistence(timeout: 3) {
             search.tap(); pause(1)
-            app.typeText("spamton"); pause(2.5); shot("efecto_spamton")
+            dismissKeyboardTips()
+            app.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
             app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7))
             app.typeText("arroz"); pause(3); shot("busqueda_filtros")
             tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
             pause(2); shot("busqueda_menor_precio")
             app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 5))
             pause(1)
+            dismissKeyboardTips()
+            // Cierra el teclado para que no tape la barra de pestañas
+            if app.keyboards.buttons["Search"].exists { app.keyboards.buttons["Search"].tap() }
+            else if app.keyboards.buttons["search"].exists { app.keyboards.buttons["search"].tap() }
+            app.swipeDown(); pause(1)
         }
 
         // Detalle de producto y vuelta al inicio
