@@ -93,7 +93,10 @@ final class BravoVaTourUITests: XCTestCase {
         // Detalle de producto y vuelta al inicio
         tap(["Café Soluble"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
         pause(3); shot("detalle_producto")
-        app.swipeUp(); pause(2); shot("detalle_precio_por_unidad")
+        // Desliza desde abajo para no abrir el visor de la foto
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+            .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)))
+        pause(2); shot("detalle_precio_por_unidad")
         tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
         pause(2)
         tap(["Agregar Café"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)

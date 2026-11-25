@@ -1372,11 +1372,24 @@ fun ProductArtworkView(
                     )
                 },
                 error = {
-                    ProductVectorIllustration(
-                        product = product,
-                        accentColor = accent,
-                        darkMode = isDark,
-                        cornerRadius = cornerRadius
+                    // Si falló el recorte, intenta la foto original antes de usar el dibujo
+                    SubcomposeAsyncImage(
+                        model = product.imageUrl,
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Fit,
+                        alignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(cornerRadius)),
+                        error = {
+                            ProductVectorIllustration(
+                                product = product,
+                                accentColor = accent,
+                                darkMode = isDark,
+                                cornerRadius = cornerRadius
+                            )
+                        }
                     )
                 }
             )

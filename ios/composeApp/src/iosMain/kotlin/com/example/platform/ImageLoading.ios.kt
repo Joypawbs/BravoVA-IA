@@ -16,7 +16,11 @@ actual fun ImageRequest.Builder.softwareBitmapsForTransformations(): ImageReques
 object IosCutoutCenterTransformation : Transformation() {
     override val cacheKey: String = "studio_cutout_center_v8"
 
-    override suspend fun transform(input: Bitmap, size: Size): Bitmap {
+    // Si algo falla al recortar, se devuelve la foto tal cual (mejor foto con fondo que sin foto)
+    override suspend fun transform(input: Bitmap, size: Size): Bitmap =
+        runCatching { cutout(input) }.getOrElse { input }
+
+    private fun cutout(input: Bitmap): Bitmap {
         val w = input.width
         val h = input.height
         if (w < 8 || h < 8) return input
