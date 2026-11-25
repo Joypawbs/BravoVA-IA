@@ -1,0 +1,20 @@
+name: Buscar fotos reales
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  fotos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Buscar en Open Food Facts
+        run: |
+          mkdir -p out
+          python3 .github/scripts/fotos_reales.py ios/composeApp/src/commonMain/kotlin/com/example/data/BravoCatalogData.kt out/fotos_bravo.json | tee out/log_bravo.txt
+      - name: Publicar resultados en la rama datos-fotos
+        run: |
+          cd out && git init -q -b datos-fotos
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Fotos reales encontradas"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" datos-fotos
