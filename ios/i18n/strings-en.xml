@@ -6,6 +6,8 @@
     <string name="tab_home">Home</string>
     <string name="tab_bravia">Brav AI</string>
     <string name="tab_profile">Profile</string>
+    <string name="tab_account">Account</string>
+    <string name="tab_search">Search</string>
     <string name="offline_banner">Offline • showing saved items</string>
     <string name="repeat_title">Reorder your last purchase?</string>
     <string name="repeat_products">%1$d items • %2$s</string>

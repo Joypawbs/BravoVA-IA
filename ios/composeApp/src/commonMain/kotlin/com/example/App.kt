@@ -895,6 +895,7 @@ fun BravoVaApp(
                                         onExitSession()
                                     }
                                 },
+                                onOpenBravisima = { viewModel.navigateTo(AppScreen.BRAVISIMA) },
                                 onOpenSubScreen = { sub -> viewModel.openAccountSubScreen(sub) }
                             )
                         }

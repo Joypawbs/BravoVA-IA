@@ -108,16 +108,20 @@ final class BravoVaTourUITests: XCTestCase {
         app.swipeDown(); pause(2)
         app.swipeDown(); pause(1)
 
+        // 2.0: Inicio, Catálogo, Brav IA y Cuenta (+ Búsqueda aparte); Bravísima está en Cuenta
         let tabs: [(String, CGFloat, String)] = [
-            ("Catálogo", 0.32, "catalogo"),
-            ("Bravísima", 0.14, "bravisima"),
-            ("Brav IA", 0.68, "brav_ia"),
-            ("Perfil", 0.86, "mi_cuenta"),
+            ("Catálogo", 0.30, "catalogo"),
+            ("Brav IA", 0.52, "brav_ia"),
+            ("Cuenta", 0.72, "mi_cuenta"),
         ]
         for (label, x, name) in tabs {
             tap([label], fallback: CGVector(dx: x, dy: 0.92), wait: 3)
             pause(3); shot(name)
         }
+        tap(["Tarjeta Bravísima"], fallback: CGVector(dx: 0.5, dy: 0.25), wait: 3)
+        pause(3); shot("bravisima")
+        tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
+        pause(2)
 
         // Dentro de Mi cuenta: abre Mis pedidos y vuelve.
         tap(["Mis pedidos"], fallback: CGVector(dx: 0.27, dy: 0.25), wait: 3)

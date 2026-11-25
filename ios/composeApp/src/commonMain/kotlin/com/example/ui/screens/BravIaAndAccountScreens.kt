@@ -2598,6 +2598,7 @@ fun AccountGridScreen(
     onBack: () -> Unit = {},
     onOpenCart: () -> Unit = {},
     onSignOut: () -> Unit = {},
+    onOpenBravisima: () -> Unit = {},
     onOpenSubScreen: (AccountSubScreen) -> Unit
 ) {
     val view = currentPlatformView()
@@ -2637,6 +2638,52 @@ fun AccountGridScreen(
         ) {
             item(key = "account_large_title") {
                 LargeTitle(title = "Mi cuenta", accent = primaryColor)
+            }
+            // 2.0: Bravísima vive aquí (antes era una pestaña)
+            item(key = "account_bravisima_card") {
+                TranslucentCard(
+                    darkMode = darkMode,
+                    cornerRadius = 20.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp)
+                        .testTag("account_bravisima_card"),
+                    onClick = {
+                        HapticFeedbackManager.onNavigationClick(view)
+                        onOpenBravisima()
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(primaryColor.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Outlined.CreditCard, contentDescription = null, tint = primaryColor)
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                text = "Tarjeta Bravísima",
+                                fontFamily = PlusJakartaSans,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Tu código para la caja, puntos y premios",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
 
             // Lista agrupada (estilo ajustes de iOS / Android) en lugar de casillas grandes.

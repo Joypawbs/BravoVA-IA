@@ -155,11 +155,14 @@ def main():
     # Al bajar se esconden las barras; subir un poco las vuelve a mostrar.
     swipe_down(); swipe_down()
 
-    tabs = [("Catálogo", 0.3, "catalogo"), ("Bravísima", 0.1, "bravisima"),
-            ("Brav IA", 0.7, "brav_ia"), ("Perfil", 0.9, "mi_cuenta")]
+    # 2.0: Inicio, Catálogo, Buscar, Brav IA y Cuenta (Bravísima está dentro de Cuenta)
+    tabs = [("Catálogo", 0.3, "catalogo"), ("Brav IA", 0.7, "brav_ia"), ("Cuenta", 0.9, "mi_cuenta")]
     for label, x, name in tabs:
         tap([label], wait=3, fallback=(x, 0.955))
         shot(name)
+    if tap(["Tarjeta Bravísima"], wait=3):
+        shot("bravisima")
+        tap(["Volver"], wait=2, fallback=(0.06, 0.06))
 
     tap(["Mis pedidos"], wait=3, fallback=(0.4, 0.115)); shot("mis_pedidos")
     tap(["Volver"], wait=2, fallback=(0.06, 0.06))
@@ -175,7 +178,7 @@ def main():
     adb("shell", "cmd", "uimode", "night", "yes"); time.sleep(4)
     tap(["Inicio"], wait=3, fallback=(0.5, 0.955)); shot("home_oscuro")
     tap(["Catálogo"], wait=3, fallback=(0.3, 0.955)); shot("catalogo_oscuro")
-    tap(["Perfil"], wait=3, fallback=(0.9, 0.955)); shot("mi_cuenta_oscuro")
+    tap(["Cuenta"], wait=3, fallback=(0.9, 0.955)); shot("mi_cuenta_oscuro")
     adb("shell", "cmd", "uimode", "night", "no")
 
 

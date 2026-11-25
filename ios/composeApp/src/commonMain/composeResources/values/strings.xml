@@ -6,6 +6,8 @@
     <string name="tab_home">Inicio</string>
     <string name="tab_bravia">Brav IA</string>
     <string name="tab_profile">Perfil</string>
+    <string name="tab_account">Cuenta</string>
+    <string name="tab_search">Buscar</string>
     <string name="offline_banner">Sin conexión • mostrando lo guardado</string>
     <string name="repeat_title">¿Repetimos tu última compra?</string>
     <string name="repeat_products">%1$d productos • %2$s</string>
