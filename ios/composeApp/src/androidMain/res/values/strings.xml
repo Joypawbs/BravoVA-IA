@@ -2,4 +2,10 @@
     <string name="app_name">BravoVa</string>
     <string name="widget_offers_description">El tema de ofertas de hoy en Supermercados Bravo</string>
     <string name="widget_bravisima_description">Tu tarjeta Bravísima a un toque</string>
+    <string name="shortcut_search_short">Buscar</string>
+    <string name="shortcut_search_long">Buscar productos</string>
+    <string name="shortcut_repeat_short">Repetir pedido</string>
+    <string name="shortcut_repeat_long">Repetir mi último pedido</string>
+    <string name="shortcut_card_short">Mi Bravísima</string>
+    <string name="shortcut_card_long">Mi tarjeta Bravísima</string>
 </resources>

@@ -45,16 +45,63 @@ fun formatUnitPrice(value: Double, kind: UnitKind): String {
     return "RD$$wholeStr.$dec / ${kind.label}"
 }
 
+/** Palabras que no dicen qué es el producto (marca, conectores, medidas). */
+private val NON_TYPE_WORDS = setOf(
+    "bravo", "marca", "exclusiva", "pet", "de", "del", "la", "el", "los", "las", "con", "sin", "y", "en", "para", "a", "al",
+    "lb", "lbs", "libra", "libras", "gr", "g", "grs", "gramos", "kg", "kgs", "kilo", "kilos", "oz", "onz", "onzas",
+    "l", "lt", "lts", "litro", "litros", "ml", "galon", "galones", "gl", "und", "unidad", "unidades", "rollos",
+    "rollo", "pack", "x", "u", "uds"
+)
+
+/** Dietas médicas: nunca se sugiere cambiarlas por otra cosa. */
+private val THERAPEUTIC_WORDS = setOf(
+    "veterinary", "prescription", "vetcare", "veterinario", "veterinaria", "clinico", "dermatologico", "renal",
+    "urinary", "hepatic", "diabetic", "hypoallergenic", "gastrointestinal", "hipoalergenico"
+)
+
+/** Variantes que hacen a dos productos distintos aunque se llamen parecido (sabor, carne, especie, tipo). */
+private val VARIANT_GROUPS = listOf(
+    setOf("res", "cerdo", "pollo", "pavo", "pescado", "atun", "salmon", "cordero"),
+    setOf("naranja", "chinola", "pina", "manzana", "mango", "uva", "limon", "fresa", "guayaba"),
+    setOf("perro", "perros", "dog", "cachorro", "cachorros", "puppy"),
+    setOf("gato", "gatos", "gatito", "gatitos", "cat", "kitten"),
+    setOf("peces", "pez", "betta"),
+    setOf("tortuga", "tortugas"),
+    setOf("loro", "loros", "cotorras", "ave", "aves"),
+    setOf("hamster", "roedor", "roedores"),
+    setOf("entera", "deslactosada", "chocolate", "descremada"),
+    setOf("rojas", "negras", "blancas", "pintas"),
+    setOf("tinto", "blanco", "rosado", "espumoso"),
+    setOf("oliva", "coco", "canola", "vegetal", "maiz", "girasol")
+)
+
+/** Palabras que describen el producto, en orden: "Bravo Arroz Premium 10 Lb" → [arroz, premium]. */
+fun Product.typeWords(): List<String> =
+    normalizeForSearch(name)
+        .split(' ', '-', '/', '(', ')', ',', '.', '%', '&', '\'')
+        .filter { it.length > 1 && it !in NON_TYPE_WORDS && it.none(Char::isDigit) }
+
+private fun sameKindOfProduct(a: List<String>, b: List<String>): Boolean {
+    // Las dos primeras palabras deben coincidir: "arroz premium" con "arroz premium", "pimienta negra" ≠ "pimienta cayena"
+    if (a.size < 2 || b.size < 2 || a[0] != b[0] || a[1] != b[1]) return false
+    if (a.any { it in THERAPEUTIC_WORDS } || b.any { it in THERAPEUTIC_WORDS }) return false
+    return VARIANT_GROUPS.all { g -> a.filter { it in g }.toSet() == b.filter { it in g }.toSet() }
+}
+
 /**
- * Busca en la misma categoría un producto con la misma medida que salga al menos un 5 % más barato
- * por libra / litro / unidad. Devuelve el producto y cuánto se ahorra (en %).
+ * Busca un producto del MISMO TIPO (pimienta negra con pimienta negra, arroz premium con arroz premium), en la
+ * misma categoría y con la misma medida, que salga al menos un 5 % más barato por libra / litro / unidad.
+ * Un ahorro mayor al 60 % casi siempre es una comparación injusta, así que se descarta.
+ * Devuelve el producto y cuánto se ahorra (en %).
  */
 fun Product.cheaperAlternative(catalog: List<Product>): Pair<Product, Int>? {
     val (mine, kind) = unitPrice() ?: return null
+    val words = typeWords()
+    if (words.size < 2) return null
     return catalog.asSequence()
-        .filter { it.sku != sku && it.category == category }
+        .filter { it.sku != sku && it.category == category && sameKindOfProduct(words, it.typeWords()) }
         .mapNotNull { p -> p.unitPrice()?.takeIf { it.second == kind }?.let { p to it.first } }
-        .filter { (_, price) -> price < mine * 0.95 }
+        .filter { (_, price) -> price < mine * 0.95 && price > mine * 0.40 }
         .minByOrNull { it.second }
         ?.let { (p, price) -> p to ((1 - price / mine) * 100).roundToInt() }
 }

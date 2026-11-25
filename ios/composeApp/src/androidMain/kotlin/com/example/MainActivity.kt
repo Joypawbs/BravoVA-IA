@@ -56,8 +56,17 @@ class MainActivity : ComponentActivity() {
         val initialFcmScreen = intent?.getStringExtra(BravoPushNotificationCenter.EXTRA_OPEN_SCREEN)
         val initialFcmSku = intent?.getStringExtra(BravoPushNotificationCenter.EXTRA_PRODUCT_SKU)
 
+        intent?.data?.let { com.example.platform.ExternalLinks.request(it.toString()) }
+
         setContent {
             BravoRoot(initialFcmScreen = initialFcmScreen, initialFcmSku = initialFcmSku)
         }
+    }
+
+    // App ya abierta: el atajo o widget llega aquí en vez de abrir otra copia
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.data?.let { com.example.platform.ExternalLinks.request(it.toString()) }
     }
 }

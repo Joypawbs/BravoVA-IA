@@ -272,231 +272,6 @@ fun BravisimaScreen(
             contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item(key = "bravisima_auth_status", contentType = "auth_status_card") {
-                TranslucentCard(
-                    darkMode = darkMode,
-                    cornerRadius = 22.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                        .testTag("bravisima_auth_card")
-                ) {
-                    if (isGuestMode) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(primaryColor.copy(alpha = 0.14f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.VerifiedUser,
-                                        contentDescription = "Cuenta Google y Bravísima",
-                                        tint = primaryColor,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Vincula tu cuenta Google",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 14.5.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "Inicia sesión con tu cuenta de Google para sincronizar y gestionar tu Tarjeta Bravísima en todos tus dispositivos.",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 12.sp,
-                                        lineHeight = 15.5.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-
-                            AnimatedVisibility(
-                                visible = authErrorBanner != null,
-                                enter = fadeIn(),
-                                exit = fadeOut()
-                            ) {
-                                authErrorBanner?.let { err ->
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.errorContainer,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text(
-                                            text = err,
-                                            fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.onErrorContainer,
-                                            modifier = Modifier.padding(10.dp)
-                                        )
-                                    }
-                                }
-                            }
-
-                            Button(
-                                onClick = {
-                                    if (isGoogleSigningIn) return@Button
-                                    HapticFeedbackManager.onConfirmAction(view)
-                                    authErrorBanner = null
-                                    isGoogleSigningIn = true
-                                    scope.launch {
-                                        val result = launchGoogleSignInSheet(context)
-                                        isGoogleSigningIn = false
-                                        result.onFailure { e ->
-                                            authErrorBanner = e.message
-                                                ?: "No se pudo completar el inicio de sesión con Google."
-                                        }
-                                    }
-                                },
-                                enabled = !isGoogleSigningIn,
-                                shape = RoundedCornerShape(999.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 11.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp)
-                                    .testTag("bravisima_google_signin_button")
-                            ) {
-                                if (isGoogleSigningIn) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.2.dp,
-                                        color = Color.White
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Conectando con Google...",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.5.sp,
-                                        color = Color.White
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = BravoAmber,
-                                        modifier = Modifier.size(17.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Iniciar sesión con Google",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 13.sp,
-                                        color = Color.White
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 13.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(Tone.success.copy(alpha = 0.14f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.CloudDone,
-                                        contentDescription = "Sincronizado con Google",
-                                        tint = Tone.success,
-                                        modifier = Modifier.size(19.dp)
-                                    )
-                                }
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Text(
-                                            text = bravisimaCard.holderName,
-                                            fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 13.5.sp,
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        if (isSavingBravisima) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(12.dp),
-                                                strokeWidth = 1.8.dp,
-                                                color = primaryColor
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = "${bravisimaCard.holderEmail ?: userProfile.email} • Cuenta Google Activa",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-
-                            OutlinedButton(
-                                onClick = {
-                                    HapticFeedbackManager.onNavigationClick(view)
-                                    onSignOutGoogle()
-                                },
-                                border = BorderStroke(1.2.dp, primaryColor.copy(alpha = 0.55f)),
-                                shape = RoundedCornerShape(999.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                modifier = Modifier
-                                    .height(34.dp)
-                                    .testTag("bravisima_sign_out_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                                    contentDescription = "Cerrar sesión de Google",
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Salir",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 12.sp,
-                                    color = primaryColor
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
             item(key = "bravisima_card", contentType = "loyalty_card") {
                 val cardGradient = if (bravisimaCard.isLocked) {
                     listOf(Tone.inkSoft, Color(0xFF1E293B), Tone.ink)
@@ -851,6 +626,231 @@ fun BravisimaScreen(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+
+            item(key = "bravisima_auth_status", contentType = "auth_status_card") {
+                TranslucentCard(
+                    darkMode = darkMode,
+                    cornerRadius = 22.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp)
+                        .testTag("bravisima_auth_card")
+                ) {
+                    if (isGuestMode) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(primaryColor.copy(alpha = 0.14f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.VerifiedUser,
+                                        contentDescription = "Cuenta Google y Bravísima",
+                                        tint = primaryColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Vincula tu cuenta Google",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 14.5.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "Inicia sesión con tu cuenta de Google para sincronizar y gestionar tu Tarjeta Bravísima en todos tus dispositivos.",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 12.sp,
+                                        lineHeight = 15.5.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            AnimatedVisibility(
+                                visible = authErrorBanner != null,
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                            ) {
+                                authErrorBanner?.let { err ->
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.errorContainer,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = err,
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                            modifier = Modifier.padding(10.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Button(
+                                onClick = {
+                                    if (isGoogleSigningIn) return@Button
+                                    HapticFeedbackManager.onConfirmAction(view)
+                                    authErrorBanner = null
+                                    isGoogleSigningIn = true
+                                    scope.launch {
+                                        val result = launchGoogleSignInSheet(context)
+                                        isGoogleSigningIn = false
+                                        result.onFailure { e ->
+                                            authErrorBanner = e.message
+                                                ?: "No se pudo completar el inicio de sesión con Google."
+                                        }
+                                    }
+                                },
+                                enabled = !isGoogleSigningIn,
+                                shape = RoundedCornerShape(999.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 11.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                                    .testTag("bravisima_google_signin_button")
+                            ) {
+                                if (isGoogleSigningIn) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.2.dp,
+                                        color = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Conectando con Google...",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 12.5.sp,
+                                        color = Color.White
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        tint = BravoAmber,
+                                        modifier = Modifier.size(17.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Iniciar sesión con Google",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 13.sp,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 13.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(Tone.success.copy(alpha = 0.14f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CloudDone,
+                                        contentDescription = "Sincronizado con Google",
+                                        tint = Tone.success,
+                                        modifier = Modifier.size(19.dp)
+                                    )
+                                }
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text(
+                                            text = bravisimaCard.holderName,
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 13.5.sp,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        if (isSavingBravisima) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(12.dp),
+                                                strokeWidth = 1.8.dp,
+                                                color = primaryColor
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = "${bravisimaCard.holderEmail ?: userProfile.email} • Cuenta Google Activa",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    HapticFeedbackManager.onNavigationClick(view)
+                                    onSignOutGoogle()
+                                },
+                                border = BorderStroke(1.2.dp, primaryColor.copy(alpha = 0.55f)),
+                                shape = RoundedCornerShape(999.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                modifier = Modifier
+                                    .height(34.dp)
+                                    .testTag("bravisima_sign_out_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                                    contentDescription = "Cerrar sesión de Google",
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Salir",
+                                    fontFamily = PlusJakartaSans,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 12.sp,
+                                    color = primaryColor
+                                )
                             }
                         }
                     }
@@ -2461,6 +2461,30 @@ fun CartCheckoutScreen(
                                 fontSize = 23.sp,
                                 color = primaryColor
                             )
+                        }
+
+                        // Lo que te ahorras hoy con Bravísima y lo que ganas para la próxima compra
+                        if (cartTotals.redeemed > 0 || cartTotals.bravisimaGenerated > 0) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Tone.successSoft,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("cart_savings_banner")
+                            ) {
+                                Text(
+                                    text = buildString {
+                                        if (cartTotals.redeemed > 0) append("Ahorras RD$${formatMoney(cartTotals.redeemed)} hoy con Bravísima")
+                                        if (cartTotals.redeemed > 0 && cartTotals.bravisimaGenerated > 0) append(" · ")
+                                        if (cartTotals.bravisimaGenerated > 0) append("Ganas RD$${formatMoney(cartTotals.bravisimaGenerated)} para tu próxima compra")
+                                    },
+                                    fontFamily = PlusJakartaSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    color = Tone.successStrong,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                )
+                            }
                         }
 
                         // Aviso del estado de la verificación biométrica

@@ -1,6 +1,10 @@
 package com.example.ui.screens
 
 import com.example.ui.theme.Tone
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 import com.example.ui.components.SwitchRow
 import androidx.compose.runtime.derivedStateOf
@@ -2881,6 +2885,8 @@ fun AccountSubScreenView(
     notificationsEnabled: Boolean,
     onBack: () -> Unit,
     onRepeatOrder: (String) -> Unit,
+    orderRatings: Map<String, Int> = emptyMap(),
+    onRateOrder: (String, Int) -> Unit = { _, _ -> },
     onOpenLiveMap: () -> Unit,
     onOpenOrderTracking: (String) -> Unit = { onOpenLiveMap() },
     onSaveProfile: (String, String, String, String) -> Unit,
@@ -3164,6 +3170,42 @@ fun AccountSubScreenView(
                                         primaryColor = primaryColor,
                                         onClick = { onRepeatOrder(order.id) }
                                     )
+                                }
+                            }
+                            if (orderStage == OrderDeliveryStage.DELIVERED) {
+                                val myRating = orderRatings[order.id] ?: 0
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = if (myRating == 0) "¿Qué tal la entrega?" else "Tu calificación",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Row {
+                                        (1..5).forEach { star ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(44.dp)
+                                                    .clip(CircleShape)
+                                                    .clickable { onRateOrder(order.id, star) }
+                                                    .semantics { contentDescription = "$star de 5 estrellas" }
+                                                    .testTag("rate_${order.id}_$star"),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = if (star <= myRating) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                                                    contentDescription = null,
+                                                    tint = if (star <= myRating) Tone.warningBright else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -1,9 +1,13 @@
 import SwiftUI
+import UIKit
 import FirebaseCore
 import FirebaseAppCheck
+import ComposeApp
 
 @main
 struct iOSApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     init() {
         FirebaseSetup.configureIfPossible()
     }
@@ -12,7 +16,36 @@ struct iOSApp: App {
         WindowGroup {
             ContentView()
                 .ignoresSafeArea(.all)
+                // Widgets, Live Activity y enlaces bravova://
+                .onOpenURL { url in ExternalLinks.shared.request(target: url.absoluteString) }
         }
+    }
+}
+
+/// Atajos del ícono (mantener presionado). Llegan al abrir la app o con la app ya abierta.
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        if let item = options.shortcutItem {
+            ExternalLinks.shared.request(target: item.type)
+        }
+        let config = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+        config.delegateClass = ShortcutSceneDelegate.self
+        return config
+    }
+}
+
+final class ShortcutSceneDelegate: NSObject, UIWindowSceneDelegate {
+    func windowScene(
+        _ windowScene: UIWindowScene,
+        performActionFor shortcutItem: UIApplicationShortcutItem,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        ExternalLinks.shared.request(target: shortcutItem.type)
+        completionHandler(true)
     }
 }
 

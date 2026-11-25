@@ -43,6 +43,17 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.aistudio.bravova.rdshop
             CFBundleURLSchemes: [bravova]
+        # Atajos al mantener presionado el ícono (el "type" es el destino de ExternalLinks.kt)
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: buscar
+            UIApplicationShortcutItemTitle: Buscar
+            UIApplicationShortcutItemIconSymbolName: magnifyingglass
+          - UIApplicationShortcutItemType: repetir
+            UIApplicationShortcutItemTitle: Repetir último pedido
+            UIApplicationShortcutItemIconSymbolName: arrow.clockwise
+          - UIApplicationShortcutItemType: bravisima
+            UIApplicationShortcutItemTitle: Mi tarjeta Bravísima
+            UIApplicationShortcutItemIconSymbolName: creditcard
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.bravova.rdshop

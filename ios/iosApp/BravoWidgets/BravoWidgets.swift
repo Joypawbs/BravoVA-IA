@@ -106,6 +106,7 @@ struct DeliveryLiveActivity: Widget {
             }
             .padding(16)
             .activityBackgroundTint(nil)
+            .widgetURL(URL(string: "bravova://pedido"))
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -127,6 +128,7 @@ struct DeliveryLiveActivity: Widget {
             } minimal: {
                 Image(systemName: "bicycle").foregroundStyle(bravoRed)
             }
+            .widgetURL(URL(string: "bravova://pedido"))
         }
     }
 }

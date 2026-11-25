@@ -397,7 +397,9 @@ data class ChatMessage(
 data class ToastNotification(
     val id: Long = System.nanoTime(),
     val icon: String,
-    val message: String
+    val message: String,
+    /** Texto del botón del aviso, por ejemplo "Deshacer". Null = aviso sin botón. */
+    val actionLabel: String? = null
 )
 
 data class NpuHardwareStatus(

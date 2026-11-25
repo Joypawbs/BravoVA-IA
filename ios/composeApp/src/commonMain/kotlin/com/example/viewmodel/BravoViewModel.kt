@@ -2362,16 +2362,31 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         )
     }
 
-    fun showToast(icon: String, message: String) {
+    fun showToast(icon: String, message: String, actionLabel: String? = null) {
         toastJob?.cancel()
-        _toast.value = ToastNotification(icon = icon, message = message)
+        _toast.value = ToastNotification(icon = icon, message = message, actionLabel = actionLabel)
         toastJob = viewModelScope.launch {
-            delay(1850L)
+            // Con botón ("Deshacer") se deja más tiempo para alcanzar a tocarlo
+            delay(if (actionLabel != null) 4500L else 1850L)
             _toast.value = null
+            if (actionLabel != null) lastRemovedCartItem = null
         }
     }
 
-    fun changeProductQty(sku: String, delta: Int) {
+    /** Último producto quitado del carrito, para poder deshacerlo desde el aviso. */
+    private var lastRemovedCartItem: CartItem? = null
+
+    /** Toque en el botón del aviso. Hoy solo existe "Deshacer" al quitar del carrito. */
+    fun onToastAction() {
+        val removed = lastRemovedCartItem ?: return
+        lastRemovedCartItem = null
+        toastJob?.cancel()
+        _toast.value = null
+        changeProductQty(removed.sku, removed.qty, silent = true)
+        showToast("cart", "Lo devolvimos a tu carrito")
+    }
+
+    fun changeProductQty(sku: String, delta: Int, silent: Boolean = false) {
         val p = findProductBySku(sku)
         val currentQty = _cart.value.find { it.sku == sku }?.qty ?: 0
         val newQty = (currentQty + delta).coerceAtLeast(0)
@@ -2402,16 +2417,18 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             }
         }
 
-        if (p != null) {
+        if (p != null && !silent) {
             if (delta > 0) {
                 showToast("✓", "${p.name} • RD$${p.price}")
             } else if (delta < 0 && newQty == 0) {
-                showToast("🗑️", "${p.name} removido")
+                lastRemovedCartItem = CartItem(sku, currentQty)
+                showToast("🗑️", "${p.name} quitado", actionLabel = "Deshacer")
             }
         }
     }
 
     fun removeProductCompletely(sku: String) {
+        val removedQty = _cart.value.find { it.sku == sku }?.qty ?: 0
         _cart.value = _cart.value.filterNot { it.sku == sku }
         val uid = getVerifiedActiveUid()
         viewModelScope.launch {
@@ -2420,7 +2437,10 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 firestoreRepo.setCartItemQuantity(uid, sku, 0)
             }
         }
-        showToast("🗑️", "Producto removido del carrito")
+        if (removedQty > 0) {
+            lastRemovedCartItem = CartItem(sku, removedQty)
+            showToast("🗑️", "Producto quitado del carrito", actionLabel = "Deshacer")
+        }
     }
 
     fun clearCart() {
@@ -2943,8 +2963,25 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
     fun reorderPastOrder(orderId: String) {
         val ord = _orders.value.find { it.id == orderId } ?: return
-        ord.skus.forEach { sku -> changeProductQty(sku, 1) }
+        // Silencioso: un solo aviso al final en vez de uno por producto
+        ord.skus.forEach { sku -> changeProductQty(sku, 1, silent = true) }
+        showToast("cart", "Agregamos ${ord.skus.size} productos de tu pedido")
         navigateTo(AppScreen.CART)
+    }
+
+    /** Calificación de 1 a 5 de cada pedido entregado (se guarda en el teléfono). */
+    private val _orderRatings = MutableStateFlow(
+        rdPrefs.getStringSet("order_ratings", emptySet()).orEmpty()
+            .mapNotNull { e -> e.split(':').takeIf { it.size == 2 }?.let { (id, n) -> n.toIntOrNull()?.let { id to it } } }
+            .toMap()
+    )
+    val orderRatings: StateFlow<Map<String, Int>> = _orderRatings.asStateFlow()
+
+    fun rateOrder(orderId: String, stars: Int) {
+        val updated = _orderRatings.value + (orderId to stars.coerceIn(1, 5))
+        _orderRatings.value = updated
+        rdPrefs.edit().putStringSet("order_ratings", updated.map { (id, n) -> "$id:$n" }.toSet()).apply()
+        showToast("star", if (stars >= 4) "¡Gracias! Se lo diremos a tu repartidor" else "Gracias, vamos a mejorar")
     }
 
     fun saveUserProfile(name: String, phone: String, rncNit: String, ncfType: String) {

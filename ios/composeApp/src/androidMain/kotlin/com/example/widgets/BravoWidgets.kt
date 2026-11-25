@@ -16,9 +16,11 @@ private val DAY_THEMES = listOf(
     "Sábado de Hogar & Cuidado Personal"
 )
 
-private fun openAppIntent(context: Context): PendingIntent = PendingIntent.getActivity(
-    context, 0,
-    Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+/** Abre la app directo en la pantalla del widget (bravova://ofertas o bravova://bravisima). */
+private fun openAppIntent(context: Context, target: String): PendingIntent = PendingIntent.getActivity(
+    context, target.hashCode(),
+    Intent(Intent.ACTION_VIEW, android.net.Uri.parse("bravova://$target"), context, MainActivity::class.java)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 )
 
@@ -29,7 +31,7 @@ class OffersWidgetProvider : AppWidgetProvider() {
         ids.forEach { id ->
             val views = RemoteViews(context.packageName, R.layout.widget_offers).apply {
                 setTextViewText(R.id.widget_theme, theme)
-                setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
+                setOnClickPendingIntent(R.id.widget_root, openAppIntent(context, "ofertas"))
             }
             manager.updateAppWidget(id, views)
         }
@@ -41,7 +43,7 @@ class BravisimaWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         ids.forEach { id ->
             val views = RemoteViews(context.packageName, R.layout.widget_bravisima).apply {
-                setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
+                setOnClickPendingIntent(R.id.widget_root, openAppIntent(context, "bravisima"))
             }
             manager.updateAppWidget(id, views)
         }

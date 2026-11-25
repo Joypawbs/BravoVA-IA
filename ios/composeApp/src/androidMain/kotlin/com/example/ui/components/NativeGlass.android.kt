@@ -82,7 +82,9 @@ actual object PlatformExtras {
         }
         val open = PendingIntent.getActivity(
             context, ID,
-            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            // Tocar la notificación abre el seguimiento del pedido
+            Intent(Intent.ACTION_VIEW, android.net.Uri.parse("bravova://pedido"), context, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val done = progress >= 1.0

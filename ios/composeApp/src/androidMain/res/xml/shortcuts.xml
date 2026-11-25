@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Atajos al mantener presionado el ícono. Cada uno abre bravova://<destino> (ver ExternalLinks.kt) -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="buscar"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_search"
+        android:shortcutShortLabel="@string/shortcut_search_short"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="bravova://buscar"
+            android:targetPackage="com.aistudio.bravova.rdshop"
+            android:targetClass="com.example.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="repetir"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_repeat"
+        android:shortcutShortLabel="@string/shortcut_repeat_short"
+        android:shortcutLongLabel="@string/shortcut_repeat_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="bravova://repetir"
+            android:targetPackage="com.aistudio.bravova.rdshop"
+            android:targetClass="com.example.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="bravisima"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_card"
+        android:shortcutShortLabel="@string/shortcut_card_short"
+        android:shortcutLongLabel="@string/shortcut_card_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="bravova://bravisima"
+            android:targetPackage="com.aistudio.bravova.rdshop"
+            android:targetClass="com.example.MainActivity" />
+    </shortcut>
+</shortcuts>

@@ -11,6 +11,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.platform.LocalDensity
@@ -218,6 +219,24 @@ fun BravoRoot(
             LaunchedEffect(initialFcmScreen, initialFcmSku) {
                 viewModel.handleFcmDeepLinkIntent(initialFcmScreen, initialFcmSku)
             }
+            // Atajos del ícono, widgets y enlaces bravova:// (ver platform/ExternalLinks.kt)
+            val externalTarget = com.example.platform.ExternalLinks.pending
+            LaunchedEffect(externalTarget) {
+                when (com.example.platform.ExternalLinks.consume()) {
+                    "buscar" -> {
+                        viewModel.navigateTo(AppScreen.HOME)
+                        com.example.ui.components.SearchFocusRequest.request()
+                    }
+                    "repetir" -> {
+                        val last = viewModel.orders.value.firstOrNull()
+                        if (last != null) viewModel.reorderPastOrder(last.id) else viewModel.navigateTo(AppScreen.HOME)
+                    }
+                    "bravisima" -> viewModel.navigateTo(AppScreen.BRAVISIMA)
+                    "ofertas" -> viewModel.navigateTo(AppScreen.CATALOG)
+                    "pedido" -> viewModel.navigateTo(AppScreen.DELIVERY)
+                    else -> Unit
+                }
+            }
 
             BravoVaTheme(
                 darkTheme = darkMode,
@@ -281,6 +300,7 @@ fun BravoVaApp(
     val shoppingLists by viewModel.lists.collectAsStateWithLifecycle()
     val aiPopulatingListId by viewModel.aiPopulatingListId.collectAsStateWithLifecycle()
     val orders by viewModel.orders.collectAsStateWithLifecycle()
+    val orderRatings by viewModel.orderRatings.collectAsStateWithLifecycle()
     val trackedOrder by viewModel.trackedOrder.collectAsStateWithLifecycle()
     val isUpdatingOrderStatus by viewModel.isUpdatingOrderStatus.collectAsStateWithLifecycle()
     val celebrationOrder by viewModel.celebrationOrder.collectAsStateWithLifecycle()
@@ -925,6 +945,8 @@ fun BravoVaApp(
                                 notificationsEnabled = pushNotifications,
                                 onBack = { viewModel.navigateBack() },
                                 onRepeatOrder = { orderId -> viewModel.reorderPastOrder(orderId) },
+                                orderRatings = orderRatings,
+                                onRateOrder = { id, stars -> viewModel.rateOrder(id, stars) },
                                 onOpenLiveMap = { viewModel.openOrderTracking() },
                                 onOpenOrderTracking = { orderId -> viewModel.openOrderTracking(orderId) },
                                 onSaveProfile = { n, p, r, ncf -> viewModel.saveUserProfile(n, p, r, ncf) },
@@ -1084,7 +1106,7 @@ fun BravoVaApp(
                             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
                         toast?.let { activeToast ->
-                            if (nativeLiquidGlassAvailable()) {
+                            if (nativeLiquidGlassAvailable() && activeToast.actionLabel == null) {
                                 NativeGlassToast(
                                     text = activeToast.message,
                                     symbol = toastSymbol(activeToast.icon),
@@ -1114,8 +1136,25 @@ fun BravoVaApp(
                                         Text(
                                             text = activeToast.message,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Medium
+                                            fontWeight = FontWeight.Medium,
+                                            maxLines = 2,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f, fill = false)
                                         )
+                                        activeToast.actionLabel?.let { label ->
+                                            androidx.compose.material3.TextButton(
+                                                onClick = { viewModel.onToastAction() },
+                                                modifier = Modifier
+                                                    .heightIn(min = 44.dp)
+                                                    .testTag("toast_action")
+                                            ) {
+                                                Text(
+                                                    text = label,
+                                                    color = MaterialTheme.colorScheme.inversePrimary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
