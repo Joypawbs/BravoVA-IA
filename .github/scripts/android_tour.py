@@ -116,6 +116,7 @@ def main():
     time.sleep(4); shot("splash")
     time.sleep(8); shot("inicio_sesion")
     tap(["Continuar como Invitado", "Invitado"], prefix=True, wait=6, fallback=(0.5, 0.77))
+    time.sleep(12)  # el emulador es lento: espera a que cargue el catálogo
     shot("home")
     w, h = screen_size()
     for _ in range(5):
@@ -124,7 +125,7 @@ def main():
     adb("shell", "input", "tap", str(int(w * 0.3)), str(int(h * 0.205))); time.sleep(1)
 
     # Búsqueda: huevo de pascua con efecto y filtros nuevos
-    if tap(["Buscar productos"], prefix=True, wait=1.5):
+    if tap(["Buscar productos"], prefix=True, wait=1.5, fallback=(0.5, 0.145)):
         adb("shell", "input", "text", "spamton"); time.sleep(2.5); shot("efecto_spamton")
         adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
         for _ in range(8):
@@ -144,7 +145,8 @@ def main():
     w, h = screen_size()
     adb("shell", "input", "swipe", str(int(w * 0.18)), str(int(h * 0.5)), str(int(w * 0.18)), str(int(h * 0.5)), "1000")
     time.sleep(2); shot("vista_rapida")
-    adb("shell", "input", "keyevent", "4"); time.sleep(1.5)
+    # Cierra la vista rápida tocando fuera (atrás podría cerrar la app si no se abrió)
+    adb("shell", "input", "tap", str(int(w * 0.5)), str(int(h * 0.12))); time.sleep(1.5)
     tap(["Agregar "], prefix=True, wait=1)
     tap(["Agregar "], prefix=True, wait=1)
     shot("home_con_carrito")
