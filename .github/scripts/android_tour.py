@@ -137,6 +137,10 @@ def main():
     tap(["Volver"], wait=2, fallback=(0.06, 0.06))
     tap(["Inicio"], wait=3, fallback=(0.5, 0.955))
     tap(["Ver carrito"], wait=3, fallback=(0.5, 0.865)); shot("carrito")
+    for _ in range(4):
+        swipe_up()
+    shot("carrito_pago_y_entrega")
+    swipe_up(); swipe_up(); shot("carrito_diaspora_y_total")
     tap(["Volver"], wait=2, fallback=(0.06, 0.06))
 
     # Modo oscuro del sistema: la app debe seguirlo sola.

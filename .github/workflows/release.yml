@@ -14,12 +14,17 @@ on:
       tag:
         description: "Etiqueta a publicar (por ejemplo v1.1.0)"
         required: true
+      ref:
+        description: "Commit o rama que se compila (vacío = la etiqueta)"
+        required: false
 
 permissions:
   contents: write
 
 env:
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
+  # Qué se compila: el commit indicado, o la propia etiqueta si ya existe
+  SRC: ${{ github.event.inputs.ref || github.event.inputs.tag || github.ref_name }}
 
 jobs:
   android:
@@ -31,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ env.SRC }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -75,7 +80,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ env.SRC }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -108,10 +113,13 @@ jobs:
   publicar:
     needs: [android, ios]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      # Las notas se leen de la rama principal; el código publicado es el de SRC
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -122,5 +130,13 @@ jobs:
         run: |
           NOTES=".github/release-notes/$TAG.md"
           [ -f "$NOTES" ] || { echo "BravoVa $TAG" > /tmp/notes.md; NOTES=/tmp/notes.md; }
+          TARGET=$(git rev-parse "$SRC^{commit}" 2>/dev/null || git rev-parse "origin/$SRC")
+          # Crea la etiqueta (si no existe) apuntando al commit publicado
+          if ! git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" "$TARGET" -m "BravoVa $TAG"
+            git push origin "refs/tags/$TAG"
+          fi
           gh release delete "$TAG" -y 2>/dev/null || true
           gh release create "$TAG" dist/* --title "BravoVa $TAG" --notes-file "$NOTES" --verify-tag
