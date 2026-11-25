@@ -64,6 +64,13 @@ final class BravoVaTourUITests: XCTestCase {
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
 
+        // Huevo de pascua: 5 toques al logo
+        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.14, dy: 0.072))
+        for _ in 0..<5 { logo.tap() }
+        pause(2); shot("huellitas")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        pause(1)
+
         // Detalle de producto y vuelta al inicio
         tap(["Café Soluble"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
         pause(3); shot("detalle_producto")
