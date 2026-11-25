@@ -1165,7 +1165,12 @@ fun BravoArcaSelectorMenuOverlay(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = onDismiss
+                        onClick = {
+                            // Los toques rápidos sobre el logo caen aquí cuando el menú está abierto:
+                            // también cuentan para el huevo de pascua
+                            PawEasterEgg.registerLogoTap()
+                            onDismiss()
+                        }
                     )
             )
 
