@@ -6,6 +6,10 @@ on:
 permissions:
   contents: write
 
+env:
+  # Clave de Google Maps (opcional): sin ella el seguimiento usa el mapa ilustrado
+  MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+
 jobs:
   tour:
     runs-on: ubuntu-latest

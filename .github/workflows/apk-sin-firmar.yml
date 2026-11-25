@@ -17,6 +17,8 @@ permissions:
   contents: write
 
 env:
+  # Clave de Google Maps (opcional): sin ella el seguimiento usa el mapa ilustrado
+  MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
   TAG: ${{ github.event.inputs.tag }}
   SRC: ${{ github.event.inputs.ref || github.event.inputs.tag }}
 

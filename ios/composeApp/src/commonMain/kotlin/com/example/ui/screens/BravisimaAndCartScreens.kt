@@ -3372,7 +3372,7 @@ fun DeliveryTrackingScreen(
                             }
                         }
 
-                        // Mapa interactivo (Leaflet + OpenStreetMap)
+                        // Mapa: real (Apple Maps / Google Maps) o ilustrado si no hay clave de Google Maps
                         RealInteractiveDeliveryMapView(
                             darkMode = darkMode,
                             primaryColor = primaryColor,
@@ -4168,6 +4168,29 @@ private fun RealInteractiveDeliveryMapView(
     animatedY: Float,
     pulseRadius: Float
 ) {
+    // Mapa real: Apple Maps en iPhone y Google Maps en Android (si la app tiene clave).
+    if (com.example.ui.components.nativeDeliveryMapAvailable()) {
+        val f = telemetry.routeProgressFraction.coerceIn(0f, 1f).toDouble()
+        val driverLat = branchLat + (userLat - branchLat) * f
+        val driverLng = branchLng + (userLng - branchLng) * f
+        val routeColor = when (telemetry.trafficLevel) {
+            "DENSO" -> Color(0xFFF59E0B)
+            "MODERADO" -> Color(0xFF10B981)
+            else -> Color(0xFF059669)
+        }
+        com.example.ui.components.NativeDeliveryMap(
+            branch = com.example.ui.components.DeliveryMapPin(branchLat, branchLng, branchName),
+            home = com.example.ui.components.DeliveryMapPin(userLat, userLng, "Tu casa"),
+            driver = com.example.ui.components.DeliveryMapPin(driverLat, driverLng, "Repartidor • ${telemetry.dynamicEtaMinutes} min"),
+            routeColor = routeColor,
+            darkMode = darkMode,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(310.dp)
+                .testTag("interactive_real_map_webview")
+        )
+        return
+    }
     var zoomLevel by remember { mutableFloatStateOf(1f) }
     var panOffsetX by remember { mutableFloatStateOf(0f) }
     var panOffsetY by remember { mutableFloatStateOf(0f) }

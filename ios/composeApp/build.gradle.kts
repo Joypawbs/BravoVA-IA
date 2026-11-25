@@ -85,6 +85,8 @@ kotlin {
             // ListenableFuture de ProcessCameraProvider (igual que la app original vía Guava)
             implementation("com.google.guava:guava:33.4.8-android")
             implementation("androidx.core:core-splashscreen:1.0.1")
+            // Mapa real del seguimiento del pedido
+            implementation("com.google.maps.android:maps-compose:8.4.0")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -104,6 +106,17 @@ android {
         versionCode = (project.findProperty("appVersionCode") as String?)?.toInt() ?: 3
         versionName = (project.findProperty("appVersionName") as String?) ?: "3.0-kmp"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Clave de Google Maps: -PMAPS_API_KEY, variable de entorno MAPS_API_KEY (secreto de GitHub)
+        // o local.properties. Sin clave, el seguimiento usa el mapa ilustrado.
+        val localProps = java.util.Properties().apply {
+            rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+        }
+        val mapsKey = (project.findProperty("MAPS_API_KEY") as String?)
+            ?: System.getenv("MAPS_API_KEY")
+            ?: localProps.getProperty("MAPS_API_KEY")
+            ?: ""
+        manifestPlaceholders["MAPS_API_KEY"] = mapsKey
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsKey\"")
     }
     // Firma de lanzamiento: el keystore llega por variables de entorno (secretos de GitHub).
     val releaseKeystore = System.getenv("BRAVOVA_KEYSTORE_FILE")
