@@ -122,8 +122,23 @@ def main():
         adb("shell", "input", "tap", str(int(w * 0.16)), str(int(h * 0.09)))
     time.sleep(2); shot("huellitas")
     adb("shell", "input", "tap", str(int(w * 0.3)), str(int(h * 0.205))); time.sleep(1)
+
+    # Búsqueda: huevo de pascua con efecto y filtros nuevos
+    if tap(["Buscar productos"], prefix=True, wait=1.5):
+        adb("shell", "input", "text", "spamton"); time.sleep(2.5); shot("efecto_spamton")
+        adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
+        for _ in range(8):
+            adb("shell", "input", "keyevent", "KEYCODE_DEL")
+        adb("shell", "input", "text", "arroz"); time.sleep(3); shot("busqueda_filtros")
+        if tap(["Menor precio"], wait=2):
+            shot("busqueda_menor_precio")
+        adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
+        for _ in range(6):
+            adb("shell", "input", "keyevent", "KEYCODE_DEL")
+        adb("shell", "input", "keyevent", "4"); time.sleep(1.5)
     if tap(["Café Soluble"], prefix=True, wait=3):
         shot("detalle_producto")
+        swipe_up(); shot("detalle_precio_por_unidad")
         tap(["Volver"], wait=2, fallback=(0.06, 0.06))
     swipe_up(); shot("home_secciones")
     w, h = screen_size()

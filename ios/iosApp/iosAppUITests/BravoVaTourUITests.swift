@@ -77,9 +77,23 @@ final class BravoVaTourUITests: XCTestCase {
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.21)).tap()
         pause(1)
 
+        // Búsqueda: huevo de pascua con efecto y filtros nuevos
+        let search = app.descendants(matching: .any).matching(identifier: "home_search_input").firstMatch
+        if search.waitForExistence(timeout: 3) {
+            search.tap(); pause(1)
+            app.typeText("spamton"); pause(2.5); shot("efecto_spamton")
+            app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7))
+            app.typeText("arroz"); pause(3); shot("busqueda_filtros")
+            tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
+            pause(2); shot("busqueda_menor_precio")
+            app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 5))
+            pause(1)
+        }
+
         // Detalle de producto y vuelta al inicio
         tap(["Café Soluble"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
         pause(3); shot("detalle_producto")
+        app.swipeUp(); pause(2); shot("detalle_precio_por_unidad")
         tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
         pause(2)
         tap(["Agregar Café"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)
@@ -105,6 +119,9 @@ final class BravoVaTourUITests: XCTestCase {
         // Dentro de Mi cuenta: abre Mis pedidos y vuelve.
         tap(["Mis pedidos"], fallback: CGVector(dx: 0.27, dy: 0.25), wait: 3)
         pause(3); shot("mis_pedidos")
+        // Seguimiento del pedido con el mapa real (Apple Maps)
+        tap(["Seguimiento en vivo", "Seguir pedido", "Rastrear"], fallback: CGVector(dx: 0.5, dy: 0.35), wait: 3)
+        pause(5); shot("seguimiento_mapa")
 
         tap(["Inicio"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 3)
         pause(2)
@@ -114,6 +131,17 @@ final class BravoVaTourUITests: XCTestCase {
         pause(2); shot("carrito_pago_y_entrega")
         app.swipeUp(); app.swipeUp()
         pause(2); shot("carrito_diaspora_y_total")
+
+        // Modo oscuro del sistema: la app debe seguirlo sola
+        if #available(iOS 17.0, *) {
+            XCUIDevice.shared.appearance = .dark
+            pause(3)
+            tap(["Inicio"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 3)
+            pause(3); shot("home_oscuro")
+            tap(["Catálogo"], fallback: CGVector(dx: 0.32, dy: 0.92), wait: 3)
+            pause(3); shot("catalogo_oscuro")
+            XCUIDevice.shared.appearance = .light
+        }
 
         // Volcado del árbol de accesibilidad para ajustar el recorrido si hace falta.
         if let dir = shotsDir {
