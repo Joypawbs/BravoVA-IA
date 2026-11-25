@@ -1,5 +1,8 @@
 package com.example.ui.components
 
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
@@ -1498,7 +1501,8 @@ fun VerticalProductCard(
     onDecrement: () -> Unit,
     modifier: Modifier = Modifier,
     isFavorite: Boolean = false,
-    onToggleFavorite: (() -> Unit)? = null
+    onToggleFavorite: (() -> Unit)? = null,
+    heroTransition: Boolean = true
 ) {
     // Tarjeta al estilo de la app oficial: foto grande, nombre centrado,
     // precio a la izquierda y botón "+" redondo (o contador) a la derecha.
@@ -1508,6 +1512,19 @@ fun VerticalProductCard(
     var pressed by remember { mutableStateOf(false) }
     val cartFlight = LocalCartFlight.current
     var imageCenter by remember { mutableStateOf(Offset.Zero) }
+    var showQuickView by remember { mutableStateOf(false) }
+    val shareContext = currentPlatformContext()
+    if (showQuickView) {
+        QuickViewBottomSheet(
+            product = product,
+            isFavorite = isFavorite,
+            accent = accent,
+            onDismiss = { showQuickView = false },
+            onAdd = { onIncrement() },
+            onFavorite = { onToggleFavorite?.invoke() },
+            onShare = { shareOnWhatsApp(shareContext, "Mira esto en BravoVa: *${product.name}* (${product.unit}) a ${formatRd(product.price)} 🛒") }
+        )
+    }
     val dataSaver = LocalDataSaver.current
     val addWithFlight = {
         if (!dataSaver) cartFlight.launch(product, imageCenter)
@@ -1545,13 +1562,31 @@ fun VerticalProductCard(
                         val pos = coords.positionInWindow()
                         imageCenter = Offset(pos.x + coords.size.width / 2f, pos.y + coords.size.height / 2f)
                     }
-                    .clickable {
-                        performCrispHaptic(view, HapticStyle.TICK)
-                        onOpenDetail()
-                    },
+                    .combinedClickable(
+                        onClick = {
+                            performCrispHaptic(view, HapticStyle.TICK)
+                            onOpenDetail()
+                        },
+                        onLongClick = {
+                            // Mantener presionado: vista rápida (hoja nativa en iOS, Material en Android)
+                            performCrispHaptic(view, HapticStyle.CONFIRM)
+                            val native = PlatformExtras.presentQuickView(
+                                title = product.name,
+                                subtitle = product.unit,
+                                price = formatRd(product.price),
+                                imageUrl = product.imageUrl.orEmpty(),
+                                isFavorite = isFavorite,
+                                accentArgb = accent.toArgb(),
+                                onAdd = { onIncrement() },
+                                onFavorite = { onToggleFavorite?.invoke() },
+                                onShare = { shareOnWhatsApp(shareContext, "Mira esto en BravoVa: *${product.name}* (${product.unit}) a ${formatRd(product.price)} 🛒") }
+                            )
+                            if (!native) showQuickView = true
+                        }
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                ProductArtworkView(product = product, cornerRadius = 12.dp, modifier = Modifier.fillMaxSize().productHeroImage(product.sku))
+                ProductArtworkView(product = product, cornerRadius = 12.dp, modifier = Modifier.fillMaxSize().then(if (heroTransition) Modifier.productHeroImage(product.sku) else Modifier))
                 if (onToggleFavorite != null) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -2101,7 +2136,9 @@ fun TranslucentBottomDock(
     isArca: Boolean,
     darkMode: Boolean,
     onNavigate: (AppScreen) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    minimized: Boolean = false,
+    onSearch: () -> Unit = {}
 ) {
     val view = currentPlatformView()
     val activeTab = when (currentScreen) {
@@ -2120,7 +2157,7 @@ fun TranslucentBottomDock(
 
     val navItems = remember {
         listOf(
-            Triple(AppScreen.BRAVISIMA, Icons.Outlined.CreditCard, "Tarjeta"),
+            Triple(AppScreen.BRAVISIMA, Icons.Outlined.CreditCard, "Bravísima"),
             Triple(AppScreen.CATALOG, Icons.Outlined.GridView, "Catálogo"),
             Triple(AppScreen.HOME, Icons.Outlined.Home, "Inicio"),
             Triple(AppScreen.BRAVIA, Icons.Outlined.AutoAwesome, "Brav IA"),
@@ -2143,7 +2180,12 @@ fun TranslucentBottomDock(
                 else HapticFeedbackManager.onNavigationClick(view)
                 onNavigate(screen)
             },
-            modifier = modifier.fillMaxWidth().height(70.dp)
+            modifier = modifier.fillMaxWidth().height(74.dp),
+            minimized = minimized,
+            onSearch = {
+                HapticFeedbackManager.onNavigationClick(view)
+                onSearch()
+            }
         )
         return
     }
@@ -2807,6 +2849,21 @@ fun CartSummaryBar(
         scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
     }
     val gradient = if (isArca) listOf(ArcaEmerald, ArcaTeal) else BravoCtaGradient
+    if (nativeLiquidGlassAvailable()) {
+        // iOS 26+: barra de vidrio nativo teñida de rojo
+        NativeGlassCartBar(
+            count = itemCount,
+            total = formatRd(total),
+            accent = gradient.last(),
+            darkMode = MaterialTheme.colorScheme.background.luminance() < 0.4f,
+            onTap = {
+                performCrispHaptic(view, HapticStyle.CONFIRM)
+                onOpenCart()
+            },
+            modifier = modifier.fillMaxWidth().height(60.dp).testTag("cart_summary_bar")
+        )
+        return
+    }
     val shape = RoundedCornerShape(16.dp)
     Row(
         modifier = modifier

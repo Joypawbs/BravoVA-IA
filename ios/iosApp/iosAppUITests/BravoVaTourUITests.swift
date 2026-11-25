@@ -76,7 +76,7 @@ final class BravoVaTourUITests: XCTestCase {
 
         let tabs: [(String, CGFloat, String)] = [
             ("Catálogo", 0.32, "catalogo"),
-            ("Tarjeta", 0.14, "tarjeta_bravisima"),
+            ("Bravísima", 0.14, "bravisima"),
             ("Brav IA", 0.68, "brav_ia"),
             ("Perfil", 0.86, "mi_cuenta"),
         ]

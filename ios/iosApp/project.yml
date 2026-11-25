@@ -2,7 +2,7 @@ name: iosApp
 options:
   bundleIdPrefix: com.aistudio.bravova
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "17.0"
   createIntermediateGroups: true
 settings:
   base:
@@ -20,6 +20,7 @@ targets:
     platform: iOS
     sources:
       - path: iosApp
+      - path: Shared
     info:
       path: iosApp/Info.plist
       properties:
@@ -37,7 +38,11 @@ targets:
         NSSpeechRecognitionUsageDescription: "Brav IA convierte tu voz en texto para responder tus consultas."
         NSPhotoLibraryUsageDescription: "Adjunta fotos de productos o facturas para que Brav IA las analice."
         NSLocationWhenInUseUsageDescription: "BravoVa usa tu ubicación para calcular la distancia y el tiempo de entrega desde la sucursal más cercana."
-        NSFaceIDUsageDescription: "Confirma pagos y canjes de tu Tarjeta Bravísima con Face ID."
+        NSFaceIDUsageDescription: "Confirma pagos y canjes de tu Bravísima con Face ID."
+        NSSupportsLiveActivities: true
+        CFBundleURLTypes:
+          - CFBundleURLName: com.aistudio.bravova.rdshop
+            CFBundleURLSchemes: [bravova]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.bravova.rdshop
@@ -51,6 +56,7 @@ targets:
       testTargets:
         - iosAppUITests
     dependencies:
+      - target: BravoWidgets
       - package: Firebase
         product: FirebaseCore
       - package: Firebase
@@ -67,6 +73,26 @@ targets:
           fi
           cd "$SRCROOT/.."
           ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+  BravoWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BravoWidgets
+      - path: Shared
+    info:
+      path: BravoWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: BravoVa
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.bravova.rdshop.widgets
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
   iosAppUITests:
     type: bundle.ui-testing
     platform: iOS

@@ -1,5 +1,7 @@
 package com.example
 
+import com.example.ui.components.nativeLiquidGlassAvailable
+import com.example.ui.components.NativeGlassToast
 import com.example.ui.theme.formatRd
 import com.example.ui.components.shareOnWhatsApp
 import com.example.ui.components.ProductHeroScopes
@@ -292,6 +294,11 @@ fun BravoVaApp(
     val sections by viewModel.activeStoreSections.collectAsStateWithLifecycle()
     val activeProducts by viewModel.activeStoreProducts.collectAsStateWithLifecycle()
     val allCatalogProducts by viewModel.allCachedProducts.collectAsStateWithLifecycle()
+    // "Lo de siempre": productos de los pedidos más recientes, sin repetir
+    val recentProducts = remember(orders, activeProducts) {
+        val bySku = activeProducts.associateBy { it.sku }
+        orders.flatMap { it.skus }.distinct().mapNotNull { bySku[it] }.take(12)
+    }
     val chatMessages by viewModel.chatHistory.collectAsStateWithLifecycle()
     val isAiGenerating by viewModel.isAiGenerating.collectAsStateWithLifecycle()
     val budgetAmount by viewModel.targetBudgetInChat.collectAsStateWithLifecycle()
@@ -577,6 +584,7 @@ fun BravoVaApp(
                                     onOpenCatalog = { viewModel.navigateTo(AppScreen.CATALOG) },
                                     onRefresh = { viewModel.refreshLocalCatalogCache() },
                                     onAddCombo = { title, skus -> viewModel.addComboToCart(title, skus) },
+                                    recentProducts = recentProducts,
                                     onOpenCategory = { catName -> viewModel.openCategoryScreen(catName) },
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
@@ -1028,8 +1036,10 @@ fun BravoVaApp(
                         )
                     }
 
+                    // En iOS 26+ la barra nativa no se esconde al hacer scroll: se encoge (como en las apps de Apple)
+                    val nativeDock = nativeLiquidGlassAvailable()
                     AnimatedVisibility(
-                        visible = areMenusVisible,
+                        visible = areMenusVisible || nativeDock,
                         enter = slideInVertically(
                             initialOffsetY = { it },
                             animationSpec = tween(250, easing = FastOutSlowInEasing)
@@ -1047,7 +1057,9 @@ fun BravoVaApp(
                             currentScreen = currentScreen,
                             isArca = isArca,
                             darkMode = darkMode,
-                            onNavigate = { target -> viewModel.navigateTo(target) }
+                            onNavigate = { target -> viewModel.navigateTo(target) },
+                            minimized = nativeDock && !areMenusVisible,
+                            onSearch = { viewModel.navigateTo(AppScreen.CATALOG) }
                         )
                     }
 
@@ -1060,33 +1072,39 @@ fun BravoVaApp(
                             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
                         toast?.let { activeToast ->
-                            Surface(
-                                shape = RoundedCornerShape(999.dp),
-                                color = Color(0xFF0F172A).copy(alpha = 0.56f),
-                                shadowElevation = 12.dp,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(999.dp))
-                                    .translucentBackdropEffect(darkMode = true, accentColor = primaryColor)
-                                    .border(1.dp, Color.White.copy(alpha = 0.26f), RoundedCornerShape(999.dp))
-                                    .testTag("toast_banner")
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            if (nativeLiquidGlassAvailable()) {
+                                NativeGlassToast(
+                                    text = activeToast.message,
+                                    symbol = toastSymbol(activeToast.icon),
+                                    accent = primaryColor,
+                                    darkMode = darkMode,
+                                    modifier = Modifier.fillMaxWidth().height(60.dp).testTag("toast_banner")
+                                )
+                            } else {
+                                // Android: aviso Material (superficie inversa), como un Snackbar
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                                    shadowElevation = 6.dp,
+                                    modifier = Modifier.testTag("toast_banner")
                                 ) {
-                                    BravoUnifiedIcon(
-                                        iconKey = activeToast.icon,
-                                        tint = Color.White,
-                                        size = 16.dp
-                                    )
-                                    Text(
-                                        text = activeToast.message,
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        color = Color.White
-                                    )
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        BravoUnifiedIcon(
+                                            iconKey = activeToast.icon,
+                                            tint = MaterialTheme.colorScheme.inversePrimary,
+                                            size = 18.dp
+                                        )
+                                        Text(
+                                            text = activeToast.message,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -1133,4 +1151,16 @@ fun BravoVaApp(
             onDismiss = { viewModel.closeBarcodeScanner() }
         )
     }
+}
+
+/** Ícono SF Symbol equivalente para los avisos en iOS. */
+private fun toastSymbol(key: String): String = when (key) {
+    "check" -> "checkmark.circle.fill"
+    "offer", "🏷️" -> "tag.fill"
+    "cloud" -> "icloud.slash.fill"
+    "pin" -> "mappin.circle.fill"
+    "moon" -> "moon.fill"
+    "sun" -> "sun.max.fill"
+    "heart" -> "heart.fill"
+    else -> "info.circle.fill"
 }

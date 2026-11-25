@@ -41,14 +41,34 @@ interface IosGlassHandle {
         selected: Int,
         accentArgb: Int,
         dark: Boolean,
-        onSelect: (Int) -> Unit
+        minimized: Boolean,
+        onSelect: (Int) -> Unit,
+        onSearch: () -> Unit
     )
+    fun updateCartBar(count: Int, total: String, accentArgb: Int, dark: Boolean, onTap: () -> Unit)
+    fun updateToast(text: String, symbol: String, accentArgb: Int, dark: Boolean)
 }
 
 interface IosGlassBridge {
     fun isLiquidGlassAvailable(): Boolean
     fun makeTopBar(): IosGlassHandle
     fun makeDock(): IosGlassHandle
+    fun makeCartBar(): IosGlassHandle
+    fun makeToast(): IosGlassHandle
+    fun presentQuickView(
+        title: String,
+        subtitle: String,
+        price: String,
+        imageUrl: String,
+        isFavorite: Boolean,
+        accentArgb: Int,
+        onAdd: () -> Unit,
+        onFavorite: () -> Unit,
+        onShare: () -> Unit
+    ): Boolean
+    fun startDeliveryActivity(orderId: String, branch: String, stage: String, etaMinutes: Int, progress: Double)
+    fun updateDeliveryActivity(stage: String, etaMinutes: Int, progress: Double)
+    fun endDeliveryActivity()
 }
 
 actual fun nativeLiquidGlassAvailable(): Boolean = IosBridges.glass?.isLiquidGlassAvailable() == true
@@ -101,17 +121,66 @@ actual fun NativeGlassDock(
     accent: Color,
     darkMode: Boolean,
     onSelect: (Int) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    minimized: Boolean,
+    onSearch: () -> Unit
 ) {
     val bridge = IosBridges.glass ?: return
     val handle = remember { bridge.makeDock() }
     val select by rememberUpdatedState(onSelect)
+    val search by rememberUpdatedState(onSearch)
     UIKitViewController(
         factory = { handle.viewController() },
         modifier = modifier,
         update = {
-            handle.updateDock(symbols, labels, selectedIndex, accent.argbInt(), darkMode) { i -> select(i) }
+            handle.updateDock(symbols, labels, selectedIndex, accent.argbInt(), darkMode, minimized, { i -> select(i) }, { search() })
         },
         properties = overlayProps
     )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassCartBar(count: Int, total: String, accent: Color, darkMode: Boolean, onTap: () -> Unit, modifier: Modifier) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeCartBar() }
+    val tap by rememberUpdatedState(onTap)
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = { handle.updateCartBar(count, total, accent.argbInt(), darkMode) { tap() } },
+        properties = overlayProps
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassToast(text: String, symbol: String, accent: Color, darkMode: Boolean, modifier: Modifier) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeToast() }
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = { handle.updateToast(text, symbol, accent.argbInt(), darkMode) },
+        properties = overlayProps
+    )
+}
+
+actual object PlatformExtras {
+    actual fun presentQuickView(
+        title: String, subtitle: String, price: String, imageUrl: String, isFavorite: Boolean, accentArgb: Int,
+        onAdd: () -> Unit, onFavorite: () -> Unit, onShare: () -> Unit
+    ): Boolean = IosBridges.glass?.presentQuickView(title, subtitle, price, imageUrl, isFavorite, accentArgb, onAdd, onFavorite, onShare) == true
+
+    actual fun startDeliveryActivity(orderId: String, branch: String, stage: String, etaMinutes: Int, progress: Double) {
+        IosBridges.glass?.startDeliveryActivity(orderId, branch, stage, etaMinutes, progress)
+    }
+
+    actual fun updateDeliveryActivity(stage: String, etaMinutes: Int, progress: Double) {
+        IosBridges.glass?.updateDeliveryActivity(stage, etaMinutes, progress)
+    }
+
+    actual fun endDeliveryActivity() {
+        IosBridges.glass?.endDeliveryActivity()
+    }
 }

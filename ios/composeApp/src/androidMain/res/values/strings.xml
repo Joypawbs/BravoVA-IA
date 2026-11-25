@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BravoVa</string>
+    <string name="widget_offers_description">El tema de ofertas de hoy en Supermercados Bravo</string>
+    <string name="widget_bravisima_description">Tu tarjeta Bravísima a un toque</string>
 </resources>

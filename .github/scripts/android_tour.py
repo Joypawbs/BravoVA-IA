@@ -127,7 +127,7 @@ def main():
     # Al bajar se esconden las barras; subir un poco las vuelve a mostrar.
     swipe_down(); swipe_down()
 
-    tabs = [("Catálogo", 0.3, "catalogo"), ("Tarjeta", 0.1, "tarjeta_bravisima"),
+    tabs = [("Catálogo", 0.3, "catalogo"), ("Bravísima", 0.1, "bravisima"),
             ("Brav IA", 0.7, "brav_ia"), ("Perfil", 0.9, "mi_cuenta")]
     for label, x, name in tabs:
         tap([label], wait=3, fallback=(x, 0.955))

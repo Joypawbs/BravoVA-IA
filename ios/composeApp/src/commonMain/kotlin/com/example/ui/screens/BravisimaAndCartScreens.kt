@@ -875,7 +875,7 @@ fun BravisimaScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Gestionar Tarjeta Bravísima",
+                                text = "Gestionar mi Bravísima",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 16.sp,
@@ -1474,7 +1474,7 @@ fun BravisimaScreen(
         GlassTopBar(
             darkMode = darkMode,
             accent = primaryColor,
-            title = "Tarjeta Bravísima",
+            title = "Bravísima",
             modifier = Modifier.align(Alignment.TopCenter),
             actions = listOf(
                 GlassBarAction(symbol = "creditcard", icon = null, label = "Nivel ${bravisimaCard.tier.label}", text = bravisimaCard.tier.label, highlighted = true)

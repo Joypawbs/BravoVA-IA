@@ -2,6 +2,7 @@ package com.example.model
 
 /** Formas de pago comunes en República Dominicana (simuladas en esta demo). */
 enum class RdPaymentOption(val label: String, val detail: String, val needsBiometric: Boolean) {
+    WALLET("Pago rápido", "Confirmas con Face ID o huella", true),
     CARD("Tarjeta guardada", "Cobro inmediato con huella", true),
     CASH_ON_DELIVERY("Efectivo al recibir", "Pagas al repartidor", false),
     POS_ON_DELIVERY("Tarjeta al recibir", "El repartidor lleva datáfono", false),
@@ -9,6 +10,12 @@ enum class RdPaymentOption(val label: String, val detail: String, val needsBiome
     TPAGO("tPago", "Apruebas el pago desde tu celular", false),
     AZUL("Azul", "Pago en línea con tu tarjeta", true)
 }
+
+/** Nombre que ve el usuario: Apple Pay en iPhone, Google Pay en Android. */
+val RdPaymentOption.displayLabel: String
+    get() = if (this == RdPaymentOption.WALLET) {
+        if (com.example.platform.PlatformInfo.isIos) "Apple Pay" else "Google Pay"
+    } else label
 
 val RD_BANKS = listOf("Banreservas", "Popular", "BHD", "Scotiabank")
 
@@ -44,7 +51,7 @@ data class CheckoutExtras(
     val paymentSummary: String
         get() = when (payment) {
             RdPaymentOption.TRANSFER -> "Transferencia ${transferBank.orEmpty()}".trim()
-            else -> payment.label
+            else -> payment.displayLabel
         }
 }
 

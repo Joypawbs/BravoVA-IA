@@ -96,8 +96,41 @@ expect fun NativeGlassDock(
     accent: Color,
     darkMode: Boolean,
     onSelect: (Int) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    minimized: Boolean = false,
+    onSearch: () -> Unit = {}
 )
+
+/** Barra del carrito de vidrio nativo (iOS 26+), teñida con el color de la marca. */
+@Composable
+expect fun NativeGlassCartBar(count: Int, total: String, accent: Color, darkMode: Boolean, onTap: () -> Unit, modifier: Modifier)
+
+/** Aviso flotante (toast) de vidrio nativo (iOS 26+). */
+@Composable
+expect fun NativeGlassToast(text: String, symbol: String, accent: Color, darkMode: Boolean, modifier: Modifier)
+
+/**
+ * Funciones del sistema que dependen de la plataforma:
+ * vista rápida de producto (hoja nativa en iOS), y pedido en vivo
+ * (Live Activity / Dynamic Island en iOS, notificación de progreso en Android).
+ */
+expect object PlatformExtras {
+    /** Devuelve false si la plataforma no tiene hoja nativa (se usa la de Compose). */
+    fun presentQuickView(
+        title: String,
+        subtitle: String,
+        price: String,
+        imageUrl: String,
+        isFavorite: Boolean,
+        accentArgb: Int,
+        onAdd: () -> Unit,
+        onFavorite: () -> Unit,
+        onShare: () -> Unit
+    ): Boolean
+    fun startDeliveryActivity(orderId: String, branch: String, stage: String, etaMinutes: Int, progress: Double)
+    fun updateDeliveryActivity(stage: String, etaMinutes: Int, progress: Double)
+    fun endDeliveryActivity()
+}
 
 internal fun Color.argbInt(): Int = toArgb()
 

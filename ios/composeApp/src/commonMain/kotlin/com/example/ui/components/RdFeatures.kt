@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.PhoneIphone
 import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.ShoppingBasket
@@ -65,6 +66,7 @@ import com.example.model.Product
 import com.example.model.RD_BANKS
 import com.example.model.RD_DELIVERY_SLOTS
 import com.example.model.RdPaymentOption
+import com.example.model.displayLabel
 import com.example.model.SEASONAL_COMBOS
 import com.example.model.SeasonalCombo
 import com.example.platform.PlatformActions
@@ -118,6 +120,7 @@ object RdPrefs {
 /* ------------------------------------------------------------------ */
 
 private fun RdPaymentOption.icon(): ImageVector = when (this) {
+    RdPaymentOption.WALLET -> Icons.Outlined.AccountBalanceWallet
     RdPaymentOption.CARD -> Icons.Outlined.CreditCard
     RdPaymentOption.CASH_ON_DELIVERY -> Icons.Outlined.Payments
     RdPaymentOption.POS_ON_DELIVERY -> Icons.Outlined.PointOfSale
@@ -161,7 +164,7 @@ fun RdCheckoutOptionsCard(
                         Icon(option.icon(), contentDescription = null, tint = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
-                            Text(option.label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text(option.displayLabel, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                             Text(option.detail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         RadioButton(

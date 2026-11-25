@@ -1,5 +1,6 @@
 package com.example.viewmodel
 
+import com.example.ui.components.PlatformExtras
 import com.example.platform.sharedPrefs
 import com.example.ui.components.RdPrefs
 import com.example.model.CheckoutExtras
@@ -1285,6 +1286,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             if (ord.id == updatedOrder.id) updatedOrder else ord
         }
         _orders.value = updatedList
+        // Pedido en vivo: Dynamic Island / pantalla de bloqueo (iOS) o notificación de progreso (Android)
+        PlatformExtras.updateDeliveryActivity(stage.shortLabel, stage.etaMinutes, stage.progressPct / 100.0)
 
         val uid = getVerifiedActiveUid()
         viewModelScope.launch {
@@ -2282,14 +2285,39 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
     fun setHomeSearchQuery(q: String) {
         _homeSearchQuery.value = q
+        checkEasterEgg(q)
     }
 
     fun setCatalogFilterQuery(q: String) {
         _catalogFilterQuery.value = q
+        checkEasterEgg(q)
     }
 
     fun setCategorySearchQuery(q: String) {
         _categorySearchQuery.value = q
+        checkEasterEgg(q)
+    }
+
+    /* Huevos de pascua para fans de Toby Fox (Undertale / Deltarune). Solo texto. */
+    private var lastEasterEgg = ""
+    private fun checkEasterEgg(raw: String): Boolean {
+        val q = raw.trim().lowercase()
+            .replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+        val line = when (q) {
+            "determinacion", "determination" -> "* Ver tantas ofertas te llena de DETERMINACIÓN."
+            "sans" -> "* jeje. ¿sabías que el kétchup combina con todo?"
+            "papyrus", "espagueti", "spaghetti" -> "* ¡NYEH HEH HEH! El gran Papyrus aprueba este espagueti."
+            "temmie", "tem" -> "* hOI!! bienbenidos a... ¡BRAVO!"
+            "perro molesto", "annoying dog", "toby fox", "toby" -> "* (Un perro molesto se llevó tu búsqueda. Guau.)"
+            "gaster" -> "* ... ... ... (Este producto no existe.)"
+            "deltarune", "kris" -> "* (Algo te dice que revises el pasillo de lácteos.)"
+            "undertale" -> "* Nadie tiene que salir herido... ni siquiera tu presupuesto."
+            else -> return false
+        }
+        if (line == lastEasterEgg) return true
+        lastEasterEgg = line
+        showToast("heart", line)
+        return true
     }
 
     fun computeCartTotals(
@@ -2652,8 +2680,15 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         _realLocationMetrics.value = updatedMetrics
         _celebrationOrder.value = newOrder
 
-        showToast("check", "¡Pedido confirmado! +RD$${t.bravisimaGenerated} en tu Tarjeta Bravísima")
+        showToast("check", "¡Pedido confirmado! +RD$${t.bravisimaGenerated} en tu Bravísima")
         navigateTo(AppScreen.DELIVERY)
+        PlatformExtras.startDeliveryActivity(
+            orderId = orderId,
+            branch = branch,
+            stage = OrderDeliveryStage.PREPARED.shortLabel,
+            etaMinutes = updatedMetrics.stageAdjustedEtaMinutes,
+            progress = OrderDeliveryStage.PREPARED.progressPct / 100.0
+        )
 
         if (_pushNotifications.value) {
             val app = application
@@ -3957,6 +3992,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             }
         }
         if (query.isEmpty()) return
+        checkEasterEgg(query)
         if (_isAiGenerating.value) {
             pauseOrStopAiGeneration()
         }

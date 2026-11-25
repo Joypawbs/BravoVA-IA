@@ -15,6 +15,7 @@ import com.example.ui.components.GlassBarAction
 import com.example.ui.components.GlassTopBar
 import com.example.ui.components.LargeTitle
 import com.example.ui.components.productHeroImage
+import com.example.ui.components.ZoomableProductImage
 import com.example.ui.components.SeasonalCombosRow
 import com.example.ui.components.PriceAlertRow
 import com.example.platform.*
@@ -164,6 +165,7 @@ fun HomeScreen(
     onOpenCatalog: () -> Unit = {},
     onRefresh: () -> Unit = {},
     onAddCombo: (String, List<String>) -> Unit = { _, _ -> },
+    recentProducts: List<Product> = emptyList(),
     onOpenCategory: (String) -> Unit,
     onOpenProduct: (String) -> Unit,
     onChangeQty: (String, Int) -> Unit
@@ -519,7 +521,47 @@ fun HomeScreen(
                         }
                     }
 
-                    item(key = "home_seasonal_combos", contentType = "combos") {
+                    if (recentProducts.isNotEmpty()) {
+                    item(key = "home_recent_products", contentType = "section_carousel") {
+                        Column(Modifier.fillMaxWidth().padding(top = 14.dp)) {
+                            Text(
+                                text = "Lo de siempre",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 14.dp)
+                            )
+                            Text(
+                                text = "Lo que compraste en tus últimos pedidos",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 14.dp)
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 14.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                items(recentProducts, key = { "recent_" + it.sku }) { product ->
+                                    VerticalProductCard(
+                                        product = product,
+                                        qtyInCart = cartQtyProvider(product.sku),
+                                        isArca = isArca,
+                                        darkMode = darkMode,
+                                        onOpenDetail = { onOpenProduct(product.sku) },
+                                        onIncrement = { onChangeQty(product.sku, 1) },
+                                        onDecrement = { onChangeQty(product.sku, -1) },
+                                        isFavorite = isFavoriteProvider(product.sku),
+                                        onToggleFavorite = onToggleFavorite?.let { fn -> { fn(product.sku) } },
+                                        modifier = Modifier.width(140.dp),
+                                        heroTransition = false
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item(key = "home_seasonal_combos", contentType = "combos") {
                     SeasonalCombosRow(
                         catalog = allProducts,
                         accent = primaryColor,
@@ -1323,11 +1365,16 @@ fun ProductDetailScreen(
                             .padding(10.dp),
                         contentAlignment = Alignment.Center
                     ) {
+                        var showZoom by remember { mutableStateOf(false) }
                         ProductArtworkView(
                             product = product,
-                            modifier = Modifier.size(200.dp).productHeroImage(product.sku),
+                            modifier = Modifier
+                                .size(200.dp)
+                                .productHeroImage(product.sku)
+                                .clickable { showZoom = true },
                             cornerRadius = 18.dp
                         )
+                        if (showZoom) ZoomableProductImage(product = product, onDismiss = { showZoom = false })
                     }
 
                     DiagonalMetadataStrip(
