@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -108,7 +109,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Clave de Google Maps: -PMAPS_API_KEY, variable de entorno MAPS_API_KEY (secreto de GitHub)
         // o local.properties. Sin clave, el seguimiento usa el mapa ilustrado.
-        val localProps = java.util.Properties().apply {
+        val localProps = Properties().apply {
             rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
         }
         val mapsKey = (project.findProperty("MAPS_API_KEY") as String?)
