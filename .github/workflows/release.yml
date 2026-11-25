@@ -1,0 +1,126 @@
+name: Publicar versión
+
+# Al subir una etiqueta vX.Y.Z se compilan las apps y se crea el release con:
+#   - BravoVa-vX.Y.Z-android-release.apk  (firmada con la clave de lanzamiento)
+#   - BravoVa-vX.Y.Z-android-debug.apk    (versión de prueba)
+#   - BravoVa-vX.Y.Z-ios-sin-firmar.ipa   (para instalar con AltStore o Sideloadly)
+# Las notas salen de .github/release-notes/vX.Y.Z.md
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Etiqueta a publicar (por ejemplo v1.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Versión a partir de la etiqueta
+        run: |
+          V="${TAG#v}"; IFS=. read -r MA MI PA <<< "$V"
+          echo "VERSION_NAME=$V" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$((MA*10000 + MI*100 + ${PA:-0}))" >> "$GITHUB_ENV"
+      - name: Clave de firma
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/bravova-release.jks"
+            echo "BRAVOVA_KEYSTORE_FILE=$RUNNER_TEMP/bravova-release.jks" >> "$GITHUB_ENV"
+            echo "BRAVOVA_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Faltan los secretos ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASSWORD: solo se publicará la APK de prueba."
+          fi
+      - name: Compilar APKs
+        run: |
+          ./gradlew --no-daemon -PappVersionCode=$VERSION_CODE -PappVersionName=$VERSION_NAME :composeApp:assembleDebug
+          mkdir -p ../dist
+          cp "$(ls composeApp/build/outputs/apk/debug/*.apk | head -1)" "../dist/BravoVa-$TAG-android-debug.apk"
+          if [ -n "${BRAVOVA_KEYSTORE_FILE:-}" ]; then
+            ./gradlew --no-daemon -PappVersionCode=$VERSION_CODE -PappVersionName=$VERSION_NAME :composeApp:assembleRelease
+            cp "$(ls composeApp/build/outputs/apk/release/*.apk | head -1)" "../dist/BravoVa-$TAG-android-release.apk"
+          fi
+          ls -la ../dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: dist/*.apk
+
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Elegir Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -v -i beta | sort -V | tail -1)
+          sudo xcode-select -s "${X:-/Applications/Xcode_16.4.app}" || true
+          xcodebuild -version
+      - name: Compilar IPA sin firmar
+        working-directory: ios/iosApp
+        run: |
+          set -o pipefail
+          brew install xcodegen
+          xcodegen generate
+          V="${TAG#v}"; IFS=. read -r MA MI PA <<< "$V"
+          xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build/device \
+            MARKETING_VERSION="$V" CURRENT_PROJECT_VERSION="$((MA*10000 + MI*100 + ${PA:-0}))" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -n 80
+          APP=$(find build/device/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
+          mkdir -p Payload && cp -R "$APP" Payload/
+          mkdir -p ../../dist && zip -qry "../../dist/BravoVa-$TAG-ios-sin-firmar.ipa" Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: dist/*.ipa
+
+  publicar:
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Crear el release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES=".github/release-notes/$TAG.md"
+          [ -f "$NOTES" ] || { echo "BravoVa $TAG" > /tmp/notes.md; NOTES=/tmp/notes.md; }
+          gh release delete "$TAG" -y 2>/dev/null || true
+          gh release create "$TAG" dist/* --title "BravoVa $TAG" --notes-file "$NOTES" --verify-tag

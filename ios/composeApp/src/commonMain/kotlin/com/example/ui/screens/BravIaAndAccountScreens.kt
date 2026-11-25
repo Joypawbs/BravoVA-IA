@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import androidx.compose.runtime.derivedStateOf
+import com.example.ui.components.LargeTitle
 import com.example.ui.components.GlassBarAction
 import com.example.ui.components.GlassTopBar
 import com.example.platform.*
@@ -2637,13 +2639,22 @@ fun AccountGridScreen(
             .fillMaxSize()
             .testTag("account_grid_screen")
     ) {
+        val accountListState = rememberLazyListState()
+        val showLargeTitle by remember {
+            derivedStateOf { accountListState.firstVisibleItemIndex == 0 && accountListState.firstVisibleItemScrollOffset < 40 }
+        }
         LazyColumn(
+            state = accountListState,
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
             contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item(key = "account_large_title") {
+                LargeTitle(title = "Mi cuenta", accent = primaryColor)
+            }
+
             // Lista agrupada (estilo ajustes de iOS / Android) en lugar de casillas grandes.
             item(key = "account_menu", contentType = "account_menu") {
                 TranslucentCard(
@@ -2791,7 +2802,7 @@ fun AccountGridScreen(
         GlassTopBar(
             darkMode = darkMode,
             accent = primaryColor,
-            title = "Mi cuenta",
+            title = if (showLargeTitle) "" else "Mi cuenta",
             modifier = Modifier.align(Alignment.TopCenter),
             onBack = {
                 HapticFeedbackManager.onNavigationClick(view)

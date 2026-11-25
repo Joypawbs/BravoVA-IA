@@ -1,5 +1,9 @@
 package com.example
 
+import com.example.ui.components.ProductHeroScopes
+import com.example.ui.components.LocalProductHeroScopes
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.platform.LocalDensity
@@ -86,6 +90,7 @@ import com.example.ui.components.BarcodeScannerModal
 import com.example.ui.components.BravoUnifiedIcon
 import com.example.ui.components.DeviceSupportsGpuBlur
 import com.example.ui.components.CartSummaryBar
+import com.example.ui.components.CartFlightOverlay
 import com.example.ui.components.HapticFeedbackManager
 import com.example.ui.components.LocalTranslucentHazeState
 import com.example.ui.components.OrderSuccessCelebrationOverlay
@@ -223,6 +228,7 @@ fun BravoRoot(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun BravoVaApp(
     viewModel: BravoViewModel,
@@ -483,6 +489,7 @@ fun BravoVaApp(
                         )
                     }
 
+                    SharedTransitionLayout {
                     AnimatedContent(
                         targetState = currentScreen,
                         transitionSpec = {
@@ -503,6 +510,7 @@ fun BravoVaApp(
                         },
                         label = "main_screen_transition"
                     ) { screenState ->
+                        CompositionLocalProvider(LocalProductHeroScopes provides ProductHeroScopes(this@SharedTransitionLayout, this@AnimatedContent)) {
                         when (screenState) {
                         AppScreen.HOME -> {
                             AnimatedContent(
@@ -555,6 +563,8 @@ fun BravoVaApp(
                                     },
                                     onNavigateToDelivery = { viewModel.openOrderTracking() },
                                     onOpenMyLists = { viewModel.openAccountSubScreen(AccountSubScreen.LISTAS) },
+                                    onOpenCatalog = { viewModel.navigateTo(AppScreen.CATALOG) },
+                                    onRefresh = { viewModel.refreshLocalCatalogCache() },
                                     onOpenCategory = { catName -> viewModel.openCategoryScreen(catName) },
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
@@ -935,7 +945,12 @@ fun BravoVaApp(
                             )
                         }
                     }
+                                            }
                     }
+                    }
+
+                    // Miniaturas que vuelan al carrito al agregar productos
+                    CartFlightOverlay()
 
                     if (PlatformInfo.isIos && canInterceptBack) {
                         // iOS no tiene botón "atrás": deslizar desde el borde izquierdo vuelve, como en las apps nativas.

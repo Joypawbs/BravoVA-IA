@@ -1,7 +1,20 @@
 package com.example.ui.screens
 
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import com.example.ui.theme.ArcaEmerald
+import com.example.ui.theme.BravoCtaGradient
+import androidx.compose.material.icons.outlined.GridView
+import com.example.ui.components.LocalDataSaver
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.AnimatedContent
 import com.example.ui.components.GlassBarAction
 import com.example.ui.components.GlassTopBar
+import com.example.ui.components.LargeTitle
+import com.example.ui.components.productHeroImage
 import com.example.platform.*
 
 import androidx.compose.animation.AnimatedVisibility
@@ -146,6 +159,8 @@ fun HomeScreen(
     onNavigateToBravIa: (String?) -> Unit,
     onNavigateToDelivery: () -> Unit,
     onOpenMyLists: () -> Unit = {},
+    onOpenCatalog: () -> Unit = {},
+    onRefresh: () -> Unit = {},
     onOpenCategory: (String) -> Unit,
     onOpenProduct: (String) -> Unit,
     onChangeQty: (String, Int) -> Unit
@@ -366,305 +381,356 @@ fun HomeScreen(
             }
         }
 
-        LazyColumn(
-            state = homeListState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .translucentBackdropSource(hazeState, zIndex = 1f)
-                .testTag("home_screen_list"),
-            contentPadding = PaddingValues(top = 4.dp, bottom = 188.dp)
-        ) {
-            if (debouncedQuery.isNotEmpty()) {
-                item(key = "search_header", contentType = "header") {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 8.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Text(
-                            text = "Resultados para \"$debouncedQuery\"",
-                            fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        BravoUnderline(isArca = isArca)
-                    }
+        // Deslizar hacia abajo para actualizar el catálogo
+        var isRefreshingHome by remember { mutableStateOf(false) }
+        val refreshScope = rememberCoroutineScope()
+        PullToRefreshBox(
+            isRefreshing = isRefreshingHome,
+            onRefresh = {
+                isRefreshingHome = true
+                performCrispHaptic(view, HapticStyle.TICK)
+                onRefresh()
+                refreshScope.launch {
+                    delay(900)
+                    isRefreshingHome = false
                 }
-
-                if (filteredProducts.isEmpty()) {
-                    item(key = "search_empty", contentType = "empty") {
-                        TranslucentCard(
-                            darkMode = darkMode,
-                            isArca = isArca,
+            },
+            modifier = Modifier.fillMaxWidth().weight(1f)
+        ) {
+            LazyColumn(
+                state = homeListState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .translucentBackdropSource(hazeState, zIndex = 1f)
+                    .testTag("home_screen_list"),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 188.dp)
+            ) {
+                if (debouncedQuery.isNotEmpty()) {
+                    item(key = "search_header", contentType = "header") {
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                                .padding(horizontal = 14.dp, vertical = 8.dp),
+                            horizontalAlignment = Alignment.Start
                         ) {
-                            Column(
+                            Text(
+                                text = "Resultados para \"$debouncedQuery\"",
+                                fontFamily = PlusJakartaSans,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            BravoUnderline(isArca = isArca)
+                        }
+                    }
+
+                    if (filteredProducts.isEmpty()) {
+                        item(key = "search_empty", contentType = "empty") {
+                            TranslucentCard(
+                                darkMode = darkMode,
+                                isArca = isArca,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(22.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                    .padding(horizontal = 14.dp, vertical = 6.dp)
                             ) {
-                                Text(
-                                    text = "Sin resultados para \"$debouncedQuery\"",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = "Prueba otra palabra clave o consulta opciones disponibles en el catálogo con Brav IA.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                AnimatedPurchaseButton(
-                                    text = "Consultar sustitutos en Brav IA",
-                                    icon = Icons.Default.AutoAwesome,
-                                    primaryColor = primaryColor,
-                                    onClick = { onNavigateToBravIa("¿Qué producto del catálogo me recomiendas como alternativa a $debouncedQuery?") }
-                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(22.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Sin resultados para \"$debouncedQuery\"",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Prueba otra palabra clave o consulta opciones disponibles en el catálogo con Brav IA.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    AnimatedPurchaseButton(
+                                        text = "Consultar sustitutos en Brav IA",
+                                        icon = Icons.Default.AutoAwesome,
+                                        primaryColor = primaryColor,
+                                        onClick = { onNavigateToBravIa("¿Qué producto del catálogo me recomiendas como alternativa a $debouncedQuery?") }
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        items(
+                            items = searchRows,
+                            key = { row -> row.first().sku },
+                            contentType = { "search_row" }
+                        ) { rowItems ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                rowItems.forEach { prod ->
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        VerticalProductCard(
+                                            product = prod,
+                                            qtyInCart = cartQtyProvider(prod.sku),
+                                            isArca = isArca,
+                                            darkMode = darkMode,
+                                            onOpenDetail = { onOpenProduct(prod.sku) },
+                                            onIncrement = { onChangeQty(prod.sku, 1) },
+                                            onDecrement = { onChangeQty(prod.sku, -1) },
+                                            isFavorite = isFavoriteProvider(prod.sku),
+                                            onToggleFavorite = onToggleFavorite?.let { fn -> { fn(prod.sku) } },
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                }
+                                repeat(3 - rowItems.size) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
                             }
                         }
                     }
                 } else {
-                    items(
-                        items = searchRows,
-                        key = { row -> row.first().sku },
-                        contentType = { "search_row" }
-                    ) { rowItems ->
+                    if (dailyRotatingOffers.isNotEmpty()) {
+                        item(key = "home_daily_rotating_offers_carousel", contentType = "daily_offers") {
+                            DailyRotatingOffersCarouselSection(
+                                dailyRotatingOffers = dailyRotatingOffers,
+                                allProducts = allProducts,
+                                darkMode = darkMode,
+                                isArca = isArca,
+                                primaryColor = primaryColor,
+                                onRotateOfferDay = onRotateOfferDay,
+                                onTriggerDailyOfferPush = onTriggerDailyOfferPush,
+                                onOpenProduct = onOpenProduct,
+                                onChangeQty = onChangeQty,
+                                sectionTag = "home_daily_rotating_offers_section",
+                                rotateButtonTag = "home_rotate_daily_offer_button"
+                            )
+                        }
+                    }
+
+                    // Banner "Todas las categorías", como en la app oficial
+                    item(key = "home_all_categories_banner", contentType = "banner") {
+                        val bannerShape = RoundedCornerShape(16.dp)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 5.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            rowItems.forEach { prod ->
-                                Box(modifier = Modifier.weight(1f)) {
-                                    VerticalProductCard(
-                                        product = prod,
-                                        qtyInCart = cartQtyProvider(prod.sku),
-                                        isArca = isArca,
-                                        darkMode = darkMode,
-                                        onOpenDetail = { onOpenProduct(prod.sku) },
-                                        onIncrement = { onChangeQty(prod.sku, 1) },
-                                        onDecrement = { onChangeQty(prod.sku, -1) },
-                                        isFavorite = isFavoriteProvider(prod.sku),
-                                        onToggleFavorite = onToggleFavorite?.let { fn -> { fn(prod.sku) } },
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
-                            repeat(3 - rowItems.size) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (dailyRotatingOffers.isNotEmpty()) {
-                    item(key = "home_daily_rotating_offers_carousel", contentType = "daily_offers") {
-                        DailyRotatingOffersCarouselSection(
-                            dailyRotatingOffers = dailyRotatingOffers,
-                            allProducts = allProducts,
-                            darkMode = darkMode,
-                            isArca = isArca,
-                            primaryColor = primaryColor,
-                            onRotateOfferDay = onRotateOfferDay,
-                            onTriggerDailyOfferPush = onTriggerDailyOfferPush,
-                            onOpenProduct = onOpenProduct,
-                            onChangeQty = onChangeQty,
-                            sectionTag = "home_daily_rotating_offers_section",
-                            rotateButtonTag = "home_rotate_daily_offer_button"
-                        )
-                    }
-                }
-
-                items(
-                    items = sections,
-                    key = { it.id },
-                    contentType = { "section_carousel" }
-                ) { section ->
-                    val sectionProducts = productsByCategory[section.name].orEmpty()
-                    if (sectionProducts.isNotEmpty()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 14.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 14.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = section.name,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f).padding(end = 8.dp)
-                                )
-
-                                Row(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(999.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                        .clickable {
-                                            HapticFeedbackManager.onNavigationClick(view)
-                                            onOpenCategory(section.name)
-                                        }
-                                        .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp)
-                                        .testTag("see_all_${section.id}"),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Ver todos",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        color = primaryColor,
-                                        maxLines = 1
-                                    )
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                        contentDescription = null,
-                                        tint = primaryColor,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 14.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                items(
-                                    items = sectionProducts,
-                                    key = { it.sku },
-                                    contentType = { "product_card" }
-                                ) { product ->
-                                    VerticalProductCard(
-                                        product = product,
-                                        qtyInCart = cartQtyProvider(product.sku),
-                                        isArca = isArca,
-                                        darkMode = darkMode,
-                                        onOpenDetail = { onOpenProduct(product.sku) },
-                                        onIncrement = { onChangeQty(product.sku, 1) },
-                                        onDecrement = { onChangeQty(product.sku, -1) },
-                                        isFavorite = isFavoriteProvider(product.sku),
-                                        onToggleFavorite = onToggleFavorite?.let { fn -> { fn(product.sku) } },
-                                        modifier = Modifier.width(140.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                item(key = "home_ai_footer", contentType = "ai_banner") {
-                    TranslucentCard(
-                        darkMode = darkMode,
-                        isArca = isArca,
-                        cornerRadius = 22.dp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 14.dp, end = 14.dp, top = 16.dp, bottom = 28.dp)
-                            .bravoAiAura(cornerRadius = 22.dp, borderWidth = 1.6.dp, haloAlpha = 0.22f)
-                            .testTag("home_ai_hero_banner"),
-                        onClick = {
-                            HapticFeedbackManager.onAssistantTrigger(view)
-                            onNavigateToBravIa(null)
-                        }
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                BravoAiPlasmaOrb(size = 38.dp, isActive = true)
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.Start
-                                ) {
-                                    Text(
-                                        text = if (isArca) {
-                                            "Asesoría Nutricional Brav IA"
-                                        } else {
-                                            "Compra con Brav IA"
-                                        },
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 16.5.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    BravoUnderline(isArca = isArca)
-                                }
-                            }
-                            Text(
-                                text = "Brav IA conoce los 750 artículos del catálogo, calcula recetas exactas y puede pedir por ti con tu confirmación manual en el chat.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            AnimatedPurchaseButton(
-                                text = "Abrir Brav IA",
-                                icon = Icons.Default.AutoAwesome,
-                                primaryColor = primaryColor,
-                                onClick = {
-                                    HapticFeedbackManager.onAssistantTrigger(view)
-                                    onNavigateToBravIa(null)
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Surface(
-                                onClick = {
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                                .height(64.dp)
+                                .clip(bannerShape)
+                                .background(Brush.horizontalGradient(if (isArca) listOf(ArcaEmerald, ArcaTeal) else BravoCtaGradient))
+                                .clickable {
                                     HapticFeedbackManager.onNavigationClick(view)
-                                    onOpenMyLists()
-                                },
-                                shape = RoundedCornerShape(999.dp),
-                                color = primaryColor.copy(alpha = 0.10f),
-                                border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.35f)),
+                                    onOpenCatalog()
+                                }
+                                .padding(horizontal = 18.dp)
+                                .testTag("home_all_categories_banner"),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "TODAS LAS CATEGORÍAS",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                letterSpacing = 0.5.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                imageVector = Icons.Outlined.GridView,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.9f),
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+
+                    items(
+                        items = sections,
+                        key = { it.id },
+                        contentType = { "section_carousel" }
+                    ) { section ->
+                        val sectionProducts = productsByCategory[section.name].orEmpty()
+                        if (sectionProducts.isNotEmpty()) {
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .testTag("home_open_smart_lists_button")
+                                    .padding(top = 14.dp)
                             ) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                                    horizontalArrangement = Arrangement.Center,
+                                        .padding(horizontal = 14.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    BravoUnifiedIcon(
-                                        iconKey = "list",
-                                        tint = primaryColor,
-                                        size = 16.dp
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "Mis listas inteligentes",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.sp,
-                                        color = primaryColor
+                                        text = section.name,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f).padding(end = 8.dp)
                                     )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(999.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .clickable {
+                                                HapticFeedbackManager.onNavigationClick(view)
+                                                onOpenCategory(section.name)
+                                            }
+                                            .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp)
+                                            .testTag("see_all_${section.id}"),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Ver todos",
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp,
+                                            color = primaryColor,
+                                            maxLines = 1
+                                        )
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                            contentDescription = null,
+                                            tint = primaryColor,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 14.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    items(
+                                        items = sectionProducts,
+                                        key = { it.sku },
+                                        contentType = { "product_card" }
+                                    ) { product ->
+                                        VerticalProductCard(
+                                            product = product,
+                                            qtyInCart = cartQtyProvider(product.sku),
+                                            isArca = isArca,
+                                            darkMode = darkMode,
+                                            onOpenDetail = { onOpenProduct(product.sku) },
+                                            onIncrement = { onChangeQty(product.sku, 1) },
+                                            onDecrement = { onChangeQty(product.sku, -1) },
+                                            isFavorite = isFavoriteProvider(product.sku),
+                                            onToggleFavorite = onToggleFavorite?.let { fn -> { fn(product.sku) } },
+                                            modifier = Modifier.width(140.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item(key = "home_ai_footer", contentType = "ai_banner") {
+                        TranslucentCard(
+                            darkMode = darkMode,
+                            isArca = isArca,
+                            cornerRadius = 22.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 14.dp, end = 14.dp, top = 16.dp, bottom = 28.dp)
+                                .bravoAiAura(cornerRadius = 22.dp, borderWidth = 1.6.dp, haloAlpha = 0.22f)
+                                .testTag("home_ai_hero_banner"),
+                            onClick = {
+                                HapticFeedbackManager.onAssistantTrigger(view)
+                                onNavigateToBravIa(null)
+                            }
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    BravoAiPlasmaOrb(size = 38.dp, isActive = true)
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.Start
+                                    ) {
+                                        Text(
+                                            text = if (isArca) {
+                                                "Asesoría Nutricional Brav IA"
+                                            } else {
+                                                "Compra con Brav IA"
+                                            },
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 16.5.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        BravoUnderline(isArca = isArca)
+                                    }
+                                }
+                                Text(
+                                    text = "Brav IA conoce los 750 artículos del catálogo, calcula recetas exactas y puede pedir por ti con tu confirmación manual en el chat.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                AnimatedPurchaseButton(
+                                    text = "Abrir Brav IA",
+                                    icon = Icons.Default.AutoAwesome,
+                                    primaryColor = primaryColor,
+                                    onClick = {
+                                        HapticFeedbackManager.onAssistantTrigger(view)
+                                        onNavigateToBravIa(null)
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                Surface(
+                                    onClick = {
+                                        HapticFeedbackManager.onNavigationClick(view)
+                                        onOpenMyLists()
+                                    },
+                                    shape = RoundedCornerShape(999.dp),
+                                    color = primaryColor.copy(alpha = 0.10f),
+                                    border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.35f)),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .testTag("home_open_smart_lists_button")
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        BravoUnifiedIcon(
+                                            iconKey = "list",
+                                            tint = primaryColor,
+                                            size = 16.dp
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "Mis listas inteligentes",
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 12.sp,
+                                            color = primaryColor
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -856,7 +922,7 @@ fun CatalogScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
-                                    items = listOf("$count arts.", "Pasillo oficial"),
+                                    items = listOf("$count productos"),
                                     slashColor = primaryColor,
                                     fontSizeSp = 11f
                                 )
@@ -887,11 +953,22 @@ fun CatalogScreen(
                     .fillMaxWidth()
                     .background(Brush.verticalGradient(listOf(headerBg, headerBg.copy(alpha = 0.94f), headerBg.copy(alpha = 0f))))
             ) {
-                GlassTopBar(
-                    darkMode = darkMode,
-                    accent = primaryColor,
-                    title = if (isArca) "Catálogo El Arca" else "Catálogo"
-                )
+                val catalogTitle = if (isArca) "Catálogo El Arca" else "Catálogo"
+                // Título grande arriba; al hacer scroll se convierte en la barra compacta
+                AnimatedContent(
+                    targetState = isCatalogScrolled,
+                    transitionSpec = {
+                        (fadeIn(tween(220)) + slideInVertically(tween(260)) { -it / 4 })
+                            .togetherWith(fadeOut(tween(160)))
+                    },
+                    label = "catalog_title"
+                ) { scrolled ->
+                    if (scrolled) {
+                        GlassTopBar(darkMode = darkMode, accent = primaryColor, title = catalogTitle)
+                    } else {
+                        LargeTitle(title = catalogTitle, accent = primaryColor)
+                    }
+                }
                 Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp)) {
                         PredictiveCatalogSearchBar(
                             query = localFilter,
@@ -1226,19 +1303,19 @@ fun ProductDetailScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(190.dp)
+                            .height(220.dp)
                             .padding(10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         ProductArtworkView(
                             product = product,
-                            modifier = Modifier.size(168.dp),
+                            modifier = Modifier.size(200.dp).productHeroImage(product.sku),
                             cornerRadius = 18.dp
                         )
                     }
 
                     DiagonalMetadataStrip(
-                        items = listOf(product.category, product.unit, "ITBIS Incluido", "1% Retorno Bravísima"),
+                        items = listOf(product.category, "ITBIS incluido"),
                         slashColor = primaryColor,
                         fontSizeSp = 10.5f
                     )
@@ -1707,7 +1784,7 @@ fun ProductDetailScreen(
         GlassTopBar(
             darkMode = darkMode,
             accent = primaryColor,
-            title = "Detalle del Producto",
+            title = "Producto",
             modifier = Modifier.align(Alignment.TopCenter),
             onBack = {
                 HapticFeedbackManager.onNavigationClick(view)
@@ -1806,7 +1883,22 @@ private fun DailyRotatingOffersCarouselSection(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        // Carrusel que avanza solo cada 4 s (se pausa si el usuario lo está moviendo)
+        val offersRowState = rememberLazyListState()
+        val dataSaver = LocalDataSaver.current
+        LaunchedEffect(dailyRotatingOffers.size, dataSaver) {
+            if (dataSaver || dailyRotatingOffers.size < 2) return@LaunchedEffect
+            while (true) {
+                delay(4000)
+                if (!offersRowState.isScrollInProgress) {
+                    val next = (offersRowState.firstVisibleItemIndex + 1) % dailyRotatingOffers.size
+                    offersRowState.animateScrollToItem(next)
+                }
+            }
+        }
         LazyRow(
+            state = offersRowState,
+            flingBehavior = rememberSnapFlingBehavior(offersRowState),
             contentPadding = PaddingValues(horizontal = 14.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -1932,6 +2024,26 @@ private fun DailyRotatingOffersCarouselSection(
                             }
                         }
                     }
+                }
+            }
+        }
+
+        if (dailyRotatingOffers.size > 1) {
+            val activeDot by remember { derivedStateOf { offersRowState.firstVisibleItemIndex } }
+            Row(
+                modifier = Modifier.padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                dailyRotatingOffers.indices.forEach { index ->
+                    val selected = index == activeDot
+                    val dotWidth by animateDpAsState(if (selected) 18.dp else 6.dp, label = "offer_dot")
+                    Box(
+                        Modifier
+                            .height(6.dp)
+                            .width(dotWidth)
+                            .clip(CircleShape)
+                            .background(if (selected) primaryColor else MaterialTheme.colorScheme.outlineVariant)
+                    )
                 }
             }
         }

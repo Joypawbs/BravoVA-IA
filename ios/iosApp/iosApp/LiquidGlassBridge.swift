@@ -124,23 +124,29 @@ struct GlassTopBarView: View {
                     .bravoGlass(Circle())
                     .accessibilityLabel(m.backLabel)
                 }
-                VStack(spacing: 1) {
-                    Text(m.title)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                    if !m.subtitle.isEmpty {
-                        Text(m.subtitle)
-                            .font(.system(size: 10.5, weight: .semibold, design: .rounded))
-                            .foregroundStyle(m.subtitleColor)
+                if m.title.isEmpty {
+                    // Con título grande en la pantalla, la píldora del título se oculta hasta hacer scroll
+                    Spacer(minLength: 0).frame(maxWidth: .infinity, maxHeight: 48)
+                } else {
+                    VStack(spacing: 1) {
+                        Text(m.title)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(.primary)
                             .lineLimit(1)
+                        if !m.subtitle.isEmpty {
+                            Text(m.subtitle)
+                                .font(.system(size: 10.5, weight: .semibold, design: .rounded))
+                                .foregroundStyle(m.subtitleColor)
+                                .lineLimit(1)
+                        }
                     }
+                    .padding(.horizontal, 14)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .bravoGlass(Capsule(), interactive: false)
+                    .accessibilityElement(children: .combine)
+                    .transition(.opacity.combined(with: .scale(scale: 0.92)))
                 }
-                .padding(.horizontal, 14)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .bravoGlass(Capsule(), interactive: false)
-                .accessibilityElement(children: .combine)
 
                 if !m.actions.isEmpty {
                     HStack(spacing: 2) {
@@ -176,6 +182,7 @@ struct GlassTopBarView: View {
                 }
             }
             .padding(.horizontal, 12)
+            .animation(.spring(duration: 0.35, bounce: 0.2), value: m.title.isEmpty)
         }
         .tint(m.accent)
         .environment(\.colorScheme, m.dark ? .dark : .light)

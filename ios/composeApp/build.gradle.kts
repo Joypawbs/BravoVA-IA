@@ -100,12 +100,26 @@ android {
         applicationId = "com.aistudio.bravova.rdshop"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "3.0-kmp"
+        // CI pasa la versión con -PappVersionCode / -PappVersionName al publicar un release
+        versionCode = (project.findProperty("appVersionCode") as String?)?.toInt() ?: 3
+        versionName = (project.findProperty("appVersionName") as String?) ?: "3.0-kmp"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    // Firma de lanzamiento: el keystore llega por variables de entorno (secretos de GitHub).
+    val releaseKeystore = System.getenv("BRAVOVA_KEYSTORE_FILE")
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("BRAVOVA_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("BRAVOVA_KEY_ALIAS") ?: "bravova"
+                keyPassword = System.getenv("BRAVOVA_KEYSTORE_PASSWORD")
+            }
+        }
     }
     buildTypes {
         release {
+            if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

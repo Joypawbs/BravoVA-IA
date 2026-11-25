@@ -1,5 +1,12 @@
 package com.example.ui.components
 
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import com.example.platform.PlatformInfo
 import com.example.ui.theme.BravoOrange
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -244,12 +251,15 @@ private fun MaterialTopBar(
                 }
             }
         }
+        val titleAlpha by animateFloatAsState(if (title.isBlank()) 0f else 1f, tween(220), label = "bar_title_alpha")
+        var lastTitle by remember { mutableStateOf(title) }
+        if (title.isNotBlank()) lastTitle = title
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).graphicsLayer { alpha = titleAlpha },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = title,
+                text = lastTitle,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -299,5 +309,35 @@ private fun MaterialTopBar(
                 }
             }
         }
+    }
+}
+
+/**
+ * Título grande (estilo iOS) que se muestra arriba de la pantalla antes de hacer scroll.
+ * Al bajar, la pantalla cambia a la barra compacta y el título pasa a la píldora.
+ */
+@Composable
+fun LargeTitle(
+    title: String,
+    accent: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 6.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Box(
+            Modifier
+                .padding(top = 2.dp)
+                .width(36.dp)
+                .height(4.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Brush.horizontalGradient(listOf(BravoOrange, accent)))
+        )
     }
 }

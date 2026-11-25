@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
 import com.example.ui.theme.BravoCtaGradient
 import com.example.ui.theme.formatRd
@@ -1324,24 +1326,19 @@ fun ProductArtworkView(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(cornerRadius))
-            .background(
-                if (isDark) Color(0xFF131C2E).copy(alpha = 0.72f)
-                else Color(0xFFF8FAFC).copy(alpha = 0.88f)
-            )
-            .border(
-                width = 1.dp,
-                color = if (isDark) Color.White.copy(alpha = 0.06f) else Color(0xFFE2E8F0),
-                shape = RoundedCornerShape(cornerRadius)
-            ),
+            .background(if (isDark) Color.White.copy(alpha = 0.04f) else Color.White),
         contentAlignment = Alignment.Center
     ) {
         if (!product.imageUrl.isNullOrBlank()) {
-            val imageRequest = remember(product.imageUrl, context) {
+            val dataSaver = LocalDataSaver.current
+            val imageRequest = remember(product.imageUrl, context, dataSaver) {
                 ImageRequest.Builder(context)
                     .data(product.imageUrl)
+                    // Se decodifica al tamaño que se muestra: menos memoria y scroll más suave
+                    .size(if (dataSaver) 256 else 512)
                     .softwareBitmapsForTransformations()
                     .transformations(productImageTransformations())
-                    .crossfade(180)
+                    .crossfade(if (dataSaver) 0 else 260)
                     .build()
             }
             SubcomposeAsyncImage(
@@ -1354,12 +1351,17 @@ fun ProductArtworkView(
                     .padding(4.dp)
                     .clip(RoundedCornerShape((cornerRadius - 2.dp).coerceAtLeast(8.dp))),
                 loading = {
-                    ShimmerSkeletonBox(
-                        darkMode = isDark,
-                        cornerRadius = cornerRadius,
-                        modifier = Modifier
+                    // Mancha suave del color del producto mientras llega la foto (sin animación infinita)
+                    Box(
+                        Modifier
                             .fillMaxSize()
-                            .padding(3.dp)
+                            .padding(10.dp)
+                            .clip(RoundedCornerShape(cornerRadius))
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(accent.copy(alpha = if (isDark) 0.22f else 0.14f), Color.Transparent)
+                                )
+                            )
                     )
                 },
                 error = {
@@ -1504,6 +1506,12 @@ fun VerticalProductCard(
     val accent = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
     val softAccent = accent.copy(alpha = if (darkMode) 0.22f else 0.10f)
     var pressed by remember { mutableStateOf(false) }
+    val cartFlight = LocalCartFlight.current
+    var imageCenter by remember { mutableStateOf(Offset.Zero) }
+    val addWithFlight = {
+        cartFlight.launch(product, imageCenter)
+        onIncrement()
+    }
     val pressScale by animateFloatAsState(
         targetValue = if (pressed) 0.97f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
@@ -1532,13 +1540,17 @@ fun VerticalProductCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(104.dp)
+                    .onGloballyPositioned { coords ->
+                        val pos = coords.positionInWindow()
+                        imageCenter = Offset(pos.x + coords.size.width / 2f, pos.y + coords.size.height / 2f)
+                    }
                     .clickable {
                         performCrispHaptic(view, HapticStyle.TICK)
                         onOpenDetail()
                     },
                 contentAlignment = Alignment.Center
             ) {
-                ProductArtworkView(product = product, cornerRadius = 12.dp, modifier = Modifier.fillMaxSize())
+                ProductArtworkView(product = product, cornerRadius = 12.dp, modifier = Modifier.fillMaxSize().productHeroImage(product.sku))
                 if (onToggleFavorite != null) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -1602,7 +1614,7 @@ fun VerticalProductCard(
                             .background(softAccent)
                             .clickable {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
-                                onIncrement()
+                                addWithFlight()
                             }
                             .testTag("add_${product.sku}"),
                         contentAlignment = Alignment.Center
@@ -1646,7 +1658,7 @@ fun VerticalProductCard(
                                 .clip(CircleShape)
                                 .clickable {
                                     performCrispHaptic(view, HapticStyle.CONFIRM)
-                                    onIncrement()
+                                    addWithFlight()
                                 }
                                 .padding(5.dp)
                         )
@@ -2815,7 +2827,16 @@ fun CartSummaryBar(
                 Text(itemCount.toString(), fontWeight = FontWeight.Bold)
             }
         }) {
-            Icon(Icons.Outlined.ShoppingCart, contentDescription = null, tint = Color.White)
+            val cartFlight = LocalCartFlight.current
+            Icon(
+                Icons.Outlined.ShoppingCart,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    val pos = coords.positionInWindow()
+                    cartFlight.target = Offset(pos.x + coords.size.width / 2f, pos.y + coords.size.height / 2f)
+                }
+            )
         }
         Spacer(Modifier.width(16.dp))
         Text(
@@ -2837,3 +2858,6 @@ fun CartSummaryBar(
         )
     }
 }
+
+/** Modo ahorro de datos: imágenes más livianas y menos animaciones. Lo provee App.kt. */
+val LocalDataSaver = androidx.compose.runtime.compositionLocalOf { false }
