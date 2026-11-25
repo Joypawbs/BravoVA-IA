@@ -62,6 +62,16 @@ final class BravoVaTourUITests: XCTestCase {
         }
     }
 
+    /// Reinicia la app para seguir desde un estado limpio (sin teclado ni menús abiertos).
+    private func relaunch() {
+        app.terminate()
+        app.launch()
+        pause(6)
+        let guest = app.buttons["Continuar como Invitado"]
+        if guest.waitForExistence(timeout: 3) { guest.tap() }
+        pause(4)
+    }
+
     private func pause(_ s: TimeInterval) { _ = XCTWaiter.wait(for: [expectation(description: "pausa")], timeout: s) }
 
     func testRecorridoCompleto() throws {
@@ -82,8 +92,7 @@ final class BravoVaTourUITests: XCTestCase {
             t0 = Date()
         }
         pause(2); shot("huellitas")
-        app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.21)).tap()
-        pause(1)
+        relaunch()
 
         // Búsqueda: huevo de pascua con efecto y filtros nuevos
         let search = app.descendants(matching: .any).matching(identifier: "home_search_input").firstMatch
@@ -96,17 +105,8 @@ final class BravoVaTourUITests: XCTestCase {
             search.typeText("arroz"); pause(3); shot("busqueda_filtros")
             tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
             pause(2); shot("busqueda_menor_precio")
-            search.tap(); pause(1)
-            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8))
-            pause(1)
-            dismissKeyboardTips()
-            // Cierra el teclado (Intro) para que no tape la barra de pestañas
-            search.typeText("\n"); pause(1)
-            if app.keyboards.count > 0 {
-                app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)).tap()
-            }
-            app.swipeDown(); pause(1)
         }
+        relaunch()
 
         // Detalle de producto y vuelta al inicio
         tap(["Café Soluble"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
@@ -125,6 +125,14 @@ final class BravoVaTourUITests: XCTestCase {
         pause(2); shot("vista_rapida")
         app.swipeDown(); pause(2)
         app.swipeDown(); pause(1)
+
+        // Atajo del ícono / widget: un enlace bravova:// debe abrir su pantalla
+        if #available(iOS 16.4, *) {
+            app.open(URL(string: "bravova://bravisima")!)
+            pause(3); shot("atajo_bravisima")
+            tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 2)
+            pause(1)
+        }
 
         // 2.0: Inicio, Catálogo, Brav IA y Cuenta (+ Búsqueda aparte); Bravísima está en Cuenta
         let tabs: [(String, CGFloat, String)] = [

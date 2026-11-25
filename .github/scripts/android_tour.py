@@ -105,6 +105,16 @@ def swipe_up():
     time.sleep(1.5)
 
 
+def relaunch():
+    """Reinicia la app para seguir desde un estado limpio (sin teclado ni menús abiertos)."""
+    adb("shell", "am", "force-stop", PACKAGE)
+    time.sleep(1)
+    adb("shell", "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")
+    time.sleep(10)
+    tap(["Continuar como Invitado", "Invitado"], prefix=True, wait=3)  # solo si vuelve a pedir sesión
+    time.sleep(8)
+
+
 def main():
     # Registro de errores del sistema por si algo falla durante el recorrido.
     subprocess.Popen(["adb", "logcat", "-v", "time", "*:E"], stdout=open(OUT / "logcat_errores.txt", "w"),
@@ -124,7 +134,7 @@ def main():
     for _ in range(5):
         adb("shell", "input", "tap", str(int(w * 0.16)), str(int(h * 0.09)))
     time.sleep(2); shot("huellitas")
-    adb("shell", "input", "tap", str(int(w * 0.3)), str(int(h * 0.205))); time.sleep(1)
+    relaunch()
 
     # Búsqueda: huevo de pascua con efecto y filtros nuevos
     if tap(["Buscar productos"], prefix=True, wait=1.5, fallback=(0.5, 0.145)):
@@ -135,10 +145,7 @@ def main():
         adb("shell", "input", "text", "arroz"); time.sleep(3); shot("busqueda_filtros")
         if tap(["Menor precio"], wait=2):
             shot("busqueda_menor_precio")
-        adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
-        for _ in range(6):
-            adb("shell", "input", "keyevent", "KEYCODE_DEL")
-        adb("shell", "input", "keyevent", "4"); time.sleep(1.5)
+    relaunch()
     if tap(["Café Soluble"], prefix=True, wait=3):
         shot("detalle_producto")
         swipe_up(); shot("detalle_precio_por_unidad")
@@ -172,6 +179,11 @@ def main():
         swipe_up()
     shot("carrito_pago_y_entrega")
     swipe_up(); swipe_up(); shot("carrito_diaspora_y_total")
+    tap(["Volver"], wait=2, fallback=(0.06, 0.06))
+
+    # Atajo del ícono / widget: un enlace bravova:// debe abrir su pantalla
+    adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", "bravova://bravisima", PACKAGE)
+    time.sleep(4); shot("atajo_bravisima")
     tap(["Volver"], wait=2, fallback=(0.06, 0.06))
 
     # Modo oscuro del sistema: la app debe seguirlo sola.
