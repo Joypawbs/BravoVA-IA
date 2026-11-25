@@ -87,7 +87,7 @@ kotlin {
             implementation("com.google.guava:guava:33.4.8-android")
             implementation("androidx.core:core-splashscreen:1.0.1")
             // Mapa real del seguimiento del pedido
-            implementation("com.google.maps.android:maps-compose:8.4.0")
+            implementation("com.google.maps.android:maps-compose:6.12.0")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
