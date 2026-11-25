@@ -1,0 +1,55 @@
+# Compila la APK de lanzamiento SIN firmar y la deja en la rama apk-sin-firmar.
+# Sirve para firmarla fuera de GitHub (con la clave que no está guardada como secreto)
+# y luego subirla a la release correspondiente.
+name: APK de lanzamiento sin firmar
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Versión (por ejemplo v1.3.1), para el número de versión de la APK"
+        required: true
+      ref:
+        description: "Commit o etiqueta que se compila (vacío = la etiqueta)"
+        required: false
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ github.event.inputs.tag }}
+  SRC: ${{ github.event.inputs.ref || github.event.inputs.tag }}
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SRC }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Versión a partir de la etiqueta
+        run: |
+          V="${TAG#v}"; IFS=. read -r MA MI PA <<< "$V"
+          echo "VERSION_NAME=$V" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$((MA*10000 + MI*100 + ${PA:-0}))" >> "$GITHUB_ENV"
+      - name: Compilar APK de lanzamiento sin firmar
+        run: |
+          ./gradlew --no-daemon -PappVersionCode=$VERSION_CODE -PappVersionName=$VERSION_NAME :composeApp:assembleRelease
+          ls -la composeApp/build/outputs/apk/release/
+          mkdir -p /tmp/pub
+          cp "$(ls composeApp/build/outputs/apk/release/*.apk | head -1)" "/tmp/pub/BravoVa-$TAG-android-release-sin-firmar.apk"
+      - name: Publicar en la rama apk-sin-firmar
+        run: |
+          cd /tmp/pub && git init -q -b apk-sin-firmar
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "APK sin firmar $TAG"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apk-sin-firmar
