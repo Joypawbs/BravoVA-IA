@@ -1644,7 +1644,7 @@ fun VerticalProductCard(
                 if (qtyInCart <= 0) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(softAccent)
                             .clickable {
@@ -1659,7 +1659,7 @@ fun VerticalProductCard(
                 } else {
                     Row(
                         modifier = Modifier
-                            .height(32.dp)
+                            .height(36.dp)
                             .clip(RoundedCornerShape(50))
                             .background(softAccent),
                         verticalAlignment = Alignment.CenterVertically
@@ -1669,7 +1669,7 @@ fun VerticalProductCard(
                             contentDescription = "Quitar uno",
                             tint = accent,
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(32.dp)
                                 .clip(CircleShape)
                                 .clickable {
                                     performCrispHaptic(view, HapticStyle.TICK)
@@ -1689,7 +1689,7 @@ fun VerticalProductCard(
                             contentDescription = "Agregar uno",
                             tint = accent,
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(32.dp)
                                 .clip(CircleShape)
                                 .clickable {
                                     performCrispHaptic(view, HapticStyle.CONFIRM)
