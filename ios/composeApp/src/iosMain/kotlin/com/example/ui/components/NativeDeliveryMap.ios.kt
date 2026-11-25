@@ -26,6 +26,12 @@ import platform.MapKit.MKMapPointForCoordinate
 import platform.MapKit.MKMapRectUnion
 import platform.MapKit.MKMapRectMake
 import platform.UIKit.UIColor
+import platform.UIKit.systemBlueColor
+import platform.UIKit.systemGreenColor
+import platform.UIKit.systemRedColor
+import platform.MapKit.addOverlay
+import platform.MapKit.overlays
+import platform.MapKit.removeOverlays
 import platform.UIKit.UIEdgeInsetsMake
 import platform.UIKit.UIUserInterfaceStyle
 import platform.darwin.NSObject

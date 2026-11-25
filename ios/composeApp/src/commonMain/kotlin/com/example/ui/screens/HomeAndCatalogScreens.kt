@@ -216,10 +216,11 @@ fun HomeScreen(
     // Búsqueda sin tildes, con filtro de ofertas y orden por precio
     var onlyOffers by rememberSaveable { mutableStateOf(false) }
     var searchSort by remember { mutableStateOf(com.example.ui.components.SearchSort.RELEVANCE) }
-    val filteredProducts = remember(debouncedQuery, allProducts, onlyOffers, searchSort) {
+    val offerSkus = remember(dailyRotatingOffers) { dailyRotatingOffers.map { it.sku }.toSet() }
+    val filteredProducts = remember(debouncedQuery, allProducts, onlyOffers, searchSort, offerSkus) {
         val q = debouncedQuery.trim()
         if (q.isEmpty()) emptyList()
-        else allProducts.filter { p -> p.matchesSearch(q) }.applySearchFilters(onlyOffers, searchSort)
+        else allProducts.filter { p -> p.matchesSearch(q) }.applySearchFilters(onlyOffers, searchSort, offerSkus)
     }
     // Guarda la búsqueda como reciente cuando el usuario se detiene en ella
     LaunchedEffect(debouncedQuery) {

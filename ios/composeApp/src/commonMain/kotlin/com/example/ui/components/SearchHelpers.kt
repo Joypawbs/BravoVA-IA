@@ -64,11 +64,12 @@ object RecentSearches {
 
 enum class SearchSort(val label: String) { RELEVANCE("Relevancia"), PRICE_LOW("Menor precio"), PRICE_HIGH("Mayor precio") }
 
-/** Precio que paga el cliente (con oferta si la hay). */
-val Product.effectivePrice: Int get() = if (discountPct > 0 && offerPrice > 0) offerPrice else price
+/** Precio que paga el cliente. */
+val Product.effectivePrice: Int get() = price
 
-fun List<Product>.applySearchFilters(onlyOffers: Boolean, sort: SearchSort): List<Product> {
-    val base = if (onlyOffers) filter { it.discountPct > 0 } else this
+/** [offerSkus]: productos que hoy están en oferta (las ofertas del día). */
+fun List<Product>.applySearchFilters(onlyOffers: Boolean, sort: SearchSort, offerSkus: Set<String> = emptySet()): List<Product> {
+    val base = if (onlyOffers) filter { it.sku in offerSkus } else this
     return when (sort) {
         SearchSort.RELEVANCE -> base
         SearchSort.PRICE_LOW -> base.sortedBy { it.effectivePrice }
