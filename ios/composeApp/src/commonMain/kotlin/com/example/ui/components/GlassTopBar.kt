@@ -204,7 +204,7 @@ fun GlassTopBar(
             ) {
                 Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (!subtitle.isNullOrEmpty()) {
-                    Text(subtitle, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = subtitleColor ?: accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(subtitle, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = subtitleColor ?: accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -232,7 +232,7 @@ fun GlassTopBar(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 if (a.icon != null) Icon(a.icon, contentDescription = a.label, tint = color, modifier = Modifier.size(20.dp))
-                                if (a.text != null) Text(a.text, fontSize = 11.5.sp, fontWeight = FontWeight.ExtraBold, color = color, maxLines = 1)
+                                if (a.text != null) Text(a.text, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = color, maxLines = 1)
                             }
                             if (a.badge != null) {
                                 Box(

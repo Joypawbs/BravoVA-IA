@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.Tone
+
 import com.example.platform.*
 
 import androidx.compose.foundation.BorderStroke
@@ -140,7 +142,7 @@ fun FcmPushControlAndFeedCard(
                             DiagonalMetadataStrip(
                                 items = listOf("ALERTAS EN TIEMPO REAL", "Google Sync"),
                                 slashColor = primaryColor,
-                                fontSizeSp = 10f
+                                fontSizeSp = 12f
                             )
                             Text(
                                 text = "Canales Push: Ofertas y Pedidos",
@@ -170,15 +172,15 @@ fun FcmPushControlAndFeedCard(
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = null,
-                                tint = if (hasSystemPermission) Color(0xFF047857) else primaryColor,
+                                tint = if (hasSystemPermission) Tone.successStrong else primaryColor,
                                 modifier = Modifier.size(13.dp)
                             )
                             Text(
                                 text = if (hasSystemPermission) "Alertas Activas" else "Activar Permiso",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.5.sp,
-                                color = if (hasSystemPermission) Color(0xFF047857) else primaryColor
+                                fontSize = 12.sp,
+                                color = if (hasSystemPermission) Tone.successStrong else primaryColor
                             )
                         }
                     }
@@ -197,14 +199,14 @@ fun FcmPushControlAndFeedCard(
                             text = "CANAL DE NOTIFICACIONES EN VIVO ACTIVO",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 9.5.sp,
+                            fontSize = 12.sp,
                             color = primaryColor
                         )
                         Text(
                             text = fcmToken,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 10.5.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -232,7 +234,7 @@ fun FcmPushControlAndFeedCard(
                             )
                             Text(
                                 text = topic.subtitle,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -283,7 +285,7 @@ fun FcmPushControlAndFeedCard(
                             text = "Probar Oferta Push",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 11.5.sp,
+                            fontSize = 12.sp,
                             color = primaryColor,
                             maxLines = 1
                         )
@@ -334,7 +336,7 @@ fun FcmPushControlAndFeedCard(
                         DiagonalMetadataStrip(
                             items = listOf("Toca una alerta para abrir la oferta o el mapa en vivo"),
                             slashColor = primaryColor,
-                            fontSizeSp = 10.5f
+                            fontSizeSp = 12f
                         )
                     }
 
@@ -362,7 +364,7 @@ fun FcmPushControlAndFeedCard(
                                     text = "Leídas",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     color = primaryColor
                                 )
                             }
@@ -372,7 +374,7 @@ fun FcmPushControlAndFeedCard(
 
                 pushFeed.take(8).forEachIndexed { idx, item ->
                     val isOrder = item.category == PushNotificationCategory.ORDER_STATUS
-                    val accent = if (isOrder) Color(0xFF059669) else primaryColor
+                    val accent = if (isOrder) Tone.success else primaryColor
 
                     if (idx > 0) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
@@ -423,7 +425,7 @@ fun FcmPushControlAndFeedCard(
                                         text = if (isOrder) "PEDIDO EN TIEMPO REAL" else "OFERTA EXCLUSIVA",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 9.5.sp,
+                                        fontSize = 12.sp,
                                         color = accent,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                     )
@@ -432,7 +434,7 @@ fun FcmPushControlAndFeedCard(
 
                             Text(
                                 text = item.timestampLabel,
-                                fontSize = 10.5.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

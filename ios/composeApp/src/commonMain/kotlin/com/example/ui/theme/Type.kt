@@ -119,8 +119,8 @@ val Typography: Typography
     labelSmall = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 11.sp,
-        lineHeight = 15.sp,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.18.sp
     )
 )

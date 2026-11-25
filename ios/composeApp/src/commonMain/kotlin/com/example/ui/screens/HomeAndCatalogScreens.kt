@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.Tone
+
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -315,8 +317,8 @@ fun HomeScreen(
                             onNavigateToDelivery()
                         },
                         shape = RoundedCornerShape(999.dp),
-                        color = Color(0xFF059669).copy(alpha = 0.12f),
-                        border = BorderStroke(1.dp, Color(0xFF059669).copy(alpha = 0.35f)),
+                        color = Tone.success.copy(alpha = 0.12f),
+                        border = BorderStroke(1.dp, Tone.success.copy(alpha = 0.35f)),
                         modifier = Modifier.testTag("home_delivery_pill")
                     ) {
                         Row(
@@ -326,15 +328,15 @@ fun HomeScreen(
                         ) {
                             BravoUnifiedIcon(
                                 iconKey = "delivery",
-                                tint = Color(0xFF059669),
+                                tint = Tone.success,
                                 size = 15.dp
                             )
                             Text(
                                 text = "En ruta",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 11.sp,
-                                color = Color(0xFF059669),
+                                fontSize = 12.sp,
+                                color = Tone.success,
                                 maxLines = 1
                             )
                         }
@@ -1090,7 +1092,7 @@ fun CatalogScreen(
                                 DiagonalMetadataStrip(
                                     items = listOf("$count productos"),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 11f
+                                    fontSizeSp = 12f
                                 )
                             }
                         }
@@ -1416,7 +1418,7 @@ fun ProductDetailScreen(
                                         if (product.isBravo) "Marca Bravo" else product.badge.ifBlank { "Oficial" }
                                     ),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 11f
+                                    fontSizeSp = 12f
                                 )
                             }
                         }
@@ -1450,7 +1452,7 @@ fun ProductDetailScreen(
                                     onToggleFavorite()
                                 },
                                 shape = CircleShape,
-                                color = if (isFavorite) Color(0xFFFFE4E6) else MaterialTheme.colorScheme.surfaceVariant,
+                                color = if (isFavorite) Tone.dangerSoft else MaterialTheme.colorScheme.surfaceVariant,
                                 border = if (isFavorite) BorderStroke(1.dp, Color(0xFFE11D48).copy(alpha = 0.4f)) else null,
                                 modifier = Modifier
                                     .size(38.dp)
@@ -1490,7 +1492,7 @@ fun ProductDetailScreen(
                     DiagonalMetadataStrip(
                         items = listOf(product.category, "ITBIS incluido"),
                         slashColor = primaryColor,
-                        fontSizeSp = 10.5f
+                        fontSizeSp = 12f
                     )
 
                     Text(
@@ -1549,7 +1551,7 @@ fun ProductDetailScreen(
                                 onOpenProduct(alt.sku)
                             },
                             shape = RoundedCornerShape(14.dp),
-                            color = Color(0xFF059669).copy(alpha = 0.10f),
+                            color = Tone.success.copy(alpha = 0.10f),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("cheaper_alternative_chip")
@@ -1559,18 +1561,18 @@ fun ProductDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(Icons.Default.Savings, contentDescription = null, tint = Color(0xFF059669), modifier = Modifier.size(18.dp))
+                                Icon(Icons.Default.Savings, contentDescription = null, tint = Tone.success, modifier = Modifier.size(18.dp))
                                 Text(
                                     text = "Ahorra $pct% por ${altUnit?.second?.label ?: "unidad"}: ${alt.name}" +
                                         (altUnit?.let { " (${formatUnitPrice(it.first, it.second)})" } ?: ""),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF047857),
+                                    color = Tone.successStrong,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f)
                                 )
-                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color(0xFF059669), modifier = Modifier.size(18.dp))
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Tone.success, modifier = Modifier.size(18.dp))
                             }
                         }
                     }
@@ -1589,7 +1591,7 @@ fun ProductDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.Verified,
                                 contentDescription = null,
-                                tint = Color(0xFF059669),
+                                tint = Tone.success,
                                 modifier = Modifier.size(15.dp)
                             )
                             Text(
@@ -1624,7 +1626,7 @@ fun ProductDetailScreen(
                                 ) {
                                     Text(
                                         text = tag,
-                                        fontSize = 10.sp,
+                                        fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
@@ -1640,7 +1642,7 @@ fun ProductDetailScreen(
                         ) {
                             Text(
                                 text = richDescription.usageOrStorageTip,
-                                fontSize = 11.5.sp,
+                                fontSize = 12.sp,
                                 lineHeight = 16.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
@@ -1724,7 +1726,7 @@ fun ProductDetailScreen(
                                     "Grasa: ${nut.fatG}"
                                 ),
                                 slashColor = primaryColor,
-                                fontSizeSp = 10f
+                                fontSizeSp = 12f
                             )
                         }
                     }
@@ -1755,7 +1757,7 @@ fun ProductDetailScreen(
                     ) {
                         nut.allergens.forEach { allergen ->
                             val isFree = allergen.contains("Libre", ignoreCase = true)
-                            val badgeColor = if (isFree) Color(0xFF059669) else Color(0xFFD97706)
+                            val badgeColor = if (isFree) Tone.success else Tone.warning
                             Surface(
                                 shape = CircleShape,
                                 color = badgeColor.copy(alpha = 0.14f),
@@ -1765,7 +1767,7 @@ fun ProductDetailScreen(
                                     text = if (isFree) "✓ $allergen" else "Alérgeno: $allergen",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 10.5.sp,
+                                    fontSize = 12.sp,
                                     color = badgeColor,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                                 )
@@ -1781,7 +1783,7 @@ fun ProductDetailScreen(
                                     text = diet,
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 10.5.sp,
+                                    fontSize = 12.sp,
                                     color = primaryColor,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                                 )
@@ -1830,7 +1832,7 @@ fun ProductDetailScreen(
                                     if (qtyInCart > 0) "$qtyInCart en carrito" else "Selecciona unidades"
                                 ),
                                 slashColor = primaryColor,
-                                fontSizeSp = 10.5f
+                                fontSizeSp = 12f
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
@@ -1909,7 +1911,7 @@ fun ProductDetailScreen(
                                     onRemoveCompletely()
                                 },
                                 shape = RoundedCornerShape(999.dp),
-                                color = if (darkMode) Color(0xFF4C0519) else Color(0xFFFFE4E6),
+                                color = if (darkMode) Color(0xFF4C0519) else Tone.dangerSoft,
                                 border = BorderStroke(1.5.dp, Color(0xFFE11D48)),
                                 modifier = Modifier
                                     .weight(0.95f)
@@ -1923,7 +1925,7 @@ fun ProductDetailScreen(
                                     Icon(
                                         imageVector = Icons.Default.DeleteOutline,
                                         contentDescription = "Remover",
-                                        tint = if (darkMode) Color(0xFFFDA4AF) else Color(0xFFBE123C),
+                                        tint = if (darkMode) Color(0xFFFDA4AF) else Tone.dangerStrong,
                                         modifier = Modifier.size(17.dp)
                                     )
                                     Spacer(modifier = Modifier.width(5.dp))
@@ -1932,7 +1934,7 @@ fun ProductDetailScreen(
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 13.5.sp,
-                                        color = if (darkMode) Color(0xFFFDA4AF) else Color(0xFFBE123C)
+                                        color = if (darkMode) Color(0xFFFDA4AF) else Tone.dangerStrong
                                     )
                                 }
                             }
@@ -1993,7 +1995,7 @@ fun ProductDetailScreen(
                             DiagonalMetadataStrip(
                                 items = listOf("OPCIÓN SUGERIDA", "Brav IA"),
                                 slashColor = primaryColor,
-                                fontSizeSp = 10f
+                                fontSizeSp = 12f
                             )
                             Text(
                                 text = "Pregúntale a Brav IA por recetas o alergias",
@@ -2171,7 +2173,7 @@ private fun DailyRotatingOffersCarouselSection(
                                     text = "-${offer.discountPct}% ${offer.dayLabel.uppercase()}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 9.5.sp,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                 )
@@ -2180,7 +2182,7 @@ private fun DailyRotatingOffersCarouselSection(
                                 text = "RD$${offer.originalPrice}",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textDecoration = TextDecoration.LineThrough
                             )
@@ -2210,7 +2212,7 @@ private fun DailyRotatingOffersCarouselSection(
                                         text = categoryBadge,
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 9.5.sp,
+                                        fontSize = 12.sp,
                                         color = primaryColor,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis

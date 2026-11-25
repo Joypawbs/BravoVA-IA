@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.Tone
+
 import androidx.compose.material.icons.outlined.Share
 import com.example.ui.components.orderWhatsAppText
 import com.example.ui.components.shareOnWhatsApp
@@ -310,7 +312,7 @@ fun BravisimaScreen(
                                         text = "Inicia sesión con tu cuenta de Google para sincronizar y gestionar tu Tarjeta Bravísima en todos tus dispositivos.",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.Medium,
-                                        fontSize = 11.5.sp,
+                                        fontSize = 12.sp,
                                         lineHeight = 15.5.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -332,7 +334,7 @@ fun BravisimaScreen(
                                             text = err,
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.SemiBold,
-                                            fontSize = 11.5.sp,
+                                            fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onErrorContainer,
                                             modifier = Modifier.padding(10.dp)
                                         )
@@ -413,13 +415,13 @@ fun BravisimaScreen(
                                     modifier = Modifier
                                         .size(38.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF059669).copy(alpha = 0.14f)),
+                                        .background(Tone.success.copy(alpha = 0.14f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.CloudDone,
                                         contentDescription = "Sincronizado con Google",
-                                        tint = Color(0xFF059669),
+                                        tint = Tone.success,
                                         modifier = Modifier.size(19.dp)
                                     )
                                 }
@@ -449,7 +451,7 @@ fun BravisimaScreen(
                                         text = "${bravisimaCard.holderEmail ?: userProfile.email} • Cuenta Google Activa",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.SemiBold,
-                                        fontSize = 11.sp,
+                                        fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -480,7 +482,7 @@ fun BravisimaScreen(
                                     text = "Salir",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 11.5.sp,
+                                    fontSize = 12.sp,
                                     color = primaryColor
                                 )
                             }
@@ -491,7 +493,7 @@ fun BravisimaScreen(
 
             item(key = "bravisima_card", contentType = "loyalty_card") {
                 val cardGradient = if (bravisimaCard.isLocked) {
-                    listOf(Color(0xFF334155), Color(0xFF1E293B), Color(0xFF0F172A))
+                    listOf(Tone.inkSoft, Color(0xFF1E293B), Tone.ink)
                 } else {
                     listOf(primaryColor, BravoRedDark, Color(0xFF4C0519))
                 }
@@ -629,7 +631,7 @@ fun BravisimaScreen(
                                     ),
                                     slashColor = Color.White,
                                     textColor = Color.White,
-                                    fontSizeSp = 11.5f
+                                    fontSizeSp = 12f
                                 )
 
                                 Spacer(modifier = Modifier.height(6.dp))
@@ -690,7 +692,7 @@ fun BravisimaScreen(
                                 barcodeBars.forEachIndexed { idx, w ->
                                     val barWidth = w * unitWidth
                                     drawRect(
-                                        color = if (bravisimaCard.isLocked) Color(0xFF94A3B8) else Color(0xFF111827),
+                                        color = if (bravisimaCard.isLocked) Tone.muted else Color(0xFF111827),
                                         topLeft = Offset(x, 0f),
                                         size = Size(barWidth, size.height)
                                     )
@@ -709,7 +711,7 @@ fun BravisimaScreen(
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 13.sp,
                                     letterSpacing = 1.sp,
-                                    color = Color(0xFF0F172A),
+                                    color = Tone.ink,
                                     maxLines = 1,
                                     softWrap = false,
                                     overflow = TextOverflow.Ellipsis,
@@ -759,7 +761,7 @@ fun BravisimaScreen(
                             Column {
                                 Text(
                                     text = if (bravisimaCard.isLocked) "BALANCE PROTEGIDO" else "BALANCE DISPONIBLE",
-                                    fontSize = 11.5.sp,
+                                    fontSize = 12.sp,
                                     letterSpacing = 0.7.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = Color.White.copy(alpha = 0.94f)
@@ -893,7 +895,7 @@ fun BravisimaScreen(
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(
                                     if (darkMode) Color.White.copy(alpha = 0.08f)
-                                    else Color(0xFFF1F5F9)
+                                    else Tone.surfaceSubtle
                                 )
                                 .border(
                                     width = 1.dp,
@@ -923,7 +925,7 @@ fun BravisimaScreen(
                                         text = if (nextTarget != null) "Meta: RD$$nextTarget" else "Nivel Máximo",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 11.5.sp,
+                                        fontSize = 12.sp,
                                         color = if (darkMode) Color.White else BravoRedDark,
                                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
                                     )
@@ -991,7 +993,7 @@ fun BravisimaScreen(
                                 Icon(
                                     imageVector = if (bravisimaCard.isLocked) Icons.Default.Lock else Icons.Default.LockOpen,
                                     contentDescription = null,
-                                    tint = if (bravisimaCard.isLocked) BravoRed else Color(0xFF10B981),
+                                    tint = if (bravisimaCard.isLocked) BravoRed else Tone.successBright,
                                     modifier = Modifier.size(21.dp)
                                 )
                                 Column {
@@ -1164,7 +1166,7 @@ fun BravisimaScreen(
                                                 text = "RD$$goalOption",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 11.5.sp,
+                                                fontSize = 12.sp,
                                                 color = if (selected) Color.White else primaryColor,
                                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                             )
@@ -1200,7 +1202,7 @@ fun BravisimaScreen(
                                                 text = catOption,
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 11.5.sp,
+                                                fontSize = 12.sp,
                                                 color = if (selected) Color.White else primaryColor,
                                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                             )
@@ -1378,7 +1380,7 @@ fun BravisimaScreen(
                             Spacer(modifier = Modifier.height(6.dp))
                             DiagonalMetadataStrip(
                                 items = listOf("+RD$${cartTotals.bravisimaGenerated}", "Hoy"),
-                                slashColor = if (darkMode) Color(0xFF34D399) else Color(0xFF059669),
+                                slashColor = if (darkMode) Color(0xFF34D399) else Tone.success,
                                 fontSizeSp = 12.5f
                             )
                         }
@@ -1552,7 +1554,7 @@ private fun MovementRow(
             fontWeight = FontWeight.ExtraBold,
             fontSize = 14.5.sp,
             color = if (isPositive) {
-                if (darkMode) Color(0xFF34D399) else Color(0xFF047857)
+                if (darkMode) Color(0xFF34D399) else Tone.successStrong
             } else {
                 if (darkMode) Color(0xFFFCA5A5) else BravoRedDark
             }
@@ -1722,7 +1724,7 @@ fun CartCheckoutScreen(
                             DiagonalMetadataStrip(
                                 items = listOf(product.category, "RD$${product.price} / ${product.unit}"),
                                 slashColor = primaryColor,
-                                fontSizeSp = 10.5f
+                                fontSizeSp = 12f
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
@@ -1747,7 +1749,7 @@ fun CartCheckoutScreen(
                                     .size(28.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (qty == 1) Color(0xFFFFE4E6) else MaterialTheme.colorScheme.surface
+                                        if (qty == 1) Tone.dangerSoft else MaterialTheme.colorScheme.surface
                                     )
                                     .clickable {
                                         HapticFeedbackManager.onDecrementOrRemove(view, isFullRemove = qty == 1)
@@ -1758,7 +1760,7 @@ fun CartCheckoutScreen(
                                 Icon(
                                     imageVector = if (qty == 1) Icons.Default.DeleteOutline else Icons.Default.Remove,
                                     contentDescription = "Restar",
-                                    tint = if (qty == 1) Color(0xFFBE123C) else primaryColor,
+                                    tint = if (qty == 1) Tone.dangerStrong else primaryColor,
                                     modifier = Modifier.size(15.dp)
                                 )
                             }
@@ -1824,13 +1826,13 @@ fun CartCheckoutScreen(
                                 DiagonalMetadataStrip(
                                     items = listOf("Pago protegido con huella", activeBranch),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 10.5f
+                                    fontSizeSp = 12f
                                 )
                             }
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = Color(0xFF10B981).copy(alpha = 0.14f),
-                                border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.35f))
+                                color = Tone.successBright.copy(alpha = 0.14f),
+                                border = BorderStroke(1.dp, Tone.successBright.copy(alpha = 0.35f))
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
@@ -1840,15 +1842,15 @@ fun CartCheckoutScreen(
                                     Icon(
                                         imageVector = Icons.Default.Fingerprint,
                                         contentDescription = null,
-                                        tint = Color(0xFF10B981),
+                                        tint = Tone.successBright,
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Text(
                                         text = "3DS + Huella",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 10.sp,
-                                        color = Color(0xFF10B981),
+                                        fontSize = 12.sp,
+                                        color = Tone.successBright,
                                         maxLines = 1,
                                         softWrap = false
                                     )
@@ -1893,13 +1895,13 @@ fun CartCheckoutScreen(
                                             text = "Delivery Express",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 11.5.sp,
+                                            fontSize = 12.sp,
                                             color = if (isDelivery) primaryColor else MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
                                             text = activeAddress?.label ?: "18 min • Gratis",
                                             fontFamily = PlusJakartaSans,
-                                            fontSize = 10.sp,
+                                            fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
@@ -1940,13 +1942,13 @@ fun CartCheckoutScreen(
                                             text = "Pickup en Tienda",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 11.5.sp,
+                                            fontSize = 12.sp,
                                             color = if (isPickup) primaryColor else MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
                                             text = activeBranch,
                                             fontFamily = PlusJakartaSans,
-                                            fontSize = 10.sp,
+                                            fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
@@ -1967,7 +1969,7 @@ fun CartCheckoutScreen(
                                     text = "Método de pago",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 11.5.sp,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.weight(1f).padding(end = 8.dp)
                                 )
@@ -2013,7 +2015,7 @@ fun CartCheckoutScreen(
                                             text = "Nueva tarjeta",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 10.sp,
+                                            fontSize = 12.sp,
                                             color = primaryColor
                                         )
                                     }
@@ -2086,13 +2088,13 @@ fun CartCheckoutScreen(
                                                     text = "${method.brand} •••• ${method.last4}",
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.ExtraBold,
-                                                    fontSize = 11.5.sp,
+                                                    fontSize = 12.sp,
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                                 Text(
                                                     text = if (isSelected) "Activa • Exp ${method.exp}" else "Toca para autorizar",
                                                     fontFamily = PlusJakartaSans,
-                                                    fontSize = 9.5.sp,
+                                                    fontSize = 12.sp,
                                                     color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
@@ -2111,7 +2113,7 @@ fun CartCheckoutScreen(
                                 text = "Comprobante Fiscal (DGII)",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.5.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -2134,7 +2136,7 @@ fun CartCheckoutScreen(
                                             text = "$code • $label",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp,
+                                            fontSize = 12.sp,
                                             maxLines = 1,
                                             softWrap = false,
                                             color = if (selected) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2271,7 +2273,7 @@ fun CartCheckoutScreen(
                                         listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con Huella")
                                     },
                                     slashColor = if (isBravisimaLocked) BravoRed else primaryColor,
-                                    fontSizeSp = 10.5f
+                                    fontSizeSp = 12f
                                 )
                             }
                             if (isBravisimaLocked) {
@@ -2296,7 +2298,7 @@ fun CartCheckoutScreen(
                                             text = "Desbloquear",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 10.5.sp,
+                                            fontSize = 12.sp,
                                             color = BravoRed
                                         )
                                     }
@@ -2329,11 +2331,11 @@ fun CartCheckoutScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Descuento Bravísima (Autorizado)", color = Color(0xFF059669))
+                                Text("Descuento Bravísima (Autorizado)", color = Tone.success)
                                 Text(
                                     "-RD$${formatMoney(cartTotals.redeemed)}.00",
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFF059669)
+                                    color = Tone.success
                                 )
                             }
                         }
@@ -2345,8 +2347,8 @@ fun CartCheckoutScreen(
                             Text("Cargo con $activeCardSummary ($ncfType)", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                             DiagonalMetadataStrip(
                                 items = listOf("GRATIS", "+RD$${cartTotals.bravisimaGenerated} Bravísima"),
-                                slashColor = Color(0xFF059669),
-                                fontSizeSp = 11.5f
+                                slashColor = Tone.success,
+                                fontSizeSp = 12f
                             )
                         }
 
@@ -2380,7 +2382,7 @@ fun CartCheckoutScreen(
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(
                                     if (lastVerificationResult != null) {
-                                        Color(0xFF10B981).copy(alpha = 0.10f)
+                                        Tone.successBright.copy(alpha = 0.10f)
                                     } else {
                                         primaryColor.copy(alpha = 0.08f)
                                     }
@@ -2388,7 +2390,7 @@ fun CartCheckoutScreen(
                                 .border(
                                     1.dp,
                                     if (lastVerificationResult != null) {
-                                        Color(0xFF10B981).copy(alpha = 0.38f)
+                                        Tone.successBright.copy(alpha = 0.38f)
                                     } else {
                                         primaryColor.copy(alpha = 0.28f)
                                     },
@@ -2405,7 +2407,7 @@ fun CartCheckoutScreen(
                                     .clip(CircleShape)
                                     .background(
                                         if (lastVerificationResult != null) {
-                                            Color(0xFF10B981).copy(alpha = 0.18f)
+                                            Tone.successBright.copy(alpha = 0.18f)
                                         } else {
                                             primaryColor.copy(alpha = 0.16f)
                                         }
@@ -2415,7 +2417,7 @@ fun CartCheckoutScreen(
                                 Icon(
                                     imageVector = Icons.Default.Fingerprint,
                                     contentDescription = "Solicitud de huella digital",
-                                    tint = if (lastVerificationResult != null) Color(0xFF10B981) else primaryColor,
+                                    tint = if (lastVerificationResult != null) Tone.successBright else primaryColor,
                                     modifier = Modifier.size(19.dp)
                                 )
                             }
@@ -2426,7 +2428,7 @@ fun CartCheckoutScreen(
                                     } ?: "Confirmación con BiometricPrompt",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 11.5.sp,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
@@ -2439,14 +2441,14 @@ fun CartCheckoutScreen(
                                     } ?: "Pagos con $activeCardSummary, canjes Bravísima y envío requieren huella.",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Medium,
-                                    fontSize = 10.5.sp,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Icon(
                                 imageVector = Icons.Default.VerifiedUser,
                                 contentDescription = null,
-                                tint = Color(0xFF10B981),
+                                tint = Tone.successBright,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -2527,7 +2529,7 @@ fun CartCheckoutScreen(
                                 DiagonalMetadataStrip(
                                     items = listOf("OPCIÓN DE AHORRO", "Brav IA"),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 10f
+                                    fontSizeSp = 12f
                                 )
                                 Text(
                                     text = "¿Deseas ajustar este carrito a un presupuesto menor?",
@@ -2562,7 +2564,7 @@ fun CartCheckoutScreen(
             actions = if (cartItems.isNotEmpty()) listOf(
                 GlassBarAction(
                     symbol = "trash", icon = Icons.Default.DeleteOutline, label = "Vaciar carrito", text = "Vaciar",
-                    tint = if (darkMode) Color(0xFFFDA4AF) else Color(0xFFBE123C),
+                    tint = if (darkMode) Color(0xFFFDA4AF) else Tone.dangerStrong,
                     testTag = "cart_empty_button",
                     onClick = {
                             performCrispHaptic(view, HapticStyle.HEAVY)
@@ -2714,8 +2716,8 @@ fun BiometricOrderPromptDialog(
     }
 
     val sensorAccent = when (scanState) {
-        "verified" -> Color(0xFF10B981)
-        "scanning" -> Color(0xFFF59E0B)
+        "verified" -> Tone.successBright
+        "scanning" -> Tone.warningBright
         "error" -> Color(0xFFEF4444)
         else -> primaryColor
     }
@@ -2768,7 +2770,7 @@ fun BiometricOrderPromptDialog(
                                 text = request.badgeTitle,
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.sp,
+                                fontSize = 12.sp,
                                 color = sensorAccent
                             )
                         }
@@ -2788,7 +2790,7 @@ fun BiometricOrderPromptDialog(
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.Medium,
                         fontSize = 12.sp,
-                        color = if (scanState == "verified") Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (scanState == "verified") Tone.successBright else MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
 
@@ -2814,7 +2816,7 @@ fun BiometricOrderPromptDialog(
                                         text = request.subtitle,
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.SemiBold,
-                                        fontSize = 11.sp,
+                                        fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -2830,14 +2832,14 @@ fun BiometricOrderPromptDialog(
                                 if (request.cashbackRd > 0) {
                                     Surface(
                                         shape = RoundedCornerShape(999.dp),
-                                        color = Color(0xFF10B981).copy(alpha = 0.14f)
+                                        color = Tone.successBright.copy(alpha = 0.14f)
                                     ) {
                                         Text(
                                             text = "+RD$${request.cashbackRd} Bravísima",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 10.5.sp,
-                                            color = Color(0xFF10B981),
+                                            fontSize = 12.sp,
+                                            color = Tone.successBright,
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                                         )
                                     }
@@ -2852,7 +2854,7 @@ fun BiometricOrderPromptDialog(
                                         request.deliveryOrBranchLabel.takeIf { it.isNotBlank() }
                                     ),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 10f
+                                    fontSizeSp = 12f
                                 )
                             }
                         }
@@ -2926,7 +2928,7 @@ fun BiometricOrderPromptDialog(
                             ?: if (scanState == "verified") "Identidad confirmada" else "Toca el sensor de huella para autorizar",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.5.sp,
+                        fontSize = 12.sp,
                         color = sensorAccent
                     )
 
@@ -3180,7 +3182,7 @@ fun DeliveryTrackingScreen(
                                         text = "#${ord.id} • ${ordStage.progressPct}%",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 11.5.sp,
+                                        fontSize = 12.sp,
                                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                                     )
                                 }
@@ -3220,7 +3222,7 @@ fun DeliveryTrackingScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Map,
                                     contentDescription = "Mapa GPS en Vivo",
-                                    tint = Color(0xFF059669),
+                                    tint = Tone.success,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Text(
@@ -3238,7 +3240,7 @@ fun DeliveryTrackingScreen(
                                 text = "${driverTelemetry.currentStreet} • ${driverTelemetry.lastUpdatedLabel}",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1,
@@ -3283,7 +3285,7 @@ fun DeliveryTrackingScreen(
                                             text = "Mi GPS",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 11.sp,
+                                            fontSize = 12.sp,
                                             color = primaryColor
                                         )
                                     }
@@ -3296,13 +3298,13 @@ fun DeliveryTrackingScreen(
                                     },
                                     shape = RoundedCornerShape(999.dp),
                                     color = if (driverTelemetry.isAutoSimulating) {
-                                        Color(0xFF059669).copy(alpha = 0.14f)
+                                        Tone.success.copy(alpha = 0.14f)
                                     } else {
                                         MaterialTheme.colorScheme.surfaceVariant
                                     },
                                     border = BorderStroke(
                                         1.dp,
-                                        if (driverTelemetry.isAutoSimulating) Color(0xFF059669) else MaterialTheme.colorScheme.outline
+                                        if (driverTelemetry.isAutoSimulating) Tone.success else MaterialTheme.colorScheme.outline
                                     ),
                                     modifier = Modifier.testTag("toggle_auto_traffic_button")
                                 ) {
@@ -3314,15 +3316,15 @@ fun DeliveryTrackingScreen(
                                         Icon(
                                             imageVector = if (driverTelemetry.isAutoSimulating) Icons.Default.Pause else Icons.Default.PlayArrow,
                                             contentDescription = "Alternar actualización automática",
-                                            tint = if (driverTelemetry.isAutoSimulating) Color(0xFF059669) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            tint = if (driverTelemetry.isAutoSimulating) Tone.success else MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
                                             text = if (driverTelemetry.isAutoSimulating) "Auto-Tráfico Activo" else "Reanudar Ruta",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 11.sp,
-                                            color = if (driverTelemetry.isAutoSimulating) Color(0xFF059669) else MaterialTheme.colorScheme.onSurfaceVariant
+                                            fontSize = 12.sp,
+                                            color = if (driverTelemetry.isAutoSimulating) Tone.success else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
@@ -3351,7 +3353,7 @@ fun DeliveryTrackingScreen(
                                             text = "Tráfico Ahora",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 11.sp,
+                                            fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
@@ -3434,7 +3436,7 @@ fun DeliveryTrackingScreen(
                                                 text = "Prom. ${driverTelemetry.avgSpeedKmh} km/h",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.SemiBold,
-                                                fontSize = 10.sp,
+                                                fontSize = 12.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
@@ -3443,9 +3445,9 @@ fun DeliveryTrackingScreen(
 
                                 // Tráfico
                                 val trafficColor = when (driverTelemetry.trafficLevel) {
-                                    "DENSO" -> Color(0xFFD97706)
-                                    "MODERADO" -> Color(0xFF059669)
-                                    else -> Color(0xFF059669)
+                                    "DENSO" -> Tone.warning
+                                    "MODERADO" -> Tone.success
+                                    else -> Tone.success
                                 }
                                 Surface(
                                     shape = RoundedCornerShape(14.dp),
@@ -3481,7 +3483,7 @@ fun DeliveryTrackingScreen(
                                                 text = if (driverTelemetry.trafficDelayDeltaMin > 0) "+${driverTelemetry.trafficDelayDeltaMin} min por tráfico" else "Ruta despejada",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.SemiBold,
-                                                fontSize = 10.sp,
+                                                fontSize = 12.sp,
                                                 color = trafficColor
                                             )
                                         }
@@ -3509,7 +3511,7 @@ fun DeliveryTrackingScreen(
                                             text = "${driverTelemetry.remainingDistanceKm} km rest.",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 10.sp,
+                                            fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
@@ -3523,7 +3525,7 @@ fun DeliveryTrackingScreen(
                                     "Envío base RD$$deliveryFeeRd (Gratis Bravísima)"
                                 ),
                                 slashColor = primaryColor,
-                                fontSizeSp = 10.5f
+                                fontSizeSp = 12f
                             )
 
                             OutlinedButton(
@@ -3536,7 +3538,7 @@ fun DeliveryTrackingScreen(
                                         )
                                     }
                                 },
-                                border = BorderStroke(1.2.dp, Color(0xFF059669)),
+                                border = BorderStroke(1.2.dp, Tone.success),
                                 shape = RoundedCornerShape(999.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -3545,7 +3547,7 @@ fun DeliveryTrackingScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Map,
                                     contentDescription = null,
-                                    tint = Color(0xFF059669),
+                                    tint = Tone.success,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -3553,8 +3555,8 @@ fun DeliveryTrackingScreen(
                                     text = "Abrir Navegación Completa en Google Maps ($effectiveRoadKm km • ~$effectiveEtaMinutes min)",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 11.5.sp,
-                                    color = Color(0xFF059669)
+                                    fontSize = 12.sp,
+                                    color = Tone.success
                                 )
                             }
                         }
@@ -3606,15 +3608,15 @@ fun DeliveryTrackingScreen(
                                 Icon(
                                     imageVector = if (isUpdatingOrderStatus) Icons.Default.Sync else Icons.Default.CloudDone,
                                     contentDescription = null,
-                                    tint = Color(0xFF059669),
+                                    tint = Tone.success,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Text(
                                     text = "Seguimiento en Tiempo Real • #${orderIdDisplay}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 11.5.sp,
-                                    color = Color(0xFF059669),
+                                    fontSize = 12.sp,
+                                    color = Tone.success,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -3628,7 +3630,7 @@ fun DeliveryTrackingScreen(
                                     text = activeOrder?.date ?: deliveryStage.updatedDateLabel,
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 10.5.sp,
+                                    fontSize = 12.sp,
                                     color = primaryColor,
                                     modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
                                 )
@@ -3679,7 +3681,7 @@ fun DeliveryTrackingScreen(
                                         .fillMaxSize()
                                         .testTag("order_delivery_circular_progress"),
                                     color = if (deliveryStage == OrderDeliveryStage.DELIVERED) {
-                                        Color(0xFF059669)
+                                        Tone.success
                                     } else {
                                         primaryColor
                                     },
@@ -3709,7 +3711,7 @@ fun DeliveryTrackingScreen(
                                         effectiveBranch
                                     ),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 10.5f
+                                    fontSizeSp = 12f
                                 )
                                 Text(
                                     text = "${(animatedProgress * 100).roundToInt()}%",
@@ -3728,7 +3730,7 @@ fun DeliveryTrackingScreen(
                                     .clip(RoundedCornerShape(999.dp))
                                     .testTag("order_delivery_progress_indicator"),
                                 color = if (deliveryStage == OrderDeliveryStage.DELIVERED) {
-                                    Color(0xFF059669)
+                                    Tone.success
                                 } else {
                                     primaryColor
                                 },
@@ -3763,7 +3765,7 @@ fun DeliveryTrackingScreen(
                                             .background(
                                                 when {
                                                     isCurrent -> primaryColor
-                                                    isReached -> Color(0xFF059669)
+                                                    isReached -> Tone.success
                                                     else -> MaterialTheme.colorScheme.surfaceVariant
                                                 }
                                             )
@@ -3794,7 +3796,7 @@ fun DeliveryTrackingScreen(
                                         text = stage.shortLabel,
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = if (isCurrent) FontWeight.ExtraBold else FontWeight.SemiBold,
-                                        fontSize = 10.sp,
+                                        fontSize = 12.sp,
                                         color = when {
                                             isCurrent -> primaryColor
                                             isReached -> MaterialTheme.colorScheme.onSurface
@@ -3814,7 +3816,7 @@ fun DeliveryTrackingScreen(
                         ) {
                             Text(
                                 text = firestoreSyncStatus,
-                                fontSize = 10.5.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
@@ -3847,7 +3849,7 @@ fun DeliveryTrackingScreen(
                                     text = "Actualizar etapa de entrega",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     color = primaryColor
                                 )
                             }
@@ -3886,8 +3888,8 @@ fun DeliveryTrackingScreen(
                                     text = "Cadena de frío activa • Orden #$orderIdDisplay",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 11.sp,
-                                    color = Color(0xFF059669),
+                                    fontSize = 12.sp,
+                                    color = Tone.success,
                                     textAlign = TextAlign.Center
                                 )
                             }
@@ -3920,14 +3922,14 @@ fun DeliveryTrackingScreen(
                                                 text = prod.name,
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 11.sp,
+                                                fontSize = 12.sp,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
                                                 text = "x$qty • RD$${prod.price}",
-                                                fontSize = 10.sp,
+                                                fontSize = 12.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = primaryColor
                                             )
@@ -3964,7 +3966,7 @@ fun DeliveryTrackingScreen(
                 )
             ),
             subtitle = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Entregado" else "${driverTelemetry.currentSpeedKmh} km/h • ~$effectiveEtaMinutes min",
-            subtitleColor = if (deliveryStage == OrderDeliveryStage.DELIVERED) Color(0xFF10B981) else primaryColor,
+            subtitleColor = if (deliveryStage == OrderDeliveryStage.DELIVERED) Tone.successBright else primaryColor,
             onBack = {
                 HapticFeedbackManager.onNavigationClick(view)
                 onBack()
@@ -4037,15 +4039,15 @@ private fun LiveDeliveryNotificationBannerCard(
                             Icon(
                                 imageVector = Icons.Filled.NotificationsActive,
                                 contentDescription = "Notificación en vivo",
-                                tint = Color(0xFF059669),
+                                tint = Tone.success,
                                 modifier = Modifier.size(13.dp)
                             )
                             Text(
                                 text = "NOTIFICACIÓN LIVE • #$orderIdDisplay",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.sp,
-                                color = Color(0xFF059669)
+                                fontSize = 12.sp,
+                                color = Tone.success
                             )
                         }
                         Text(
@@ -4061,7 +4063,7 @@ private fun LiveDeliveryNotificationBannerCard(
                             text = activeSubtitle,
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 11.5.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -4093,7 +4095,7 @@ private fun LiveDeliveryNotificationBannerCard(
                                 text = "$speedKmh km/h",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.5.sp,
+                                fontSize = 12.sp,
                                 color = primaryColor
                             )
                         }
@@ -4126,14 +4128,14 @@ private fun LiveDeliveryNotificationBannerCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
                         contentDescription = null,
-                        tint = Color(0xFF059669),
+                        tint = Tone.success,
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
                         text = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Pedido entregado en tu puerta" else "Llegada estimada en ~$etaMin min • ${telemetry.remainingDistanceKm} km",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
+                        fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -4141,7 +4143,7 @@ private fun LiveDeliveryNotificationBannerCard(
                     text = "${(progressFraction * 100).roundToInt()}%",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = primaryColor
                 )
             }
@@ -4152,7 +4154,7 @@ private fun LiveDeliveryNotificationBannerCard(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(999.dp)),
-                color = Color(0xFF059669),
+                color = Tone.success,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
@@ -4180,9 +4182,9 @@ private fun RealInteractiveDeliveryMapView(
         val driverLat = branchLat + (userLat - branchLat) * f
         val driverLng = branchLng + (userLng - branchLng) * f
         val routeColor = when (telemetry.trafficLevel) {
-            "DENSO" -> Color(0xFFF59E0B)
-            "MODERADO" -> Color(0xFF10B981)
-            else -> Color(0xFF059669)
+            "DENSO" -> Tone.warningBright
+            "MODERADO" -> Tone.successBright
+            else -> Tone.success
         }
         com.example.ui.components.NativeDeliveryMap(
             branch = com.example.ui.components.DeliveryMapPin(branchLat, branchLng, branchName),
@@ -4225,11 +4227,11 @@ private fun RealInteractiveDeliveryMapView(
     val waterColor = if (darkMode) Color(0xFF0E2238) else Color(0xFFCFE6FA)
     val secondaryStreetColor = if (darkMode) Color(0xFF1E293B) else Color(0xFFFFFFFF)
     val primaryAvenueColor = if (darkMode) Color(0xFF283548) else Color(0xFFFFFBEB)
-    val avenueBorderColor = if (darkMode) Color(0xFF334155) else Color(0xFFCBD5E1)
+    val avenueBorderColor = if (darkMode) Tone.inkSoft else Color(0xFFCBD5E1)
     val routeActiveColor = when (telemetry.trafficLevel) {
-        "DENSO" -> Color(0xFFF59E0B)
-        "MODERADO" -> Color(0xFF10B981)
-        else -> Color(0xFF059669)
+        "DENSO" -> Tone.warningBright
+        "MODERADO" -> Tone.successBright
+        else -> Tone.success
     }
 
     Box(
@@ -4375,8 +4377,8 @@ private fun RealInteractiveDeliveryMapView(
             run {
                 val labelColor = if (darkMode) Color(203, 213, 225, 215) else Color(51, 65, 85, 220)
                 val parkColor = if (darkMode) Color(110, 231, 183, 210) else Color(4, 120, 87, 220)
-                val labelSize = (10.5f * animatedZoom).coerceIn(9f, 15f)
-                val parkSize = (9.5f * animatedZoom).coerceIn(8.5f, 13f)
+                val labelSize = (12f * animatedZoom).coerceIn(12f, 16f)
+                val parkSize = (12f * animatedZoom).coerceIn(12f, 14f)
 
                 val av27Pos = project(0.35f, 0.465f)
                 canvasLabel(canvasTextMeasurer, "Av. 27 de Febrero", av27Pos.x, av27Pos.y, labelColor, labelSize)
@@ -4454,7 +4456,7 @@ private fun RealInteractiveDeliveryMapView(
             // 7. Marcador del cliente
             val destCenter = project(SANTO_DOMINGO_ROUTE.last().xFraction, SANTO_DOMINGO_ROUTE.last().yFraction)
             drawCircle(
-                color = Color(0xFF059669).copy(alpha = 0.26f),
+                color = Tone.success.copy(alpha = 0.26f),
                 radius = 20f * animatedZoom,
                 center = destCenter
             )
@@ -4464,7 +4466,7 @@ private fun RealInteractiveDeliveryMapView(
                 center = destCenter
             )
             drawCircle(
-                color = Color(0xFF059669),
+                color = Tone.success,
                 radius = 8.5f * animatedZoom,
                 center = destCenter
             )
@@ -4558,7 +4560,7 @@ private fun RealInteractiveDeliveryMapView(
                     text = "${telemetry.currentStreet} • Tiempo Real 1:1",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 10.sp,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -4653,7 +4655,7 @@ private fun RealInteractiveDeliveryMapView(
                         text = if (followDriver) "Siguiendo" else "Centrar",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 9.5.sp,
+                        fontSize = 12.sp,
                         color = if (followDriver) Color.White else MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -4688,7 +4690,7 @@ private fun RealInteractiveDeliveryMapView(
                     ),
                     slashColor = Color(0xFF34D399),
                     textColor = Color.White,
-                    fontSizeSp = 11f
+                    fontSizeSp = 12f
                 )
             }
         }
@@ -4770,14 +4772,14 @@ private fun DriverAiLiveChatCard(
                             )
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = Color(0xFF059669).copy(alpha = 0.14f)
+                                color = Tone.success.copy(alpha = 0.14f)
                             ) {
                                 Text(
                                     text = "IA En Ruta • ${telemetry.currentSpeedKmh} km/h",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 9.5.sp,
-                                    color = Color(0xFF059669),
+                                    fontSize = 12.sp,
+                                    color = Tone.success,
                                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                                 )
                             }
@@ -4785,7 +4787,7 @@ private fun DriverAiLiveChatCard(
                         DiagonalMetadataStrip(
                             items = listOf("Repartidor BravoVa", "4.95 Estrellas", "Placa K-04921"),
                             slashColor = primaryColor,
-                            fontSizeSp = 10.5f
+                            fontSizeSp = 12f
                         )
                     }
                 }
@@ -4796,13 +4798,13 @@ private fun DriverAiLiveChatCard(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF059669).copy(alpha = 0.14f))
+                            .background(Tone.success.copy(alpha = 0.14f))
                             .testTag("driver_call_button")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Call,
                             contentDescription = "Llamar a Carlos",
-                            tint = Color(0xFF059669),
+                            tint = Tone.success,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -4848,7 +4850,7 @@ private fun DriverAiLiveChatCard(
                             text = prompt,
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = primaryColor,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         )
@@ -4894,14 +4896,14 @@ private fun DriverAiLiveChatCard(
                                         text = if (isUser) "Tú" else "🛵 Carlos Rodríguez (Repartidor)",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 10.5.sp,
+                                        fontSize = 12.sp,
                                         color = if (isUser) Color.White.copy(alpha = 0.9f) else primaryColor
                                     )
                                     Text(
                                         text = "${msg.timestampLabel} • ${msg.speedKmhAtSend} km/h",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.SemiBold,
-                                        fontSize = 9.5.sp,
+                                        fontSize = 12.sp,
                                         color = if (isUser) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -4933,7 +4935,7 @@ private fun DriverAiLiveChatCard(
                             text = "Carlos Rodríguez está respondiendo desde la ruta (${telemetry.currentSpeedKmh} km/h)...",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = primaryColor
                         )
                     }

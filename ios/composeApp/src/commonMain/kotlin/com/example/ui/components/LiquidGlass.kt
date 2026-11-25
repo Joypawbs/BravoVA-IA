@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import com.example.ui.theme.Tone
+
 import com.example.platform.PlatformInfo
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.core.Animatable
@@ -122,7 +124,8 @@ fun LiquidGlass(
     content: @Composable BoxScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(cornerRadius)
-    if (PlatformInfo.isAndroid) {
+    // "Reducir transparencia" (iOS): superficie sólida en lugar del vidrio dibujado a mano
+    if (PlatformInfo.isAndroid || com.example.platform.systemPrefersReducedTransparency()) {
         // En Android usamos superficies Material 3 (colores dinámicos) en lugar de vidrio.
         androidx.compose.material3.Surface(
             modifier = modifier,
@@ -221,7 +224,7 @@ fun LiquidGlass(
                         start = Offset.Zero,
                         end = Offset(size.width, size.height)
                     )
-                    val rimShade = if (darkMode) Color.Black.copy(alpha = 0.35f) else Color(0xFF0F172A).copy(alpha = 0.10f)
+                    val rimShade = if (darkMode) Color.Black.copy(alpha = 0.35f) else Tone.ink.copy(alpha = 0.10f)
                     onDrawBehind {
                         drawRoundRect(brush = tint, cornerRadius = cr)
                         drawRoundRect(

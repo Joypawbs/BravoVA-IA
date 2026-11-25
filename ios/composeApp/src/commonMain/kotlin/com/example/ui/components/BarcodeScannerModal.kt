@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import com.example.ui.theme.Tone
+
 import com.example.platform.*
 import coil3.compose.AsyncImage
 
@@ -132,7 +134,7 @@ fun BarcodeScannerModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(28.dp))
-                    .background(Color(0xFF0F172A).copy(alpha = 0.82f))
+                    .background(Tone.ink.copy(alpha = 0.82f))
                     .border(
                         width = 1.2.dp,
                         brush = Brush.verticalGradient(
@@ -161,7 +163,7 @@ fun BarcodeScannerModal(
                         )
                         Text(
                             text = "Apunta al código de barras EAN-13 del producto",
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
                     }
@@ -201,7 +203,7 @@ fun BarcodeScannerModal(
                                 .size(38.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (torchEnabled) Color(0xFFF59E0B) else Color.White.copy(alpha = 0.14f)
+                                    if (torchEnabled) Tone.warningBright else Color.White.copy(alpha = 0.14f)
                                 )
                                 .testTag("scanner_torch_button")
                         ) {
@@ -325,7 +327,7 @@ fun BarcodeScannerModal(
                             text = "EAN-13 DETECTADO: $currentEan",
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = Color(0xFF34D399),
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                         )
@@ -336,7 +338,7 @@ fun BarcodeScannerModal(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         text = "PRUEBA RÁPIDA DE PRODUCTOS:",
-                        fontSize = 10.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 0.7.sp,
                         color = Color.White.copy(alpha = 0.65f)
@@ -395,7 +397,7 @@ fun BarcodeScannerModal(
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(Color(0xFFF1F5F9))
+                                        .background(Tone.surfaceSubtle)
                                         .padding(4.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -408,13 +410,13 @@ fun BarcodeScannerModal(
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 15.sp,
-                                        color = Color(0xFF0F172A),
+                                        color = Tone.ink,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = "${selectedProduct.unit} • SKU ${selectedProduct.sku}",
-                                        fontSize = 11.sp,
+                                        fontSize = 12.sp,
                                         color = Color(0xFF64748B)
                                     )
                                     Text(
@@ -444,14 +446,14 @@ fun BarcodeScannerModal(
                                     Icon(
                                         imageVector = Icons.Default.Info,
                                         contentDescription = null,
-                                        tint = Color(0xFF0F172A),
+                                        tint = Tone.ink,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "Detalles",
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF0F172A)
+                                        color = Tone.ink
                                     )
                                 }
 

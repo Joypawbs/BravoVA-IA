@@ -255,7 +255,7 @@ fun BravoGoogleAuthScreen(
                             text = if (darkMode) "Modo Oscuro" else "Modo Claro",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.5.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -310,7 +310,7 @@ fun BravoGoogleAuthScreen(
                                     "Brav IA"
                                 ),
                                 slashColor = primaryColor,
-                                fontSizeSp = 11f
+                                fontSizeSp = 12f
                             )
 
                             Text(
@@ -382,7 +382,7 @@ fun BravoGoogleAuthScreen(
                                                 text = subtitle,
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.Medium,
-                                                fontSize = 10.5.sp,
+                                                fontSize = 12.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
@@ -514,7 +514,7 @@ fun BravoGoogleAuthScreen(
                                     text = "Inicio de sesión seguro con Google • Datos protegidos",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.SemiBold,
-                                    fontSize = 10.5.sp,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }

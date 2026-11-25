@@ -47,6 +47,8 @@ fun BravoVaTheme(
 ) {
     // Android 12+: Material You completo (colores del fondo de pantalla del usuario).
     // iOS y Android antiguos: la paleta oficial de Bravo.
+    // Los tokens (Tone) leen este estado para elegir su versión clara u oscura
+    if (ThemeState.dark != darkTheme) ThemeState.dark = darkTheme
     val dynamicScheme = platformDynamicColorScheme(darkTheme)
     val baseScheme = when {
         dynamicScheme != null && isArcaStore ->

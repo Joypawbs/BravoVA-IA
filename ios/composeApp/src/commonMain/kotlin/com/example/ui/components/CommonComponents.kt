@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import com.example.ui.theme.Tone
+
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.ui.graphics.luminance
@@ -298,7 +300,7 @@ fun DiagonalMetadataStrip(
     items: List<String>,
     slashColor: Color = MaterialTheme.colorScheme.primary,
     textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    fontSizeSp: Float = 11f,
+    fontSizeSp: Float = 12f,
     modifier: Modifier = Modifier,
     onItemClick: ((Int, String) -> Unit)? = null
 ) {
@@ -468,7 +470,7 @@ fun ShimmerSkeletonBox(
 
     val baseColor = if (darkMode) Color(0xFF162032) else Color(0xFFE2E8F0)
     val midColor = if (darkMode) Color(0xFF1E293B) else Color(0xFFEEF2F6)
-    val highlightColor = if (darkMode) Color(0xFF334155) else Color(0xFFFFFFFF)
+    val highlightColor = if (darkMode) Tone.inkSoft else Color(0xFFFFFFFF)
 
     val brush = Brush.linearGradient(
         colorStops = arrayOf(
@@ -567,7 +569,7 @@ fun AppStartupSkeletonScreen(
     val bgTop = if (darkMode) Color(0xFF060911) else Color(0xFFFFF5F5)
     val bgBottom = if (darkMode) Color(0xFF0E1626) else Color(0xFFFFFBEB)
     val primaryTextColor = if (darkMode) Color(0xFFF8FAFC) else Color(0xFF1E293B)
-    val secondaryTextColor = if (darkMode) Color(0xFF94A3B8) else Color(0xFF64748B)
+    val secondaryTextColor = if (darkMode) Tone.muted else Color(0xFF64748B)
     val emblemSurfaceColor = if (darkMode) Color(0xFF151F32) else Color(0xFFFE0116)
     val starPath = remember { Path() }
 
@@ -669,7 +671,7 @@ fun AppStartupSkeletonScreen(
                         val rimColor = if (darkMode) {
                             Color.White.copy(alpha = (0.45f + 0.50f * twinkle).coerceIn(0f, 1f))
                         } else {
-                            Color(0xFFD97706).copy(alpha = (0.35f + 0.45f * twinkle).coerceIn(0f, 1f))
+                            Tone.warning.copy(alpha = (0.35f + 0.45f * twinkle).coerceIn(0f, 1f))
                         }
 
                         // Halo pequeño alrededor de cada estrella
@@ -820,7 +822,7 @@ fun AppStartupSkeletonScreen(
                         text = "Cargando catálogo, precios e imágenes...",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
+                        fontSize = 12.sp,
                         color = secondaryTextColor
                     )
                 }
@@ -1000,7 +1002,7 @@ private fun BravoArcaSelectorMenuContent(
             text = "CAMBIAR DE TIENDA",
             fontFamily = PlusJakartaSans,
             fontWeight = FontWeight.ExtraBold,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             letterSpacing = 0.8.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
@@ -1042,7 +1044,7 @@ private fun BravoArcaSelectorMenuContent(
                             text = "Los expertos en vender barato",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 10.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -1101,7 +1103,7 @@ private fun BravoArcaSelectorMenuContent(
                             text = "Nutrición & Cuidado Mascotas",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 10.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -1412,9 +1414,9 @@ fun ProductVectorIllustration(
     darkMode: Boolean = MaterialTheme.colorScheme.background.red < 0.3f,
     cornerRadius: Dp = 12.dp
 ) {
-    val fallbackBg = if (darkMode) Color(0xFF111927) else Color(0xFFF1F5F9)
+    val fallbackBg = if (darkMode) Color(0xFF111927) else Tone.surfaceSubtle
     val badgeCardBg = if (darkMode) Color(0xFF1E293B) else Color.White.copy(alpha = 0.94f)
-    val badgeTextColor = if (darkMode) Color(0xFFE2E8F0) else Color(0xFF0F172A)
+    val badgeTextColor = if (darkMode) Color(0xFFE2E8F0) else Tone.ink
 
     Box(
         modifier = modifier
@@ -1492,7 +1494,7 @@ fun ProductVectorIllustration(
                 text = if (product.isBravo) "b" else "★",
                 color = accentColor,
                 fontWeight = FontWeight.Black,
-                fontSize = 11.sp
+                fontSize = 12.sp
             )
             Text(
                 text = product.badge.ifBlank { "BRAVO" }.take(10),
@@ -1968,7 +1970,7 @@ fun FormattedChatText(
                                 text = block.badgeNumber.toString(),
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = Color.White
                             )
                         }
@@ -2002,8 +2004,8 @@ fun FormattedChatText(
 
 private val BravoIridescentSpectrum = listOf(
     Color(0xFFD9232A),
-    Color(0xFFF59E0B),
-    Color(0xFF10B981),
+    Tone.warningBright,
+    Tone.successBright,
     Color(0xFF06B6D4),
     Color(0xFF3B82F6),
     Color(0xFFD9232A)
@@ -2115,7 +2117,7 @@ fun BravoAiPlasmaOrb(
         val lobe2 = Offset(cx - cos(phase * 0.8f) * r * 0.22f, cy - sin(phase * 0.8f) * r * 0.22f)
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(Color(0xFFF59E0B).copy(alpha = 0.72f), Color(0xFFD9232A).copy(alpha = 0.35f), Color.Transparent),
+                colors = listOf(Tone.warningBright.copy(alpha = 0.72f), Color(0xFFD9232A).copy(alpha = 0.35f), Color.Transparent),
                 center = lobe1,
                 radius = r * 0.78f
             ),
@@ -2124,7 +2126,7 @@ fun BravoAiPlasmaOrb(
         )
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(Color(0xFF06B6D4).copy(alpha = 0.62f), Color(0xFF10B981).copy(alpha = 0.28f), Color.Transparent),
+                colors = listOf(Color(0xFF06B6D4).copy(alpha = 0.62f), Tone.successBright.copy(alpha = 0.28f), Color.Transparent),
                 center = lobe2,
                 radius = r * 0.72f
             ),
@@ -2166,7 +2168,7 @@ fun TranslucentBottomDock(
         AppScreen.ACCOUNT, AppScreen.ACCOUNT_SUB -> AppScreen.ACCOUNT
     }
     val activeColor = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
-    val inactiveColor = if (darkMode) Color(0xFF94A3B8) else Color(0xFF1E293B)
+    val inactiveColor = if (darkMode) Tone.muted else Color(0xFF1E293B)
     val useRealHaze = LocalTranslucentHazeState.current != null && DeviceSupportsGpuBlur
     val dockBg = if (useRealHaze) Color.Transparent else uniformMenuTranslucentContainerColor(darkMode)
     val borderBrush = uniformMenuTranslucentBorderBrush(activeColor, darkMode)
@@ -2381,7 +2383,7 @@ fun OrderSuccessCelebrationOverlay(
         label = "ringScale"
     )
     val confettiSeeds = remember(orderId) {
-        val colors = listOf(BravoRed, BravoAmber, Color(0xFF10B981), Color.White)
+        val colors = listOf(BravoRed, BravoAmber, Tone.successBright, Color.White)
         List(24) { idx ->
             val angle = ((idx * 137.5f) % 360f) * (PI.toFloat() / 180f)
             val speed = 0.35f + ((idx * 29) % 100) / 150f
@@ -2424,9 +2426,9 @@ fun OrderSuccessCelebrationOverlay(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF059669),
-                        Color(0xFF10B981),
-                        Color(0xFF047857)
+                        Tone.success,
+                        Tone.successBright,
+                        Tone.successStrong
                     )
                 )
             )
@@ -2595,7 +2597,7 @@ fun OrderSuccessCelebrationOverlay(
                                 text = "Llegada estimada por GPS: ~$etaMinutes min",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 11.5.sp,
+                                fontSize = 12.sp,
                                 color = Color.White.copy(alpha = 0.9f)
                             )
                         }
@@ -2620,7 +2622,7 @@ fun OrderSuccessCelebrationOverlay(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
                             contentDescription = null,
-                            tint = Color(0xFF047857),
+                            tint = Tone.successStrong,
                             modifier = Modifier.size(19.dp)
                         )
                         Text(
@@ -2628,7 +2630,7 @@ fun OrderSuccessCelebrationOverlay(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp,
-                            color = Color(0xFF047857)
+                            color = Tone.successStrong
                         )
                     }
                 }
@@ -2801,14 +2803,14 @@ fun PredictiveCatalogSearchBar(
                                 text = "RD$${predictedProduct.price}" + (if (cal != null) " • ${cal}kcal" else ""),
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.sp,
+                                fontSize = 12.sp,
                                 color = primaryColor
                             )
                             Text(
                                 text = "Completar ⇥",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 9.5.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }

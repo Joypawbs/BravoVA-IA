@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import com.example.ui.theme.Tone
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -203,7 +205,7 @@ private fun FallingFlowers() {
                     val a = (k * 72f) * (PI / 180).toFloat()
                     drawCircle(Color(0xFFFFD233), 7f * s, Offset(c.x + 8f * s * kotlin.math.cos(a), c.y + 8f * s * sin(a)))
                 }
-                drawCircle(Color(0xFFF59E0B), 5f * s, c)
+                drawCircle(Tone.warningBright, 5f * s, c)
                 drawCircle(Color(0xFF8A5A00), 5f * s, c, style = Stroke(1.2f))
             }
         }

@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.Tone
+
 import androidx.compose.material.icons.outlined.Share
 import com.example.ui.components.shareOnWhatsApp
 import com.example.platform.*
@@ -143,7 +145,7 @@ fun BravIaHistoryAutoListHeroCard(
                         DiagonalMetadataStrip(
                             items = listOf("BRAV IA • HISTORIAL INTELIGENTE", "$ordersCount órdenes analizadas"),
                             slashColor = primaryColor,
-                            fontSizeSp = 10f
+                            fontSizeSp = 12f
                         )
                         Text(
                             text = "Autocompletado según tus compras",
@@ -178,7 +180,7 @@ fun BravIaHistoryAutoListHeroCard(
                             text = "TUS MÁS COMPRADOS DETECTADOS",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 10.5.sp,
+                            fontSize = 12.sp,
                             color = primaryColor
                         )
                     }
@@ -208,7 +210,7 @@ fun BravIaHistoryAutoListHeroCard(
                                             text = stat.product.name,
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 11.5.sp,
+                                            fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1
                                         )
@@ -216,7 +218,7 @@ fun BravIaHistoryAutoListHeroCard(
                                             text = "Comprado ${stat.purchaseCount}x • RD$${stat.product.price}",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 10.sp,
+                                            fontSize = 12.sp,
                                             color = primaryColor
                                         )
                                     }
@@ -239,7 +241,7 @@ fun BravIaHistoryAutoListHeroCard(
                     text = "GENERAR LISTA INTELIGENTE CON 1 TOQUE",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 10.5.sp,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -365,7 +367,7 @@ fun CreateShoppingListFormCard(
                         )
                         Text(
                             text = "Llena la lista automáticamente según tu historial de compras",
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -495,7 +497,7 @@ fun ManagedShoppingListCard(
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Guardar nombre",
-                                    tint = Color(0xFF059669)
+                                    tint = Tone.success
                                 )
                             }
                             IconButton(
@@ -532,7 +534,7 @@ fun ManagedShoppingListCard(
                                         text = "✨ Brav IA",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 10.sp,
+                                        fontSize = 12.sp,
                                         color = primaryColor,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                     )
@@ -550,7 +552,7 @@ fun ManagedShoppingListCard(
                             shoppingList.updatedAtLabel
                         ),
                         slashColor = primaryColor,
-                        fontSizeSp = 11f
+                        fontSizeSp = 12f
                     )
                 }
 
@@ -604,7 +606,7 @@ fun ManagedShoppingListCard(
                             Icon(
                                 imageVector = Icons.Default.DeleteOutline,
                                 contentDescription = "Eliminar lista",
-                                tint = Color(0xFFBE123C),
+                                tint = Tone.dangerStrong,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -659,7 +661,7 @@ fun ManagedShoppingListCard(
                             text = shoppingList.aiNote,
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 11.5.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -699,7 +701,7 @@ fun ManagedShoppingListCard(
                                 text = "+${resolvedProducts.size - 5}",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = primaryColor,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
                             )
@@ -737,7 +739,7 @@ fun ManagedShoppingListCard(
                         text = if (resolvedProducts.isEmpty()) "Autocompletar IA" else "Completar con IA",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 11.5.sp,
+                        fontSize = 12.sp,
                         color = primaryColor,
                         maxLines = 1
                     )
@@ -840,7 +842,7 @@ fun ManagedShoppingListCard(
                                         DiagonalMetadataStrip(
                                             items = listOf("RD$${prod.price}.00", prod.unit, prod.category),
                                             slashColor = primaryColor,
-                                            fontSizeSp = 10.5f
+                                            fontSizeSp = 12f
                                         )
                                     }
                                 }
@@ -872,7 +874,7 @@ fun ManagedShoppingListCard(
                                         modifier = Modifier
                                             .size(30.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFFFFE4E6))
+                                            .background(Tone.dangerSoft)
                                             .clickable {
                                                 HapticFeedbackManager.onDecrementOrRemove(view, isFullRemove = true)
                                                 onRemoveProductFromList(prod.sku)
@@ -883,7 +885,7 @@ fun ManagedShoppingListCard(
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = "Quitar de la lista",
-                                            tint = Color(0xFFBE123C),
+                                            tint = Tone.dangerStrong,
                                             modifier = Modifier.size(15.dp)
                                         )
                                     }
@@ -899,7 +901,7 @@ fun ManagedShoppingListCard(
                                 text = "SUGERIDOS DE TU HISTORIAL DE COMPRAS (+ AGREGAR)",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.sp,
+                                fontSize = 12.sp,
                                 color = primaryColor
                             )
                             Row(
@@ -933,7 +935,7 @@ fun ManagedShoppingListCard(
                                                 text = "${stat.product.name} (${stat.purchaseCount}x)",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 11.sp,
+                                                fontSize = 12.sp,
                                                 color = primaryColor
                                             )
                                         }
@@ -1034,7 +1036,7 @@ fun ManagedShoppingListCard(
                                             )
                                             Text(
                                                 text = "RD$${prod.price}.00 • ${prod.unit}",
-                                                fontSize = 10.5.sp,
+                                                fontSize = 12.sp,
                                                 color = primaryColor,
                                                 fontWeight = FontWeight.Bold
                                             )
@@ -1049,7 +1051,7 @@ fun ManagedShoppingListCard(
                                             text = "+ Agregar",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 10.5.sp,
+                                            fontSize = 12.sp,
                                             color = Color.White,
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                                         )

@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.Tone
+
 import com.example.ui.components.SwitchRow
 import androidx.compose.runtime.derivedStateOf
 import com.example.ui.components.LargeTitle
@@ -241,8 +243,8 @@ private fun SuggestionMailDispatchedCard(
     val view = currentPlatformView()
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = Color(0xFF059669).copy(alpha = 0.12f),
-        border = BorderStroke(1.3.dp, Color(0xFF059669)),
+        color = Tone.success.copy(alpha = 0.12f),
+        border = BorderStroke(1.3.dp, Tone.success),
         modifier = Modifier
             .fillMaxWidth()
             .testTag("suggestion_mail_payload_card")
@@ -264,29 +266,29 @@ private fun SuggestionMailDispatchedCard(
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = null,
-                        tint = Color(0xFF059669),
+                        tint = Tone.success,
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
                         text = "SUGGESTION_MAIL_PAYLOAD • Enviado",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 11.5.sp,
-                        color = Color(0xFF047857),
+                        fontSize = 12.sp,
+                        color = Tone.successStrong,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color(0xFF059669).copy(alpha = 0.20f)
+                    color = Tone.success.copy(alpha = 0.20f)
                 ) {
                     Text(
                         text = "${payload.category} • ${payload.priority}",
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 9.5.sp,
-                        color = Color(0xFF047857),
+                        fontSize = 12.sp,
+                        color = Tone.successStrong,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
@@ -296,7 +298,7 @@ private fun SuggestionMailDispatchedCard(
                 text = "Destino oficial: ${payload.toEmail}",
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.Bold,
-                fontSize = 11.5.sp,
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
@@ -304,14 +306,14 @@ private fun SuggestionMailDispatchedCard(
                 text = "Asunto: ${payload.subject}",
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             DiagonalMetadataStrip(
                 items = listOf(payload.activeBranch, payload.activeStore.uppercase(), payload.fromUser),
-                slashColor = Color(0xFF059669),
-                fontSizeSp = 10f
+                slashColor = Tone.success,
+                fontSizeSp = 12f
             )
 
             OutlinedButton(
@@ -339,7 +341,7 @@ private fun SuggestionMailDispatchedCard(
                     }
                 },
                 shape = RoundedCornerShape(999.dp),
-                border = BorderStroke(1.1.dp, Color(0xFF059669)),
+                border = BorderStroke(1.1.dp, Tone.success),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -348,7 +350,7 @@ private fun SuggestionMailDispatchedCard(
                 Icon(
                     imageVector = Icons.Default.Email,
                     contentDescription = null,
-                    tint = Color(0xFF047857),
+                    tint = Tone.successStrong,
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -356,8 +358,8 @@ private fun SuggestionMailDispatchedCard(
                     text = "Abrir copia en cliente de correo (${payload.toEmail})",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 10.5.sp,
-                    color = Color(0xFF047857),
+                    fontSize = 12.sp,
+                    color = Tone.successStrong,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -425,7 +427,7 @@ private fun BravIaLogoSparklingStars(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFFE31837).copy(alpha = 0.28f * badgePulse),
+                        Tone.danger.copy(alpha = 0.28f * badgePulse),
                         Color(0xFFFFB800).copy(alpha = 0.18f),
                         Color.Transparent
                     ),
@@ -465,7 +467,7 @@ private fun BravIaLogoSparklingStars(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             starColor.copy(alpha = 0.55f * twinkle),
-                            Color(0xFFE31837).copy(alpha = 0.20f * twinkle),
+                            Tone.danger.copy(alpha = 0.20f * twinkle),
                             Color.Transparent
                         ),
                         center = Offset(cx, cy),
@@ -572,8 +574,8 @@ private fun BravIaPersonalizedThinkingRow(
                 text = "Brav IA está pensando...",
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = 11.5.sp,
-                color = Color(0xFFE31837)
+                fontSize = 12.sp,
+                color = Tone.danger
             )
             AnimatedContent(
                 targetState = phrases[phraseIndex % phrases.size],
@@ -1149,7 +1151,7 @@ fun BravIaChatScreen(
                                         .height(34.dp)
                                         .testTag("bravia_open_lists_pill")
                                 ) {
-                                    Text("Mis Listas", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
+                                    Text("Mis Listas", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
                                 }
 
                                 OutlinedButton(
@@ -1165,7 +1167,7 @@ fun BravIaChatScreen(
                                         .height(34.dp)
                                         .testTag("budget_build_button")
                                 ) {
-                                    Text("Armar", fontSize = 11.5.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
+                                    Text("Armar", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
                                 }
 
                                 OutlinedButton(
@@ -1180,7 +1182,7 @@ fun BravIaChatScreen(
                                         .height(34.dp)
                                         .testTag("budget_adjust_button")
                                 ) {
-                                    Text("Ajustar", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = primaryColor)
+                                    Text("Ajustar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = primaryColor)
                                 }
                             }
                         }
@@ -1235,7 +1237,7 @@ fun BravIaChatScreen(
                                         text = "Soporte Visual (Foto / NCF)",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 11.5.sp,
+                                        fontSize = 12.sp,
                                         color = primaryColor
                                     )
                                 }
@@ -1257,7 +1259,7 @@ fun BravIaChatScreen(
                                         text = label,
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 11.5.sp,
+                                        fontSize = 12.sp,
                                         color = primaryColor,
                                         modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp)
                                     )
@@ -1374,8 +1376,8 @@ fun BravIaChatScreen(
                                             onPauseGeneration()
                                         },
                                         shape = RoundedCornerShape(999.dp),
-                                        color = Color(0xFFE31837).copy(alpha = 0.14f),
-                                        border = BorderStroke(1.2.dp, Color(0xFFE31837)),
+                                        color = Tone.danger.copy(alpha = 0.14f),
+                                        border = BorderStroke(1.2.dp, Tone.danger),
                                         modifier = Modifier.testTag("bravia_pause_card_button")
                                     ) {
                                         Row(
@@ -1386,15 +1388,15 @@ fun BravIaChatScreen(
                                             Icon(
                                                 imageVector = Icons.Default.Pause,
                                                 contentDescription = "Pausar respuesta de IA",
-                                                tint = Color(0xFFE31837),
+                                                tint = Tone.danger,
                                                 modifier = Modifier.size(14.dp)
                                             )
                                             Text(
                                                 text = "Pausar",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 11.sp,
-                                                color = Color(0xFFE31837)
+                                                fontSize = 12.sp,
+                                                color = Tone.danger
                                             )
                                         }
                                     }
@@ -1416,8 +1418,8 @@ fun BravIaChatScreen(
                                                 text = "Respondiendo de forma personalizada para ti...",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 11.sp,
-                                                color = Color(0xFFE31837),
+                                                fontSize = 12.sp,
+                                                color = Tone.danger,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
@@ -1429,8 +1431,8 @@ fun BravIaChatScreen(
                                                 onPauseGeneration()
                                             },
                                             shape = RoundedCornerShape(999.dp),
-                                            color = Color(0xFFE31837).copy(alpha = 0.14f),
-                                            border = BorderStroke(1.dp, Color(0xFFE31837))
+                                            color = Tone.danger.copy(alpha = 0.14f),
+                                            border = BorderStroke(1.dp, Tone.danger)
                                         ) {
                                             Row(
                                                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
@@ -1440,15 +1442,15 @@ fun BravIaChatScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.Pause,
                                                     contentDescription = "Pausar",
-                                                    tint = Color(0xFFE31837),
+                                                    tint = Tone.danger,
                                                     modifier = Modifier.size(13.dp)
                                                 )
                                                 Text(
                                                     text = "Pausar",
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.ExtraBold,
-                                                    fontSize = 10.5.sp,
-                                                    color = Color(0xFFE31837)
+                                                    fontSize = 12.sp,
+                                                    color = Tone.danger
                                                 )
                                             }
                                         }
@@ -1498,7 +1500,7 @@ fun BravIaChatScreen(
                                                     stopAllVoiceOutputAndRecording()
                                                 },
                                                 shape = RoundedCornerShape(999.dp),
-                                                color = Color(0xFFE31837).copy(alpha = 0.12f),
+                                                color = Tone.danger.copy(alpha = 0.12f),
                                                 modifier = Modifier.padding(end = 6.dp)
                                             ) {
                                                 Row(
@@ -1509,15 +1511,15 @@ fun BravIaChatScreen(
                                                     Icon(
                                                         imageVector = Icons.Default.Pause,
                                                         contentDescription = "Pausar narración",
-                                                        tint = Color(0xFFE31837),
+                                                        tint = Tone.danger,
                                                         modifier = Modifier.size(14.dp)
                                                     )
                                                     Text(
                                                         text = "Pausar voz",
                                                         fontFamily = PlusJakartaSans,
                                                         fontWeight = FontWeight.ExtraBold,
-                                                        fontSize = 11.sp,
-                                                        color = Color(0xFFE31837)
+                                                        fontSize = 12.sp,
+                                                        color = Tone.danger
                                                     )
                                                 }
                                             }
@@ -1546,7 +1548,7 @@ fun BravIaChatScreen(
                                                     text = "Escuchar en voz",
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.ExtraBold,
-                                                    fontSize = 11.sp,
+                                                    fontSize = 12.sp,
                                                     color = primaryColor
                                                 )
                                             }
@@ -1604,7 +1606,7 @@ fun BravIaChatScreen(
                                                     DiagonalMetadataStrip(
                                                         items = listOf("RD$${prod.price}.00", prod.unit, prod.category),
                                                         slashColor = primaryColor,
-                                                        fontSizeSp = 10.5f
+                                                        fontSizeSp = 12f
                                                     )
                                                 }
                                             }
@@ -1641,8 +1643,8 @@ fun BravIaChatScreen(
                                             onConfirmOrderFromChat(msg.id)
                                         },
                                         shape = RoundedCornerShape(16.dp),
-                                        color = Color(0xFF059669).copy(alpha = 0.14f),
-                                        border = BorderStroke(1.4.dp, Color(0xFF059669)),
+                                        color = Tone.success.copy(alpha = 0.14f),
+                                        border = BorderStroke(1.4.dp, Tone.success),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("chat_order_confirmed_badge_${msg.id}")
@@ -1662,7 +1664,7 @@ fun BravIaChatScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.CheckCircle,
                                                     contentDescription = "Pedido confirmado",
-                                                    tint = Color(0xFF059669),
+                                                    tint = Tone.success,
                                                     modifier = Modifier.size(20.dp)
                                                 )
                                                 Column {
@@ -1671,13 +1673,13 @@ fun BravIaChatScreen(
                                                         fontFamily = PlusJakartaSans,
                                                         fontWeight = FontWeight.ExtraBold,
                                                         fontSize = 13.sp,
-                                                        color = Color(0xFF047857)
+                                                        color = Tone.successStrong
                                                     )
                                                     Text(
                                                         text = "Toca para ver seguimiento GPS en tiempo real",
                                                         fontFamily = PlusJakartaSans,
                                                         fontWeight = FontWeight.Medium,
-                                                        fontSize = 11.sp,
+                                                        fontSize = 12.sp,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
                                                 }
@@ -1687,15 +1689,15 @@ fun BravIaChatScreen(
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = 13.5.sp,
-                                                color = Color(0xFF047857)
+                                                color = Tone.successStrong
                                             )
                                         }
                                     }
                                 } else if (msg.requiresOrderConfirmation) {
                                     Surface(
                                         shape = RoundedCornerShape(18.dp),
-                                        color = Color(0xFF059669).copy(alpha = 0.10f),
-                                        border = BorderStroke(1.5.dp, Color(0xFF059669)),
+                                        color = Tone.success.copy(alpha = 0.10f),
+                                        border = BorderStroke(1.5.dp, Tone.success),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("manual_order_confirmation_card_${msg.id}")
@@ -1713,7 +1715,7 @@ fun BravIaChatScreen(
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.ExtraBold,
                                                     fontSize = 14.5.sp,
-                                                    color = Color(0xFF047857)
+                                                    color = Tone.successStrong
                                                 )
                                                 BravoUnderline(isArca = isArca)
                                             }
@@ -1724,8 +1726,8 @@ fun BravIaChatScreen(
                                                     "${recommendedProducts.size} artículos",
                                                     "ETA GPS ~$estimatedEtaMinutes min"
                                                 ),
-                                                slashColor = Color(0xFF059669),
-                                                fontSizeSp = 10.5f
+                                                slashColor = Tone.success,
+                                                fontSizeSp = 12f
                                             )
 
                                             Row(
@@ -1745,7 +1747,7 @@ fun BravIaChatScreen(
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.ExtraBold,
                                                     fontSize = 16.sp,
-                                                    color = Color(0xFF047857)
+                                                    color = Tone.successStrong
                                                 )
                                             }
 
@@ -1770,7 +1772,7 @@ fun BravIaChatScreen(
                                                         text = "Cancelar",
                                                         fontFamily = PlusJakartaSans,
                                                         fontWeight = FontWeight.Bold,
-                                                        fontSize = 11.5.sp,
+                                                        fontSize = 12.sp,
                                                         color = MaterialTheme.colorScheme.onSurface
                                                     )
                                                 }
@@ -1800,7 +1802,7 @@ fun BravIaChatScreen(
                                                         text = "Confirmar Pedido • RD$${formatPesos(totalCombo)}",
                                                         fontFamily = PlusJakartaSans,
                                                         fontWeight = FontWeight.ExtraBold,
-                                                        fontSize = 11.5.sp,
+                                                        fontSize = 12.sp,
                                                         maxLines = 1
                                                     )
                                                 }
@@ -1859,7 +1861,7 @@ fun BravIaChatScreen(
                                                 )
                                                 DropdownMenuItem(
                                                     text = { Text("Pedir por mí (tú confirmas)", fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold) },
-                                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF059669)) },
+                                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Tone.success) },
                                                     onClick = {
                                                         bundleMenuOpen = false
                                                         HapticFeedbackManager.onConfirmAction(view)
@@ -2042,7 +2044,7 @@ fun BravIaChatScreen(
                                         text = "Imagen adjunta • Brav IA Soporte Multimodal",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 11.5.sp,
+                                        fontSize = 12.sp,
                                         color = primaryColor,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -2051,7 +2053,7 @@ fun BravIaChatScreen(
                                         text = "Lista para auditar producto dañado/vencido, factura NCF o alacena",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.Medium,
-                                        fontSize = 10.5.sp,
+                                        fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -2156,7 +2158,7 @@ fun BravIaChatScreen(
                     Icon(
                         imageVector = Icons.Default.PhotoCamera,
                         contentDescription = "Adjuntar foto de producto, factura NCF o alacena",
-                        tint = if (!pendingImageUri.isNullOrBlank()) Color(0xFF059669) else primaryColor,
+                        tint = if (!pendingImageUri.isNullOrBlank()) Tone.success else primaryColor,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -2239,7 +2241,7 @@ fun BravIaChatScreen(
                                 text = "Pausar",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = Color.White
                             )
                         }
@@ -2313,7 +2315,7 @@ private fun RecipeStepsVisualCard(
                     text = "Guía de voz lista (${steps.size} pasos enumerados arriba)",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 11.5.sp,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -2325,8 +2327,8 @@ private fun RecipeStepsVisualCard(
                     Surface(
                         onClick = onPauseSpeech,
                         shape = RoundedCornerShape(999.dp),
-                        color = Color(0xFFE31837).copy(alpha = 0.14f),
-                        border = BorderStroke(1.dp, Color(0xFFE31837))
+                        color = Tone.danger.copy(alpha = 0.14f),
+                        border = BorderStroke(1.dp, Tone.danger)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
@@ -2336,15 +2338,15 @@ private fun RecipeStepsVisualCard(
                             Icon(
                                 imageVector = Icons.Default.Pause,
                                 contentDescription = "Pausar voz de pasos",
-                                tint = Color(0xFFE31837),
+                                tint = Tone.danger,
                                 modifier = Modifier.size(13.dp)
                             )
                             Text(
                                 text = "Pausar",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.5.sp,
-                                color = Color(0xFFE31837),
+                                fontSize = 12.sp,
+                                color = Tone.danger,
                                 maxLines = 1
                             )
                         }
@@ -2370,7 +2372,7 @@ private fun RecipeStepsVisualCard(
                             text = "Narrar Pasos",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 10.5.sp,
+                            fontSize = 12.sp,
                             color = primaryColor,
                             maxLines = 1
                         )
@@ -2466,7 +2468,7 @@ private fun LiveVoiceConversationBanner(
                             text = statusText,
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -2500,7 +2502,7 @@ private fun LiveVoiceConversationBanner(
                                 text = if (isPaused) "Reanudar" else "Pausar",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.5.sp,
+                                fontSize = 12.sp,
                                 color = if (isPaused) Color.White else primaryColor
                             )
                         }
@@ -2526,7 +2528,7 @@ private fun LiveVoiceConversationBanner(
                                 text = "Hablar",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 10.5.sp,
+                                fontSize = 12.sp,
                                 color = Color.White
                             )
                         }
@@ -2566,7 +2568,7 @@ private fun LiveVoiceConversationBanner(
                             text = chipTitle,
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = primaryColor,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                         )
@@ -2741,7 +2743,7 @@ fun AccountGridScreen(
                                 text = if (isGuestMode) "$cacheStatusLabel • Sin cuenta Google" else firestoreSyncStatus,
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -2772,7 +2774,7 @@ fun AccountGridScreen(
                             text = if (isGuestMode) "Conectar Google" else "Salir",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 11.5.sp,
+                            fontSize = 12.sp,
                             color = primaryColor
                         )
                     }
@@ -2915,7 +2917,7 @@ fun AccountSubScreenView(
                             DiagonalMetadataStrip(
                                 items = listOf("Cuenta Google", firestoreSyncStatus),
                                 slashColor = primaryColor,
-                                fontSizeSp = 11f
+                                fontSizeSp = 12f
                             )
                         }
                     }
@@ -2955,7 +2957,7 @@ fun AccountSubScreenView(
                                     ) {
                                         BravoUnifiedIcon(
                                             iconKey = topStage.emoji,
-                                            tint = Color(0xFF047857),
+                                            tint = Tone.successStrong,
                                             size = 16.dp
                                         )
                                         Text(
@@ -2963,7 +2965,7 @@ fun AccountSubScreenView(
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 15.sp,
-                                            color = Color(0xFF047857)
+                                            color = Tone.successStrong
                                         )
                                     }
                                     DiagonalMetadataStrip(
@@ -2973,7 +2975,7 @@ fun AccountSubScreenView(
                                             "Seguimiento en vivo"
                                         ),
                                         slashColor = primaryColor,
-                                        fontSizeSp = 11f
+                                        fontSizeSp = 12f
                                     )
                                 }
                                 Text(
@@ -2992,7 +2994,7 @@ fun AccountSubScreenView(
                                     .height(7.dp)
                                     .clip(RoundedCornerShape(999.dp)),
                                 color = if (topStage == OrderDeliveryStage.DELIVERED) {
-                                    Color(0xFF059669)
+                                    Tone.success
                                 } else {
                                     primaryColor
                                 },
@@ -3040,7 +3042,7 @@ fun AccountSubScreenView(
                                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
                                         val badgeTint = if (orderStage == OrderDeliveryStage.DELIVERED) {
-                                            Color(0xFF047857)
+                                            Tone.successStrong
                                         } else {
                                             primaryColor
                                         }
@@ -3051,7 +3053,7 @@ fun AccountSubScreenView(
                                         )
                                         Text(
                                             text = "${orderStage.statusText} • ${orderStage.progressPct}%",
-                                            fontSize = 11.sp,
+                                            fontSize = 12.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = badgeTint
                                         )
@@ -3061,7 +3063,7 @@ fun AccountSubScreenView(
                             DiagonalMetadataStrip(
                                 items = listOf(order.date, order.branch, "${order.badgeNum} artículos"),
                                 slashColor = primaryColor,
-                                fontSizeSp = 11f
+                                fontSizeSp = 12f
                             )
                             LinearProgressIndicator(
                                 progress = { orderStage.progressFraction },
@@ -3070,7 +3072,7 @@ fun AccountSubScreenView(
                                     .height(6.dp)
                                     .clip(RoundedCornerShape(999.dp)),
                                 color = if (orderStage == OrderDeliveryStage.DELIVERED) {
-                                    Color(0xFF059669)
+                                    Tone.success
                                 } else {
                                     primaryColor
                                 },
@@ -3105,7 +3107,7 @@ fun AccountSubScreenView(
                                             text = "Seguir envío",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 11.sp,
+                                            fontSize = 12.sp,
                                             color = primaryColor
                                         )
                                     }
@@ -3234,14 +3236,14 @@ fun AccountSubScreenView(
                                 DiagonalMetadataStrip(
                                     items = listOf("Vence ${method.exp}", if (method.isDefault) "Predeterminada" else "Secundaria"),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 11f
+                                    fontSizeSp = 12f
                                 )
                             }
                             if (method.isDefault) {
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
                                     contentDescription = "Predeterminada",
-                                    tint = Color(0xFF059669)
+                                    tint = Tone.success
                                 )
                             }
                         }
@@ -3288,14 +3290,14 @@ fun AccountSubScreenView(
                                 DiagonalMetadataStrip(
                                     items = listOf(addr.street, addr.branch),
                                     slashColor = primaryColor,
-                                    fontSizeSp = 11f
+                                    fontSizeSp = 12f
                                 )
                             }
                             if (addr.isDefault) {
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
                                     contentDescription = "Activa",
-                                    tint = Color(0xFF059669)
+                                    tint = Tone.success
                                 )
                             }
                         }
@@ -3449,7 +3451,7 @@ fun AccountSubScreenView(
                                         DiagonalMetadataStrip(
                                             items = listOf("Guardado local", if (darkMode) "Activo" else "Inactivo"),
                                             slashColor = primaryColor,
-                                            fontSizeSp = 10.5f
+                                            fontSizeSp = 12f
                                         )
                                     }
                                 }
@@ -3534,7 +3536,7 @@ fun AccountSubScreenView(
                                                 cacheStatusLabel
                                             ),
                                             slashColor = primaryColor,
-                                            fontSizeSp = 10.5f
+                                            fontSizeSp = 12f
                                         )
                                     }
                                 }
@@ -3555,7 +3557,7 @@ fun AccountSubScreenView(
                                         text = "Sincronizar",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 11.sp,
+                                        fontSize = 12.sp,
                                         color = primaryColor
                                     )
                                 }
@@ -3834,7 +3836,7 @@ fun AccountSubScreenView(
                             DiagonalMetadataStrip(
                                 items = listOf("Destino: bezaleelpatrocino0@gmail.com", activeBranch),
                                 slashColor = primaryColor,
-                                fontSizeSp = 10.5f
+                                fontSizeSp = 12f
                             )
 
                             val categories = listOf(
@@ -3864,7 +3866,7 @@ fun AccountSubScreenView(
                                             text = label,
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 11.sp,
+                                            fontSize = 12.sp,
                                             color = if (selected) Color.White else primaryColor,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
@@ -3893,14 +3895,14 @@ fun AccountSubScreenView(
                                             supportPriority = prio
                                         },
                                         shape = RoundedCornerShape(999.dp),
-                                        color = if (selected) Color(0xFF059669) else Color(0xFF059669).copy(alpha = 0.10f)
+                                        color = if (selected) Tone.success else Tone.success.copy(alpha = 0.10f)
                                     ) {
                                         Text(
                                             text = prio,
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 10.5.sp,
-                                            color = if (selected) Color.White else Color(0xFF047857),
+                                            fontSize = 12.sp,
+                                            color = if (selected) Color.White else Tone.successStrong,
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                                         )
                                     }
