@@ -1,0 +1,37 @@
+# Toma la APK firmada de la rama apk-firmada, la verifica con las herramientas
+# oficiales del SDK de Android (apksigner y zipalign) y la sube a la release.
+# Si la verificación falla, no se sube nada.
+name: Subir APK firmada
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release a la que se sube (por ejemplo v1.3.1)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  subir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TAG: ${{ github.event.inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: apk-firmada
+      - name: Verificar con apksigner y zipalign
+        run: |
+          APK="BravoVa-$TAG-android-release.apk"
+          test -f "$APK"
+          BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          echo "build-tools: $BT"
+          "$BT/zipalign" -c -P 16 4 "$APK"
+          "$BT/apksigner" verify --verbose --print-certs "$APK"
+          "$BT/aapt2" dump badging "$APK" | head -3
+      - name: Subir a la release
+        run: gh release upload "$TAG" "BravoVa-$TAG-android-release.apk" --clobber -R "${{ github.repository }}"
