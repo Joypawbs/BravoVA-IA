@@ -992,7 +992,7 @@ fun BravIaChatScreen(
     val dynamicInputBottomPadding by animateDpAsState(
         targetValue = when {
             isImeVisible -> 4.dp
-            areMenusVisible -> 66.dp
+            areMenusVisible -> if (PlatformInfo.isIos) 78.dp else 66.dp
             else -> 6.dp
         },
         animationSpec = tween(durationMillis = 180),
@@ -1941,7 +1941,7 @@ fun BravIaChatScreen(
                     ),
                     GlassBarAction(
                         symbol = "cart", icon = Icons.Default.ShoppingCart, label = "Ver carrito",
-                        text = "RD$${formatPesos(cartTotals.finalPay.roundToInt())}",
+                        badge = if (cartTotals.count > 0) cartTotals.count.toString() else null,
                         testTag = "bravia_cart_pill",
                         onClick = {
                             HapticFeedbackManager.onNavigationClick(view)

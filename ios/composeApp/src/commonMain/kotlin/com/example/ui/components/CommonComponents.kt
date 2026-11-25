@@ -928,7 +928,7 @@ fun BravoArcaHeaderSwitcher(
                 .clip(RoundedCornerShape(14.dp))
                 .clickable {
                     HapticFeedbackManager.onNavigationClick(view)
-                    setExpanded(!isExpanded)
+                    if (PawEasterEgg.registerLogoTap()) setExpanded(false) else setExpanded(!isExpanded)
                 }
                 .padding(horizontal = 4.dp, vertical = 4.dp)
                 .testTag("brand_switcher_button"),
@@ -1328,8 +1328,8 @@ fun ProductArtworkView(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(cornerRadius))
-            .background(if (isDark) Color.White.copy(alpha = 0.04f) else Color.White),
+            // Sin fondo: la foto ya llega recortada y centrada (ProductCutout.kt)
+            .clip(RoundedCornerShape(cornerRadius)),
         contentAlignment = Alignment.Center
     ) {
         if (!product.imageUrl.isNullOrBlank()) {
@@ -1351,8 +1351,7 @@ fun ProductArtworkView(
                 alignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp)
-                    .clip(RoundedCornerShape((cornerRadius - 2.dp).coerceAtLeast(8.dp))),
+                    .padding(2.dp),
                 loading = {
                     // Mancha suave del color del producto mientras llega la foto (sin animación infinita)
                     Box(

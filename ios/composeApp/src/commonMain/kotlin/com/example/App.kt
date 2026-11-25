@@ -98,6 +98,7 @@ import com.example.ui.components.BravoUnifiedIcon
 import com.example.ui.components.DeviceSupportsGpuBlur
 import com.example.ui.components.CartSummaryBar
 import com.example.ui.components.CartFlightOverlay
+import com.example.ui.components.PawEasterEggOverlay
 import com.example.ui.components.HapticFeedbackManager
 import com.example.ui.components.LocalTranslucentHazeState
 import com.example.ui.components.OrderSuccessCelebrationOverlay
@@ -1039,7 +1040,8 @@ fun BravoVaApp(
                     }
 
                     // En iOS 26+ la barra nativa no se esconde al hacer scroll: se encoge (como en las apps de Apple)
-                    val nativeDock = nativeLiquidGlassAvailable()
+                    // En Brav IA la barra de escribir ocupa ese espacio, así que ahí la barra se esconde como antes
+                    val nativeDock = nativeLiquidGlassAvailable() && currentScreen != AppScreen.BRAVIA
                     AnimatedVisibility(
                         visible = areMenusVisible || nativeDock,
                         enter = slideInVertically(
@@ -1111,6 +1113,8 @@ fun BravoVaApp(
                             }
                         }
                     }
+
+                    PawEasterEggOverlay()
 
                     AnimatedVisibility(
                         visible = celebrationOrder != null,

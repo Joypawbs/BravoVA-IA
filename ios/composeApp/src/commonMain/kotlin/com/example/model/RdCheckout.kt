@@ -11,6 +11,12 @@ enum class RdPaymentOption(val label: String, val detail: String, val needsBiome
     AZUL("Azul", "Pago en línea con tu tarjeta", true)
 }
 
+/** Detalle según la plataforma (Face ID existe solo en iPhone). */
+val RdPaymentOption.displayDetail: String
+    get() = if (this == RdPaymentOption.WALLET) {
+        if (com.example.platform.PlatformInfo.isIos) "Confirmas con Face ID" else "Confirmas con tu huella"
+    } else detail
+
 /** Nombre que ve el usuario: Apple Pay en iPhone, Google Pay en Android. */
 val RdPaymentOption.displayLabel: String
     get() = if (this == RdPaymentOption.WALLET) {

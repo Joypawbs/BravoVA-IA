@@ -1816,7 +1816,7 @@ fun CartCheckoutScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
-                                    items = listOf("Protección BiometricPrompt", activeBranch),
+                                    items = listOf("Pago protegido con huella", activeBranch),
                                     slashColor = primaryColor,
                                     fontSizeSp = 10.5f
                                 )

@@ -67,6 +67,7 @@ import com.example.model.RD_BANKS
 import com.example.model.RD_DELIVERY_SLOTS
 import com.example.model.RdPaymentOption
 import com.example.model.displayLabel
+import com.example.model.displayDetail
 import com.example.model.SEASONAL_COMBOS
 import com.example.model.SeasonalCombo
 import com.example.platform.PlatformActions
@@ -165,7 +166,7 @@ fun RdCheckoutOptionsCard(
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
                             Text(option.displayLabel, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                            Text(option.detail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(option.displayDetail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         RadioButton(
                             selected = selected,

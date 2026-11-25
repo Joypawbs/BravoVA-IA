@@ -1961,6 +1961,7 @@ private fun DailyRotatingOffersCarouselSection(
 
         // Carrusel que avanza solo cada 4 s (se pausa si el usuario lo está moviendo)
         val offersRowState = rememberLazyListState()
+        val offersEdgePx = with(LocalDensity.current) { 14.dp.roundToPx() }
         val dataSaver = LocalDataSaver.current
         LaunchedEffect(dailyRotatingOffers.size, dataSaver) {
             if (dataSaver || dailyRotatingOffers.size < 2) return@LaunchedEffect
@@ -1968,7 +1969,8 @@ private fun DailyRotatingOffersCarouselSection(
                 delay(4000)
                 if (!offersRowState.isScrollInProgress) {
                     val next = (offersRowState.firstVisibleItemIndex + 1) % dailyRotatingOffers.size
-                    offersRowState.animateScrollToItem(next)
+                    // Respeta el margen izquierdo para que la tarjeta no quede cortada
+                    offersRowState.animateScrollToItem(next, -offersEdgePx)
                 }
             }
         }
