@@ -78,6 +78,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.VerifiedUser
@@ -1646,6 +1647,11 @@ fun CartCheckoutScreen(
                             .padding(26.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        com.example.ui.components.EmptyStateBadge(
+                            icon = Icons.Default.ShoppingCart,
+                            accent = primaryColor
+                        )
+                        Spacer(modifier = Modifier.height(14.dp))
                         Text(
                             text = "Tu carrito está vacío",
                             fontFamily = PlusJakartaSans,

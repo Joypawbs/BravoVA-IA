@@ -68,6 +68,9 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.SearchOff
+import com.example.ui.components.matchesSearch
+import com.example.ui.components.applySearchFilters
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.HorizontalDivider
@@ -203,13 +206,19 @@ fun HomeScreen(
         }
     }
 
-    val filteredProducts = remember(debouncedQuery, allProducts) {
-        val q = debouncedQuery.trim().lowercase()
+    // Búsqueda sin tildes, con filtro de ofertas y orden por precio
+    var onlyOffers by rememberSaveable { mutableStateOf(false) }
+    var searchSort by remember { mutableStateOf(com.example.ui.components.SearchSort.RELEVANCE) }
+    val filteredProducts = remember(debouncedQuery, allProducts, onlyOffers, searchSort) {
+        val q = debouncedQuery.trim()
         if (q.isEmpty()) emptyList()
-        else allProducts.filter { p ->
-            p.name.lowercase().contains(q) ||
-                p.category.lowercase().contains(q) ||
-                p.badge.lowercase().contains(q)
+        else allProducts.filter { p -> p.matchesSearch(q) }.applySearchFilters(onlyOffers, searchSort)
+    }
+    // Guarda la búsqueda como reciente cuando el usuario se detiene en ella
+    LaunchedEffect(debouncedQuery) {
+        if (debouncedQuery.isNotBlank()) {
+            delay(1500L)
+            com.example.ui.components.RecentSearches.add(debouncedQuery)
         }
     }
 
@@ -410,6 +419,18 @@ fun HomeScreen(
                     .testTag("home_screen_list"),
                 contentPadding = PaddingValues(top = 4.dp, bottom = 188.dp)
             ) {
+                if (debouncedQuery.isEmpty() && isSearchFocused) {
+                    item(key = "search_suggestions", contentType = "suggestions") {
+                        com.example.ui.components.SearchSuggestionRow(
+                            popular = miniSearchSuggestions,
+                            onPick = { picked ->
+                                performCrispHaptic(view, HapticStyle.TICK)
+                                localSearchInput = picked
+                            },
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+                        )
+                    }
+                }
                 if (debouncedQuery.isNotEmpty()) {
                     item(key = "search_header", contentType = "header") {
                         Column(
@@ -426,6 +447,20 @@ fun HomeScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             BravoUnderline(isArca = isArca)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            com.example.ui.components.SearchFilterRow(
+                                onlyOffers = onlyOffers,
+                                onToggleOffers = {
+                                    performCrispHaptic(view, HapticStyle.TICK)
+                                    onlyOffers = !onlyOffers
+                                },
+                                sort = searchSort,
+                                onSortChange = {
+                                    performCrispHaptic(view, HapticStyle.TICK)
+                                    searchSort = it
+                                },
+                                accent = primaryColor
+                            )
                         }
                     }
 
@@ -444,6 +479,11 @@ fun HomeScreen(
                                         .padding(22.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
+                                    com.example.ui.components.EmptyStateBadge(
+                                        icon = Icons.Default.SearchOff,
+                                        accent = primaryColor
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
                                     Text(
                                         text = "Sin resultados para \"$debouncedQuery\"",
                                         fontFamily = PlusJakartaSans,
@@ -860,11 +900,11 @@ fun CatalogScreen(
     }
 
     val filteredSections = remember(debouncedFilter, sections, allProducts) {
-        val q = debouncedFilter.trim().lowercase()
+        val q = com.example.ui.components.normalizeForSearch(debouncedFilter)
         if (q.isEmpty()) sections
         else sections.filter { sec ->
-            sec.name.lowercase().contains(q) ||
-                allProducts.any { it.category == sec.name && it.name.lowercase().contains(q) }
+            com.example.ui.components.normalizeForSearch(sec.name).contains(q) ||
+                allProducts.any { it.category == sec.name && it.matchesSearch(q) }
         }
     }
 
@@ -1093,11 +1133,9 @@ fun CategoryGridScreen(
     }
 
     val filteredItems = remember(debouncedQuery, catProducts) {
-        val q = debouncedQuery.trim().lowercase()
+        val q = debouncedQuery.trim()
         if (q.isEmpty()) catProducts
-        else catProducts.filter {
-            it.name.lowercase().contains(q) || it.badge.lowercase().contains(q)
-        }
+        else catProducts.filter { it.matchesSearch(q) }
     }
 
     val rows = remember(filteredItems) {

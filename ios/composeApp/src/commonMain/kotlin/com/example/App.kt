@@ -1114,6 +1114,13 @@ fun BravoVaApp(
                         }
                     }
 
+                    com.example.ui.components.OfflineBanner(
+                        visible = isOfflineMode,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 72.dp)
+                    )
+
                     PawEasterEggOverlay()
                     com.example.ui.components.EasterEffectsOverlay()
 
