@@ -26,12 +26,16 @@ def search(terms, country=True):
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.load(r).get("products", [])
 
+# Productos que ya tienen una foto real encontrada en una pasada anterior
+SKIP = set(json.loads(Path(sys.argv[3]).read_text())) if len(sys.argv) > 3 and Path(sys.argv[3]).exists() else set()
 entries = re.findall(r'p\("([^"]+)", "([^"]+)", \d+, "[^"]*", "[^"]*", (true|false), "[^"]*", "[^"]*", "[^"]*", "([^"]+)"\)', SRC.read_text())
 results = {}
 for sku, name, is_bravo, img in entries:
     generic = any(h in img for h in GENERIC)
     if is_bravo == "true" and not generic:
         continue  # marca propia con foto real: se deja
+    if sku in SKIP:
+        continue
     want = set(norm(name))
     if len(want) < 2:
         continue
@@ -50,11 +54,11 @@ for sku, name, is_bravo, img in entries:
                 best = {"url": p["image_front_url"], "nombre_off": p.get("product_name"), "puntaje": round(score, 2), "rd": country}
         if best:
             break
-        time.sleep(0.7)
+        time.sleep(2.5)
     if best:
         results[sku] = best
         print(f"{sku} {name} -> {best['nombre_off']} ({best['puntaje']})")
-    time.sleep(0.7)
+    time.sleep(2.5)
 
 OUT.write_text(json.dumps(results, ensure_ascii=False, indent=1))
 print("total", len(results))

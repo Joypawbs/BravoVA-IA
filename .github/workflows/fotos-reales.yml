@@ -11,7 +11,8 @@ jobs:
       - name: Buscar en Open Food Facts
         run: |
           mkdir -p out
-          python3 .github/scripts/fotos_reales.py ios/composeApp/src/commonMain/kotlin/com/example/data/BravoCatalogData.kt out/fotos_bravo.json | tee out/log_bravo.txt
+          git fetch -q origin datos-fotos && git show origin/datos-fotos:fotos_bravo.json > /tmp/previas.json || echo "{}" > /tmp/previas.json
+          python3 .github/scripts/fotos_reales.py ios/composeApp/src/commonMain/kotlin/com/example/data/BravoCatalogData.kt out/fotos_bravo.json /tmp/previas.json | tee out/log_bravo.txt
       - name: Publicar resultados en la rama datos-fotos
         run: |
           cd out && git init -q -b datos-fotos
