@@ -1,0 +1,19 @@
+name: Probar permisos de publicación
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a prueba-permisos HEAD -m prueba && git push origin refs/tags/prueba-permisos || echo "FALLO_TAG"
+          gh release create prueba-permisos --draft --title prueba --notes prueba --verify-tag || echo "FALLO_RELEASE"
+          gh release delete prueba-permisos -y --cleanup-tag || true
