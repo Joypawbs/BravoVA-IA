@@ -14,12 +14,17 @@ on:
       tag:
         description: "Etiqueta a publicar (por ejemplo v1.1.0)"
         required: true
+      ref:
+        description: "Commit o rama que se compila (vacío = la etiqueta)"
+        required: false
 
 permissions:
   contents: write
 
 env:
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
+  # Qué se compila: el commit indicado, o la propia etiqueta si ya existe
+  SRC: ${{ github.event.inputs.ref || github.event.inputs.tag || github.ref_name }}
 
 jobs:
   android:
@@ -31,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ env.SRC }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -75,7 +80,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ env.SRC }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -109,9 +114,10 @@ jobs:
     needs: [android, ios]
     runs-on: ubuntu-latest
     steps:
+      # Las notas se leen de la rama principal; el código publicado es el de SRC
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -122,5 +128,7 @@ jobs:
         run: |
           NOTES=".github/release-notes/$TAG.md"
           [ -f "$NOTES" ] || { echo "BravoVa $TAG" > /tmp/notes.md; NOTES=/tmp/notes.md; }
+          TARGET=$(git rev-parse "$SRC^{commit}" 2>/dev/null || git rev-parse "origin/$SRC")
           gh release delete "$TAG" -y 2>/dev/null || true
-          gh release create "$TAG" dist/* --title "BravoVa $TAG" --notes-file "$NOTES" --verify-tag
+          # Si la etiqueta no existe, GitHub la crea en TARGET
+          gh release create "$TAG" dist/* --title "BravoVa $TAG" --notes-file "$NOTES" --target "$TARGET"
