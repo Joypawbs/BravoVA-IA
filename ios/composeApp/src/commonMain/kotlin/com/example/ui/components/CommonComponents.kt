@@ -615,7 +615,7 @@ fun AppStartupSkeletonScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(240.dp)
             ) {
-                // Soft radial halo and well-delimited orbital sparkles drawn cleanly in a single Canvas
+                // Halo suave y destellos alrededor del emblema
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val w = size.width
                     val h = size.height
@@ -644,7 +644,7 @@ fun AppStartupSkeletonScreen(
                         val twinkle = rawWave * rawWave * (3f - 2f * rawWave)
                         val scaleFactor = 0.52f + 0.48f * twinkle
 
-                        // Gentle orbital drift (1.5dp) for organic fluidity without leaving its zone
+                        // Pequeño vaivén (1.5dp) para que no se vea rígido
                         val driftPx = 1.5.dp.toPx()
                         val cx = w * star.xFraction + cos(angle) * driftPx
                         val cy = h * star.yFraction + sin(angle) * driftPx
@@ -667,7 +667,7 @@ fun AppStartupSkeletonScreen(
                             Color(0xFFD97706).copy(alpha = (0.35f + 0.45f * twinkle).coerceIn(0f, 1f))
                         }
 
-                        // Tightly delimited halo around each individual star (no overlap with neighbors)
+                        // Halo pequeño alrededor de cada estrella
                         drawCircle(
                             brush = Brush.radialGradient(
                                 colorStops = arrayOf(
@@ -753,7 +753,7 @@ fun AppStartupSkeletonScreen(
                         modifier = Modifier.fillMaxSize()
                     )
 
-                    // Delimited diagonal gloss sweep strictly inside the emblem bounds
+                    // Brillo diagonal que recorre el emblema
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         val w = size.width
                         val h = size.height
@@ -2597,7 +2597,7 @@ fun PredictiveCatalogSearchBar(
         }
     }
 
-    // Inline ghost completion suffix when the product name starts with what the user typed
+    // Sugerencia en gris con el resto del nombre del producto
     val inlineGhostSuffix = remember(query, predictedProduct) {
         val clean = query
         if (clean.isBlank() || predictedProduct == null) {
@@ -2652,7 +2652,7 @@ fun PredictiveCatalogSearchBar(
                             overflow = TextOverflow.Ellipsis
                         )
                     } else if (predictedProduct != null && inlineGhostSuffix.isNotEmpty()) {
-                        // Inline ghost predictive text right behind the user's cursor
+                        // Texto sugerido detrás de lo que escribe el usuario
                         Text(
                             text = buildAnnotatedString {
                                 withStyle(
@@ -2707,7 +2707,7 @@ fun PredictiveCatalogSearchBar(
                     )
                 }
 
-                // Inline predictive completion chip inside the search bar when typing
+                // Chip con la sugerencia dentro de la barra de búsqueda
                 if (query.isNotBlank() && predictedProduct != null && !predictedProduct.name.equals(query.trim(), ignoreCase = true)) {
                     val cal = predictedProduct.nutritionProfile().caloriesKcal
                     Surface(

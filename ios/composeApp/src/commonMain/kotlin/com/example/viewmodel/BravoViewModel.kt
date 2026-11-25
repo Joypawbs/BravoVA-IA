@@ -740,7 +740,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             else -> 1.0 to "Tráfico fluido en ruta"
         }
 
-        // Urban moto speed ~26 km/h + 5 min branch dispatch
+        // Moto en ciudad ~26 km/h + 5 min de preparación en la sucursal
         val baseEta = ((roadDistKm / 26.0) * 60.0 * trafficMultiplier + 5.0).roundToInt().coerceIn(6, 48)
         val stageEta = when (stage) {
             OrderDeliveryStage.RECEIVED -> baseEta + 4
@@ -834,7 +834,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             )
         }
 
-        // Also request a live single location update
+        // Pide también una ubicación actual
         runCatching {
             LocationProvider.requestSingleUpdate(context) { location ->
                 val (lat, lng, desc) = if (location.latitude in 17.5..20.2 && location.longitude in -72.0..-68.0) {
@@ -1918,7 +1918,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
     private suspend fun fetchInternetRecipeVerification(query: String): String? = withContext(Dispatchers.IO) {
         try {
-            // Extract dish subject from user query
+            // Saca el nombre del plato de la pregunta
             val cleaned = query.lowercase()
                 .replace(Regex("""¿|\?|!|¡|,|\."""), " ")
                 .replace(
@@ -3259,7 +3259,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             return
         }
 
-        // Merge message SKUs into cart and execute real checkout flow
+        // Pasa los productos del mensaje al carrito y hace el pedido
         val mergedMap = LinkedHashMap<String, Int>()
         _cart.value.forEach { item -> mergedMap[item.sku] = item.qty }
         orderSkus.forEach { sku -> mergedMap[sku] = (mergedMap[sku] ?: 0).coerceAtLeast(1) }

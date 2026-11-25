@@ -880,7 +880,7 @@ fun BravisimaScreen(
                             BravoUnderline(isArca = false)
                         }
 
-                        // Tier & Monthly Goal summary
+                        // Nivel y meta del mes
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -971,7 +971,7 @@ fun BravisimaScreen(
                             )
                         }
 
-                        // Security Lock Switch
+                        // Bloqueo de seguridad
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -1025,7 +1025,7 @@ fun BravisimaScreen(
 
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
 
-                        // Auto Redeem Switch
+                        // Canje automático
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -1076,7 +1076,7 @@ fun BravisimaScreen(
 
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
 
-                        // Edit Holder Alias & Savings Goal accordion
+                        // Editar alias y meta de ahorro
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1843,7 +1843,7 @@ fun CartCheckoutScreen(
                             }
                         }
 
-                        // Delivery Mode Selector (Delivery Express vs Pickup)
+                        // Entrega a domicilio o recoger en tienda
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1943,7 +1943,7 @@ fun CartCheckoutScreen(
                             }
                         }
 
-                        // Payment Method Row (Biometric-protected switching & adding)
+                        // Método de pago (cambiarlo pide huella)
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -2348,7 +2348,7 @@ fun CartCheckoutScreen(
                             )
                         }
 
-                        // Biometric Security Status Banner (shows cryptographic token when verified)
+                        // Aviso del estado de la verificación biométrica
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -2669,7 +2669,7 @@ fun BiometricOrderPromptDialog(
                 statusMessage = "Huella no reconocida. Intenta nuevamente o usa el sensor en pantalla."
             },
             onFallbackRequested = {
-                // User opted for interactive on-screen sensor or device has no enrolled hardware biometrics
+                // Sensor en pantalla (si el usuario lo eligió o el equipo no tiene huella)
             }
         )
         onDispose {
@@ -2827,7 +2827,7 @@ fun BiometricOrderPromptDialog(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    // Interactive Fingerprint Sensor Area
+                    // Zona del sensor de huella
                     Box(
                         modifier = Modifier
                             .size(110.dp)
@@ -3085,7 +3085,7 @@ fun DeliveryTrackingScreen(
             contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 1. Live Notification Banner with Icons & Real-Time Telemetry
+            // 1. Aviso en vivo del estado del pedido
             item(key = "live_delivery_notification_banner", contentType = "live_banner") {
                 LiveDeliveryNotificationBannerCard(
                     banner = liveDeliveryBanner,
@@ -3344,7 +3344,7 @@ fun DeliveryTrackingScreen(
                             }
                         }
 
-                        // Real Interactive Map View (Leaflet + OpenStreetMap/CartoDB street tiles + High-DPI fallback)
+                        // Mapa interactivo (Leaflet + OpenStreetMap)
                         RealInteractiveDeliveryMapView(
                             darkMode = darkMode,
                             primaryColor = primaryColor,
@@ -3360,7 +3360,7 @@ fun DeliveryTrackingScreen(
                             pulseRadius = pulseRadius
                         )
 
-                        // Live Speed, Traffic & ETA Metrics Strip
+                        // Velocidad, tráfico y hora estimada
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -3371,7 +3371,7 @@ fun DeliveryTrackingScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                // Speed Pill
+                                // Velocidad
                                 Surface(
                                     shape = RoundedCornerShape(14.dp),
                                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
@@ -3407,7 +3407,7 @@ fun DeliveryTrackingScreen(
                                     }
                                 }
 
-                                // Traffic Pill
+                                // Tráfico
                                 val trafficColor = when (driverTelemetry.trafficLevel) {
                                     "DENSO" -> Color(0xFFD97706)
                                     "MODERADO" -> Color(0xFF059669)
@@ -3454,7 +3454,7 @@ fun DeliveryTrackingScreen(
                                     }
                                 }
 
-                                // ETA Pill
+                                // Hora estimada
                                 Surface(
                                     shape = RoundedCornerShape(14.dp),
                                     color = primaryColor.copy(alpha = 0.12f),
@@ -3528,7 +3528,7 @@ fun DeliveryTrackingScreen(
                 }
             }
 
-            // 3. AI-Simulated Driver Chat Card ("Mensajes al Repartidor con IA")
+            // 3. Chat con el repartidor (respuestas simuladas por IA)
             item(key = "driver_ai_live_chat_card", contentType = "driver_chat") {
                 DriverAiLiveChatCard(
                     darkMode = darkMode,
@@ -3545,7 +3545,7 @@ fun DeliveryTrackingScreen(
                 )
             }
 
-            // 4. Delivery Stage Progress Card (Clean Consumer Copy)
+            // 4. Etapas del pedido
             item(key = "firestore_realtime_progress_card", contentType = "progress_card") {
                 TranslucentCard(
                     darkMode = darkMode,
@@ -4192,7 +4192,7 @@ private fun RealInteractiveDeliveryMapView(
                 )
             }
 
-            // 1. Urban City Blocks & Green Zones (Santo Domingo Polígono Central)
+            // 1. Manzanas y zonas verdes (Polígono Central, Santo Domingo)
             val blocks = listOf(
                 Triple(Offset(0.04f, 0.06f), Offset(0.18f, 0.19f), blockColor),
                 Triple(Offset(0.26f, 0.05f), Offset(0.45f, 0.19f), blockColor),
@@ -4216,7 +4216,7 @@ private fun RealInteractiveDeliveryMapView(
                 )
             }
 
-            // Parks & plazas
+            // Parques y plazas
             val park1TL = project(0.05f, 0.55f)
             val park1BR = project(0.29f, 0.89f)
             drawRoundRect(
@@ -4244,7 +4244,7 @@ private fun RealInteractiveDeliveryMapView(
                 cornerRadius = CornerRadius(24f * animatedZoom, 24f * animatedZoom)
             )
 
-            // 2. Secondary Streets Grid
+            // 2. Calles secundarias
             val secondaryStreets = listOf(
                 Offset(0f, 0.22f) to Offset(1f, 0.22f),
                 Offset(0f, 0.74f) to Offset(1f, 0.74f),
@@ -4272,7 +4272,7 @@ private fun RealInteractiveDeliveryMapView(
                 )
             }
 
-            // 3. Primary Santo Domingo Avenues (Av. Winston Churchill, Av. Abraham Lincoln, Av. 27 de Febrero)
+            // 3. Avenidas principales (Winston Churchill, Abraham Lincoln…)
             val mainAvenues = listOf(
                 Offset(0.21f, 0f) to Offset(0.21f, 1f),
                 Offset(0.68f, 0f) to Offset(0.68f, 1f),
@@ -4297,7 +4297,7 @@ private fun RealInteractiveDeliveryMapView(
                 )
             }
 
-            // 4. Street Name Labels on Canvas
+            // 4. Nombres de las calles
             run {
                 val labelColor = if (darkMode) Color(203, 213, 225, 215) else Color(51, 65, 85, 220)
                 val parkColor = if (darkMode) Color(110, 231, 183, 210) else Color(4, 120, 87, 220)
@@ -4326,7 +4326,7 @@ private fun RealInteractiveDeliveryMapView(
                 canvasLabel(canvasTextMeasurer, "Plaza Piantini", park2Label.x, park2Label.y, parkColor, parkSize)
             }
 
-            // 5. Full GPS Route Polyline (Completed vs Remaining with Live Traffic Flow)
+            // 5. Ruta completa (tramo hecho y tramo pendiente)
             val routePoints = SANTO_DOMINGO_ROUTE.map { pt -> project(pt.xFraction, pt.yFraction) }
             if (routePoints.size >= 2) {
                 val fullRoutePath = Path().apply {
@@ -4335,19 +4335,19 @@ private fun RealInteractiveDeliveryMapView(
                         lineTo(routePoints[i].x, routePoints[i].y)
                     }
                 }
-                // Outer route halo
+                // Halo de la ruta
                 drawPath(
                     path = fullRoutePath,
                     color = primaryColor.copy(alpha = 0.24f),
                     style = Stroke(width = 18f * animatedZoom, cap = StrokeCap.Round)
                 )
-                // Base route track
+                // Trazo base de la ruta
                 drawPath(
                     path = fullRoutePath,
                     color = routeActiveColor.copy(alpha = 0.35f),
                     style = Stroke(width = 9f * animatedZoom, cap = StrokeCap.Round)
                 )
-                // Animated traffic flow dashes
+                // Rayas animadas del tráfico
                 drawPath(
                     path = fullRoutePath,
                     color = routeActiveColor,
@@ -4359,7 +4359,7 @@ private fun RealInteractiveDeliveryMapView(
                 )
             }
 
-            // 6. Origin Marker (Supermercado Bravo Branch)
+            // 6. Marcador de la sucursal
             val originCenter = project(SANTO_DOMINGO_ROUTE.first().xFraction, SANTO_DOMINGO_ROUTE.first().yFraction)
             drawCircle(
                 color = primaryColor.copy(alpha = 0.24f),
@@ -4377,7 +4377,7 @@ private fun RealInteractiveDeliveryMapView(
                 center = originCenter
             )
 
-            // 7. Destination Marker (Customer Delivery Location)
+            // 7. Marcador del cliente
             val destCenter = project(SANTO_DOMINGO_ROUTE.last().xFraction, SANTO_DOMINGO_ROUTE.last().yFraction)
             drawCircle(
                 color = Color(0xFF059669).copy(alpha = 0.26f),
@@ -4395,9 +4395,9 @@ private fun RealInteractiveDeliveryMapView(
                 center = destCenter
             )
 
-            // 8. Real-Time 1:1 Driver Position Marker & Radar Pulse
+            // 8. Posición del repartidor con pulso
             val driverCenter = project(animatedX, animatedY)
-            // Traveled segment line from origin to current driver position
+            // Tramo recorrido hasta el repartidor
             drawLine(
                 color = primaryColor,
                 start = originCenter,
@@ -4426,12 +4426,12 @@ private fun RealInteractiveDeliveryMapView(
                 center = driverCenter
             )
 
-            // Callout Labels for Origin, Destination & Driver directly anchored on Canvas
+            // Etiquetas de sucursal, cliente y repartidor
             run {
                 val pillBg = if (darkMode) Color(15, 23, 42, 235) else Color(255, 255, 255, 242)
                 val pillText = if (darkMode) Color.White else Color(15, 23, 42)
 
-                // Origin badge
+                // Etiqueta de la sucursal
                 val originLabel = "🏪 $branchName"
                 val oWidth = measureCanvasLabel(canvasTextMeasurer, originLabel, 10.5f) + 18f * density
                 val oHeight = 20f * density
@@ -4440,7 +4440,7 @@ private fun RealInteractiveDeliveryMapView(
                 drawRoundRect(pillBg, topLeft = Offset(oLeft, oTop), size = Size(oWidth, oHeight), cornerRadius = CornerRadius(999f, 999f))
                 canvasLabel(canvasTextMeasurer, originLabel, oLeft + 9f * density, oTop + oHeight / 2f + 3.8f * density, pillText, 10.5f)
 
-                // Destination badge
+                // Etiqueta del cliente
                 val destLabel = "📍 Tu Entrega"
                 val dWidth = measureCanvasLabel(canvasTextMeasurer, destLabel, 10.5f) + 18f * density
                 val dLeft = (destCenter.x - dWidth / 2f).coerceIn(8f, (w - dWidth - 8f).coerceAtLeast(8f))
@@ -4448,7 +4448,7 @@ private fun RealInteractiveDeliveryMapView(
                 drawRoundRect(pillBg, topLeft = Offset(dLeft, dTop), size = Size(dWidth, oHeight), cornerRadius = CornerRadius(999f, 999f))
                 canvasLabel(canvasTextMeasurer, destLabel, dLeft + 9f * density, dTop + oHeight / 2f + 3.8f * density, pillText, 10.5f)
 
-                // Live Driver floating badge
+                // Etiqueta del repartidor
                 val speedText = "🛵 Carlos • ${telemetry.currentSpeedKmh} km/h"
                 val drWidth = measureCanvasLabel(canvasTextMeasurer, speedText, 11f) + 20f * density
                 val drHeight = 22f * density
@@ -4459,7 +4459,7 @@ private fun RealInteractiveDeliveryMapView(
             }
         }
 
-        // Top-Start Street & Traffic Live Pill
+        // Calle actual y tráfico (arriba a la izquierda)
         Surface(
             shape = RoundedCornerShape(999.dp),
             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
@@ -4492,7 +4492,7 @@ private fun RealInteractiveDeliveryMapView(
             }
         }
 
-        // Top-End Interactive Map Zoom & Center Controls (+ / - / Centrar)
+        // Zoom y centrar (arriba a la derecha)
         Column(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -4586,7 +4586,7 @@ private fun RealInteractiveDeliveryMapView(
             }
         }
 
-        // Bottom Live Telemetry Pill Overlay
+        // Datos en vivo (abajo)
         Surface(
             shape = RoundedCornerShape(999.dp),
             color = Color(0xFF0B0F17).copy(alpha = 0.92f),
@@ -4657,7 +4657,7 @@ private fun DriverAiLiveChatCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Driver Header
+            // Cabecera del repartidor
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -4755,7 +4755,7 @@ private fun DriverAiLiveChatCard(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
 
-            // Quick Prompt Chips for Driver Chat
+            // Respuestas rápidas
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -4782,7 +4782,7 @@ private fun DriverAiLiveChatCard(
                 }
             }
 
-            // Messages List
+            // Mensajes
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -4866,7 +4866,7 @@ private fun DriverAiLiveChatCard(
                 }
             }
 
-            // Input Row for Driver Message
+            // Campo para escribirle al repartidor
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

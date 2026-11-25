@@ -415,7 +415,7 @@ private fun BravIaLogoSparklingStars(
             val w = size.width
             val h = size.height
 
-            // Soft crimson-amber logo aura
+            // Aura suave con los colores del logo
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
@@ -430,7 +430,7 @@ private fun BravIaLogoSparklingStars(
                 center = Offset(w * 0.5f, h * 0.5f)
             )
 
-            // 4 logo-style 4-point stars with staggered phases (center-left main star + 3 companion stars)
+            // Cuatro estrellas que se encienden por turnos
             val starConfigs = listOf(
                 floatArrayOf(0.42f, 0.52f, 10.5f, 0.00f),
                 floatArrayOf(0.76f, 0.26f, 6.8f, 0.28f),
@@ -454,7 +454,7 @@ private fun BravIaLogoSparklingStars(
                     else -> Color(0xFFFFF59D).copy(alpha = 0.50f + 0.50f * twinkle)
                 }
 
-                // Starlight halo
+                // Halo de la estrella
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -479,7 +479,7 @@ private fun BravIaLogoSparklingStars(
                 }
                 drawPath(path = starPath, color = starColor)
 
-                // Bright white-gold core
+                // Centro blanco dorado
                 drawCircle(
                     color = Color.White.copy(alpha = 0.90f * twinkle),
                     radius = max(1.2f, r * 0.18f),
@@ -599,7 +599,7 @@ private fun Modifier.glowingRedAiContour(
     cornerShape: RoundedCornerShape
 ): Modifier {
     val infiniteTransition = rememberInfiniteTransition(label = "ai_single_line_contour")
-    // Slow, calm traversal of the single line around the message box
+    // La línea recorre el borde despacio
     val lineProgress by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -612,7 +612,7 @@ private fun Modifier.glowingRedAiContour(
         ),
         label = "singleLineTraversalProgress"
     )
-    // Very slow rotation through soft rose/coral/red shades
+    // Cambia muy despacio entre rosa, coral y rojo
     val colorPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -658,7 +658,7 @@ private fun Modifier.glowingRedAiContour(
         pathMeasure.setPath(perimeterPath, forceClosed = true)
         val totalLen = pathMeasure.length.coerceAtLeast(1f)
 
-        // Single line length: ~26% of the box perimeter
+        // Largo de la línea: ~26 % del perímetro
         val singleLineLen = totalLen * 0.26f
         val startDist = (lineProgress * totalLen) % totalLen
         val endDist = startDist + singleLineLen
@@ -671,7 +671,7 @@ private fun Modifier.glowingRedAiContour(
             pathMeasure.getSegment(0f, endDist - totalLen, singleLinePath, startWithMoveTo = true)
         }
 
-        // Leading head slice of the single line (brightest soft core)
+        // Punta de la línea (la parte más brillante)
         val headSliceLen = singleLineLen * 0.42f
         val headStartDist = (startDist + singleLineLen - headSliceLen) % totalLen
         val headEndDist = headStartDist + headSliceLen
@@ -683,7 +683,7 @@ private fun Modifier.glowingRedAiContour(
             pathMeasure.getSegment(0f, headEndDist - totalLen, headLinePath, startWithMoveTo = true)
         }
 
-        // Compute approximate coordinates of the traveling line's leading tip for ambient illumination
+        // Posición aproximada de la punta de la línea
         val headFraction = ((endDist % totalLen) / totalLen)
         val headAngle = headFraction * (2f * PI).toFloat()
         val headCenter = Offset(
@@ -694,7 +694,7 @@ private fun Modifier.glowingRedAiContour(
         val ambientRadius = max(w, h) * 0.72f
 
         onDrawWithContent {
-            // Soft ambient illumination cast into the message card without any surrounding border lines
+            // Luz suave dentro de la tarjeta del mensaje
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
@@ -985,7 +985,7 @@ fun BravIaChatScreen(
         animationSpec = tween(durationMillis = 200),
         label = "bravia_top_overlay_padding"
     )
-    // Dock input bar directly above the top edge of the bottom navigation bar (or keyboard)
+    // Barra de escritura justo encima de la barra inferior
     val dynamicInputBottomPadding by animateDpAsState(
         targetValue = when {
             isImeVisible -> 4.dp
@@ -1014,7 +1014,7 @@ fun BravIaChatScreen(
             .imePadding()
             .testTag("bravia_chat_screen")
     ) {
-        // Ambient illumination layer casting soft red/rose light across the entire interface
+        // Capa de luz rojiza suave sobre la pantalla
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -1030,7 +1030,7 @@ fun BravIaChatScreen(
             val sweepX = w * (0.5f + 0.34f * cos(uiOrbitAngle))
             val sweepY = h * (0.46f + 0.28f * sin(uiOrbitAngle))
 
-            // Primary traveling ambient aura illuminating the chat & cards
+            // Aura principal que se mueve detrás del chat
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
@@ -1045,7 +1045,7 @@ fun BravIaChatScreen(
                 center = Offset(sweepX, sweepY)
             )
 
-            // Top header & budget card ambient reflection
+            // Reflejo en la cabecera y la tarjeta de presupuesto
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
@@ -1059,7 +1059,7 @@ fun BravIaChatScreen(
                 center = Offset(w * (0.5f - 0.28f * sin(uiOrbitAngle)), h * 0.12f)
             )
 
-            // Bottom input bar & dock ambient reflection
+            // Reflejo en la barra de escritura
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(

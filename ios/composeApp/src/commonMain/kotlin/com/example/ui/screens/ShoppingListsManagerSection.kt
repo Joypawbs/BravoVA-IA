@@ -642,7 +642,7 @@ fun ManagedShoppingListCard(
                 }
             }
 
-            // Preview strip of product thumbnails when collapsed
+            // Miniaturas de productos cuando la lista está cerrada
             if (!isExpanded && resolvedProducts.isNotEmpty()) {
                 Row(
                     modifier = Modifier
@@ -868,7 +868,7 @@ fun ManagedShoppingListCard(
                         }
                     }
 
-                    // Quick-add from user's frequent purchase history
+                    // Agregar rápido desde lo que más compras
                     if (historySuggestionsNotYetInList.isNotEmpty()) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(
@@ -919,7 +919,7 @@ fun ManagedShoppingListCard(
                         }
                     }
 
-                    // Inline search to add any catalog product to this list
+                    // Buscar cualquier producto del catálogo para agregarlo
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
