@@ -1,5 +1,8 @@
 package com.example.viewmodel
 
+import com.example.platform.sharedPrefs
+import com.example.ui.components.RdPrefs
+import com.example.model.CheckoutExtras
 import androidx.lifecycle.ViewModel
 import com.example.data.remote.CloudRepositoryIds
 import com.example.data.remote.createCloudRepository
@@ -187,6 +190,74 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
     private val _categorySearchQuery = MutableStateFlow("")
     val categorySearchQuery: StateFlow<String> = _categorySearchQuery.asStateFlow()
+
+    /* ---------- Funciones pensadas para RD ---------- */
+    private val rdPrefs = sharedPrefs("bravova_rd")
+
+    /** Lo que el cliente eligió en el checkout (pago, horario, referencia, propina, diáspora, NCF). */
+    private val _checkoutExtras = MutableStateFlow(RdPrefs.loadExtras())
+    val checkoutExtras: StateFlow<CheckoutExtras> = _checkoutExtras.asStateFlow()
+    fun updateCheckoutExtras(extras: CheckoutExtras) {
+        _checkoutExtras.value = extras
+        RdPrefs.saveExtras(extras)
+    }
+
+    /** Extras de cada pedido, para compartirlo por WhatsApp. */
+    private val _orderExtras = MutableStateFlow<Map<String, CheckoutExtras>>(emptyMap())
+    val orderExtras: StateFlow<Map<String, CheckoutExtras>> = _orderExtras.asStateFlow()
+
+    /** Pedido que se hizo sin señal y espera a que vuelva internet. */
+    private val _pendingOfflineOrder = MutableStateFlow(rdPrefs.getBoolean("pending_offline_order", false))
+    val pendingOfflineOrder: StateFlow<Boolean> = _pendingOfflineOrder.asStateFlow()
+
+    /** Ahorro de datos: imágenes livianas y sin animaciones automáticas. */
+    private val _dataSaver = MutableStateFlow(rdPrefs.getBoolean("data_saver", false))
+    val dataSaver: StateFlow<Boolean> = _dataSaver.asStateFlow()
+    fun setDataSaver(enabled: Boolean) {
+        _dataSaver.value = enabled
+        rdPrefs.edit().putBoolean("data_saver", enabled).apply()
+        showToast(if (enabled) "check" else "sun", if (enabled) "Ahorro de datos activado" else "Ahorro de datos desactivado")
+    }
+
+    /** Productos con alerta de precio. */
+    private val _priceAlerts = MutableStateFlow(rdPrefs.getStringSet("price_alerts", emptySet()).orEmpty())
+    val priceAlerts: StateFlow<Set<String>> = _priceAlerts.asStateFlow()
+    fun togglePriceAlert(sku: String) {
+        val next = if (sku in _priceAlerts.value) _priceAlerts.value - sku else _priceAlerts.value + sku
+        _priceAlerts.value = next
+        rdPrefs.edit().putStringSet("price_alerts", next).apply()
+        showToast("offer", if (sku in next) "Te avisaremos cuando baje de precio" else "Alerta de precio quitada")
+        if (sku in next) checkPriceAlerts()
+    }
+
+    /** Si alguna oferta del día incluye un producto con alerta, avisa una vez por día. */
+    private fun checkPriceAlerts() {
+        val alerts = _priceAlerts.value
+        if (alerts.isEmpty()) return
+        val hit = getDailyRotatingOffersForCurrentStore().firstOrNull { it.sku in alerts } ?: return
+        val key = "alert_${hit.sku}_${hit.dayIndex}"
+        if (rdPrefs.getBoolean(key, false)) return
+        rdPrefs.edit().putBoolean(key, true).apply()
+        showToast("offer", "¡Bajó de precio! ${hit.title}: RD$${hit.offerPrice} (-${hit.discountPct}%)")
+        if (_pushNotifications.value) {
+            BravoPushNotificationCenter.dispatchPushNotification(
+                context = application,
+                category = PushNotificationCategory.EXCLUSIVE_OFFER,
+                title = "Bajó de precio: ${hit.title}",
+                body = "Ahora RD$${hit.offerPrice} (antes RD$${hit.originalPrice}). Oferta de ${hit.dayLabel}.",
+                topic = BravoPushNotificationCenter.TOPIC_OFFERS_BRAVO,
+                targetOrderId = null,
+                progressPct = 0,
+                postSystemNotification = true
+            )
+        }
+    }
+
+    /** Agrega todos los productos de un combo de temporada de una vez. */
+    fun addComboToCart(title: String, skus: List<String>) {
+        skus.forEach { changeProductQty(it, 1) }
+        showToast("check", "$title: ${skus.size} productos agregados")
+    }
 
     /** null = seguir el tema claro/oscuro del dispositivo. */
     private val _darkModeOverride = MutableStateFlow(localRepo.getDarkModeOverrideSync())
@@ -620,6 +691,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         if (topOffer != null) {
             showToast("offer", "${topOffer.dayLabel}: ${topOffer.title} (-${topOffer.discountPct}%)")
         }
+        checkPriceAlerts()
     }
 
     fun getDailyRotatingOffersForCurrentStore(
@@ -877,6 +949,15 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             connectivityUnregister = ConnectivityMonitor.observe(application) { online ->
                 _isOfflineMode.value = !online
                 _npuStatus.value = detectDeviceNpuStatus(!online)
+                if (online && _pendingOfflineOrder.value) {
+                    _pendingOfflineOrder.value = false
+                    rdPrefs.edit().putBoolean("pending_offline_order", false).apply()
+                    viewModelScope.launch {
+                        delay(800)
+                        showToast("check", "Volvió la señal: enviando tu pedido…")
+                        completeCheckoutOrder()
+                    }
+                }
             }
         } catch (e: Exception) {
             Log.d(TAG, "Default network callback registration skipped: ${e.message}")
@@ -2470,6 +2551,14 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     }
 
     fun completeCheckoutOrder() {
+        if (_isOfflineMode.value) {
+            // Sin señal: el pedido queda en cola y se envía solo al volver internet
+            _pendingOfflineOrder.value = true
+            rdPrefs.edit().putBoolean("pending_offline_order", true).apply()
+            showToast("cloud", "Sin conexión: enviaremos tu pedido apenas vuelva la señal")
+            return
+        }
+        val extras = _checkoutExtras.value
         val currentCard = _bravisimaCard.value
         val effectiveRedeem = _redeemBravisimaInCart.value && !currentCard.isLocked
         val t = computeCartTotals(redeemBravisima = effectiveRedeem)
@@ -2490,10 +2579,13 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             status = OrderDeliveryStage.PREPARED.statusText,
             badgeNum = t.count,
             date = "Hace un instante",
-            total = t.finalPay,
+            total = t.finalPay + extras.tipRd,
             branch = branch,
             skus = _cart.value.map { it.sku }
         )
+        _orderExtras.value = _orderExtras.value + (orderId to extras)
+        // La propina y el comprobante se usan una sola vez
+        updateCheckoutExtras(extras.copy(tipRd = 0, transferProofAttached = false))
 
         val generatedMovements = buildList {
             if (t.bravisimaGenerated > 0) {

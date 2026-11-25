@@ -1508,8 +1508,9 @@ fun VerticalProductCard(
     var pressed by remember { mutableStateOf(false) }
     val cartFlight = LocalCartFlight.current
     var imageCenter by remember { mutableStateOf(Offset.Zero) }
+    val dataSaver = LocalDataSaver.current
     val addWithFlight = {
-        cartFlight.launch(product, imageCenter)
+        if (!dataSaver) cartFlight.launch(product, imageCenter)
         onIncrement()
     }
     val pressScale by animateFloatAsState(

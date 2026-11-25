@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.components.SwitchRow
 import androidx.compose.runtime.derivedStateOf
 import com.example.ui.components.LargeTitle
 import com.example.ui.components.GlassBarAction
@@ -2868,6 +2869,8 @@ fun AccountSubScreenView(
     onToggleDarkMode: () -> Unit,
     followsSystemTheme: Boolean = false,
     onFollowSystemTheme: () -> Unit = {},
+    dataSaver: Boolean = false,
+    onToggleDataSaver: (Boolean) -> Unit = {},
     onSelectPalette: (String) -> Unit = {},
     onToggleNotifications: () -> Unit,
     onToggleFcmTopic: (String, Boolean) -> Unit = { _, _ -> },
@@ -3424,6 +3427,18 @@ fun AccountSubScreenView(
                                     colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor),
                                     modifier = Modifier.testTag("follow_system_theme_switch")
                                 )
+                            }
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+                            SwitchRow(
+                                title = "Ahorro de datos",
+                                subtitle = "Imágenes más livianas y sin animaciones automáticas",
+                                checked = dataSaver,
+                                accent = primaryColor
+                            ) { on ->
+                                performCrispHaptic(view, HapticStyle.CONFIRM)
+                                onToggleDataSaver(on)
                             }
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))

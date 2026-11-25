@@ -1,7 +1,10 @@
 package com.example
 
+import com.example.ui.theme.formatRd
+import com.example.ui.components.shareOnWhatsApp
 import com.example.ui.components.ProductHeroScopes
 import com.example.ui.components.LocalProductHeroScopes
+import com.example.ui.components.LocalDataSaver
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.width
@@ -256,6 +259,11 @@ fun BravoVaApp(
     val lastAddedCartFeedback by viewModel.lastAddedCartFeedback.collectAsStateWithLifecycle()
     val darkMode by viewModel.darkMode.collectAsStateWithLifecycle()
     val darkModeOverride by viewModel.darkModeOverride.collectAsStateWithLifecycle()
+    val checkoutExtras by viewModel.checkoutExtras.collectAsStateWithLifecycle()
+    val orderExtras by viewModel.orderExtras.collectAsStateWithLifecycle()
+    val dataSaver by viewModel.dataSaver.collectAsStateWithLifecycle()
+    val priceAlerts by viewModel.priceAlerts.collectAsStateWithLifecycle()
+    val platformContext = currentPlatformContext()
     val selectedPaletteId by viewModel.selectedPaletteId.collectAsStateWithLifecycle()
     val pushNotifications by viewModel.pushNotifications.collectAsStateWithLifecycle()
     val fcmToken by viewModel.fcmToken.collectAsStateWithLifecycle()
@@ -510,7 +518,10 @@ fun BravoVaApp(
                         },
                         label = "main_screen_transition"
                     ) { screenState ->
-                        CompositionLocalProvider(LocalProductHeroScopes provides ProductHeroScopes(this@SharedTransitionLayout, this@AnimatedContent)) {
+                        CompositionLocalProvider(
+                            LocalProductHeroScopes provides ProductHeroScopes(this@SharedTransitionLayout, this@AnimatedContent),
+                            LocalDataSaver provides dataSaver
+                        ) {
                         when (screenState) {
                         AppScreen.HOME -> {
                             AnimatedContent(
@@ -565,6 +576,7 @@ fun BravoVaApp(
                                     onOpenMyLists = { viewModel.openAccountSubScreen(AccountSubScreen.LISTAS) },
                                     onOpenCatalog = { viewModel.navigateTo(AppScreen.CATALOG) },
                                     onRefresh = { viewModel.refreshLocalCatalogCache() },
+                                    onAddCombo = { title, skus -> viewModel.addComboToCart(title, skus) },
                                     onOpenCategory = { catName -> viewModel.openCategoryScreen(catName) },
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
@@ -648,11 +660,18 @@ fun BravoVaApp(
                                 onBack = { viewModel.navigateBack() },
                                 onOpenCart = { viewModel.navigateTo(AppScreen.CART) },
                                 onToggleFavorite = { viewModel.toggleProductInFavList(prod.sku) },
-                                onShare = { viewModel.showToast("🔗", "Enlace de ${prod.name} copiado") },
+                                onShare = {
+                                    shareOnWhatsApp(
+                                        platformContext,
+                                        "Mira esto en BravoVa: *${prod.name}* (${prod.unit}) a ${formatRd(prod.price)} 🛒"
+                                    )
+                                },
                                 onChangeQty = { delta -> viewModel.changeProductQty(prod.sku, delta) },
                                 onRemoveCompletely = { viewModel.removeProductCompletely(prod.sku) },
                                 onOpenCategoryFilter = { catName -> viewModel.openCategoryScreen(catName) },
-                                onAskBravIa = { viewModel.askAiAboutProduct(prod.sku) }
+                                onAskBravIa = { viewModel.askAiAboutProduct(prod.sku) },
+                                hasPriceAlert = prod.sku in priceAlerts,
+                                onTogglePriceAlert = { viewModel.togglePriceAlert(prod.sku) }
                             )
                         }
 
@@ -707,6 +726,8 @@ fun BravoVaApp(
                                 onUpdateQty = { sku, delta -> viewModel.changeProductQty(sku, delta) },
                                 onToggleRedeem = { enabled -> viewModel.setRedeemBravisimaInCart(enabled) },
                                 onConfirmCheckout = { viewModel.completeCheckoutOrder() },
+                                checkoutExtras = checkoutExtras,
+                                onCheckoutExtrasChange = { viewModel.updateCheckoutExtras(it) },
                                 onExploreCatalog = { viewModel.navigateTo(AppScreen.HOME) },
                                 onAskBravIa = { viewModel.navigateTo(AppScreen.BRAVIA) },
                                 onSelectPaymentMethod = { id -> viewModel.setDefaultPayment(id) },
@@ -766,7 +787,8 @@ fun BravoVaApp(
                                 onAdvanceDeliveryStage = {
                                     viewModel.advanceTrackedOrderStatusInFirestore()
                                 },
-                                onOpenProduct = { sku -> viewModel.openProductDetail(sku) }
+                                onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
+                                orderExtras = orderExtras
                             )
                         }
 
@@ -911,6 +933,8 @@ fun BravoVaApp(
                                 onToggleDarkMode = { viewModel.toggleDarkMode() },
                                 followsSystemTheme = darkModeOverride == null,
                                 onFollowSystemTheme = { viewModel.followSystemTheme() },
+                                dataSaver = dataSaver,
+                                onToggleDataSaver = { viewModel.setDataSaver(it) },
                                 npuStatus = npuStatus,
                                 onToggleNpuMode = { viewModel.toggleNpuMode() },
                                 onSelectPalette = { paletteId -> viewModel.selectColorPalette(paletteId) },

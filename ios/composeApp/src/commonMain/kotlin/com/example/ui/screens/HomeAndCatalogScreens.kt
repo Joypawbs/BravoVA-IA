@@ -15,6 +15,8 @@ import com.example.ui.components.GlassBarAction
 import com.example.ui.components.GlassTopBar
 import com.example.ui.components.LargeTitle
 import com.example.ui.components.productHeroImage
+import com.example.ui.components.SeasonalCombosRow
+import com.example.ui.components.PriceAlertRow
 import com.example.platform.*
 
 import androidx.compose.animation.AnimatedVisibility
@@ -161,6 +163,7 @@ fun HomeScreen(
     onOpenMyLists: () -> Unit = {},
     onOpenCatalog: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onAddCombo: (String, List<String>) -> Unit = { _, _ -> },
     onOpenCategory: (String) -> Unit,
     onOpenProduct: (String) -> Unit,
     onChangeQty: (String, Int) -> Unit
@@ -516,7 +519,18 @@ fun HomeScreen(
                         }
                     }
 
-                    // Banner "Todas las categorías", como en la app oficial
+                    item(key = "home_seasonal_combos", contentType = "combos") {
+                    SeasonalCombosRow(
+                        catalog = allProducts,
+                        accent = primaryColor,
+                        onAddCombo = { combo, products ->
+                            performCrispHaptic(view, HapticStyle.CONFIRM)
+                            onAddCombo(combo.title, products.map { it.sku })
+                        }
+                    )
+                }
+
+                // Banner "Todas las categorías", como en la app oficial
                     item(key = "home_all_categories_banner", contentType = "banner") {
                         val bannerShape = RoundedCornerShape(16.dp)
                         Row(
@@ -1178,7 +1192,9 @@ fun ProductDetailScreen(
     onShare: () -> Unit,
     onChangeQty: (Int) -> Unit,
     onRemoveCompletely: () -> Unit,
-    onAskBravIa: () -> Unit
+    onAskBravIa: () -> Unit,
+    hasPriceAlert: Boolean = false,
+    onTogglePriceAlert: () -> Unit = {}
 ) {
     val view = currentPlatformView()
     val isArca = storeMode == StoreMode.ARCA
@@ -1570,6 +1586,19 @@ fun ProductDetailScreen(
                     }
                 }
             }
+        }
+
+        item(key = "detail_price_alert", contentType = "price_alert") {
+            PriceAlertRow(
+                active = hasPriceAlert,
+                accent = primaryColor,
+                darkMode = darkMode,
+                onToggle = {
+                    performCrispHaptic(view, HapticStyle.TICK)
+                    onTogglePriceAlert()
+                },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp)
+            )
         }
 
         item(key = "detail_purchase_card", contentType = "purchase_card") {

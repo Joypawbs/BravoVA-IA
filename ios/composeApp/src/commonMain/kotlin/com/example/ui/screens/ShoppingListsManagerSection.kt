@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import androidx.compose.material.icons.outlined.Share
+import com.example.ui.components.shareOnWhatsApp
 import com.example.platform.*
 
 import androidx.compose.animation.AnimatedVisibility
@@ -565,6 +567,28 @@ fun ManagedShoppingListCard(
                             contentDescription = "Renombrar lista",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(17.dp)
+                        )
+                    }
+                    // Compartir la lista con la familia por WhatsApp
+                    val shareContext = currentPlatformContext()
+                    IconButton(
+                        onClick = {
+                            performCrispHaptic(view, HapticStyle.TICK)
+                            val lines = shoppingList.skus.mapNotNull(productLookup).joinToString("\n") { "• ${it.name} (${it.unit})" }
+                            shareOnWhatsApp(
+                                shareContext,
+                                "🛒 *${shoppingList.name}* (lista BravoVa)\n$lines\n\n¿Falta algo? Agrégalo y me avisas."
+                            )
+                        },
+                        modifier = Modifier
+                            .size(32.dp)
+                            .testTag("share_shopping_list_${shoppingList.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Share,
+                            contentDescription = "Compartir lista por WhatsApp",
+                            tint = primaryColor,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                     if (shoppingList.id != "l1") {

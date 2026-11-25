@@ -1,5 +1,10 @@
 package com.example.ui.screens
 
+import androidx.compose.material.icons.outlined.Share
+import com.example.ui.components.orderWhatsAppText
+import com.example.ui.components.shareOnWhatsApp
+import com.example.ui.components.RdCheckoutOptionsCard
+import com.example.model.CheckoutExtras
 import com.example.ui.components.GlassBarAction
 import com.example.ui.components.GlassTopBar
 import com.example.platform.*
@@ -1577,14 +1582,16 @@ fun CartCheckoutScreen(
     onSelectPaymentMethod: (String) -> Unit = {},
     onAddPaymentCard: () -> Unit = {},
     onToggleCardLock: () -> Unit = {},
-    onBiometricVerified: (BiometricVerificationResult) -> Unit = {}
+    onBiometricVerified: (BiometricVerificationResult) -> Unit = {},
+    checkoutExtras: CheckoutExtras = CheckoutExtras(),
+    onCheckoutExtrasChange: (CheckoutExtras) -> Unit = {}
 ) {
     val view = currentPlatformView()
     val isArca = storeMode == StoreMode.ARCA
     val primaryColor = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
 
     var deliveryMode by remember { mutableStateOf("delivery") } // "delivery" or "pickup"
-    var ncfType by remember { mutableStateOf("B02") } // "B02" Consumidor Final, "B01" Crédito Fiscal
+    val ncfType = checkoutExtras.ncfType // "B02" Consumidor Final, "B01" Crédito Fiscal
     var lastVerificationResult by remember { mutableStateOf<BiometricVerificationResult?>(null) }
     var pendingBiometricRequest by remember { mutableStateOf<BiometricPromptRequest?>(null) }
     var pendingBiometricAction by remember { mutableStateOf<((BiometricVerificationResult) -> Unit)?>(null) }
@@ -2107,7 +2114,7 @@ fun CartCheckoutScreen(
                                     Surface(
                                         onClick = {
                                             performCrispHaptic(view, HapticStyle.TICK)
-                                            ncfType = code
+                                            onCheckoutExtrasChange(checkoutExtras.copy(ncfType = code))
                                         },
                                         shape = RoundedCornerShape(999.dp),
                                         color = if (selected) primaryColor.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -2133,6 +2140,18 @@ fun CartCheckoutScreen(
                         }
                     }
                 }
+            }
+
+            item(key = "cart_rd_options", contentType = "rd_options") {
+                RdCheckoutOptionsCard(
+                    extras = checkoutExtras,
+                    onChange = onCheckoutExtrasChange,
+                    baseTotalRd = cartTotals.finalPay,
+                    isDelivery = deliveryMode == "delivery",
+                    darkMode = darkMode,
+                    accent = primaryColor,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp)
+                )
             }
 
             item(key = "cart_summary_box", contentType = "summary") {
@@ -2426,12 +2445,20 @@ fun CartCheckoutScreen(
                             )
                         }
 
+                        val payTotalRd = cartTotals.finalPay.roundToInt() + checkoutExtras.tipRd
+                        val needsBiometric = checkoutExtras.payment.needsBiometric
                         AnimatedPurchaseButton(
-                            text = "Confirmar Pago con Huella • RD$${formatMoney(cartTotals.finalPay.roundToInt())}",
-                            icon = Icons.Default.Fingerprint,
+                            text = if (needsBiometric) "Pagar con huella • RD$${formatMoney(payTotalRd)}"
+                            else "Confirmar pedido • RD$${formatMoney(payTotalRd)}",
+                            icon = if (needsBiometric) Icons.Default.Fingerprint else Icons.Default.VerifiedUser,
                             primaryColor = primaryColor,
                             onClick = {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
+                                if (!needsBiometric) {
+                                    HapticFeedbackManager.onCheckoutConfirm(view)
+                                    onConfirmCheckout()
+                                    return@AnimatedPurchaseButton
+                                }
                                 val finalPayRd = cartTotals.finalPay.roundToInt()
                                 requestBiometricAuthorization(
                                     request = BiometricPromptRequest(
@@ -2995,7 +3022,8 @@ fun DeliveryTrackingScreen(
     onSelectOrder: (String) -> Unit = {},
     onSelectDeliveryStage: (OrderDeliveryStage) -> Unit = {},
     onAdvanceDeliveryStage: () -> Unit = {},
-    onOpenProduct: (String) -> Unit = {}
+    onOpenProduct: (String) -> Unit = {},
+    orderExtras: Map<String, CheckoutExtras> = emptyMap()
 ) {
     val view = currentPlatformView()
     val context = currentPlatformContext()
@@ -3910,8 +3938,25 @@ fun DeliveryTrackingScreen(
         GlassTopBar(
             darkMode = darkMode,
             accent = primaryColor,
-            title = "Seguimiento en Tiempo Real",
+            title = "Tu pedido",
             modifier = Modifier.align(Alignment.TopCenter),
+            actions = listOf(
+                GlassBarAction(
+                    symbol = "square.and.arrow.up",
+                    icon = Icons.Outlined.Share,
+                    label = "Compartir por WhatsApp",
+                    testTag = "share_order_whatsapp",
+                    onClick = {
+                        val order = trackedOrder ?: allOrders.firstOrNull()
+                        if (order != null) {
+                            shareOnWhatsApp(
+                                context,
+                                orderWhatsAppText(order.id, deliveryStage.statusText, order.total, order.branch, orderExtras[order.id])
+                            )
+                        }
+                    }
+                )
+            ),
             subtitle = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Entregado" else "${driverTelemetry.currentSpeedKmh} km/h • ~$effectiveEtaMinutes min",
             subtitleColor = if (deliveryStage == OrderDeliveryStage.DELIVERED) Color(0xFF10B981) else primaryColor,
             onBack = {
