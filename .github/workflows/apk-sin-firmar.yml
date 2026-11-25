@@ -40,9 +40,12 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Versión a partir de la etiqueta
         run: |
-          V="${TAG#v}"; IFS=. read -r MA MI PA <<< "$V"
+          V="${TAG#v}"; BASE="${V%%-*}"; IFS=. read -r MA MI PA <<< "$BASE"
+          CODE=$((MA*10000 + MI*100 + ${PA:-0}))
+          # Beta (v2.0.0-beta1): queda por debajo de la versión final, pero por encima de la anterior
+          if [[ "$V" == *-beta* ]]; then N="${V##*beta}"; CODE=$((CODE - 100 + ${N:-1})); fi
           echo "VERSION_NAME=$V" >> "$GITHUB_ENV"
-          echo "VERSION_CODE=$((MA*10000 + MI*100 + ${PA:-0}))" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$CODE" >> "$GITHUB_ENV"
       - name: Compilar APK de lanzamiento sin firmar
         run: |
           ./gradlew --no-daemon -PappVersionCode=$VERSION_CODE -PappVersionName=$VERSION_NAME :composeApp:assembleRelease

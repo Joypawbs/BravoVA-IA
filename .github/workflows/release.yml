@@ -46,9 +46,12 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Versión a partir de la etiqueta
         run: |
-          V="${TAG#v}"; IFS=. read -r MA MI PA <<< "$V"
+          V="${TAG#v}"; BASE="${V%%-*}"; IFS=. read -r MA MI PA <<< "$BASE"
+          CODE=$((MA*10000 + MI*100 + ${PA:-0}))
+          # Beta (v2.0.0-beta1): queda por debajo de la versión final, pero por encima de la anterior
+          if [[ "$V" == *-beta* ]]; then N="${V##*beta}"; CODE=$((CODE - 100 + ${N:-1})); fi
           echo "VERSION_NAME=$V" >> "$GITHUB_ENV"
-          echo "VERSION_CODE=$((MA*10000 + MI*100 + ${PA:-0}))" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$CODE" >> "$GITHUB_ENV"
       - name: Clave de firma
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
@@ -99,10 +102,14 @@ jobs:
           set -o pipefail
           brew install xcodegen
           xcodegen generate
-          V="${TAG#v}"; IFS=. read -r MA MI PA <<< "$V"
+          V="${TAG#v}"; BASE="${V%%-*}"; IFS=. read -r MA MI PA <<< "$BASE"
+          CODE=$((MA*10000 + MI*100 + ${PA:-0}))
+          # Beta (v2.0.0-beta1): queda por debajo de la versión final, pero por encima de la anterior
+          if [[ "$V" == *-beta* ]]; then N="${V##*beta}"; CODE=$((CODE - 100 + ${N:-1})); fi
+          # iOS solo acepta números en la versión visible: 2.0.0 (la beta se distingue por el número de compilación)
           xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Release \
             -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build/device \
-            MARKETING_VERSION="$V" CURRENT_PROJECT_VERSION="$((MA*10000 + MI*100 + ${PA:-0}))" \
+            MARKETING_VERSION="$BASE" CURRENT_PROJECT_VERSION="$CODE" \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -n 80
           APP=$(find build/device/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
           mkdir -p Payload && cp -R "$APP" Payload/
@@ -141,4 +148,6 @@ jobs:
             git push origin "refs/tags/$TAG"
           fi
           gh release delete "$TAG" -y 2>/dev/null || true
-          gh release create "$TAG" dist/* --title "BravoVa $TAG" --notes-file "$NOTES" --verify-tag
+          # Las etiquetas con guion (v2.0.0-beta1) se publican como versión de prueba
+          PRE=""; [[ "$TAG" == *-* ]] && PRE="--prerelease"
+          gh release create "$TAG" dist/* --title "BravoVa $TAG" --notes-file "$NOTES" --verify-tag $PRE
