@@ -1951,11 +1951,12 @@ fun CartCheckoutScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Método de pago (protegido con huella)",
+                                    text = "Método de pago",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.5.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.weight(1f).padding(end = 8.dp)
                                 )
                                 Surface(
                                     onClick = {

@@ -1904,7 +1904,7 @@ fun BravIaChatScreen(
                 darkMode = darkMode,
                 accent = primaryColor,
                 title = "Brav IA",
-                subtitle = if (isGenerating) "Pensando…" else if (isArca) "Asesor de El Arca" else "Tu chef y asistente de compras",
+                subtitle = if (isGenerating) "Pensando…" else if (isArca) "Asesor de El Arca" else "Chef y compras",
                 onBack = {
                     HapticFeedbackManager.onNavigationClick(view)
                     onBack()

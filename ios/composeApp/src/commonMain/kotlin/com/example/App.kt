@@ -390,7 +390,7 @@ fun BravoVaApp(
                     val aiAmbientAlpha by animateFloatAsState(
                         targetValue = when {
                             isAiGenerating -> if (darkMode) 0.14f else 0.24f
-                            currentScreen == AppScreen.BRAVIA -> if (darkMode) 0.08f else 0.15f
+                            currentScreen == AppScreen.BRAVIA -> if (darkMode) 0.08f else 0.08f
                             else -> 0f
                         },
                         animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
@@ -443,9 +443,9 @@ fun BravoVaApp(
                             .translucentBackdropSource(hazeState, zIndex = 0f)
                     ) {
                         drawRect(color = rootBgColor)
-                        val topGlowAlpha = if (darkMode) 0.07f else 0.16f
-                        val midGlowAlpha = if (darkMode) 0.05f else 0.13f
-                        val bottomGlowAlpha = if (darkMode) 0.06f else 0.15f
+                        val topGlowAlpha = if (darkMode) 0.07f else 0.05f
+                        val midGlowAlpha = if (darkMode) 0.05f else 0.03f
+                        val bottomGlowAlpha = if (darkMode) 0.06f else 0.04f
                         val driftX1 = cos(orbDriftPhase) * size.width * 0.06f
                         val driftY1 = sin(orbDriftPhase) * size.height * 0.04f
                         val driftX2 = sin(orbDriftPhase * 0.85f) * size.width * 0.07f
