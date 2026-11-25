@@ -1,5 +1,9 @@
 package com.example.ui.components
 
+import org.jetbrains.compose.resources.stringResource
+
+import com.example.resources.*
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -71,7 +75,7 @@ fun OfflineBanner(visible: Boolean, modifier: Modifier = Modifier) {
             ) {
                 Icon(Icons.Filled.WifiOff, contentDescription = null, tint = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.size(16.dp))
                 Text(
-                    "Sin conexión • mostrando lo guardado",
+                    stringResource(Res.string.offline_banner),
                     color = MaterialTheme.colorScheme.inverseOnSurface,
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.SemiBold

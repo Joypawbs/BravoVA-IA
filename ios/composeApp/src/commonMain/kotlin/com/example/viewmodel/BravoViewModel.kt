@@ -655,6 +655,9 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             _darkMode.value = _darkModeOverride.value ?: _systemDark.value
             _selectedPaletteId.value = localRepo.loadPaletteId(_selectedPaletteId.value)
             _activeBranch.value = localRepo.loadActiveBranch(_activeBranch.value)
+            // 2.0: la app se muestra en cuanto se conocen tema y tienda; el resto llega después
+            // (el catálogo guardado ya se cargó arriba y los pedidos/listas aparecen al instante).
+            _isAppBooting.value = false
             _accumulatedBravisimaBalance.value = localRepo.getBravisimaBalance(145)
             _orders.value = localRepo.loadOrders(defaultOrders)
             val initialTracked = _orders.value.find { it.id == _trackedOrderId.value } ?: _orders.value.firstOrNull()
@@ -669,8 +672,6 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 updatedLists[0] = updatedLists[0].copy(skus = savedFavs)
             }
             _lists.value = updatedLists
-            delay(480L)
-            _isAppBooting.value = false
         }
         viewModelScope.launch {
             localRepo.cartItems.collect { entities ->

@@ -2554,9 +2554,9 @@ private fun LiveVoiceConversationBanner(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 val voiceQuickPrompts = listOf(
-                    "🎤 \"Dime los pasos para preparar Mangú\"" to "Dame los pasos exactos y al grano para preparar un Mangú con Los Tres Golpes.",
-                    "🎤 \"¿Cómo preparo un Sancocho?\"" to "Explícame paso a paso y directo al grano cómo preparar un Sancocho Dominicano y qué ingredientes necesito.",
-                    "🎤 \"Receta rápida con pollo\"" to "Dame los pasos concisos para preparar una receta rápida con pechuga de pollo y arroz Bravo."
+                    "\"Dime los pasos para preparar Mangú\"" to "Dame los pasos exactos y al grano para preparar un Mangú con Los Tres Golpes.",
+                    "\"¿Cómo preparo un Sancocho?\"" to "Explícame paso a paso y directo al grano cómo preparar un Sancocho Dominicano y qué ingredientes necesito.",
+                    "\"Receta rápida con pollo\"" to "Dame los pasos concisos para preparar una receta rápida con pechuga de pollo y arroz Bravo."
                 )
                 voiceQuickPrompts.forEach { (chipTitle, fullPrompt) ->
                     Surface(
@@ -4000,7 +4000,7 @@ fun AccountSubScreenView(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Button(
-                                onClick = { onShowToast("💬", "Conectando con WhatsApp Bravo (809-540-2728)...") },
+                                onClick = { onShowToast("chat", "Conectando con WhatsApp Bravo (809-540-2728)...") },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
                                 shape = RoundedCornerShape(999.dp),
                                 modifier = Modifier.fillMaxWidth()
@@ -4011,7 +4011,7 @@ fun AccountSubScreenView(
                                 text = "Llamar al (809) 540-2728",
                                 icon = null,
                                 primaryColor = primaryColor,
-                                onClick = { onShowToast("📞", "Marcando a Servicio al Cliente (809-540-2728)...") },
+                                onClick = { onShowToast("phone", "Marcando a Servicio al Cliente (809-540-2728)...") },
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }

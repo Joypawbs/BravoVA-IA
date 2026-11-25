@@ -1,5 +1,9 @@
 package com.example.ui.screens
 
+import org.jetbrains.compose.resources.stringResource
+
+import com.example.resources.*
+
 import com.example.ui.theme.Tone
 
 import kotlinx.coroutines.launch
@@ -450,7 +454,7 @@ fun HomeScreen(
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
-                                text = "Resultados para \"$debouncedQuery\"",
+                                text = stringResource(Res.string.search_results_for, debouncedQuery),
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 16.sp,
@@ -495,7 +499,7 @@ fun HomeScreen(
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
-                                        text = "Sin resultados para \"$debouncedQuery\"",
+                                        text = stringResource(Res.string.search_empty_title, debouncedQuery),
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
@@ -503,14 +507,14 @@ fun HomeScreen(
                                     )
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "Prueba otra palabra clave o consulta opciones disponibles en el catálogo con Brav IA.",
+                                        text = stringResource(Res.string.search_empty_body),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     AnimatedPurchaseButton(
-                                        text = "Consultar sustitutos en Brav IA",
+                                        text = stringResource(Res.string.search_empty_cta),
                                         icon = Icons.Default.AutoAwesome,
                                         primaryColor = primaryColor,
                                         onClick = { onNavigateToBravIa("¿Qué producto del catálogo me recomiendas como alternativa a $debouncedQuery?") }
@@ -596,14 +600,14 @@ fun HomeScreen(
                                     )
                                     Column(Modifier.weight(1f)) {
                                         Text(
-                                            text = "¿Repetimos tu última compra?",
+                                            text = stringResource(Res.string.repeat_title),
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 14.5.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = "${lastOrder.skus.size} productos • ${lastOrder.date}",
+                                            text = stringResource(Res.string.repeat_products, lastOrder.skus.size, lastOrder.date),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 1,
@@ -620,7 +624,7 @@ fun HomeScreen(
                                         modifier = Modifier.testTag("home_repeat_order_button")
                                     ) {
                                         Text(
-                                            text = "Repetir",
+                                            text = stringResource(Res.string.repeat_button),
                                             color = Color.White,
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
@@ -637,13 +641,13 @@ fun HomeScreen(
                     item(key = "home_recent_products", contentType = "section_carousel") {
                         Column(Modifier.fillMaxWidth().padding(top = 14.dp)) {
                             Text(
-                                text = "Lo de siempre",
+                                text = stringResource(Res.string.recent_label),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 14.dp)
                             )
                             Text(
-                                text = "Lo que compraste en tus últimos pedidos",
+                                text = stringResource(Res.string.recent_subtitle),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 14.dp)
@@ -1535,7 +1539,7 @@ fun ProductDetailScreen(
                     val cheaper = remember(product.sku, allProducts) { product.cheaperAlternative(allProducts) }
                     if (unitPriceInfo != null) {
                         Text(
-                            text = "Equivale a ${formatUnitPrice(unitPriceInfo.first, unitPriceInfo.second)}",
+                            text = stringResource(Res.string.unit_price_equals, formatUnitPrice(unitPriceInfo.first, unitPriceInfo.second)),
                             fontSize = 12.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

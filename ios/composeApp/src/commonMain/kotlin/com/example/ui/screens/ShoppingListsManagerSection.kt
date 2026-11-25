@@ -230,10 +230,10 @@ fun BravIaHistoryAutoListHeroCard(
             }
 
             val presets = listOf(
-                Triple("ai_preset_habitual", "✨ Mi Compra Habitual", "Productos más comprados en todo mi historial de órdenes más básicos de despensa"),
-                Triple("ai_preset_desayuno", "🍳 Desayunos y Cena", "Mis productos habituales de desayuno y cena dominicana según mi historial"),
-                Triple("ai_preset_hogar", "🧹 Reposición Hogar", "Productos de limpieza y hogar basados en mis compras pasadas"),
-                Triple("ai_preset_mascota", "🐾 Mascota El Arca", "Alimentos, snacks y cuidado de mascotas según mi historial")
+                Triple("ai_preset_habitual", "Mi Compra Habitual", "Productos más comprados en todo mi historial de órdenes más básicos de despensa"),
+                Triple("ai_preset_desayuno", "Desayunos y Cena", "Mis productos habituales de desayuno y cena dominicana según mi historial"),
+                Triple("ai_preset_hogar", "Reposición Hogar", "Productos de limpieza y hogar basados en mis compras pasadas"),
+                Triple("ai_preset_mascota", "Mascota El Arca", "Alimentos, snacks y cuidado de mascotas según mi historial")
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -389,7 +389,7 @@ fun CreateShoppingListFormCard(
 
             AnimatedPurchaseButton(
                 text = if (autoPopulateWithAi) {
-                    "✨ Crear y Autocompletar con Brav IA"
+                    "Crear y Autocompletar con Brav IA"
                 } else {
                     "+ Crear Lista Personalizada"
                 },
@@ -531,7 +531,7 @@ fun ManagedShoppingListCard(
                                     color = primaryColor.copy(alpha = 0.14f)
                                 ) {
                                     Text(
-                                        text = "✨ Brav IA",
+                                        text = "Brav IA",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,

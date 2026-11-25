@@ -1,5 +1,9 @@
 package com.example.ui.components
 
+import org.jetbrains.compose.resources.stringResource
+
+import com.example.resources.*
+
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -62,7 +66,9 @@ object RecentSearches {
     fun clear() = items.clear()
 }
 
-enum class SearchSort(val label: String) { RELEVANCE("Relevancia"), PRICE_LOW("Menor precio"), PRICE_HIGH("Mayor precio") }
+enum class SearchSort(val labelRes: org.jetbrains.compose.resources.StringResource) {
+    RELEVANCE(Res.string.sort_relevance), PRICE_LOW(Res.string.sort_price_low), PRICE_HIGH(Res.string.sort_price_high)
+}
 
 /** Precio que paga el cliente. */
 val Product.effectivePrice: Int get() = price
@@ -99,7 +105,7 @@ fun SearchFilterRow(
         FilterChip(
             selected = onlyOffers,
             onClick = onToggleOffers,
-            label = { Text("En oferta") },
+            label = { Text(stringResource(Res.string.filter_offers)) },
             leadingIcon = if (onlyOffers) { { Icon(Icons.Filled.Check, null, Modifier.size(16.dp)) } } else null,
             colors = colors
         )
@@ -107,7 +113,7 @@ fun SearchFilterRow(
             FilterChip(
                 selected = sort == s,
                 onClick = { onSortChange(s) },
-                label = { Text(s.label) },
+                label = { Text(stringResource(s.labelRes)) },
                 colors = colors
             )
         }
@@ -130,14 +136,14 @@ fun SearchSuggestionRow(
             SuggestionChip(
                 onClick = { onPick(q) },
                 label = { Text(q) },
-                icon = { Icon(Icons.Filled.History, contentDescription = "Búsqueda reciente", modifier = Modifier.size(16.dp)) }
+                icon = { Icon(Icons.Filled.History, contentDescription = stringResource(Res.string.search_recent_cd), modifier = Modifier.size(16.dp)) }
             )
         }
         popular.filter { p -> recent.none { normalizeForSearch(it) == normalizeForSearch(p) } }.forEach { q ->
             SuggestionChip(
                 onClick = { onPick(q) },
                 label = { Text(q) },
-                icon = { Icon(Icons.AutoMirrored.Filled.TrendingUp, contentDescription = "Popular", modifier = Modifier.size(16.dp)) }
+                icon = { Icon(Icons.AutoMirrored.Filled.TrendingUp, contentDescription = stringResource(Res.string.search_popular_cd), modifier = Modifier.size(16.dp)) }
             )
         }
     }

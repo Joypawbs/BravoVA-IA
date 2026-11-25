@@ -1176,7 +1176,16 @@ fun BravoVaApp(
 
 /** Ícono SF Symbol equivalente para los avisos en iOS. */
 private fun toastSymbol(key: String): String = when (key) {
-    "check" -> "checkmark.circle.fill"
+    "check", "✓", "✅" -> "checkmark.circle.fill"
+    "🗑️", "trash" -> "trash.fill"
+    "📋", "list" -> "list.bullet.rectangle.fill"
+    "✏️" -> "pencil"
+    "✨", "ai" -> "sparkles"
+    "🛒", "cart" -> "cart.fill"
+    "🐾" -> "pawprint.fill"
+    "★" -> "star.fill"
+    "chat" -> "message.fill"
+    "phone" -> "phone.fill"
     "offer", "🏷️" -> "tag.fill"
     "cloud" -> "icloud.slash.fill"
     "pin" -> "mappin.circle.fill"

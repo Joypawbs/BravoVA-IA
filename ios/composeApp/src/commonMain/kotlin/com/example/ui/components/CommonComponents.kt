@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import org.jetbrains.compose.resources.stringResource
+
 import com.example.ui.theme.Tone
 
 import androidx.compose.ui.graphics.toArgb
@@ -65,6 +67,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.DirectionsBike
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AcUnit
@@ -1802,6 +1806,8 @@ fun BravoUnifiedIcon(
         normalized == "🐾" || normalized.contains("pet") || normalized.contains("arca") -> Icons.Filled.Pets
         normalized == "🛒" || normalized.contains("cart") -> Icons.Filled.ShoppingCart
         normalized == "🏆" || normalized.contains("trophy") || normalized.contains("points") -> Icons.Filled.EmojiEvents
+        normalized == "💬" || normalized.contains("chat") -> Icons.AutoMirrored.Filled.Chat
+        normalized == "📞" || normalized.contains("phone") -> Icons.Filled.Phone
         normalized.contains("shipping") || normalized.contains("truck") -> Icons.Filled.LocalShipping
         else -> Icons.Filled.Info
     }
@@ -2174,13 +2180,18 @@ fun TranslucentBottomDock(
     val borderBrush = uniformMenuTranslucentBorderBrush(activeColor, darkMode)
     val sheenBrush = uniformMenuTranslucentSheenBrush(darkMode, activeColor)
 
-    val navItems = remember {
+    val tabBravisima = stringResource(Res.string.tab_bravisima)
+    val tabCatalog = stringResource(Res.string.tab_catalog)
+    val tabHome = stringResource(Res.string.tab_home)
+    val tabBravia = stringResource(Res.string.tab_bravia)
+    val tabProfile = stringResource(Res.string.tab_profile)
+    val navItems = remember(tabBravisima, tabCatalog, tabHome, tabBravia, tabProfile) {
         listOf(
-            Triple(AppScreen.BRAVISIMA, Icons.Outlined.CreditCard, "Bravísima"),
-            Triple(AppScreen.CATALOG, Icons.Outlined.GridView, "Catálogo"),
-            Triple(AppScreen.HOME, Icons.Outlined.Home, "Inicio"),
-            Triple(AppScreen.BRAVIA, Icons.Outlined.AutoAwesome, "Brav IA"),
-            Triple(AppScreen.ACCOUNT, Icons.Outlined.PersonOutline, "Perfil")
+            Triple(AppScreen.BRAVISIMA, Icons.Outlined.CreditCard, tabBravisima),
+            Triple(AppScreen.CATALOG, Icons.Outlined.GridView, tabCatalog),
+            Triple(AppScreen.HOME, Icons.Outlined.Home, tabHome),
+            Triple(AppScreen.BRAVIA, Icons.Outlined.AutoAwesome, tabBravia),
+            Triple(AppScreen.ACCOUNT, Icons.Outlined.PersonOutline, tabProfile)
         )
     }
 

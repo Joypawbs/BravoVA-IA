@@ -75,10 +75,10 @@ private data class SampleScanChip(
 )
 
 private val SAMPLE_BARCODE_CHIPS = listOf(
-    SampleScanChip("BRV-001", "🍖 Salami ($499)", "7460112299014"),
-    SampleScanChip("BRV-017", "🧻 Papel Bravo ($379)", "7460112299021"),
-    SampleScanChip("BRV-089", "🍞 Pan Viga ($99)", "7460112299038"),
-    SampleScanChip("ARC-001", "🐾 Alimento Arca ($620)", "7460112299045")
+    SampleScanChip("BRV-001", "Salami ($499)", "7460112299014"),
+    SampleScanChip("BRV-017", "Papel Bravo ($379)", "7460112299021"),
+    SampleScanChip("BRV-089", "Pan Viga ($99)", "7460112299038"),
+    SampleScanChip("ARC-001", "Alimento Arca ($620)", "7460112299045")
 )
 
 @Composable

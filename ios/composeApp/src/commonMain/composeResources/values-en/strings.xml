@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos de BravoVa. Español es el idioma base; values-en = inglés para la diáspora. -->
+<resources>
+    <string name="tab_bravisima">Bravísima</string>
+    <string name="tab_catalog">Catalog</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_bravia">Brav AI</string>
+    <string name="tab_profile">Profile</string>
+    <string name="offline_banner">Offline • showing saved items</string>
+    <string name="repeat_title">Reorder your last purchase?</string>
+    <string name="repeat_products">%1$d items • %2$s</string>
+    <string name="repeat_button">Reorder</string>
+    <string name="recent_label">Your usuals</string>
+    <string name="recent_subtitle">What you bought in your last orders</string>
+    <string name="filter_offers">On sale</string>
+    <string name="sort_relevance">Relevance</string>
+    <string name="sort_price_low">Lowest price</string>
+    <string name="sort_price_high">Highest price</string>
+    <string name="search_recent_cd">Recent search</string>
+    <string name="search_popular_cd">Popular</string>
+    <string name="search_results_for">Results for "%1$s"</string>
+    <string name="search_empty_title">No results for "%1$s"</string>
+    <string name="search_empty_body">Try another keyword or ask Brav AI for available options in the catalog.</string>
+    <string name="search_empty_cta">Ask Brav AI for substitutes</string>
+    <string name="cart_empty_title">Your cart is empty</string>
+    <string name="cart_empty_body">Add products straight from the aisles with a quick tap.</string>
+    <string name="cart_empty_cta">Browse products</string>
+    <string name="unit_price_equals">That\'s %1$s</string>
+    <string name="cheaper_alternative">Save %1$d% per %2$s: %3$s</string>
+    <string name="unit_lb">lb</string>
+    <string name="unit_liter">liter</string>
+    <string name="unit_unit">unit</string>
+</resources>

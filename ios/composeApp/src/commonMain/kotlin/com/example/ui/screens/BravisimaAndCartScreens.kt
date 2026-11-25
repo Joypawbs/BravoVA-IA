@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import org.jetbrains.compose.resources.stringResource
+
 import com.example.ui.theme.Tone
 
 import androidx.compose.material.icons.outlined.Share
@@ -1655,7 +1657,7 @@ fun CartCheckoutScreen(
                         )
                         Spacer(modifier = Modifier.height(14.dp))
                         Text(
-                            text = "Tu carrito está vacío",
+                            text = stringResource(Res.string.cart_empty_title),
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 20.sp,
@@ -1663,14 +1665,14 @@ fun CartCheckoutScreen(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Agrega productos directamente desde los pasillos con un toque rápido.",
+                            text = stringResource(Res.string.cart_empty_body),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(18.dp))
                         AnimatedPurchaseButton(
-                            text = "Explorar productos",
+                            text = stringResource(Res.string.cart_empty_cta),
                             primaryColor = primaryColor,
                             onClick = onExploreCatalog,
                             modifier = Modifier.fillMaxWidth()
@@ -4508,7 +4510,7 @@ private fun RealInteractiveDeliveryMapView(
                 val pillText = if (darkMode) Color.White else Color(15, 23, 42)
 
                 // Etiqueta de la sucursal
-                val originLabel = "🏪 $branchName"
+                val originLabel = "$branchName"
                 val oWidth = measureCanvasLabel(canvasTextMeasurer, originLabel, 10.5f) + 18f * density
                 val oHeight = 20f * density
                 val oLeft = (originCenter.x - oWidth / 2f).coerceIn(8f, (w - oWidth - 8f).coerceAtLeast(8f))
@@ -4517,7 +4519,7 @@ private fun RealInteractiveDeliveryMapView(
                 canvasLabel(canvasTextMeasurer, originLabel, oLeft + 9f * density, oTop + oHeight / 2f + 3.8f * density, pillText, 10.5f)
 
                 // Etiqueta del cliente
-                val destLabel = "📍 Tu Entrega"
+                val destLabel = "Tu entrega"
                 val dWidth = measureCanvasLabel(canvasTextMeasurer, destLabel, 10.5f) + 18f * density
                 val dLeft = (destCenter.x - dWidth / 2f).coerceIn(8f, (w - dWidth - 8f).coerceAtLeast(8f))
                 val dTop = (destCenter.y + 12f * density).coerceIn(8f, (h - oHeight - 46f * density).coerceAtLeast(8f))
@@ -4525,7 +4527,7 @@ private fun RealInteractiveDeliveryMapView(
                 canvasLabel(canvasTextMeasurer, destLabel, dLeft + 9f * density, dTop + oHeight / 2f + 3.8f * density, pillText, 10.5f)
 
                 // Etiqueta del repartidor
-                val speedText = "🛵 Carlos • ${telemetry.currentSpeedKmh} km/h"
+                val speedText = "Carlos • ${telemetry.currentSpeedKmh} km/h"
                 val drWidth = measureCanvasLabel(canvasTextMeasurer, speedText, 11f) + 20f * density
                 val drHeight = 22f * density
                 val drLeft = (driverCenter.x - drWidth / 2f).coerceIn(10f, (w - drWidth - 10f).coerceAtLeast(10f))
@@ -4893,7 +4895,7 @@ private fun DriverAiLiveChatCard(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = if (isUser) "Tú" else "🛵 Carlos Rodríguez (Repartidor)",
+                                        text = if (isUser) "Tú" else "Carlos Rodríguez (repartidor)",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
