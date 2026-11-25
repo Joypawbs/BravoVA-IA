@@ -65,10 +65,10 @@ final class BravoVaTourUITests: XCTestCase {
         pause(4); shot("home")
 
         // Huevo de pascua: 5 toques al logo
-        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.14, dy: 0.072))
+        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.16, dy: 0.097))
         for _ in 0..<5 { logo.tap() }
         pause(2); shot("huellitas")
-        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.21)).tap()
         pause(1)
 
         // Detalle de producto y vuelta al inicio

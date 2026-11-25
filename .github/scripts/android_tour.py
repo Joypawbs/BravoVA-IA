@@ -119,9 +119,9 @@ def main():
     shot("home")
     w, h = screen_size()
     for _ in range(5):
-        adb("shell", "input", "tap", str(int(w * 0.14)), str(int(h * 0.055)))
+        adb("shell", "input", "tap", str(int(w * 0.16)), str(int(h * 0.09)))
     time.sleep(2); shot("huellitas")
-    adb("shell", "input", "tap", str(w // 2), str(h // 2)); time.sleep(1)
+    adb("shell", "input", "tap", str(int(w * 0.3)), str(int(h * 0.205))); time.sleep(1)
     if tap(["Café Soluble"], prefix=True, wait=3):
         shot("detalle_producto")
         tap(["Volver"], wait=2, fallback=(0.06, 0.06))
