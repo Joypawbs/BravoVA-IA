@@ -1,0 +1,86 @@
+{
+ "BRV-032": {
+  "url": "https://images.openfoodfacts.org/images/products/770/059/159/3006/front_es.10.400.jpg",
+  "nombre_off": "Chips de plátano maduro con sal marina",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-048": {
+  "url": "https://images.openfoodfacts.org/images/products/750/105/536/1540/front_es.17.400.jpg",
+  "nombre_off": "Coca Cola Sabor Original",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-082": {
+  "url": "https://images.openfoodfacts.org/images/products/000/002/487/4977/front_es.3.400.jpg",
+  "nombre_off": "Muslos de ala o alas de pollo FIESTA frescos",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-098": {
+  "url": "https://images.openfoodfacts.org/images/products/842/186/010/1997/front_fr.8.400.jpg",
+  "nombre_off": "Leche Uht Entera Tierra De Sabor Caja 6 Litros",
+  "puntaje": 0.75,
+  "rd": false
+ },
+ "BRV-112": {
+  "url": "https://images.openfoodfacts.org/images/products/759/110/424/1107/front_es.3.400.jpg",
+  "nombre_off": "Harina trigo todo uso",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-186": {
+  "url": "https://images.openfoodfacts.org/images/products/848/000/023/4254/front_es.3.400.jpg",
+  "nombre_off": "Uvas Peladas, Sin semillas, Almibar",
+  "puntaje": 0.75,
+  "rd": false
+ },
+ "BRV-201": {
+  "url": "https://images.openfoodfacts.org/images/products/217/324/300/2877/front_es.3.400.jpg",
+  "nombre_off": "Queso Gouda Holandés",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-203": {
+  "url": "https://images.openfoodfacts.org/images/products/000/000/161/2533/front_es.8.400.jpg",
+  "nombre_off": "Queso tipo provolone rebanado ahumado",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-211": {
+  "url": "https://images.openfoodfacts.org/images/products/759/241/200/0110/front_es.3.400.jpg",
+  "nombre_off": "Yogurt griego con almendras y miel",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-219": {
+  "url": "https://images.openfoodfacts.org/images/products/004/122/022/4012/front_en.9.400.jpg",
+  "nombre_off": "Crema Agria Mexicam Style Sour Cream",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-231": {
+  "url": "https://images.openfoodfacts.org/images/products/843/538/281/0633/front_es.3.400.jpg",
+  "nombre_off": "Galletas Rellenas de crema de chocolate",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-244": {
+  "url": "https://images.openfoodfacts.org/images/products/848/000/034/1716/front_es.62.400.jpg",
+  "nombre_off": "Pimienta negra molida",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-257": {
+  "url": "https://images.openfoodfacts.org/images/products/780/241/000/1614/front_en.3.400.jpg",
+  "nombre_off": "Caldo en Polvo de Verduras Bolsa",
+  "puntaje": 1.0,
+  "rd": false
+ },
+ "BRV-258": {
+  "url": "https://images.openfoodfacts.org/images/products/841/138/832/7399/front_fr.26.400.jpg",
+  "nombre_off": "Escamas de pimenton ahumado dulce",
+  "puntaje": 0.75,
+  "rd": false
+ }
+}
