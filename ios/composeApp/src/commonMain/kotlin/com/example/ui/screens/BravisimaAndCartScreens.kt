@@ -2352,14 +2352,14 @@ fun CartCheckoutScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Total a pagar",
+                                text = if (checkoutExtras.tipRd > 0) "Total con propina" else "Total a pagar",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 18.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "RD$${formatMoney(cartTotals.finalPay.roundToInt())}.00",
+                                text = "RD$${formatMoney(cartTotals.finalPay.roundToInt() + checkoutExtras.tipRd)}.00",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 23.sp,
