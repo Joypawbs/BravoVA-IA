@@ -200,7 +200,7 @@ class BravoLocalRepository(
     }
 
     companion object {
-        private const val CURRENT_CATALOG_IMAGES_VERSION = 10
+        private const val CURRENT_CATALOG_IMAGES_VERSION = 11
     }
 
     suspend fun ensureCatalogCached(
