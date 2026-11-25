@@ -82,6 +82,8 @@ import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Egg
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -1653,6 +1655,8 @@ fun VerticalProductCard(
             )
 
             Spacer(Modifier.weight(1f))
+            // 2.0: precio + botón "+"; al agregar, el botón se vuelve un selector de cantidad
+            // a todo el ancho de la tarjeta, con toques de 40 dp (Baymard: cantidad visible tras agregar)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -1668,7 +1672,7 @@ fun VerticalProductCard(
                 if (qtyInCart <= 0) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
                             .background(softAccent)
                             .clickable {
@@ -1678,48 +1682,62 @@ fun VerticalProductCard(
                             .testTag("add_${product.sku}"),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Agregar ${product.name}", tint = accent, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Filled.Add, contentDescription = "Agregar ${product.name}", tint = accent, modifier = Modifier.size(22.dp))
                     }
-                } else {
-                    Row(
+                }
+            }
+            if (qtyInCart > 0) {
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(accent),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
                         modifier = Modifier
-                            .height(36.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(softAccent),
-                        verticalAlignment = Alignment.CenterVertically
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                performCrispHaptic(view, HapticStyle.TICK)
+                                onDecrement()
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Remove,
-                            contentDescription = "Quitar uno",
-                            tint = accent,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .clickable {
-                                    performCrispHaptic(view, HapticStyle.TICK)
-                                    onDecrement()
-                                }
-                                .padding(5.dp)
+                            imageVector = if (qtyInCart == 1) Icons.Filled.DeleteOutline else Icons.Filled.Remove,
+                            contentDescription = if (qtyInCart == 1) "Quitar ${product.name} del carrito" else "Quitar uno",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
                         )
-                        Text(
-                            text = qtyInCart.toString(),
-                            color = accent,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            modifier = Modifier.padding(horizontal = 2.dp)
-                        )
+                    }
+                    Text(
+                        text = qtyInCart.toString(),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics { contentDescription = "$qtyInCart en el carrito" }
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                performCrispHaptic(view, HapticStyle.CONFIRM)
+                                addWithFlight()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = "Agregar uno",
-                            tint = accent,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .clickable {
-                                    performCrispHaptic(view, HapticStyle.CONFIRM)
-                                    addWithFlight()
-                                }
-                                .padding(5.dp)
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }

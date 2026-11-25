@@ -557,23 +557,6 @@ fun HomeScreen(
                         }
                     }
                 } else {
-                    if (dailyRotatingOffers.isNotEmpty()) {
-                        item(key = "home_daily_rotating_offers_carousel", contentType = "daily_offers") {
-                            DailyRotatingOffersCarouselSection(
-                                dailyRotatingOffers = dailyRotatingOffers,
-                                allProducts = allProducts,
-                                darkMode = darkMode,
-                                isArca = isArca,
-                                primaryColor = primaryColor,
-                                onRotateOfferDay = onRotateOfferDay,
-                                onTriggerDailyOfferPush = onTriggerDailyOfferPush,
-                                onOpenProduct = onOpenProduct,
-                                onChangeQty = onChangeQty,
-                                sectionTag = "home_daily_rotating_offers_section",
-                                rotateButtonTag = "home_rotate_daily_offer_button"
-                            )
-                        }
-                    }
 
                     // Recordatorio: repetir la última compra con un toque
                     if (lastOrder != null && lastOrder.skus.isNotEmpty()) {
@@ -673,6 +656,25 @@ fun HomeScreen(
                                     )
                                 }
                             }
+                        }
+                    }
+
+                    // 2.0: las ofertas del día van después de lo que más se recompra
+                    if (dailyRotatingOffers.isNotEmpty()) {
+                        item(key = "home_daily_rotating_offers_carousel", contentType = "daily_offers") {
+                            DailyRotatingOffersCarouselSection(
+                                dailyRotatingOffers = dailyRotatingOffers,
+                                allProducts = allProducts,
+                                darkMode = darkMode,
+                                isArca = isArca,
+                                primaryColor = primaryColor,
+                                onRotateOfferDay = onRotateOfferDay,
+                                onTriggerDailyOfferPush = onTriggerDailyOfferPush,
+                                onOpenProduct = onOpenProduct,
+                                onChangeQty = onChangeQty,
+                                sectionTag = "home_daily_rotating_offers_section",
+                                rotateButtonTag = "home_rotate_daily_offer_button"
+                            )
                         }
                     }
                 }
