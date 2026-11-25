@@ -65,14 +65,13 @@ final class BravoVaTourUITests: XCTestCase {
         pause(4); shot("home")
 
         // Huevo de pascua: 5 toques al logo
-        let logoEl = app.descendants(matching: .any).matching(identifier: "brand_switcher_button").firstMatch
-        if logoEl.waitForExistence(timeout: 2) {
-            print("[tour] logo: 5 toques rápidos sobre el elemento")
-            logoEl.tap(withNumberOfTaps: 5, numberOfTouches: 1)
-        } else {
-            print("[tour] logo: 5 toques por coordenadas")
-            let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.16, dy: 0.097))
-            for _ in 0..<5 { logo.tap() }
+        // Toques individuales con su hora, para ver cuánto tarda cada uno en el simulador
+        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.16, dy: 0.097))
+        var t0 = Date()
+        for i in 0..<5 {
+            logo.press(forDuration: 0.05)
+            print("[tour] logo toque \(i + 1): \(String(format: "%.2f", Date().timeIntervalSince(t0))) s")
+            t0 = Date()
         }
         pause(2); shot("huellitas")
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.21)).tap()

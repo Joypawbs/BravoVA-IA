@@ -45,10 +45,10 @@ object PawEasterEgg {
     private var streak = 0
     private var lastTap = 0L
 
-    /** Cuenta toques seguidos: la racha se reinicia si pasan más de 1,5 s entre dos toques. */
+    /** Cuenta toques seguidos: la racha se reinicia si pasan más de 3 s entre dos toques. */
     fun registerLogoTap(): Boolean {
         val now = System.currentTimeMillis()
-        streak = if (now - lastTap <= 1500) streak + 1 else 1
+        streak = if (now - lastTap <= 3000) streak + 1 else 1
         lastTap = now
         if (streak >= 5) {
             streak = 0
