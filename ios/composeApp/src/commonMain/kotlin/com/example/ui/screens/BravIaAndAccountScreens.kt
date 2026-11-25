@@ -1819,7 +1819,7 @@ fun BravIaChatScreen(
                                             border = BorderStroke(1.3.dp, primaryColor),
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
                                             modifier = Modifier
-                                                .weight(0.9f)
+                                                .weight(0.8f)
                                                 .testTag("save_as_list_${msg.id}")
                                         ) {
                                             Icon(
@@ -1840,14 +1840,14 @@ fun BravIaChatScreen(
                                         }
 
                                         AnimatedPurchaseButton(
-                                            text = "Agregar (${recommendedProducts.size}) • RD$${formatPesos(totalCombo)}",
+                                            text = "Agregar ${recommendedProducts.size} • RD$${formatPesos(totalCombo)}",
                                             icon = Icons.Default.ShoppingCart,
                                             primaryColor = primaryColor,
                                             onClick = {
                                                 HapticFeedbackManager.onAddToCart(view)
                                                 onAddBundleForMessage(msg.id)
                                             },
-                                            modifier = Modifier.weight(1.3f),
+                                            modifier = Modifier.weight(1.4f),
                                             testTag = "add_all_recommended_${msg.id}"
                                         )
                                     }
@@ -1879,7 +1879,7 @@ fun BravIaChatScreen(
                                             )
                                             Spacer(modifier = Modifier.width(6.dp))
                                             Text(
-                                                text = "Pedir por mí con Brav IA (Confirmación Manual • RD$${formatPesos(totalCombo)})",
+                                                text = "Pedir por mí • tú confirmas • RD$${formatPesos(totalCombo)}",
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = 11.5.sp,
