@@ -42,6 +42,8 @@ class CartFlightController {
     var target: Offset? = null
 
     fun launch(product: Product, from: Offset) {
+        // Con "reducir movimiento" no se anima el vuelo al carrito
+        if (com.example.platform.systemPrefersReducedMotion()) return
         if (flights.size >= 4) return // no acumular animaciones si tocan muy rápido
         flights += Flight(nextId++, product, from)
     }

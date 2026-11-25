@@ -68,8 +68,13 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.SearchOff
 import com.example.ui.components.matchesSearch
+import com.example.ui.components.unitPrice
+import com.example.ui.components.cheaperAlternative
+import com.example.ui.components.formatUnitPrice
 import com.example.ui.components.applySearchFilters
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Verified
@@ -169,6 +174,8 @@ fun HomeScreen(
     onRefresh: () -> Unit = {},
     onAddCombo: (String, List<String>) -> Unit = { _, _ -> },
     recentProducts: List<Product> = emptyList(),
+    lastOrder: com.example.model.OrderRecord? = null,
+    onRepeatOrder: (String) -> Unit = {},
     onOpenCategory: (String) -> Unit,
     onOpenProduct: (String) -> Unit,
     onChangeQty: (String, Int) -> Unit
@@ -558,6 +565,68 @@ fun HomeScreen(
                                 sectionTag = "home_daily_rotating_offers_section",
                                 rotateButtonTag = "home_rotate_daily_offer_button"
                             )
+                        }
+                    }
+
+                    // Recordatorio: repetir la última compra con un toque
+                    if (lastOrder != null && lastOrder.skus.isNotEmpty()) {
+                        item(key = "home_repeat_last_order", contentType = "repeat_order") {
+                            TranslucentCard(
+                                darkMode = darkMode,
+                                isArca = isArca,
+                                cornerRadius = 20.dp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp)
+                                    .padding(top = 14.dp)
+                                    .testTag("home_repeat_order_card")
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    com.example.ui.components.EmptyStateBadge(
+                                        icon = Icons.Default.Replay,
+                                        accent = primaryColor,
+                                        modifier = Modifier.size(48.dp)
+                                    )
+                                    Column(Modifier.weight(1f)) {
+                                        Text(
+                                            text = "¿Repetimos tu última compra?",
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 14.5.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "${lastOrder.skus.size} productos • ${lastOrder.date}",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    Surface(
+                                        onClick = {
+                                            performCrispHaptic(view, HapticStyle.CONFIRM)
+                                            onRepeatOrder(lastOrder.id)
+                                        },
+                                        shape = RoundedCornerShape(999.dp),
+                                        color = primaryColor,
+                                        modifier = Modifier.testTag("home_repeat_order_button")
+                                    ) {
+                                        Text(
+                                            text = "Repetir",
+                                            color = Color.White,
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 13.sp,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -1274,7 +1343,9 @@ fun ProductDetailScreen(
     onRemoveCompletely: () -> Unit,
     onAskBravIa: () -> Unit,
     hasPriceAlert: Boolean = false,
-    onTogglePriceAlert: () -> Unit = {}
+    onTogglePriceAlert: () -> Unit = {},
+    allProducts: List<Product> = emptyList(),
+    onOpenProduct: (String) -> Unit = {}
 ) {
     val view = currentPlatformView()
     val isArca = storeMode == StoreMode.ARCA
@@ -1453,6 +1524,53 @@ fun ProductDetailScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(bottom = 3.dp)
                             )
+                        }
+                    }
+
+                    // Precio por libra / litro / unidad y, si existe, una opción más barata parecida
+                    val unitPriceInfo = remember(product.sku, product.price) { product.unitPrice() }
+                    val cheaper = remember(product.sku, allProducts) { product.cheaperAlternative(allProducts) }
+                    if (unitPriceInfo != null) {
+                        Text(
+                            text = "Equivale a ${formatUnitPrice(unitPriceInfo.first, unitPriceInfo.second)}",
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.testTag("unit_price_label")
+                        )
+                    }
+                    if (cheaper != null) {
+                        val (alt, pct) = cheaper
+                        val altUnit = alt.unitPrice()
+                        Surface(
+                            onClick = {
+                                performCrispHaptic(view, HapticStyle.TICK)
+                                onOpenProduct(alt.sku)
+                            },
+                            shape = RoundedCornerShape(14.dp),
+                            color = Color(0xFF059669).copy(alpha = 0.10f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("cheaper_alternative_chip")
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.Savings, contentDescription = null, tint = Color(0xFF059669), modifier = Modifier.size(18.dp))
+                                Text(
+                                    text = "Ahorra $pct% por ${altUnit?.second?.label ?: "unidad"}: ${alt.name}" +
+                                        (altUnit?.let { " (${formatUnitPrice(it.first, it.second)})" } ?: ""),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF047857),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color(0xFF059669), modifier = Modifier.size(18.dp))
+                            }
                         }
                     }
 
@@ -2002,7 +2120,8 @@ private fun DailyRotatingOffersCarouselSection(
         val offersEdgePx = with(LocalDensity.current) { 14.dp.roundToPx() }
         val dataSaver = LocalDataSaver.current
         LaunchedEffect(dailyRotatingOffers.size, dataSaver) {
-            if (dataSaver || dailyRotatingOffers.size < 2) return@LaunchedEffect
+            // No avanza solo con ahorro de datos o con "reducir movimiento" activado
+            if (dataSaver || dailyRotatingOffers.size < 2 || com.example.platform.systemPrefersReducedMotion()) return@LaunchedEffect
             while (true) {
                 delay(4000)
                 if (!offersRowState.isScrollInProgress) {

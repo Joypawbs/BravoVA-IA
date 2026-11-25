@@ -1749,7 +1749,7 @@ fun SectionLineIcon(iconType: String, isArca: Boolean) {
     ) {
         Icon(
             imageVector = vectorIcon,
-            contentDescription = iconType,
+            contentDescription = null, // decorativo: el texto de al lado ya lo describe
             tint = accent,
             modifier = Modifier.size(21.dp)
         )
@@ -1792,7 +1792,7 @@ fun BravoUnifiedIcon(
     }
     Icon(
         imageVector = vector,
-        contentDescription = iconKey,
+        contentDescription = null, // decorativo: el texto de al lado ya lo describe
         tint = tint,
         modifier = modifier.size(size)
     )

@@ -588,6 +588,8 @@ fun BravoVaApp(
                                     onRefresh = { viewModel.refreshLocalCatalogCache() },
                                     onAddCombo = { title, skus -> viewModel.addComboToCart(title, skus) },
                                     recentProducts = recentProducts,
+                                    lastOrder = orders.firstOrNull(),
+                                    onRepeatOrder = { id -> viewModel.reorderPastOrder(id) },
                                     onOpenCategory = { catName -> viewModel.openCategoryScreen(catName) },
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
@@ -682,7 +684,9 @@ fun BravoVaApp(
                                 onOpenCategoryFilter = { catName -> viewModel.openCategoryScreen(catName) },
                                 onAskBravIa = { viewModel.askAiAboutProduct(prod.sku) },
                                 hasPriceAlert = prod.sku in priceAlerts,
-                                onTogglePriceAlert = { viewModel.togglePriceAlert(prod.sku) }
+                                onTogglePriceAlert = { viewModel.togglePriceAlert(prod.sku) },
+                                allProducts = allCatalogProducts,
+                                onOpenProduct = { sku -> viewModel.openProductDetail(sku) }
                             )
                         }
 
@@ -1122,6 +1126,9 @@ fun BravoVaApp(
                     )
 
                     PawEasterEggOverlay()
+                    LaunchedEffect(Unit) {
+                        com.example.ui.components.EasterEffects.reduceMotion = com.example.platform.systemPrefersReducedMotion()
+                    }
                     com.example.ui.components.EasterEffectsOverlay()
 
                     AnimatedVisibility(
