@@ -72,6 +72,10 @@ final class BravoVaTourUITests: XCTestCase {
         tap(["Agregar Café"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)
         pause(2); shot("home_con_carrito")
         app.swipeUp(); pause(2); shot("home_ofertas")
+        // Mantener presionado un producto abre la vista rápida (hoja nativa)
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.18, dy: 0.55)).press(forDuration: 1.0)
+        pause(2); shot("vista_rapida")
+        app.swipeDown(); pause(2)
         app.swipeDown(); pause(1)
 
         let tabs: [(String, CGFloat, String)] = [
