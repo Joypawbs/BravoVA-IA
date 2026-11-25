@@ -56,8 +56,10 @@ def nodes():
     found = []
     for m in re.finditer(r'<node [^>]*>', xml):
         node = m.group(0)
-        text = re.search(r'text="([^"]*)"', node).group(1)
-        desc = re.search(r'content-desc="([^"]*)"', node).group(1)
+        tm = re.search(r'text="([^"]*)"', node)
+        dm = re.search(r'content-desc="([^"]*)"', node)
+        text = tm.group(1) if tm else ""
+        desc = dm.group(1) if dm else ""
         b = re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', node)
         if b:
             x1, y1, x2, y2 = map(int, b.groups())
