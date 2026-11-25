@@ -2312,7 +2312,17 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             "gaster" -> "* ... ... ... (Este producto no existe.)"
             "deltarune", "kris" -> "* (Algo te dice que revises el pasillo de lácteos.)"
             "undertale" -> "* Nadie tiene que salir herido... ni siquiera tu presupuesto."
+            "spamton" -> "* ¡¡ES TU OPORTUNIDAD DE SER UN [[GRAN AHORRADOR]]!!"
+            "muffet" -> "* Las arañas te ofrecen un dulce... por un módico precio. Jijiji."
+            "ralsei" -> "* ¡Que tengas una compra llena de esponjosidad!"
+            "asgore" -> "* ¿Una taza de té? Combina muy bien con el pan de agua."
             else -> return false
+        }
+        when (q) {
+            "spamton" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.SPAMTON)
+            "muffet" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.MUFFET)
+            "ralsei" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.RALSEI)
+            "asgore" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.ASGORE)
         }
         if (line == lastEasterEgg) return true
         lastEasterEgg = line

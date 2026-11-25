@@ -1115,6 +1115,7 @@ fun BravoVaApp(
                     }
 
                     PawEasterEggOverlay()
+                    com.example.ui.components.EasterEffectsOverlay()
 
                     AnimatedVisibility(
                         visible = celebrationOrder != null,

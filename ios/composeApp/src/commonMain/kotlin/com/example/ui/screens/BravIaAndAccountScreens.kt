@@ -71,6 +71,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
@@ -87,6 +88,8 @@ import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -1805,88 +1808,66 @@ fun BravIaChatScreen(
                                         }
                                     }
                                 } else {
+                                    // Una acción principal y el resto en el menú "⋯" para no saturar la tarjeta
+                                    var bundleMenuOpen by remember(msg.id) { mutableStateOf(false) }
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        OutlinedButton(
-                                            onClick = {
-                                                HapticFeedbackManager.onConfirmAction(view)
-                                                onSaveBundleAsList(msg.id)
-                                            },
-                                            shape = RoundedCornerShape(999.dp),
-                                            border = BorderStroke(1.3.dp, primaryColor),
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
-                                            modifier = Modifier
-                                                .weight(0.8f)
-                                                .testTag("save_as_list_${msg.id}")
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Outlined.FormatListBulleted,
-                                                contentDescription = null,
-                                                tint = primaryColor,
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text(
-                                                text = "Guardar Lista",
-                                                fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 11.sp,
-                                                color = primaryColor,
-                                                maxLines = 1
-                                            )
-                                        }
-
                                         AnimatedPurchaseButton(
-                                            text = "Agregar ${recommendedProducts.size} • RD$${formatPesos(totalCombo)}",
+                                            text = "Agregar todo • RD$${formatPesos(totalCombo)}",
                                             icon = Icons.Default.ShoppingCart,
                                             primaryColor = primaryColor,
                                             onClick = {
                                                 HapticFeedbackManager.onAddToCart(view)
                                                 onAddBundleForMessage(msg.id)
                                             },
-                                            modifier = Modifier.weight(1.4f),
+                                            modifier = Modifier.weight(1f),
                                             testTag = "add_all_recommended_${msg.id}"
                                         )
-                                    }
-
-                                    Surface(
-                                        onClick = {
-                                            HapticFeedbackManager.onConfirmAction(view)
-                                            onRequestOrderConfirmation(msg.id)
-                                        },
-                                        shape = RoundedCornerShape(999.dp),
-                                        color = Color(0xFF059669).copy(alpha = 0.12f),
-                                        border = BorderStroke(1.2.dp, Color(0xFF059669)),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .testTag("request_order_confirmation_button_${msg.id}")
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 14.dp, vertical = 9.dp),
-                                            horizontalArrangement = Arrangement.Center,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.CheckCircle,
-                                                contentDescription = null,
-                                                tint = Color(0xFF059669),
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                text = "Pedir por mí • tú confirmas • RD$${formatPesos(totalCombo)}",
-                                                fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 11.5.sp,
-                                                color = Color(0xFF047857),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                        Box {
+                                            Surface(
+                                                onClick = { bundleMenuOpen = true },
+                                                shape = CircleShape,
+                                                color = primaryColor.copy(alpha = 0.12f),
+                                                modifier = Modifier
+                                                    .size(44.dp)
+                                                    .testTag("bundle_more_${msg.id}")
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.MoreHoriz,
+                                                        contentDescription = "Más opciones de la receta",
+                                                        tint = primaryColor
+                                                    )
+                                                }
+                                            }
+                                            DropdownMenu(
+                                                expanded = bundleMenuOpen,
+                                                onDismissRequest = { bundleMenuOpen = false }
+                                            ) {
+                                                DropdownMenuItem(
+                                                    text = { Text("Guardar como lista", fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold) },
+                                                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.FormatListBulleted, contentDescription = null) },
+                                                    onClick = {
+                                                        bundleMenuOpen = false
+                                                        HapticFeedbackManager.onConfirmAction(view)
+                                                        onSaveBundleAsList(msg.id)
+                                                    },
+                                                    modifier = Modifier.testTag("save_as_list_${msg.id}")
+                                                )
+                                                DropdownMenuItem(
+                                                    text = { Text("Pedir por mí (tú confirmas)", fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold) },
+                                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF059669)) },
+                                                    onClick = {
+                                                        bundleMenuOpen = false
+                                                        HapticFeedbackManager.onConfirmAction(view)
+                                                        onRequestOrderConfirmation(msg.id)
+                                                    },
+                                                    modifier = Modifier.testTag("request_order_confirmation_button_${msg.id}")
+                                                )
+                                            }
                                         }
                                     }
                                 }

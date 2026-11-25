@@ -37,11 +37,14 @@ fun cutoutAndCenter(input: IntArray, w: Int, h: Int, padding: Float = 0.06f): Cu
     for (y in 1 until h - 1) { sample(pixels[y * w]); sample(pixels[y * w + w - 1]) }
     val opaque = n - transparent
     val alreadyTransparent = transparent > n / 3
+    // Foto con escena de fondo (no se puede recortar): se muestra como una tarjetita redondeada
+    var sceneMode = false
 
     if (!alreadyTransparent && opaque > 0) {
         val mr = sr / opaque; val mg = sg / opaque; val mb = sb / opaque
         val spread = sqrt(max(0.0, sr2 / opaque - mr * mr) + max(0.0, sg2 / opaque - mg * mg) + max(0.0, sb2 / opaque - mb * mb))
         // Solo si el borde es parejo: una foto con escena de fondo se deja como está
+        if (spread >= 38.0) sceneMode = true
         if (spread < 38.0) {
             val bgR = mr.toInt(); val bgG = mg.toInt(); val bgB = mb.toInt()
             val light = bgR > 200 && bgG > 200 && bgB > 200
@@ -108,14 +111,31 @@ fun cutoutAndCenter(input: IntArray, w: Int, h: Int, padding: Float = 0.06f): Cu
     if (maxX <= minX || maxY <= minY) return null
     val cw = maxX - minX + 1
     val ch = maxY - minY + 1
-    val side = (max(cw, ch) * (1f + padding * 2)).toInt()
+    val pad = if (sceneMode) max(padding, 0.10f) else padding
+    val side = (max(cw, ch) * (1f + pad * 2)).toInt()
     val out = IntArray(side * side)
     val offX = (side - cw) / 2
     val offY = (side - ch) / 2
+    // Esquinas redondeadas para las fotos con escena, así todas se ven del mismo estilo
+    val radius = if (sceneMode) (minOf(cw, ch) * 0.12f) else 0f
     for (y in 0 until ch) {
         val srcRow = (minY + y) * w + minX
         val dstRow = (offY + y) * side + offX
-        for (x in 0 until cw) out[dstRow + x] = pixels[srcRow + x]
+        for (x in 0 until cw) {
+            var px = pixels[srcRow + x]
+            if (radius > 0f) {
+                val dx = when { x < radius -> radius - x; x > cw - 1 - radius -> x - (cw - 1 - radius); else -> 0f }
+                val dy = when { y < radius -> radius - y; y > ch - 1 - radius -> y - (ch - 1 - radius); else -> 0f }
+                if (dx > 0f && dy > 0f) {
+                    val d = sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                    if (d > radius) {
+                        val a = ((1f - (d - radius)).coerceIn(0f, 1f) * ((px ushr 24) and 0xFF)).toInt()
+                        px = (a shl 24) or (px and 0x00FFFFFF)
+                    }
+                }
+            }
+            out[dstRow + x] = px
+        }
     }
     return CutoutResult(out, side, side)
 }

@@ -166,11 +166,11 @@ fun GlassTopBar(
             modifier = modifier
                 .fillMaxWidth()
                 .background(
+                    // Más opaco arriba para que el contenido que pasa por detrás no compita con el título
                     Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
-                            MaterialTheme.colorScheme.background.copy(alpha = 0f)
-                        )
+                        0f to MaterialTheme.colorScheme.background.copy(alpha = 0.97f),
+                        0.55f to MaterialTheme.colorScheme.background.copy(alpha = 0.86f),
+                        1f to MaterialTheme.colorScheme.background.copy(alpha = 0f)
                     )
                 )
                 .padding(top = 4.dp)

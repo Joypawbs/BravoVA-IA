@@ -14,7 +14,7 @@ actual fun ImageRequest.Builder.softwareBitmapsForTransformations(): ImageReques
 
 /** iOS: misma limpieza de fondo que en Android (ProductCutout.kt), usando los píxeles de Skia. */
 object IosCutoutCenterTransformation : Transformation() {
-    override val cacheKey: String = "studio_cutout_center_v7"
+    override val cacheKey: String = "studio_cutout_center_v8"
 
     override suspend fun transform(input: Bitmap, size: Size): Bitmap {
         val w = input.width

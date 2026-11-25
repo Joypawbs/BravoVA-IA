@@ -23,7 +23,7 @@ actual fun ImageRequest.Builder.softwareBitmapsForTransformations(): ImageReques
 
 object StudioCutoutCenterTransformation : Transformation() {
     // v7: algoritmo común (ProductCutout.kt): quita fondos lisos de cualquier color, sin recorte redondeado
-    override val cacheKey: String = "studio_cutout_center_v7"
+    override val cacheKey: String = "studio_cutout_center_v8"
 
     private val cutoutMemoryCache = object : LruCache<Int, Bitmap>(96) {}
 
