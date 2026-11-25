@@ -93,6 +93,10 @@ final class BravoVaTourUITests: XCTestCase {
         pause(2)
         tap(["Carrito", "carrito"], fallback: CGVector(dx: 0.88, dy: 0.86), wait: 2)
         pause(3); shot("carrito")
+        for _ in 0..<4 { app.swipeUp() }
+        pause(2); shot("carrito_pago_y_entrega")
+        app.swipeUp(); app.swipeUp()
+        pause(2); shot("carrito_diaspora_y_total")
 
         // Volcado del árbol de accesibilidad para ajustar el recorrido si hace falta.
         if let dir = shotsDir {
