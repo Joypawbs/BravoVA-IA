@@ -88,6 +88,8 @@ kotlin {
             implementation("androidx.core:core-splashscreen:1.0.1")
             // Mapa real del seguimiento del pedido
             implementation("com.google.maps.android:maps-compose:6.12.0")
+            // Sin clave de Google: MapLibre con mapas libres de OpenFreeMap
+            implementation("org.maplibre.gl:android-sdk:13.7.1")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

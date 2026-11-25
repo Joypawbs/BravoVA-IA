@@ -93,6 +93,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -1600,6 +1604,8 @@ fun CartCheckoutScreen(
     var lastVerificationResult by remember { mutableStateOf<BiometricVerificationResult?>(null) }
     var pendingBiometricRequest by remember { mutableStateOf<BiometricPromptRequest?>(null) }
     var pendingBiometricAction by remember { mutableStateOf<((BiometricVerificationResult) -> Unit)?>(null) }
+    var isProcessingPayment by remember { mutableStateOf(false) }
+    val payScope = rememberCoroutineScope()
 
     val activeCard = remember(paymentMethods) {
         paymentMethods.firstOrNull { it.isDefault } ?: paymentMethods.firstOrNull()
@@ -2164,6 +2170,86 @@ fun CartCheckoutScreen(
                 )
             }
 
+            item(key = "cart_substitutions", contentType = "substitutions") {
+                TranslucentCard(
+                    darkMode = darkMode,
+                    isArca = isArca,
+                    cornerRadius = 18.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp)
+                        .testTag("cart_substitutions_card")
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Si algo se agota",
+                            fontFamily = PlusJakartaSans,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Elige qué hacemos mientras preparamos tu pedido.",
+                            fontFamily = PlusJakartaSans,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        com.example.model.SubstitutionPref.entries.forEach { pref ->
+                            val selected = checkoutExtras.substitution == pref
+                            Surface(
+                                onClick = {
+                                    performCrispHaptic(view, HapticStyle.TICK)
+                                    onCheckoutExtrasChange(checkoutExtras.copy(substitution = pref))
+                                },
+                                shape = RoundedCornerShape(14.dp),
+                                color = if (selected) primaryColor.copy(alpha = 0.12f)
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                border = BorderStroke(
+                                    if (selected) 1.4.dp else 1.dp,
+                                    if (selected) primaryColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 48.dp)
+                                    .semantics { this.selected = selected }
+                                    .testTag("substitution_${pref.name.lowercase()}")
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (selected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                                        contentDescription = null,
+                                        tint = if (selected) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = pref.label,
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = pref.detail,
+                                            fontFamily = PlusJakartaSans,
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             item(key = "cart_summary_box", contentType = "summary") {
                 TranslucentCard(
                     darkMode = darkMode,
@@ -2457,7 +2543,20 @@ fun CartCheckoutScreen(
 
                         val payTotalRd = cartTotals.finalPay.roundToInt() + checkoutExtras.tipRd
                         val needsBiometric = checkoutExtras.payment.needsBiometric
+                        fun submitOrder() {
+                            if (isProcessingPayment) return
+                            isProcessingPayment = true
+                            payScope.launch {
+                                // Breve paso de "procesando" para que el cobro no se sienta instantáneo ni se repita
+                                delay(1100L)
+                                HapticFeedbackManager.onCheckoutConfirm(view)
+                                onConfirmCheckout()
+                                isProcessingPayment = false
+                            }
+                        }
                         AnimatedPurchaseButton(
+                            loading = isProcessingPayment,
+                            loadingText = "Procesando pago…",
                             text = if (needsBiometric) "Pagar con huella • RD$${formatMoney(payTotalRd)}"
                             else "Confirmar pedido • RD$${formatMoney(payTotalRd)}",
                             icon = if (needsBiometric) Icons.Default.Fingerprint else Icons.Default.VerifiedUser,
@@ -2465,8 +2564,7 @@ fun CartCheckoutScreen(
                             onClick = {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
                                 if (!needsBiometric) {
-                                    HapticFeedbackManager.onCheckoutConfirm(view)
-                                    onConfirmCheckout()
+                                    submitOrder()
                                     return@AnimatedPurchaseButton
                                 }
                                 val finalPayRd = cartTotals.finalPay.roundToInt()
@@ -2486,8 +2584,7 @@ fun CartCheckoutScreen(
                                     onAuthorized = { res ->
                                         lastVerificationResult = res
                                         onBiometricVerified(res)
-                                        HapticFeedbackManager.onCheckoutConfirm(view)
-                                        onConfirmCheckout()
+                                        submitOrder()
                                     }
                                 )
                             },

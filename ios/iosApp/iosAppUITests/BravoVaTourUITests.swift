@@ -90,17 +90,21 @@ final class BravoVaTourUITests: XCTestCase {
         if search.waitForExistence(timeout: 3) {
             search.tap(); pause(1)
             dismissKeyboardTips()
-            app.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
-            app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7))
-            app.typeText("arroz"); pause(3); shot("busqueda_filtros")
+            // Escribe directo en el campo (no en la app) para que ninguna letra se pierda
+            search.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
+            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
+            search.typeText("arroz"); pause(3); shot("busqueda_filtros")
             tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
             pause(2); shot("busqueda_menor_precio")
-            app.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 5))
+            search.tap(); pause(1)
+            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8))
             pause(1)
             dismissKeyboardTips()
-            // Cierra el teclado para que no tape la barra de pestañas
-            if app.keyboards.buttons["Search"].exists { app.keyboards.buttons["Search"].tap() }
-            else if app.keyboards.buttons["search"].exists { app.keyboards.buttons["search"].tap() }
+            // Cierra el teclado (Intro) para que no tape la barra de pestañas
+            search.typeText("\n"); pause(1)
+            if app.keyboards.count > 0 {
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)).tap()
+            }
             app.swipeDown(); pause(1)
         }
 

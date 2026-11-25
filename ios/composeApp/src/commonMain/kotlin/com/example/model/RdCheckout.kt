@@ -52,7 +52,8 @@ data class CheckoutExtras(
     val diasporaPhone: String? = null,
     val diasporaCurrency: DiasporaCurrency? = null,
     val ncfType: String = "B02",
-    val rnc: String = ""
+    val rnc: String = "",
+    val substitution: SubstitutionPref = SubstitutionPref.SIMILAR
 ) {
     val paymentSummary: String
         get() = when (payment) {
@@ -70,3 +71,11 @@ val SEASONAL_COMBOS = listOf(
     SeasonalCombo("nochebuena", "La cena de Nochebuena", "Pernil, telera y ensalada rusa", listOf("cerdo", "pernil", "pan", "papa", "zanahoria", "mayonesa", "uva", "manzana")),
     SeasonalCombo("desayuno", "Mangú completo", "Los tres golpes", listOf("plátano", "salami", "queso", "huevo", "cebolla"))
 )
+
+
+/** Qué hacer si un producto del carrito se agota mientras se prepara el pedido. */
+enum class SubstitutionPref(val label: String, val detail: String) {
+    SIMILAR("Cambiar por similar", "Mismo tipo, igual o menor precio"),
+    CALL("Llamarme", "El preparador te consulta antes"),
+    NONE("No cambiar", "Se quita y se descuenta del total")
+}

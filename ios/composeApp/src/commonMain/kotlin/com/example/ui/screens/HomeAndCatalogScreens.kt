@@ -252,6 +252,15 @@ fun HomeScreen(
     val storeMenuHazeState = rememberHazeState(blurEnabled = true)
     var isStoreMenuExpanded by remember { mutableStateOf(false) }
     var isSearchFocused by remember { mutableStateOf(false) }
+    // Botón Buscar de la barra de pestañas: enfoca el campo de búsqueda del inicio
+    val homeSearchFocus = remember { androidx.compose.ui.focus.FocusRequester() }
+    val searchRequest = com.example.ui.components.SearchFocusRequest.serial
+    LaunchedEffect(searchRequest) {
+        if (searchRequest > 0) {
+            delay(120)
+            runCatching { homeSearchFocus.requestFocus() }
+        }
+    }
     val showTopHeader = areMenusVisible || isSearchFocused
     val homeListState = rememberLazyListState()
     val isHomeScrolled by remember {
@@ -363,6 +372,7 @@ fun HomeScreen(
                     isArca = isArca,
                     testTag = "home_search_input",
                     onFocusChanged = { isSearchFocused = it },
+                    focusRequester = homeSearchFocus,
                     modifier = Modifier.bravoAiAura(
                         cornerRadius = 999.dp,
                         enabled = localSearchInput.isNotBlank(),

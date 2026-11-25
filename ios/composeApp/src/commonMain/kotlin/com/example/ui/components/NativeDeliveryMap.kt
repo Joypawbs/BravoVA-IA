@@ -17,7 +17,7 @@ expect fun nativeDeliveryMapAvailable(): Boolean
 
 /**
  * Mapa real del seguimiento del pedido: sucursal, casa, repartidor y la ruta entre ellos.
- * Usa Apple Maps en iOS y Google Maps en Android.
+ * Usa Apple Maps en iOS; en Android, Google Maps con clave o MapLibre + OpenFreeMap sin ella.
  */
 @Composable
 expect fun NativeDeliveryMap(

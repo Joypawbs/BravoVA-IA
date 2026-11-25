@@ -14,6 +14,7 @@ import com.example.ui.theme.BravoCtaGradient
 import com.example.ui.theme.formatRd
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Badge
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.NavigationBarItem
@@ -67,6 +68,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.DirectionsBike
@@ -380,7 +383,9 @@ fun AnimatedPurchaseButton(
     primaryColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    testTag: String? = null
+    testTag: String? = null,
+    loading: Boolean = false,
+    loadingText: String? = null
 ) {
     val view = currentPlatformView()
     val scope = rememberCoroutineScope()
@@ -388,7 +393,7 @@ fun AnimatedPurchaseButton(
     val isPressed by interactionSource.collectIsPressedAsState()
     var flashActive by remember { mutableStateOf(false) }
 
-    val filledState = isPressed || flashActive
+    val filledState = isPressed || flashActive || loading
 
     val bgColor by animateColorAsState(
         targetValue = if (filledState) primaryColor else primaryColor.copy(alpha = 0.06f),
@@ -413,6 +418,7 @@ fun AnimatedPurchaseButton(
 
     Surface(
         onClick = {
+            if (loading) return@Surface
             performCrispHaptic(view, HapticStyle.CONFIRM)
             scope.launch {
                 flashActive = true
@@ -421,6 +427,7 @@ fun AnimatedPurchaseButton(
                 flashActive = false
             }
         },
+        enabled = !loading,
         interactionSource = interactionSource,
         shape = RoundedCornerShape(999.dp),
         color = bgColor,
@@ -435,7 +442,14 @@ fun AnimatedPurchaseButton(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (icon != null) {
+            if (loading) {
+                CircularProgressIndicator(
+                    color = contentColor,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            } else if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
@@ -445,7 +459,7 @@ fun AnimatedPurchaseButton(
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Text(
-                text = text,
+                text = if (loading) (loadingText ?: text) else text,
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 14.sp,
@@ -2693,7 +2707,8 @@ fun PredictiveCatalogSearchBar(
     testTag: String,
     modifier: Modifier = Modifier,
     onFocusChanged: (Boolean) -> Unit = {},
-    trailingActionContent: (@Composable () -> Unit)? = null
+    trailingActionContent: (@Composable () -> Unit)? = null,
+    focusRequester: androidx.compose.ui.focus.FocusRequester? = null
 ) {
     val primaryColor = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
     val view = currentPlatformView()
@@ -2818,44 +2833,32 @@ fun PredictiveCatalogSearchBar(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                             .onFocusChanged { onFocusChanged(it.isFocused) }
                             .testTag(testTag)
                     )
                 }
 
-                // Chip con la sugerencia dentro de la barra de búsqueda
+                // 2.0: campo limpio. En lugar de la pastilla con precio y calorías, solo un botón
+                // pequeño para completar con la sugerencia (el texto fantasma ya la muestra).
                 if (query.isNotBlank() && predictedProduct != null && !predictedProduct.name.equals(query.trim(), ignoreCase = true)) {
-                    val cal = predictedProduct.nutritionProfile().caloriesKcal
-                    Surface(
-                        onClick = {
-                            performCrispHaptic(view, HapticStyle.TICK)
-                            onQueryChange(predictedProduct.name)
-                        },
-                        shape = CircleShape,
-                        color = primaryColor.copy(alpha = if (darkMode) 0.22f else 0.12f),
-                        border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.35f)),
-                        modifier = Modifier.testTag("${testTag}_inline_prediction")
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                performCrispHaptic(view, HapticStyle.TICK)
+                                onQueryChange(predictedProduct.name)
+                            }
+                            .testTag("${testTag}_inline_prediction"),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = "RD$${predictedProduct.price}" + (if (cal != null) " • ${cal}kcal" else ""),
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.sp,
-                                color = primaryColor
-                            )
-                            Text(
-                                text = "Completar ⇥",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Filled.NorthWest,
+                            contentDescription = "Completar con ${predictedProduct.name}",
+                            tint = primaryColor,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
 

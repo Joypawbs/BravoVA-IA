@@ -1068,7 +1068,10 @@ fun BravoVaApp(
                             darkMode = darkMode,
                             onNavigate = { target -> viewModel.navigateTo(target) },
                             minimized = nativeDock && !areMenusVisible,
-                            onSearch = { viewModel.navigateTo(AppScreen.CATALOG) }
+                            onSearch = {
+                                viewModel.navigateTo(AppScreen.HOME)
+                                com.example.ui.components.SearchFocusRequest.request()
+                            }
                         )
                     }
 
