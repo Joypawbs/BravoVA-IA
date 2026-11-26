@@ -1,0 +1,6 @@
+inicio: desplazar arriba y abajo: cuadros=86 | con tirón=85 (98.84%) | p50=250ms p90=400ms p99=550ms
+Catálogo: 5 s sin tocar: cuadros=30 | con tirón=30 (100.00%) | p50=200ms p90=450ms p99=550ms
+catálogo: desplazar: cuadros=45 | con tirón=45 (100.00%) | p50=250ms p90=450ms p99=550ms
+Brav IA: 5 s sin tocar: cuadros=36 | con tirón=36 (100.00%) | p50=150ms p90=250ms p99=300ms
+Cuenta: 5 s sin tocar: cuadros=35 | con tirón=35 (100.00%) | p50=150ms p90=250ms p99=300ms
+arranque en frío (ms): [1744, 2132, 1966] promedio=1947
