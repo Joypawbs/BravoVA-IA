@@ -105,6 +105,43 @@ def swipe_up():
     time.sleep(1.5)
 
 
+PERF = []
+
+
+def perf_reset():
+    adb("shell", "dumpsys", "gfxinfo", PACKAGE, "reset")
+
+
+def perf(label):
+    """Anota cuántos cuadros salieron con tirón desde el último reinicio (dumpsys gfxinfo)."""
+    out = adb("shell", "dumpsys", "gfxinfo", PACKAGE, capture=True) or ""
+    def grab(key):
+        for line in out.splitlines():
+            if line.strip().startswith(key):
+                return line.split(":", 1)[1].strip()
+        return "?"
+    row = f"{label}: cuadros={grab('Total frames rendered')} | con tirón={grab('Janky frames')} | " \
+          f"p50={grab('50th percentile')} p90={grab('90th percentile')} p99={grab('99th percentile')}"
+    print("[perf]", row)
+    PERF.append(row)
+    perf_reset()
+
+
+def cold_starts(n=3):
+    """Arranque en frío: tiempo hasta el primer cuadro (am start -W)."""
+    times = []
+    for _ in range(n):
+        adb("shell", "am", "force-stop", PACKAGE); time.sleep(2)
+        out = adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/com.example.MainActivity", capture=True) or ""
+        for line in out.splitlines():
+            if line.startswith("TotalTime"):
+                times.append(int(line.split(":")[1]))
+        time.sleep(6)
+    row = f"arranque en frío (ms): {times} promedio={sum(times) // max(1, len(times))}"
+    print("[perf]", row)
+    PERF.append(row)
+
+
 def relaunch():
     """Reinicia la app para seguir desde un estado limpio (sin teclado ni menús abiertos)."""
     adb("shell", "am", "force-stop", PACKAGE)
@@ -163,6 +200,12 @@ def main():
         shot("detalle_producto")
         swipe_up(); shot("detalle_precio_por_unidad")
         tap(["Volver"], wait=2, fallback=(0.06, 0.06))
+    perf_reset()
+    for _ in range(3):
+        swipe_up()
+    for _ in range(3):
+        swipe_down()
+    perf("inicio: desplazar arriba y abajo")
     swipe_up(); shot("home_secciones")
     w, h = screen_size()
     adb("shell", "input", "swipe", str(int(w * 0.18)), str(int(h * 0.5)), str(int(w * 0.18)), str(int(h * 0.5)), "1000")
@@ -180,6 +223,12 @@ def main():
     for label, x, name in tabs:
         tap([label], wait=3, fallback=(x, 0.955))
         shot(name)
+        # Pantalla quieta 5 s: idealmente casi no se dibujan cuadros (las animaciones de fondo cuestan)
+        perf_reset(); time.sleep(5); perf(f"{label}: 5 s sin tocar")
+        if label == "Catálogo":
+            for _ in range(3):
+                swipe_up()
+            perf("catálogo: desplazar")
     if tap(["Tarjeta Bravísima"], wait=3):
         shot("bravisima")
         # Código para la caja a pantalla completa (tocar cualquier parte lo cierra)
@@ -203,6 +252,9 @@ def main():
     adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", "bravova://bravisima", PACKAGE)
     time.sleep(4); shot("atajo_bravisima")
     tap(["Volver"], wait=2, fallback=(0.06, 0.06))
+
+    cold_starts()
+    (OUT / "rendimiento.txt").write_text("\n".join(PERF) + "\n", encoding="utf-8")
 
     # Modo oscuro del sistema: la app debe seguirlo sola.
     adb("shell", "cmd", "uimode", "night", "yes"); time.sleep(4)

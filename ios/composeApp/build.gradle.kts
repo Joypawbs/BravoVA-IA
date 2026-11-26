@@ -133,11 +133,21 @@ android {
             }
         }
     }
+    // R8 (optimizador de Android): -Pminify=false lo apaga, para poder medir el antes y el después
+    val useR8 = (project.findProperty("minify") as String?)?.toBoolean() ?: false
     buildTypes {
         release {
             if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            isMinifyEnabled = useR8
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        // Igual que la de lanzamiento (optimizada, sin depuración) pero firmada con la clave de depuración,
+        // para instalarla en el emulador y medir fluidez real. No se publica.
+        create("profile") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
         }
     }
     compileOptions {
