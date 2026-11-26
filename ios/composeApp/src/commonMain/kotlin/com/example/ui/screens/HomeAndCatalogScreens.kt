@@ -2165,13 +2165,15 @@ private fun DailyRotatingOffersCarouselSection(
         // quedar alineada a la izquierda. Sin esto, al llegar al final la fila no podía desplazarse
         // más y dejaba la tarjeta anterior cortada en el borde.
         var offersRowWidthPx by remember { mutableIntStateOf(0) }
-        val offersEndPadding = with(LocalDensity.current) { (offersRowWidthPx.toDp() - 220.dp - 14.dp).coerceAtLeast(14.dp) }
+        // El margen izquierdo va fuera de la fila (padding), no dentro (contentPadding): así la tarjeta
+        // anterior no asoma por ese margen al desplazarse.
+        val offersEndPadding = with(LocalDensity.current) { (offersRowWidthPx.toDp() - 220.dp).coerceAtLeast(14.dp) }
         LazyRow(
             state = offersRowState,
             flingBehavior = rememberSnapFlingBehavior(offersRowState),
-            contentPadding = PaddingValues(start = 14.dp, end = offersEndPadding),
+            contentPadding = PaddingValues(end = offersEndPadding),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth().onSizeChanged { offersRowWidthPx = it.width }
+            modifier = Modifier.fillMaxWidth().padding(start = 14.dp).onSizeChanged { offersRowWidthPx = it.width }
         ) {
             items(
                 items = dailyRotatingOffers,

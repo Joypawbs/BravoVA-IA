@@ -79,6 +79,16 @@ class BravIaEngineTest {
         val g = BravIaEngine.ground(RawAiReply("ok", emptyList(), "mangu", null, null), lookup, "BRV", mangu, null, people = 6)
         assertEquals(2, g.recipeMultiplier)
         assertEquals(8, g.items.first { it.sku == "BRV-083" }.qty, "el doble de plátanos")
+        assertEquals(1, g.items.first { it.sku == "BRV-096" }.qty, "un cartón de 12 huevos alcanza")
+        assertEquals(1, g.items.first { it.sku == "BRV-100" }.qty, "un bloque de mantequilla alcanza")
+        assertEquals(2, g.items.first { it.sku == "BRV-004" }.qty, "el salami va por libra")
+    }
+
+    @Test
+    fun unknownRecipeIsHonestOffline() {
+        val r = BravIaEngine.localReply("receta de paella valenciana", bravo, lookup, "BRV", null, false)
+        assertTrue(r.text.startsWith("Esa receta no está en mi recetario verificado"), r.text)
+        assertNull(r.recipe)
     }
 
     // ---------- Lectura del JSON ----------

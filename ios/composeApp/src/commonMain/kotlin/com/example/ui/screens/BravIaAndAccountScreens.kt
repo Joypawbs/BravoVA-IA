@@ -148,6 +148,7 @@ import com.example.model.ChatMessage
 import com.example.model.Recipe
 import com.example.model.BRAV_IA_RECIPES
 import com.example.ai.StoreFacts
+import com.example.ai.BravIaEngine
 import com.example.model.findRecipeById
 import com.example.model.FcmTopicSubscription
 import com.example.model.FrequentProductStat
@@ -2348,7 +2349,7 @@ private fun VerifiedRecipeCard(
                     val tag = when {
                         product == null -> "No disponible en BravoVa"
                         ing.pantry -> "Despensa · RD$${formatPesos(product.price)}"
-                        else -> (if (ing.unitsToBuy * multiplier > 1) "${ing.unitsToBuy * multiplier} × " else "") + "RD$${formatPesos(product.price)}"
+                        else -> BravIaEngine.unitsFor(ing, multiplier).let { u -> if (u > 1) "$u × " else "" } + "RD$${formatPesos(product.price)}"
                     }
                     Text(
                         text = tag,

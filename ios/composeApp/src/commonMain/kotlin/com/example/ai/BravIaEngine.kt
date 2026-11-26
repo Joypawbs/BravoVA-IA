@@ -400,9 +400,20 @@ object BravIaEngine {
             .filter { !it.pantry && !it.optional }
             .mapNotNull { ing ->
                 val sku = ing.skus.firstOrNull { lookup(it) != null } ?: return@mapNotNull null
-                GroundedItem(sku, ing.unitsToBuy * multiplier, ing.name)
+                GroundedItem(sku, unitsFor(ing, multiplier), ing.name)
             }
     )
+
+    /**
+     * Unidades a comprar de un ingrediente cuando la receta se multiplica. Solo crece lo que se
+     * compra por unidad (4 plátanos → 8) o por libra (carnes, víveres). Un paquete que ya alcanza
+     * (12 huevos, 400 g de mantequilla para 3 cucharadas) se queda en 1.
+     */
+    fun unitsFor(ing: com.example.model.RecipeIngredient, multiplier: Int): Int {
+        if (multiplier <= 1) return ing.unitsToBuy
+        val byWeight = Regex("""\b(lb|libra|libras)\b""").containsMatchIn(BravIaText.normalize(ing.amount))
+        return if (ing.unitsToBuy > 1 || byWeight) ing.unitsToBuy * multiplier else ing.unitsToBuy
+    }
 
     fun totalOf(items: List<GroundedItem>, lookup: (String) -> Product?): Int =
         items.sumOf { (lookup(it.sku)?.price ?: 0) * it.qty }
@@ -500,7 +511,9 @@ object BravIaEngine {
         val matches = if (keywords.isEmpty()) emptyList() else selectCandidates(query, storeProducts, null, limit = 6)
             .filter { p -> val h = BravIaText.normalize(p.name + " " + p.category); keywords.any { k -> h.contains(if (k.length > 4) k.dropLast(1) else k) } }
         val similar = if (storePrefix == "BRV") similarRecipes(query) else emptyList()
+        val wantsRecipe = cookingIntent.containsMatchIn(n)
         val text = buildString {
+            if (wantsRecipe && storePrefix == "BRV") append("Esa receta no está en mi recetario verificado, así que no te doy medidas ni pasos inventados. ")
             if (matches.isNotEmpty()) append("Esto encontré en el catálogo para «${query.trim().take(60)}».")
             else append("No encontré productos que coincidan con «${query.trim().take(60)}». Prueba con otro nombre o revisa el catálogo.")
             if (similar.isNotEmpty()) append("\n\nRecetas verificadas que te pueden servir: ").append(similar.joinToString(", ") { "**${it.name}**" }).append(".")
