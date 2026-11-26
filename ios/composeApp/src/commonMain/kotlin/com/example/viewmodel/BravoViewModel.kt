@@ -1,5 +1,6 @@
 package com.example.viewmodel
 
+import com.example.ui.components.play
 import com.example.ui.components.PlatformExtras
 import com.example.platform.sharedPrefs
 import com.example.ui.components.RdPrefs
@@ -2299,35 +2300,18 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         checkEasterEgg(q)
     }
 
-    /* Huevos de pascua para fans de Toby Fox (Undertale / Deltarune). Solo texto. */
+    /* Huevos de pascua para fans de Toby Fox (Undertale / Deltarune): ver ui/components/EasterEggs.kt */
     private var lastEasterEgg = ""
     private fun checkEasterEgg(raw: String): Boolean {
-        val q = raw.trim().lowercase()
-            .replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
-        val line = when (q) {
-            "determinacion", "determination" -> "* Ver tantas ofertas te llena de DETERMINACIÓN."
-            "sans" -> "* jeje. ¿sabías que el kétchup combina con todo?"
-            "papyrus", "espagueti", "spaghetti" -> "* ¡NYEH HEH HEH! El gran Papyrus aprueba este espagueti."
-            "temmie", "tem" -> "* hOI!! bienbenidos a... ¡BRAVO!"
-            "perro molesto", "annoying dog", "toby fox", "toby" -> "* (Un perro molesto se llevó tu búsqueda. Guau.)"
-            "gaster" -> "* ... ... ... (Este producto no existe.)"
-            "deltarune", "kris" -> "* (Algo te dice que revises el pasillo de lácteos.)"
-            "undertale" -> "* Nadie tiene que salir herido... ni siquiera tu presupuesto."
-            "spamton" -> "* ¡¡ES TU OPORTUNIDAD DE SER UN [[GRAN AHORRADOR]]!!"
-            "muffet" -> "* Las arañas te ofrecen un dulce... por un módico precio. Jijiji."
-            "ralsei" -> "* ¡Que tengas una compra llena de esponjosidad!"
-            "asgore" -> "* ¿Una taza de té? Combina muy bien con el pan de agua."
-            else -> return false
+        val egg = com.example.ui.components.findEasterEgg(raw) ?: run {
+            lastEasterEgg = ""
+            return false
         }
-        when (q) {
-            "spamton" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.SPAMTON)
-            "muffet" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.MUFFET)
-            "ralsei" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.RALSEI)
-            "asgore" -> com.example.ui.components.EasterEffects.start(com.example.ui.components.EasterEffect.ASGORE)
-        }
-        if (line == lastEasterEgg) return true
-        lastEasterEgg = line
-        showToast("heart", line)
+        // No repetir efecto, sonido ni aviso mientras la búsqueda sigue siendo la misma palabra
+        if (egg.line == lastEasterEgg) return true
+        lastEasterEgg = egg.line
+        egg.play()
+        showToast("heart", egg.line)
         return true
     }
 
