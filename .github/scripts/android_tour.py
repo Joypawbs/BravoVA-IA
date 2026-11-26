@@ -156,6 +156,9 @@ def main():
     # Registro de errores del sistema por si algo falla durante el recorrido.
     subprocess.Popen(["adb", "logcat", "-v", "time", "*:E"], stdout=open(OUT / "logcat_errores.txt", "w"),
                      stderr=subprocess.DEVNULL)
+    # Mensajes de diagnóstico de la app (println → System.out)
+    subprocess.Popen(["adb", "logcat", "-v", "time", "-s", "System.out:I"], stdout=open(OUT / "logcat_app.txt", "w"),
+                     stderr=subprocess.DEVNULL)
     # Evita que los avisos "X no responde" del emulador tapen la app.
     adb("shell", "settings", "put", "global", "hide_error_dialogs", "1")
     adb("shell", "cmd", "uimode", "night", "no")
@@ -188,7 +191,7 @@ def main():
         adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
         for _ in range(8):
             adb("shell", "input", "keyevent", "KEYCODE_DEL")
-        adb("shell", "input", "text", "jevil"); time.sleep(2.5); shot("efecto_jevil")
+        adb("shell", "input", "text", "jevil"); time.sleep(1.2); shot("efecto_jevil")
         adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
         for _ in range(6):
             adb("shell", "input", "keyevent", "KEYCODE_DEL")

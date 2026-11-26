@@ -155,6 +155,8 @@ fun findEasterEgg(query: String): EasterEgg? {
 
 /** Dispara el huevo: efecto visual (si no se pidió reducir movimiento) y sonido. */
 fun EasterEgg.play() {
+    // Diagnóstico (visible en logcat / consola): confirma que el huevo se activó y si el efecto se omitió
+    println("[huevo] ${keywords.first()} efecto=$effect reducirMovimiento=${EasterEffects.reduceMotion}")
     effect?.let { EasterEffects.start(it, particles) }
     com.example.platform.ChipSynth.play(sound)
 }
