@@ -111,6 +111,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -3245,6 +3246,8 @@ fun DeliveryTrackingScreen(
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
+                                        maxLines = 1,
+                                        softWrap = false,
                                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                                     )
                                 }
@@ -3755,8 +3758,10 @@ fun DeliveryTrackingScreen(
                                     text = "${deliveryStage.progressPct}%",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
@@ -4242,8 +4247,24 @@ private fun RealInteractiveDeliveryMapView(
     // Mapa real: Apple Maps en iPhone y Google Maps en Android (si la app tiene clave).
     if (com.example.ui.components.nativeDeliveryMapAvailable()) {
         val f = telemetry.routeProgressFraction.coerceIn(0f, 1f).toDouble()
-        val driverLat = branchLat + (userLat - branchLat) * f
-        val driverLng = branchLng + (userLng - branchLng) * f
+        // Ruta por calles calculada por el ViewModel; el repartidor ya viene ubicado sobre ella
+        val route by com.example.delivery.DeliveryRouteStore.route.collectAsState()
+        val activeRoute = route?.takeIf { r ->
+            r.points.isNotEmpty() &&
+                com.example.delivery.RoadRoute.haversine(r.points.first().first, r.points.first().second, branchLat, branchLng) < 0.6 &&
+                com.example.delivery.RoadRoute.haversine(r.points.last().first, r.points.last().second, userLat, userLng) < 0.6
+        }
+        val km = (activeRoute?.totalKm ?: 0.0) * f
+        val driverLat = if (activeRoute != null) telemetry.driverLat else branchLat + (userLat - branchLat) * f
+        val driverLng = if (activeRoute != null) telemetry.driverLng else branchLng + (userLng - branchLng) * f
+        // Las rutas solo se recalculan cuando el repartidor avanza ~20 m (menos trabajo del mapa)
+        val kmBucket = (km * 50).roundToInt()
+        val travelled = remember(activeRoute, kmBucket) {
+            activeRoute?.travelledPath(km)?.map { com.example.ui.components.DeliveryMapPin(it.first, it.second, "") } ?: emptyList()
+        }
+        val remaining = remember(activeRoute, kmBucket) {
+            activeRoute?.remainingPath(km)?.map { com.example.ui.components.DeliveryMapPin(it.first, it.second, "") } ?: emptyList()
+        }
         val routeColor = when (telemetry.trafficLevel) {
             "DENSO" -> Tone.warningBright
             "MODERADO" -> Tone.successBright
@@ -4258,7 +4279,9 @@ private fun RealInteractiveDeliveryMapView(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(310.dp)
-                .testTag("interactive_real_map_webview")
+                .testTag("interactive_real_map_webview"),
+            travelledPath = travelled,
+            remainingPath = remaining
         )
         return
     }
@@ -4831,18 +4854,23 @@ private fun DriverAiLiveChatCard(
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
                             )
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
                                 color = Tone.success.copy(alpha = 0.14f)
                             ) {
                                 Text(
-                                    text = "IA En Ruta • ${telemetry.currentSpeedKmh} km/h",
+                                    text = if (telemetry.currentSpeedKmh > 0) "${telemetry.currentSpeedKmh} km/h" else "Detenido",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 12.sp,
                                     color = Tone.success,
+                                    maxLines = 1,
+                                    softWrap = false,
                                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                                 )
                             }

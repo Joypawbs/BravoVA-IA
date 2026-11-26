@@ -83,6 +83,7 @@ private class DeliveryMapHolder {
     val homePin = MKPointAnnotation()
     val driverPin = MKPointAnnotation()
     var framed = false
+    var framedWithRoute = false
 
     init {
         delegate.branchPin = branchPin
@@ -96,11 +97,10 @@ private class DeliveryMapHolder {
 
 private fun coord(p: DeliveryMapPin): CValue<CLLocationCoordinate2D> = CLLocationCoordinate2DMake(p.lat, p.lng)
 
-private fun polyline(a: DeliveryMapPin, b: DeliveryMapPin): MKPolyline = memScoped {
-    val pts = allocArray<CLLocationCoordinate2D>(2)
-    pts[0].latitude = a.lat; pts[0].longitude = a.lng
-    pts[1].latitude = b.lat; pts[1].longitude = b.lng
-    MKPolyline.polylineWithCoordinates(pts, 2u)
+private fun polyline(path: List<DeliveryMapPin>): MKPolyline = memScoped {
+    val pts = allocArray<CLLocationCoordinate2D>(path.size)
+    path.forEachIndexed { i, p -> pts[i].latitude = p.lat; pts[i].longitude = p.lng }
+    MKPolyline.polylineWithCoordinates(pts, path.size.toULong())
 }
 
 @OptIn(ExperimentalForeignApi::class)
@@ -111,7 +111,9 @@ actual fun NativeDeliveryMap(
     driver: DeliveryMapPin,
     routeColor: Color,
     darkMode: Boolean,
-    modifier: Modifier
+    modifier: Modifier,
+    travelledPath: List<DeliveryMapPin>,
+    remainingPath: List<DeliveryMapPin>
 ) {
     val holder = remember { DeliveryMapHolder() }
     UIKitView(
@@ -126,14 +128,19 @@ actual fun NativeDeliveryMap(
             holder.driverPin.setTitle(driver.title); holder.driverPin.setCoordinate(coord(driver))
 
             map.removeOverlays(map.overlays)
-            val done = polyline(branch, driver)
+            val donePath = travelledPath.takeIf { it.size >= 2 } ?: listOf(branch, driver)
+            val leftPath = remainingPath.takeIf { it.size >= 2 } ?: listOf(driver, home)
+            val done = polyline(donePath)
             holder.delegate.doneRoute = done
             map.addOverlay(done)
-            map.addOverlay(polyline(driver, home))
+            map.addOverlay(polyline(leftPath))
 
-            if (!holder.framed) {
+            // Encuadra de nuevo cuando llega la ruta por calles (puede salirse del primer encuadre)
+            val frameKey = donePath.size + leftPath.size > 4
+            if (!holder.framed || (frameKey && !holder.framedWithRoute)) {
                 holder.framed = true
-                val rect = listOf(branch, home, driver)
+                holder.framedWithRoute = frameKey
+                val rect = (listOf(branch, home, driver) + donePath + leftPath)
                     .map { MKPointAnnotationRect(it) }
                     .reduce { acc, r -> MKMapRectUnion(acc, r) }
                 map.setVisibleMapRect(rect, UIEdgeInsetsMake(70.0, 50.0, 70.0, 50.0), animated = false)

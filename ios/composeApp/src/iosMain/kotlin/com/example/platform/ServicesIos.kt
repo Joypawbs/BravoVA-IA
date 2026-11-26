@@ -448,9 +448,9 @@ actual object AuthPlatform {
 
     actual fun userFlow(): Flow<AuthUser?> {
         val bridge = IosBridges.auth ?: return flowOf(null)
-        return kotlinx.coroutines.flow.callbackFlow {
+        return callbackFlow {
             bridge.observe { trySend(it?.toAuthUser()) }
-            kotlinx.coroutines.channels.awaitClose { }
+            awaitClose { }
         }
     }
 
