@@ -252,7 +252,8 @@ fun BravoRoot(
             // Atajos del ícono, widgets y enlaces bravova:// (ver platform/ExternalLinks.kt)
             val externalTarget = com.example.platform.ExternalLinks.pending
             LaunchedEffect(externalTarget) {
-                when (com.example.platform.ExternalLinks.consume()) {
+                val link = com.example.platform.ExternalLinks.consume() ?: return@LaunchedEffect
+                when (com.example.platform.ExternalLinks.targetOf(link)) {
                     "buscar" -> {
                         viewModel.navigateTo(AppScreen.HOME)
                         com.example.ui.components.SearchFocusRequest.request()
@@ -264,7 +265,11 @@ fun BravoRoot(
                     "bravisima" -> viewModel.navigateTo(AppScreen.BRAVISIMA)
                     "ofertas" -> viewModel.navigateTo(AppScreen.CATALOG)
                     "pedido" -> viewModel.navigateTo(AppScreen.DELIVERY)
-                    "bravia" -> viewModel.navigateTo(AppScreen.BRAVIA)
+                    "bravia" -> {
+                        // bravova://bravia?q=… abre Brav IA y envía la pregunta
+                        viewModel.navigateTo(AppScreen.BRAVIA)
+                        com.example.platform.ExternalLinks.param(link, "q")?.let { viewModel.sendCustomChatMsg(it) }
+                    }
                     else -> Unit
                 }
             }
