@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
  * atajos del ícono (mantener presionado), widgets y enlaces bravova://.
  *
  * Android (MainActivity) e iOS (Swift) llaman a [request]; App.kt lo atiende con [consume].
- * Destinos: buscar, repetir, bravisima, ofertas, pedido.
+ * Destinos: buscar, repetir, bravisima, ofertas, pedido, bravia.
  */
 object ExternalLinks {
     var pending by mutableStateOf<String?>(null)

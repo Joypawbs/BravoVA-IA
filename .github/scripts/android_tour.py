@@ -240,7 +240,9 @@ def main():
                 swipe_up()
             perf("catálogo: desplazar")
     # Brav IA como invitado: responde en modo local, sin cuenta, con datos del catálogo y el recetario.
-    tap(["Brav IA"], wait=3, fallback=(0.7, 0.955))
+    # Enlace directo: más fiable que tocar la pestaña (la barra se esconde al desplazar).
+    adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", "bravova://bravia", PACKAGE)
+    time.sleep(4)
     for consulta, nombre in (("como hago un sancocho", "brav_ia_receta"), ("necesito arroz y habichuelas", "brav_ia_productos"), ("receta de paella valenciana", "brav_ia_receta_no_verificada")):
         if tap(["Pide una receta"], prefix=True, wait=1.5, fallback=(0.5, 0.9)):
             adb("shell", "input", "text", consulta.replace(" ", "%s")); time.sleep(1)

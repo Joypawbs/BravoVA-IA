@@ -1474,96 +1474,52 @@ fun ProductVectorIllustration(
     darkMode: Boolean = MaterialTheme.colorScheme.background.red < 0.3f,
     cornerRadius: Dp = 12.dp
 ) {
+    // Dibujo de respaldo: ícono del tipo de producto + su distintivo (ver ProductIllustration.kt)
     val fallbackBg = if (darkMode) Color(0xFF111927) else Tone.surfaceSubtle
-    val badgeCardBg = if (darkMode) Color(0xFF1E293B) else Color.White.copy(alpha = 0.94f)
-    val badgeTextColor = if (darkMode) Color(0xFFE2E8F0) else Tone.ink
-
-    Box(
+    val icon = remember(product.sku) { productCategoryIcon(product) }
+    val label = remember(product.badge) { shortBadge(product.badge) }
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .padding(2.dp)
             .clip(RoundedCornerShape(cornerRadius))
             .background(
                 Brush.radialGradient(
-                    colors = listOf(
-                        accentColor.copy(alpha = if (darkMode) 0.22f else 0.14f),
-                        fallbackBg
-                    )
+                    colors = listOf(accentColor.copy(alpha = if (darkMode) 0.24f else 0.16f), fallbackBg)
                 )
-            )
-            .border(
-                width = 1.dp,
-                color = accentColor.copy(alpha = if (darkMode) 0.36f else 0.22f),
-                shape = RoundedCornerShape(cornerRadius)
             ),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val w = size.width
-            val h = size.height
-            when (product.artType) {
-                "salami" -> {
-                    drawRoundRect(
-                        color = accentColor.copy(alpha = 0.85f),
-                        topLeft = Offset(w * 0.14f, h * 0.28f),
-                        size = Size(w * 0.72f, h * 0.44f),
-                        cornerRadius = CornerRadius(h * 0.22f, h * 0.22f)
-                    )
-                    drawRoundRect(
-                        color = badgeCardBg,
-                        topLeft = Offset(w * 0.30f, h * 0.30f),
-                        size = Size(w * 0.40f, h * 0.40f),
-                        cornerRadius = CornerRadius(8f, 8f)
-                    )
-                }
-                "jug" -> {
-                    drawRoundRect(
-                        color = accentColor.copy(alpha = 0.85f),
-                        topLeft = Offset(w * 0.24f, h * 0.14f),
-                        size = Size(w * 0.52f, h * 0.72f),
-                        cornerRadius = CornerRadius(14f, 14f)
-                    )
-                    drawRoundRect(
-                        color = badgeCardBg,
-                        topLeft = Offset(w * 0.29f, h * 0.34f),
-                        size = Size(w * 0.42f, h * 0.34f),
-                        cornerRadius = CornerRadius(8f, 8f)
-                    )
-                }
-                else -> {
-                    drawRoundRect(
-                        color = accentColor.copy(alpha = 0.82f),
-                        topLeft = Offset(w * 0.18f, h * 0.14f),
-                        size = Size(w * 0.64f, h * 0.72f),
-                        cornerRadius = CornerRadius(16f, 16f)
-                    )
-                    drawRoundRect(
-                        color = badgeCardBg,
-                        topLeft = Offset(w * 0.24f, h * 0.30f),
-                        size = Size(w * 0.52f, h * 0.40f),
-                        cornerRadius = CornerRadius(10f, 10f)
-                    )
-                }
+        val side = minOf(maxWidth, maxHeight)
+        val showLabel = side >= 72.dp
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Box(
+                modifier = Modifier
+                    .size(side * 0.5f)
+                    .clip(CircleShape)
+                    .background(accentColor.copy(alpha = if (darkMode) 0.22f else 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = product.name,
+                    tint = accentColor,
+                    modifier = Modifier.size(side * 0.3f)
+                )
             }
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        ) {
-            Text(
-                text = if (product.isBravo) "b" else "★",
-                color = accentColor,
-                fontWeight = FontWeight.Black,
-                fontSize = 12.sp
-            )
-            Text(
-                text = product.badge.ifBlank { "BRAVO" }.take(10),
-                color = badgeTextColor,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 6.5.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (showLabel) {
+                Spacer(Modifier.height(side * 0.06f))
+                Text(
+                    text = label,
+                    color = if (darkMode) Color(0xFFE2E8F0) else Tone.ink,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 9.sp,
+                    letterSpacing = 0.4.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 6.dp)
+                )
+            }
         }
     }
 }

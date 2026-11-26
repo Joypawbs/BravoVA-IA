@@ -264,6 +264,7 @@ fun BravoRoot(
                     "bravisima" -> viewModel.navigateTo(AppScreen.BRAVISIMA)
                     "ofertas" -> viewModel.navigateTo(AppScreen.CATALOG)
                     "pedido" -> viewModel.navigateTo(AppScreen.DELIVERY)
+                    "bravia" -> viewModel.navigateTo(AppScreen.BRAVIA)
                     else -> Unit
                 }
             }
