@@ -481,6 +481,11 @@ fun BravoVaApp(
                     // que el vidrio esmerilado (que desenfoca este fondo) se recalcule en cada cuadro.
                     val orbDriftPhaseState = remember { mutableFloatStateOf(0f) }
                     LaunchedEffect(Unit) {
+                        // Con Liquid Glass nativo (iOS 26+) el vidrio vuelve a muestrear lo que tiene
+                        // detrás en cada cambio: un fondo que se mueve 15 veces por segundo obligaba a
+                        // redibujar todas las barras de vidrio y causaba tirones al desplazarse.
+                        if (com.example.ui.components.nativeLiquidGlassAvailable() ||
+                            com.example.platform.systemPrefersReducedMotion()) return@LaunchedEffect
                         val stepMs = if (com.example.platform.DevicePerformance.isLowEnd) 125L else 66L
                         val start = kotlin.time.TimeSource.Monotonic.markNow()
                         while (true) {
