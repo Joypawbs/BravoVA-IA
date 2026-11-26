@@ -184,6 +184,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -650,62 +652,23 @@ private fun Modifier.glowingRedAiContour(
         label = "softGlowPulse"
     )
 
-    val activeSoftColor = sampleSoftAiRedColor(colorPhase)
-    val trailingSoftColor = sampleSoftAiRedColor(colorPhase + 0.22f)
-
+    // Rendimiento: antes se medía el contorno y se recortaban dos trazos en cada cuadro, pero solo se
+    // usaba la posición de la punta. La punta está a (avance + 26 % del perímetro), así que basta esa cuenta.
+    // Las animaciones se leen al dibujar: no se reconstruye el mensaje en cada cuadro.
     return this.drawWithCache {
         val w = size.width
         val h = size.height
-        val cornerPx = 22.dp.toPx()
-
-        val perimeterPath = Path().apply {
-            addRoundRect(
-                RoundRect(
-                    rect = Rect(0f, 0f, w, h),
-                    cornerRadius = CornerRadius(cornerPx, cornerPx)
-                )
-            )
-        }
-        val pathMeasure = PathMeasure()
-        pathMeasure.setPath(perimeterPath, forceClosed = true)
-        val totalLen = pathMeasure.length.coerceAtLeast(1f)
-
-        // Largo de la línea: ~26 % del perímetro
-        val singleLineLen = totalLen * 0.26f
-        val startDist = (lineProgress * totalLen) % totalLen
-        val endDist = startDist + singleLineLen
-
-        val singleLinePath = Path()
-        if (endDist <= totalLen) {
-            pathMeasure.getSegment(startDist, endDist, singleLinePath, startWithMoveTo = true)
-        } else {
-            pathMeasure.getSegment(startDist, totalLen, singleLinePath, startWithMoveTo = true)
-            pathMeasure.getSegment(0f, endDist - totalLen, singleLinePath, startWithMoveTo = true)
-        }
-
-        // Punta de la línea (la parte más brillante)
-        val headSliceLen = singleLineLen * 0.42f
-        val headStartDist = (startDist + singleLineLen - headSliceLen) % totalLen
-        val headEndDist = headStartDist + headSliceLen
-        val headLinePath = Path()
-        if (headEndDist <= totalLen) {
-            pathMeasure.getSegment(headStartDist, headEndDist, headLinePath, startWithMoveTo = true)
-        } else {
-            pathMeasure.getSegment(headStartDist, totalLen, headLinePath, startWithMoveTo = true)
-            pathMeasure.getSegment(0f, headEndDist - totalLen, headLinePath, startWithMoveTo = true)
-        }
-
-        // Posición aproximada de la punta de la línea
-        val headFraction = ((endDist % totalLen) / totalLen)
-        val headAngle = headFraction * (2f * PI).toFloat()
-        val headCenter = Offset(
-            x = (w * 0.5f + cos(headAngle) * (w * 0.48f)).coerceIn(0f, w),
-            y = (h * 0.5f + sin(headAngle) * (h * 0.48f)).coerceIn(0f, h)
-        )
-
         val ambientRadius = max(w, h) * 0.72f
 
         onDrawWithContent {
+            val headFraction = (lineProgress + 0.26f) % 1f
+            val headAngle = headFraction * (2f * PI).toFloat()
+            val headCenter = Offset(
+                x = (w * 0.5f + cos(headAngle) * (w * 0.48f)).coerceIn(0f, w),
+                y = (h * 0.5f + sin(headAngle) * (h * 0.48f)).coerceIn(0f, h)
+            )
+            val activeSoftColor = sampleSoftAiRedColor(colorPhase)
+            val trailingSoftColor = sampleSoftAiRedColor(colorPhase + 0.22f)
             // Luz suave dentro de la tarjeta del mensaje
             drawCircle(
                 brush = Brush.radialGradient(
@@ -984,8 +947,8 @@ fun BravIaChatScreen(
         ),
         label = "uiAmbientOrbitAngle"
     )
-    val ambientSoftPrimary = sampleSoftAiRedColor(uiColorPhase)
-    val ambientSoftSecondary = sampleSoftAiRedColor(uiColorPhase + 0.35f)
+    // Rendimiento: los colores que cambian con la animación se calculan DENTRO del dibujo
+    // (no al componer), así solo se repinta el fondo y no se reconstruye todo el chat en cada cuadro.
 
     val hazeState = LocalTranslucentHazeState.current
     val density = LocalDensity.current
@@ -1032,6 +995,8 @@ fun BravIaChatScreen(
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 0f)
         ) {
+            val ambientSoftPrimary = sampleSoftAiRedColor(uiColorPhase)
+            val ambientSoftSecondary = sampleSoftAiRedColor(uiColorPhase + 0.35f)
             val w = size.width
             val h = size.height
             val baseIntensity = if (darkMode) {
@@ -2096,7 +2061,7 @@ fun BravIaChatScreen(
                         haloAlpha = 0.24f
                     )
                     .clip(RoundedCornerShape(999.dp))
-                    .translucentBackdropEffect(darkMode = darkMode, accentColor = ambientSoftPrimary)
+                    .translucentBackdropEffect(darkMode = darkMode)
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
@@ -2106,17 +2071,26 @@ fun BravIaChatScreen(
                             )
                         )
                     )
-                    .border(
-                        width = 1.4.dp,
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                ambientSoftPrimary.copy(alpha = if (isGenerating) 0.65f else 0.38f),
-                                ambientSoftSecondary.copy(alpha = if (isGenerating) 0.50f else 0.28f),
-                                ambientSoftPrimary.copy(alpha = if (isGenerating) 0.65f else 0.38f)
-                            )
-                        ),
-                        shape = RoundedCornerShape(999.dp)
-                    )
+                    // Borde con el color animado, leído al dibujar (no reconstruye la barra en cada cuadro)
+                    .drawWithContent {
+                        drawContent()
+                        val primary = sampleSoftAiRedColor(uiColorPhase)
+                        val secondary = sampleSoftAiRedColor(uiColorPhase + 0.35f)
+                        val stroke = 1.4.dp.toPx()
+                        drawRoundRect(
+                            brush = Brush.horizontalGradient(
+                                listOf(
+                                    primary.copy(alpha = if (isGenerating) 0.65f else 0.38f),
+                                    secondary.copy(alpha = if (isGenerating) 0.50f else 0.28f),
+                                    primary.copy(alpha = if (isGenerating) 0.65f else 0.38f)
+                                )
+                            ),
+                            topLeft = Offset(stroke / 2, stroke / 2),
+                            size = Size(size.width - stroke, size.height - stroke),
+                            cornerRadius = CornerRadius(size.height / 2, size.height / 2),
+                            style = Stroke(width = stroke)
+                        )
+                    }
                     .padding(horizontal = 8.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center

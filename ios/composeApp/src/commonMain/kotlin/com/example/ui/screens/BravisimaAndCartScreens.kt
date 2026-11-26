@@ -3514,9 +3514,10 @@ fun DeliveryTrackingScreen(
                             userLng = userLng,
                             telemetry = driverTelemetry,
                             deliveryStage = deliveryStage,
-                            animatedX = animatedX,
-                            animatedY = animatedY,
-                            pulseRadius = pulseRadius
+                            // Lambdas: el mapa lee estos valores al dibujar, sin reconstruir toda la pantalla
+                            animatedX = { animatedX },
+                            animatedY = { animatedY },
+                            pulseRadius = { pulseRadius }
                         )
 
                         // Velocidad, tráfico y hora estimada
@@ -4295,9 +4296,9 @@ private fun RealInteractiveDeliveryMapView(
     userLng: Double,
     telemetry: DriverLiveTelemetry,
     deliveryStage: OrderDeliveryStage,
-    animatedX: Float,
-    animatedY: Float,
-    pulseRadius: Float
+    animatedX: () -> Float,
+    animatedY: () -> Float,
+    pulseRadius: () -> Float
 ) {
     // Mapa real: Apple Maps en iPhone y Google Maps en Android (si la app tiene clave).
     if (com.example.ui.components.nativeDeliveryMapAvailable()) {
@@ -4377,8 +4378,8 @@ private fun RealInteractiveDeliveryMapView(
             val w = size.width
             val h = size.height
 
-            val focusX = if (followDriver && zoomLevel > 1.05f) (0.5f - animatedX) * w * 0.45f else panOffsetX
-            val focusY = if (followDriver && zoomLevel > 1.05f) (0.5f - animatedY) * h * 0.45f else panOffsetY
+            val focusX = if (followDriver && zoomLevel > 1.05f) (0.5f - animatedX()) * w * 0.45f else panOffsetX
+            val focusY = if (followDriver && zoomLevel > 1.05f) (0.5f - animatedY()) * h * 0.45f else panOffsetY
 
             fun project(xFrac: Float, yFrac: Float): Offset {
                 val cx = w * 0.5f
@@ -4595,7 +4596,7 @@ private fun RealInteractiveDeliveryMapView(
             )
 
             // 8. Posición del repartidor con pulso
-            val driverCenter = project(animatedX, animatedY)
+            val driverCenter = project(animatedX(), animatedY())
             // Tramo recorrido hasta el repartidor
             drawLine(
                 color = primaryColor,
@@ -4606,7 +4607,7 @@ private fun RealInteractiveDeliveryMapView(
             )
             drawCircle(
                 color = primaryColor.copy(alpha = 0.28f),
-                radius = pulseRadius * animatedZoom,
+                radius = pulseRadius() * animatedZoom,
                 center = driverCenter
             )
             drawCircle(

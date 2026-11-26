@@ -199,7 +199,7 @@ fun LiquidGlass(
                     this.shape = shape
                 }
                 .then(
-                    if (useHaze) Modifier.hazeEffect(state = hazeState, style = hazeStyle) { blurEnabled = true }
+                    if (useHaze) Modifier.hazeEffect(state = hazeState, style = hazeStyle) { blurEnabled = true; inputScale = hazeInputScaleForDevice() }
                     else Modifier.background(uniformMenuTranslucentContainerColor(darkMode))
                 )
         )

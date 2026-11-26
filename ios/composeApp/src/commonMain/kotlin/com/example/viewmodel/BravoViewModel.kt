@@ -1436,7 +1436,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             isAiGenerated = autoPopulateWithAi,
             updatedAtLabel = if (autoPopulateWithAi) "Autocompletando con Brav IA..." else "Creada ahora"
         )
-        val updated = listOf(_lists.value.first()) + listOf(newList) + _lists.value.drop(1)
+        // take(1) en vez de first(): no se cierra si todavía no existe la lista de favoritos
+        val updated = _lists.value.take(1) + listOf(newList) + _lists.value.drop(1)
         persistLists(updated, changedList = newList)
         if (autoPopulateWithAi) {
             populateListWithBravIa(newId, focusHint.ifBlank { cleanName })
@@ -1541,7 +1542,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             isAiGenerated = true,
             updatedAtLabel = "Creada por Brav IA • Sincronizada"
         )
-        val updated = listOf(_lists.value.first()) + listOf(newList) + _lists.value.drop(1)
+        // take(1) en vez de first(): no se cierra si todavía no existe la lista de favoritos
+        val updated = _lists.value.take(1) + listOf(newList) + _lists.value.drop(1)
         persistLists(updated, changedList = newList)
         showToast("📋", "Lista guardada: \"$derivedTitle\"")
     }

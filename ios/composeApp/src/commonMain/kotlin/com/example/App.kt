@@ -60,6 +60,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -465,16 +467,20 @@ fun BravoVaApp(
                         animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
                         label = "global_ai_ambient_alpha"
                     )
-                    val ambientTransition = rememberInfiniteTransition(label = "store_ambient_backdrop")
-                    val orbDriftPhase by ambientTransition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = (2f * PI).toFloat(),
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(durationMillis = 12000, easing = LinearEasing),
-                            repeatMode = RepeatMode.Restart
-                        ),
-                        label = "orbDriftPhase"
-                    )
+                    // Rendimiento: el brillo del fondo da una vuelta cada 12 s y se mueve apenas un 6 %.
+                    // Actualizarlo ~15 veces por segundo (8 en gama baja) se ve igual que a 60–120 y evita
+                    // que el vidrio esmerilado (que desenfoca este fondo) se recalcule en cada cuadro.
+                    val orbDriftPhaseState = remember { mutableFloatStateOf(0f) }
+                    LaunchedEffect(Unit) {
+                        val stepMs = if (com.example.platform.DevicePerformance.isLowEnd) 125L else 66L
+                        val start = kotlin.time.TimeSource.Monotonic.markNow()
+                        while (true) {
+                            delay(stepMs)
+                            val elapsed = start.elapsedNow().inWholeMilliseconds % 12_000L
+                            orbDriftPhaseState.floatValue = (elapsed / 12_000f) * (2f * PI).toFloat()
+                        }
+                    }
+                    val orbDriftPhase by orbDriftPhaseState
                     val targetTopGlowColor = when {
                         isAiAmbientActive -> Color(0xFFF38B9B)
                         isArca -> ArcaTeal
@@ -704,7 +710,12 @@ fun BravoVaApp(
                         }
 
                         AppScreen.PRODUCT -> {
-                            val prod = viewModel.findProductBySku(activeProductSku) ?: activeProducts.first()
+                            // Sin catálogo cargado (primera vez sin internet) no hay producto que mostrar: se vuelve atrás en vez de cerrar la app
+                            val prodOrNull = viewModel.findProductBySku(activeProductSku) ?: activeProducts.firstOrNull()
+                            if (prodOrNull == null) {
+                                LaunchedEffect(Unit) { viewModel.navigateBack() }
+                            } else {
+                            val prod = prodOrNull
                             val isFav = remember(shoppingLists, prod.sku) {
                                 viewModel.isProductFavorite(prod.sku)
                             }
@@ -733,6 +744,7 @@ fun BravoVaApp(
                                 allProducts = allCatalogProducts,
                                 onOpenProduct = { sku -> viewModel.openProductDetail(sku) }
                             )
+                            }
                         }
 
                         AppScreen.BRAVISIMA -> {

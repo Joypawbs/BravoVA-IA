@@ -29,6 +29,7 @@ kotlin {
         freeCompilerArgs.addAll(
             "-Xexpect-actual-classes",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=dev.chrisbanes.haze.ExperimentalHazeApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
             "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
             "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
@@ -134,7 +135,7 @@ android {
         }
     }
     // R8 (optimizador de Android): -Pminify=false lo apaga, para poder medir el antes y el después
-    val useR8 = (project.findProperty("minify") as String?)?.toBoolean() ?: false
+    val useR8 = (project.findProperty("minify") as String?)?.toBoolean() ?: true
     buildTypes {
         release {
             if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")

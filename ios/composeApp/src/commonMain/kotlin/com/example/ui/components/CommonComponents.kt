@@ -32,7 +32,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 
 import com.example.platform.*
 import coil3.compose.LocalPlatformContext
-import coil3.compose.SubcomposeAsyncImage
+import androidx.compose.runtime.collectAsState
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.transformations
@@ -263,6 +265,7 @@ fun Modifier.translucentBackdropSource(
     }
 }
 
+@OptIn(dev.chrisbanes.haze.ExperimentalHazeApi::class)
 @Composable
 fun Modifier.translucentBackdropEffect(
     darkMode: Boolean,
@@ -274,8 +277,19 @@ fun Modifier.translucentBackdropEffect(
     val style = rememberUniformTranslucentHazeStyle(darkMode = darkMode, accentColor = accentColor)
     return this.hazeEffect(state = hazeState, style = style) {
         blurEnabled = true
+        inputScale = hazeInputScaleForDevice()
     }
 }
+
+/**
+ * Rendimiento del vidrio esmerilado: el fondo se desenfoca a menor resolución y se agranda después.
+ * Con un desenfoque de 24 dp la diferencia no se nota. Según el autor de Haze, 0.8 reduce ~35 % de
+ * píxeles de forma casi imperceptible; en gama baja se usa la escala automática (1/3).
+ */
+@OptIn(dev.chrisbanes.haze.ExperimentalHazeApi::class)
+fun hazeInputScaleForDevice(): dev.chrisbanes.haze.HazeInputScale =
+    if (com.example.platform.DevicePerformance.isLowEnd) dev.chrisbanes.haze.HazeInputScale.Auto
+    else dev.chrisbanes.haze.HazeInputScale.Fixed(0.8f)
 
 @Composable
 fun uniformMenuTranslucentContainerColor(darkMode: Boolean): Color {
@@ -1386,15 +1400,15 @@ fun ProductArtworkView(
                     .crossfade(if (dataSaver) 0 else 260)
                     .build()
             }
-            SubcomposeAsyncImage(
-                model = imageRequest,
-                contentDescription = product.name,
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(2.dp),
-                loading = {
+            // Rendimiento: rememberAsyncImagePainter en vez de SubcomposeAsyncImage. Coil advierte que la
+            // subcomposición es lenta en LazyRow/LazyColumn, y aquí hay una foto por tarjeta de producto.
+            val painter = rememberAsyncImagePainter(model = imageRequest, contentScale = ContentScale.Fit)
+            val imageState by painter.state.collectAsState()
+            if (imageState is AsyncImagePainter.State.Error) {
+                // Si falló el recorte, intenta la foto original antes de usar el dibujo
+                ProductOriginalPhotoOrIllustration(product, accent, isDark, cornerRadius)
+            } else {
+                if (imageState !is AsyncImagePainter.State.Success) {
                     // Mancha suave del color del producto mientras llega la foto (sin animación infinita)
                     Box(
                         Modifier
@@ -1407,29 +1421,17 @@ fun ProductArtworkView(
                                 )
                             )
                     )
-                },
-                error = {
-                    // Si falló el recorte, intenta la foto original antes de usar el dibujo
-                    SubcomposeAsyncImage(
-                        model = product.imageUrl,
-                        contentDescription = product.name,
-                        contentScale = ContentScale.Fit,
-                        alignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp)
-                            .clip(RoundedCornerShape(cornerRadius)),
-                        error = {
-                            ProductVectorIllustration(
-                                product = product,
-                                accentColor = accent,
-                                darkMode = isDark,
-                                cornerRadius = cornerRadius
-                            )
-                        }
-                    )
                 }
-            )
+                Image(
+                    painter = painter,
+                    contentDescription = product.name,
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(2.dp)
+                )
+            }
         } else {
             ProductVectorIllustration(
                 product = product,
@@ -1438,6 +1440,27 @@ fun ProductArtworkView(
                 cornerRadius = cornerRadius
             )
         }
+    }
+}
+
+/** Respaldo: la foto original sin recortar; si tampoco carga, el dibujo del producto. */
+@Composable
+private fun ProductOriginalPhotoOrIllustration(product: Product, accent: Color, isDark: Boolean, cornerRadius: Dp) {
+    val painter = rememberAsyncImagePainter(model = product.imageUrl, contentScale = ContentScale.Fit)
+    val state by painter.state.collectAsState()
+    if (state is AsyncImagePainter.State.Error) {
+        ProductVectorIllustration(product = product, accentColor = accent, darkMode = isDark, cornerRadius = cornerRadius)
+    } else {
+        Image(
+            painter = painter,
+            contentDescription = product.name,
+            contentScale = ContentScale.Fit,
+            alignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .clip(RoundedCornerShape(cornerRadius))
+        )
     }
 }
 
