@@ -1,6 +1,0 @@
-{
-  "name": "BravoVa",
-  "description": "Supermercados Bravo y El Arca Petshop con asistente inteligente Brav IA, tarjeta Bravísima y seguimiento en vivo.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
