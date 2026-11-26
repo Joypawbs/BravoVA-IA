@@ -1,0 +1,33 @@
+Tamaño de la APK: A=82700576 bytes, B=64709632 bytes
+A ronda 1 | inicio: desplazar: cuadros=46 p50=750ms p90=950ms p99=1300ms
+A ronda 1 | inicio: 5 s quieto: cuadros=18 p50=750ms p90=1100ms p99=1250ms
+A ronda 1 | Catálogo: 5 s quieto: cuadros=18 p50=900ms p90=1150ms p99=1150ms
+A ronda 1 | catálogo: desplazar: cuadros=25 p50=1150ms p90=1850ms p99=2400ms
+A ronda 1 | Brav IA: 5 s quieto: cuadros=14 p50=1150ms p90=1600ms p99=1600ms
+A ronda 1 | Cuenta: 5 s quieto: cuadros=14 p50=1150ms p90=1450ms p99=1700ms
+A ronda 1 | arranque en frío: [2183, 2906, 1871] promedio=2320 ms
+A ronda 1 | memoria (PSS): 131 MB
+B ronda 1 | inicio: desplazar: cuadros=55 p50=500ms p90=700ms p99=900ms
+B ronda 1 | inicio: 5 s quieto: cuadros=24 p50=300ms p90=450ms p99=500ms
+B ronda 1 | Catálogo: 5 s quieto: cuadros=22 p50=300ms p90=550ms p99=650ms
+B ronda 1 | catálogo: desplazar: cuadros=27 p50=400ms p90=600ms p99=700ms
+B ronda 1 | Brav IA: 5 s quieto: cuadros=25 p50=250ms p90=350ms p99=500ms
+B ronda 1 | Cuenta: 5 s quieto: cuadros=19 p50=300ms p90=500ms p99=600ms
+B ronda 1 | arranque en frío: [2006, 1793, 1764] promedio=1854 ms
+B ronda 1 | memoria (PSS): 102 MB
+A ronda 2 | inicio: desplazar: cuadros=55 p50=500ms p90=800ms p99=850ms
+A ronda 2 | inicio: 5 s quieto: cuadros=28 p50=450ms p90=650ms p99=700ms
+A ronda 2 | Catálogo: 5 s quieto: cuadros=25 p50=500ms p90=700ms p99=750ms
+A ronda 2 | catálogo: desplazar: cuadros=30 p50=550ms p90=700ms p99=800ms
+A ronda 2 | Brav IA: 5 s quieto: cuadros=27 p50=450ms p90=550ms p99=750ms
+A ronda 2 | Cuenta: 5 s quieto: cuadros=25 p50=500ms p90=650ms p99=700ms
+A ronda 2 | arranque en frío: [1839, 1856, 1762] promedio=1819 ms
+A ronda 2 | memoria (PSS): 144 MB
+B ronda 2 | inicio: desplazar: cuadros=58 p50=500ms p90=600ms p99=700ms
+B ronda 2 | inicio: 5 s quieto: cuadros=26 p50=400ms p90=600ms p99=700ms
+B ronda 2 | Catálogo: 5 s quieto: cuadros=22 p50=300ms p90=500ms p99=650ms
+B ronda 2 | catálogo: desplazar: cuadros=29 p50=400ms p90=600ms p99=600ms
+B ronda 2 | Brav IA: 5 s quieto: cuadros=24 p50=250ms p90=400ms p99=450ms
+B ronda 2 | Cuenta: 5 s quieto: cuadros=24 p50=250ms p90=400ms p99=450ms
+B ronda 2 | arranque en frío: [1729, 1687, 1688] promedio=1701 ms
+B ronda 2 | memoria (PSS): 106 MB
