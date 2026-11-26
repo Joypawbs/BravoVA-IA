@@ -95,6 +95,13 @@ def tap(labels, prefix=False, wait=2.0, fallback=None):
     return False
 
 
+def hide_keyboard():
+    """Cierra el teclado solo si está abierto (Atrás sin teclado saldría de la pantalla)."""
+    state = adb("shell", "dumpsys", "input_method", capture=True) or ""
+    if "mInputShown=true" in state or "mIsInputViewShown=true" in state:
+        adb("shell", "input", "keyevent", "4"); time.sleep(1)
+
+
 def swipe_down():
     adb("shell", "input", "swipe", "540", "800", "540", "1800", "350")
     time.sleep(1.5)
@@ -232,6 +239,19 @@ def main():
             for _ in range(3):
                 swipe_up()
             perf("catálogo: desplazar")
+    # Brav IA como invitado: responde en modo local, sin cuenta, con datos del catálogo y el recetario.
+    tap(["Brav IA"], wait=3, fallback=(0.7, 0.955))
+    for consulta, nombre in (("como hago un sancocho", "brav_ia_receta"), ("necesito arroz y habichuelas", "brav_ia_productos"), ("receta de paella valenciana", "brav_ia_receta_no_verificada")):
+        if tap(["Pide una receta"], prefix=True, wait=1.5, fallback=(0.5, 0.9)):
+            adb("shell", "input", "text", consulta.replace(" ", "%s")); time.sleep(1)
+            adb("shell", "input", "keyevent", "66"); time.sleep(5)
+            hide_keyboard()
+            shot(nombre)
+            if nombre == "brav_ia_receta":
+                swipe_down(); shot("brav_ia_receta_ingredientes")
+                swipe_down(); shot("brav_ia_receta_pasos")
+                swipe_up(); swipe_up(); swipe_up()
+    tap(["Cuenta"], wait=3, fallback=(0.9, 0.955))
     if tap(["Tarjeta Bravísima"], wait=3):
         shot("bravisima")
         # Código para la caja a pantalla completa (tocar cualquier parte lo cierra)

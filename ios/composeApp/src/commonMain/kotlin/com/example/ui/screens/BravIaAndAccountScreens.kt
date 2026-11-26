@@ -2176,9 +2176,9 @@ fun BravIaChatScreen(
                     if (inputText.isEmpty()) {
                         Text(
                             text = when {
-                                !pendingImageUri.isNullOrBlank() -> "Describe tu foto o toca Enviar para auditar..."
-                                isArca -> "Receta/dieta mascota, foto o sugerencia..."
-                                else -> "Receta web, foto NCF/calidad o sugerencia..."
+                                !pendingImageUri.isNullOrBlank() -> "Cuéntame qué quieres saber de la foto…"
+                                isArca -> "Pregunta por tu mascota o envía una foto…"
+                                else -> "Pide una receta, productos o envía una foto…"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 12.sp,
