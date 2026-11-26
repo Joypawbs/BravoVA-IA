@@ -30,6 +30,7 @@ import com.example.platform.URLEncoder
 import com.example.platform.content
 import com.example.platform.createGenerativeModel
 import com.example.platform.AiModelConfig
+import com.example.platform.appCheckDebugTokenOrNull
 import com.example.platform.AiContent
 import com.example.ai.BravIaEngine
 import com.example.ai.BravIaText
@@ -176,8 +177,12 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     private val bravIaChatModel by lazy { createGenerativeModel("gemini-3.8-flash", bravIaChatConfig) }
     private val bravIaChatFallbackModel by lazy { createGenerativeModel("gemini-3.5-flash-lite", bravIaChatConfig) }
 
-    private fun isFirebaseUserAuthenticatedForAi(): Boolean =
-        runCatching { AuthPlatform.currentUser() != null }.getOrDefault(false)
+    /**
+     * Brav IA usa Firebase AI Logic, que no necesita un usuario con sesión (la protege App Check).
+     * Antes se exigía sesión y en iPhone —donde no había inicio de sesión— Brav IA nunca hablaba
+     * con el modelo. Ahora siempre se intenta el modelo; si falla, la respuesta local dice el motivo.
+     */
+    private fun isFirebaseUserAuthenticatedForAi(): Boolean = true
 
     private val _pendingChatImageUri = MutableStateFlow<String?>(null)
     val pendingChatImageUri: StateFlow<String?> = _pendingChatImageUri.asStateFlow()
@@ -3066,11 +3071,30 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 }
             } catch (e: Exception) {
                 Log.d(TAG, "Brav IA usa la respuesta local: ${e.message}")
-                publish(localAnswer(), "Brav IA • Modo sin conexión", elapsed())
+                // El motivo visible ayuda a saber si es la red, la clave de Firebase o el modelo.
+                val reason = aiFailureReason(e)
+                var local = localAnswer()
+                val token = if (reason == "acceso de la app no verificado") runCatching { appCheckDebugTokenOrNull() }.getOrNull() else null
+                if (token != null) {
+                    local = local.copy(text = local.text + "\n\nPara activar la IA en esta instalación, registra este token en Firebase → App Check → app de iOS → Administrar tokens de depuración:\n" + token)
+                }
+                publish(local, "Brav IA • Sin conexión con la IA ($reason)", elapsed())
             } finally {
                 _isAiGenerating.value = false
                 activeAiChatJob = null
             }
+        }
+    }
+
+    private fun aiFailureReason(e: Throwable): String {
+        val m = (e.message ?: e::class.simpleName ?: "").lowercase()
+        return when {
+            "app check" in m || "appcheck" in m || "403" in m || "permission" in m -> "acceso de la app no verificado"
+            "quota" in m || "429" in m || "resource exhausted" in m -> "límite de uso alcanzado"
+            "network" in m || "internet" in m || "offline" in m || "timed out" in m || "unreachable" in m -> "sin internet"
+            "not found" in m || "404" in m -> "modelo no disponible"
+            "api key" in m || "invalid" in m -> "configuración de Firebase"
+            else -> (e.message ?: "error").take(60)
         }
     }
 

@@ -373,6 +373,8 @@ fun HomeScreen(
                     testTag = "home_search_input",
                     onFocusChanged = { isSearchFocused = it },
                     focusRequester = homeSearchFocus,
+                    nativeTrailingSymbol = "barcode.viewfinder",
+                    onNativeTrailing = { onOpenScanner() },
                     modifier = Modifier.bravoAiAura(
                         cornerRadius = 999.dp,
                         enabled = localSearchInput.isNotBlank(),

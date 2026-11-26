@@ -101,7 +101,7 @@ jobs:
         run: |
           set -o pipefail
           brew install xcodegen
-          xcodegen generate
+          bash ../scripts/generar_proyecto.sh
           V="${TAG#v}"; BASE="${V%%-*}"; IFS=. read -r MA MI PA <<< "$BASE"
           CODE=$((MA*10000 + MI*100 + ${PA:-0}))
           # Beta (v2.0.0-beta1): queda por debajo de la versión final, pero por encima de la anterior

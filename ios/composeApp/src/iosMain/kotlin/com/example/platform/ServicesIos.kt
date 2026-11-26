@@ -421,19 +421,55 @@ actual object PushPlatform {
 /*  Auth: Firebase Auth for iOS is not wired yet -> local session        */
 /* ------------------------------------------------------------------ */
 
-actual object AuthPlatform {
-    actual val isSignInAvailable: Boolean = false
-    actual fun currentUser(): AuthUser? = null
-    actual fun userFlow(): Flow<AuthUser?> = flowOf(null)
-    actual suspend fun attemptSilentSignIn(context: PlatformContext): Result<AuthUser?> = Result.success(null)
+/**
+ * Implementado en Swift (iosApp/iosApp/FirebaseAuthBridge.swift) con Firebase Auth y Google Sign-In.
+ * Kotlin no puede llamar a esos SDK directamente, así que Swift le entrega este puente al iniciar.
+ */
+interface IosAuthBridge {
+    /** [uid, nombre, correo] del usuario con sesión, o null. */
+    fun currentUser(): List<String>?
+    /** Llama a [onChange] cada vez que cambia la sesión (con null al cerrarla). */
+    fun observe(onChange: (List<String>?) -> Unit)
+    /** Abre la hoja de Google. [onComplete] recibe null si todo salió bien o el motivo del error. */
+    fun signInWithGoogle(onComplete: (String?) -> Unit)
+    fun signOut()
+    /** Token de depuración de App Check si la app se instaló sin App Attest; si no, null. */
+    fun appCheckDebugToken(): String?
+}
 
-    actual suspend fun launchSignInSheet(context: PlatformContext, onFallbackSession: () -> Unit): Result<AuthUser?> {
-        // Same behaviour as Android devices without Google Play accounts: a verified local session.
-        onFallbackSession()
-        return Result.success(null)
+actual fun appCheckDebugTokenOrNull(): String? = IosBridges.auth?.appCheckDebugToken()
+
+private fun List<String>.toAuthUser() = AuthUser(uid = this[0], displayName = getOrNull(1)?.ifBlank { null }, email = getOrNull(2)?.ifBlank { null })
+
+actual object AuthPlatform {
+    actual val isSignInAvailable: Boolean get() = IosBridges.auth != null
+
+    actual fun currentUser(): AuthUser? = IosBridges.auth?.currentUser()?.toAuthUser()
+
+    actual fun userFlow(): Flow<AuthUser?> {
+        val bridge = IosBridges.auth ?: return flowOf(null)
+        return kotlinx.coroutines.flow.callbackFlow {
+            bridge.observe { trySend(it?.toAuthUser()) }
+            kotlinx.coroutines.channels.awaitClose { }
+        }
     }
 
-    actual suspend fun signOut(context: PlatformContext) = Unit
+    actual suspend fun attemptSilentSignIn(context: PlatformContext): Result<AuthUser?> = Result.success(currentUser())
+
+    actual suspend fun launchSignInSheet(context: PlatformContext, onFallbackSession: () -> Unit): Result<AuthUser?> {
+        val bridge = IosBridges.auth ?: run {
+            onFallbackSession()
+            return Result.success(null)
+        }
+        val error = kotlinx.coroutines.suspendCancellableCoroutine<String?> { cont ->
+            bridge.signInWithGoogle { err -> if (cont.isActive) cont.resumeWith(Result.success(err)) }
+        }
+        return if (error == null) Result.success(currentUser()) else Result.failure(IllegalStateException(error))
+    }
+
+    actual suspend fun signOut(context: PlatformContext) {
+        IosBridges.auth?.signOut()
+    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -459,6 +495,7 @@ interface IosAiBridge {
 
 object IosBridges {
     var ai: IosAiBridge? = null
+    var auth: IosAuthBridge? = null
     /** Vidrio líquido nativo (SwiftUI), registrado desde iOSApp. */
     var glass: com.example.ui.components.IosGlassBridge? = null
 }

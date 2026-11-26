@@ -1,14 +1,13 @@
 package com.example.model
 
-/** Formas de pago comunes en República Dominicana (simuladas en esta demo). */
+/**
+ * Formas de pago de Bravo en línea: tarjeta de crédito o débito, Apple Pay (iPhone) y
+ * Google Pay (Android). Se quitaron transferencia, tPago, efectivo y datáfono porque
+ * Bravo no los ofrece en su compra en línea.
+ */
 enum class RdPaymentOption(val label: String, val detail: String, val needsBiometric: Boolean) {
     WALLET("Pago rápido", "Confirmas con Face ID o huella", true),
-    CARD("Tarjeta guardada", "Cobro inmediato con huella", true),
-    CASH_ON_DELIVERY("Efectivo al recibir", "Pagas al repartidor", false),
-    POS_ON_DELIVERY("Tarjeta al recibir", "El repartidor lleva datáfono", false),
-    TRANSFER("Transferencia bancaria", "Adjunta el comprobante", false),
-    TPAGO("tPago", "Apruebas el pago desde tu celular", false),
-    AZUL("Azul", "Pago en línea con tu tarjeta", true)
+    CARD("Tarjeta de crédito o débito", "Visa o Mastercard guardada", true)
 }
 
 /** Detalle según la plataforma (Face ID existe solo en iPhone). */
@@ -56,10 +55,7 @@ data class CheckoutExtras(
     val substitution: SubstitutionPref = SubstitutionPref.SIMILAR
 ) {
     val paymentSummary: String
-        get() = when (payment) {
-            RdPaymentOption.TRANSFER -> "Transferencia ${transferBank.orEmpty()}".trim()
-            else -> payment.displayLabel
-        }
+        get() = payment.displayLabel
 }
 
 /** Combos de temporada: se arman buscando estas palabras en el catálogo. */

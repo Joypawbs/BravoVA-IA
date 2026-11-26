@@ -1600,7 +1600,7 @@ fun CartCheckoutScreen(
     val isArca = storeMode == StoreMode.ARCA
     val primaryColor = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
 
-    var deliveryMode by remember { mutableStateOf("delivery") } // "delivery" or "pickup"
+    val deliveryMode = "delivery" // la recogida en tienda se quitó: siempre es entrega a domicilio
     val ncfType = checkoutExtras.ncfType // "B02" Consumidor Final, "B01" Crédito Fiscal
     var lastVerificationResult by remember { mutableStateOf<BiometricVerificationResult?>(null) }
     var pendingBiometricRequest by remember { mutableStateOf<BiometricPromptRequest?>(null) }
@@ -1867,102 +1867,40 @@ fun CartCheckoutScreen(
                             }
                         }
 
-                        // Entrega a domicilio o recoger en tienda
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        // Solo entrega a domicilio: Bravo en línea no ofrece recogida en esta app.
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = primaryColor.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.5f)),
+                            modifier = Modifier.fillMaxWidth().testTag("checkout_mode_delivery")
                         ) {
-                            val isDelivery = deliveryMode == "delivery"
-                            Surface(
-                                onClick = {
-                                    performCrispHaptic(view, HapticStyle.TICK)
-                                    deliveryMode = "delivery"
-                                },
-                                shape = RoundedCornerShape(14.dp),
-                                color = if (isDelivery) primaryColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                                border = BorderStroke(
-                                    width = if (isDelivery) 1.4.dp else 1.dp,
-                                    color = if (isDelivery) primaryColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
-                                ),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("checkout_mode_delivery")
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
-                                        contentDescription = null,
-                                        tint = if (isDelivery) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(16.dp)
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
+                                    contentDescription = null,
+                                    tint = primaryColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Entrega a domicilio",
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
-                                    Column {
-                                        Text(
-                                            text = "Delivery Express",
-                                            fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 12.sp,
-                                            color = if (isDelivery) primaryColor else MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = activeAddress?.label ?: "18 min • Gratis",
-                                            fontFamily = PlusJakartaSans,
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
-                            }
-
-                            val isPickup = deliveryMode == "pickup"
-                            Surface(
-                                onClick = {
-                                    performCrispHaptic(view, HapticStyle.TICK)
-                                    deliveryMode = "pickup"
-                                },
-                                shape = RoundedCornerShape(14.dp),
-                                color = if (isPickup) primaryColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                                border = BorderStroke(
-                                    width = if (isPickup) 1.4.dp else 1.dp,
-                                    color = if (isPickup) primaryColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
-                                ),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("checkout_mode_pickup")
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Storefront,
-                                        contentDescription = null,
-                                        tint = if (isPickup) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(16.dp)
+                                    Text(
+                                        text = activeAddress?.label?.let { "$it • desde $activeBranch" } ?: "Desde $activeBranch",
+                                        fontFamily = PlusJakartaSans,
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
-                                    Column {
-                                        Text(
-                                            text = "Pickup en Tienda",
-                                            fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 12.sp,
-                                            color = if (isPickup) primaryColor else MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = activeBranch,
-                                            fontFamily = PlusJakartaSans,
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
                                 }
                             }
                         }

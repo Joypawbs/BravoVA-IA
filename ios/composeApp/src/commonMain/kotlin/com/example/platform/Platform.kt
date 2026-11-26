@@ -288,6 +288,9 @@ expect object PushPlatform {
 
 data class AuthUser(val uid: String, val displayName: String?, val email: String?)
 
+/** Token de depuración de App Check en instalaciones sin App Attest (Sideloadly), o null. */
+expect fun appCheckDebugTokenOrNull(): String?
+
 expect object AuthPlatform {
     val isSignInAvailable: Boolean
     fun currentUser(): AuthUser?

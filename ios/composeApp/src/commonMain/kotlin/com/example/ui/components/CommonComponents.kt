@@ -78,6 +78,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.focusable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.automirrored.filled.Chat
@@ -2719,7 +2721,10 @@ fun PredictiveCatalogSearchBar(
     modifier: Modifier = Modifier,
     onFocusChanged: (Boolean) -> Unit = {},
     trailingActionContent: (@Composable () -> Unit)? = null,
-    focusRequester: androidx.compose.ui.focus.FocusRequester? = null
+    focusRequester: androidx.compose.ui.focus.FocusRequester? = null,
+    /** Ícono SF Symbol del botón derecho en el buscador nativo de iOS (vacío = sin botón). */
+    nativeTrailingSymbol: String = "",
+    onNativeTrailing: () -> Unit = {}
 ) {
     val primaryColor = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
     val view = currentPlatformView()
@@ -2752,6 +2757,37 @@ fun PredictiveCatalogSearchBar(
                 "  —  ${predictedProduct.name}"
             }
         }
+    }
+
+    if (nativeLiquidGlassAvailable()) {
+        // iOS 26+: el buscador es un campo nativo de vidrio líquido. Quien pide el foco con
+        // focusRequester lo recibe aquí y se reenvía al campo nativo para abrir el teclado.
+        var focusSignal by remember { mutableIntStateOf(0) }
+        Box(modifier = modifier.fillMaxWidth().height(50.dp).testTag(testTag)) {
+            if (focusRequester != null) {
+                Box(
+                    Modifier
+                        .size(1.dp)
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { if (it.isFocused) focusSignal++ }
+                        .focusable()
+                )
+            }
+            NativeGlassSearchField(
+                text = query,
+                placeholder = placeholderText,
+                accent = primaryColor,
+                darkMode = darkMode,
+                trailingSymbol = nativeTrailingSymbol,
+                focusSignal = focusSignal,
+                onChange = onQueryChange,
+                onSubmit = { if (predictedProduct != null) onSelectPredictedProduct(predictedProduct) },
+                onFocus = onFocusChanged,
+                onTrailing = onNativeTrailing,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        return
     }
 
     Column(

@@ -183,3 +183,5 @@ private suspend fun launchGoogleSignInSheetImpl(context: Context, activateFallba
     }
 }
 
+
+actual fun appCheckDebugTokenOrNull(): String? = null

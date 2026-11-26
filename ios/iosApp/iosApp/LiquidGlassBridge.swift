@@ -224,20 +224,19 @@ final class DockModel: ObservableObject {
 struct GlassDockView: View {
     @ObservedObject var m: DockModel
     @Namespace private var ns
+    // Arrastre con el dedo sobre las pestañas (como la barra de pestañas de iOS 26):
+    // una lente de vidrio sigue el dedo y al soltar se abre la pestaña que quedó debajo.
+    @State private var dragX: CGFloat? = nil
+    @State private var hovered: Int? = nil
+
     var body: some View {
         BravoGlassGroup(spacing: 12) {
             HStack(spacing: 10) {
-                HStack(spacing: 0) {
-                    ForEach(Array(m.symbols.enumerated()), id: \.offset) { i, symbol in
-                        if !m.minimized || i == m.selected {
-                            tab(i, symbol)
-                        }
-                    }
-                }
-                .padding(.horizontal, m.minimized ? 0 : 6)
-                .frame(width: m.minimized ? 58 : nil)
-                .frame(maxWidth: m.minimized ? 58 : .infinity, maxHeight: .infinity)
-                .bravoGlass(Capsule())
+                tabs
+                    .padding(.horizontal, m.minimized ? 0 : 6)
+                    .frame(width: m.minimized ? 58 : nil)
+                    .frame(maxWidth: m.minimized ? 58 : .infinity, maxHeight: .infinity)
+                    .bravoGlass(Capsule())
 
                 if m.minimized { Spacer(minLength: 0) }
 
@@ -260,34 +259,93 @@ struct GlassDockView: View {
         .tint(m.accent)
         .environment(\.colorScheme, m.dark ? .dark : .light)
         .bravoFeedback(.selection, trigger: m.selected)
+        .bravoFeedback(.selection, trigger: hovered)
+    }
+
+    private var tabs: some View {
+        HStack(spacing: 0) {
+            ForEach(Array(m.symbols.enumerated()), id: \.offset) { i, symbol in
+                if !m.minimized || i == m.selected {
+                    tab(i, symbol)
+                }
+            }
+        }
+        .overlay {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    if let x = dragX, !m.minimized, !m.symbols.isEmpty {
+                        let w = geo.size.width / CGFloat(m.symbols.count)
+                        Capsule()
+                            .fill(m.accent.opacity(0.10))
+                            .bravoGlass(Capsule(), tint: m.accent.opacity(0.18))
+                            .frame(width: w * 1.08, height: geo.size.height * 0.92)
+                            .scaleEffect(1.12)
+                            .offset(x: min(max(x - w * 0.54, -4), geo.size.width - w * 1.04))
+                            .frame(maxHeight: .infinity)
+                            .allowsHitTesting(false)
+                            .transition(.scale(scale: 0.7).combined(with: .opacity))
+                    }
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { v in
+                                    guard !m.minimized else { return }
+                                    let idx = index(at: v.location.x, width: geo.size.width)
+                                    // La lente aparece solo al arrastrar, no en un toque corto
+                                    if abs(v.translation.width) > 6 || dragX != nil {
+                                        withAnimation(.interactiveSpring(response: 0.28, dampingFraction: 0.8)) { dragX = v.location.x }
+                                    }
+                                    if hovered != idx { hovered = idx }
+                                }
+                                .onEnded { v in
+                                    let idx = m.minimized ? m.selected : index(at: v.location.x, width: geo.size.width)
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                                        dragX = nil
+                                        hovered = nil
+                                    }
+                                    m.onSelect(idx)
+                                }
+                        )
+                }
+            }
+        }
+    }
+
+    private func index(at x: CGFloat, width: CGFloat) -> Int {
+        guard !m.symbols.isEmpty, width > 0 else { return m.selected }
+        let i = Int((x / width) * CGFloat(m.symbols.count))
+        return min(max(i, 0), m.symbols.count - 1)
     }
 
     private func tab(_ i: Int, _ symbol: String) -> some View {
-        Button { m.onSelect(i) } label: {
-            VStack(spacing: 2) {
-                Image(systemName: i == m.selected && UIImage(systemName: symbol + ".fill") != nil ? symbol + ".fill" : symbol)
-                    .symbolRenderingMode(.hierarchical)
-                    .font(.system(size: 19, weight: i == m.selected ? .semibold : .regular))
-                if !m.minimized, m.labels.indices.contains(i) {
-                    Text(m.labels[i]).font(.system(size: 10, weight: .semibold)).lineLimit(1)
-                }
+        let isActive = hovered.map { $0 == i } ?? (i == m.selected)
+        return VStack(spacing: 2) {
+            Image(systemName: isActive && UIImage(systemName: symbol + ".fill") != nil ? symbol + ".fill" : symbol)
+                .symbolRenderingMode(.hierarchical)
+                .font(.system(size: 19, weight: isActive ? .semibold : .regular))
+                .scaleEffect(dragX != nil && hovered == i ? 1.15 : 1)
+            if !m.minimized, m.labels.indices.contains(i) {
+                Text(m.labels[i]).font(.system(size: 10, weight: .semibold)).lineLimit(1)
             }
-            .foregroundStyle(i == m.selected ? m.accent : Color.primary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background {
-                if i == m.selected && !m.minimized {
-                    Capsule()
-                        .fill(m.accent.opacity(0.14))
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 2)
-                        .matchedGeometryEffect(id: "seleccion", in: ns)
-                }
-            }
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .foregroundStyle(isActive ? m.accent : Color.primary)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background {
+            if i == m.selected && !m.minimized && dragX == nil {
+                Capsule()
+                    .fill(m.accent.opacity(0.14))
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 2)
+                    .matchedGeometryEffect(id: "seleccion", in: ns)
+            }
+        }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
         .accessibilityLabel(m.labels.indices.contains(i) ? m.labels[i] : "")
-        .accessibilityAddTraits(i == m.selected ? .isSelected : [])
+        .accessibilityAddTraits(i == m.selected ? [.isSelected, .isButton] : .isButton)
+        .accessibilityAction { m.onSelect(i) }
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: hovered)
     }
 }
 
@@ -429,14 +487,81 @@ private func topViewController() -> UIViewController? {
     return top
 }
 
+// MARK: - Buscador de vidrio (campo de texto nativo con .glassEffect)
+
+final class SearchFieldModel: ObservableObject {
+    @Published var text = ""
+    @Published var placeholder = "Buscar"
+    @Published var accent = Color.red
+    @Published var dark = false
+    @Published var trailingSymbol = ""
+    @Published var focusRequest = 0
+    var onChange: (String) -> Void = { _ in }
+    var onSubmit: () -> Void = {}
+    var onFocus: (Bool) -> Void = { _ in }
+    var onTrailing: () -> Void = {}
+}
+
+struct GlassSearchFieldView: View {
+    @ObservedObject var m: SearchFieldModel
+    @FocusState private var focused: Bool
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(m.accent)
+            TextField(m.placeholder, text: Binding(
+                get: { m.text },
+                set: { new in m.text = new; m.onChange(new) }
+            ))
+            .focused($focused)
+            .submitLabel(.search)
+            .onSubmit { m.onSubmit() }
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .font(.system(size: 15, weight: .medium))
+            if !m.text.isEmpty {
+                Button {
+                    m.text = ""
+                    m.onChange("")
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Borrar búsqueda")
+            }
+            if !m.trailingSymbol.isEmpty {
+                Button(action: m.onTrailing) {
+                    Image(systemName: m.trailingSymbol)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(m.accent)
+                        .frame(width: 32, height: 32)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Escanear código")
+            }
+        }
+        .padding(.leading, 16).padding(.trailing, 10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Capsule())
+        .onTapGesture { focused = true }
+        .bravoGlass(Capsule())
+        .padding(.horizontal, 1).padding(.vertical, 2)
+        .environment(\.colorScheme, m.dark ? .dark : .light)
+        .onChange(of: focused) { _, now in m.onFocus(now) }
+        .onChange(of: m.focusRequest) { _, _ in focused = true }
+    }
+}
+
 // MARK: - Puente con Kotlin
 
 final class GlassHandle: NSObject, IosGlassHandle {
-    enum Kind { case topBar, dock, cartBar, toast }
+    enum Kind { case topBar, dock, cartBar, toast, search }
     private let topModel = TopBarModel()
     private let dockModel = DockModel()
     private let cartModel = CartBarModel()
     private let toastModel = ToastModel()
+    private let searchModel = SearchFieldModel()
     private let controller: UIViewController
 
     init(kind: Kind) {
@@ -445,6 +570,7 @@ final class GlassHandle: NSObject, IosGlassHandle {
         case .dock: controller = GlassHostController(root: GlassDockView(m: dockModel))
         case .cartBar: controller = GlassHostController(root: GlassCartBarView(m: cartModel))
         case .toast: controller = GlassHostController(root: GlassToastView(m: toastModel))
+        case .search: controller = GlassHostController(root: GlassSearchFieldView(m: searchModel))
         }
         super.init()
     }
@@ -499,6 +625,24 @@ final class GlassHandle: NSObject, IosGlassHandle {
         if m.dark != dark { m.dark = dark }
     }
 
+    func updateSearchField(text: String, placeholder: String, accentArgb: Int32, dark: Bool, trailingSymbol: String,
+                           onChange: @escaping (String) -> Void, onSubmit: @escaping () -> Void,
+                           onFocus: @escaping (KotlinBoolean) -> Void, onTrailing: @escaping () -> Void) {
+        let m = searchModel
+        m.onChange = onChange
+        m.onSubmit = onSubmit
+        m.onFocus = { f in onFocus(KotlinBoolean(bool: f)) }
+        m.onTrailing = onTrailing
+        // Solo se reemplaza el texto si Kotlin lo cambió (p. ej. al elegir una sugerencia)
+        if m.text != text { m.text = text }
+        if m.placeholder != placeholder { m.placeholder = placeholder }
+        if m.trailingSymbol != trailingSymbol { m.trailingSymbol = trailingSymbol }
+        m.accent = Color(argb: accentArgb)
+        if m.dark != dark { m.dark = dark }
+    }
+
+    func focusSearchField() { searchModel.focusRequest += 1 }
+
     func updateToast(text: String, symbol: String, accentArgb: Int32, dark: Bool) {
         let m = toastModel
         if m.text != text { m.text = text }
@@ -519,6 +663,7 @@ final class LiquidGlassBridge: NSObject, IosGlassBridge {
     func makeDock() -> IosGlassHandle { GlassHandle(kind: .dock) }
     func makeCartBar() -> IosGlassHandle { GlassHandle(kind: .cartBar) }
     func makeToast() -> IosGlassHandle { GlassHandle(kind: .toast) }
+    func makeSearchField() -> IosGlassHandle { GlassHandle(kind: .search) }
 
     func presentQuickView(title: String, subtitle: String, price: String, imageUrl: String, isFavorite: Bool,
                           accentArgb: Int32, onAdd: @escaping () -> Void, onFavorite: @escaping () -> Void,

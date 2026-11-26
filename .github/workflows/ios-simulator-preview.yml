@@ -35,7 +35,7 @@ jobs:
         run: brew install xcodegen
       - name: Generate Xcode project
         working-directory: ios/iosApp
-        run: xcodegen generate
+        run: bash ../scripts/generar_proyecto.sh
       - name: Boot iPhone
         run: |
           UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];c=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone 16 Pro') and 'Max' not in x['name']] or [x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone')];print(c[0]['udid'])")

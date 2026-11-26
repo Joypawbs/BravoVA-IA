@@ -41,6 +41,21 @@ actual fun NativeGlassCartBar(count: Int, total: String, accent: Color, darkMode
 @Composable
 actual fun NativeGlassToast(text: String, symbol: String, accent: Color, darkMode: Boolean, modifier: Modifier) {}
 
+@Composable
+actual fun NativeGlassSearchField(
+    text: String,
+    placeholder: String,
+    accent: Color,
+    darkMode: Boolean,
+    trailingSymbol: String,
+    focusSignal: Int,
+    onChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onFocus: (Boolean) -> Unit,
+    onTrailing: () -> Unit,
+    modifier: Modifier
+) {}
+
 /** Android: el pedido en curso se muestra como notificación de progreso en vivo (Live Update en Android 16). */
 actual object PlatformExtras {
     private const val CHANNEL = "bravova_pedido_en_vivo"

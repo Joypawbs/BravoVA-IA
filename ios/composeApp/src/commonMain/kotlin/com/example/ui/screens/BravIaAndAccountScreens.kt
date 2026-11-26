@@ -148,6 +148,7 @@ import com.example.model.ChatMessage
 import com.example.model.Recipe
 import com.example.model.BRAV_IA_RECIPES
 import com.example.ai.StoreFacts
+import com.example.ui.components.nativeLiquidGlassAvailable
 import com.example.ai.BravIaEngine
 import com.example.model.findRecipeById
 import com.example.model.FcmTopicSubscription
@@ -954,7 +955,8 @@ fun BravIaChatScreen(
     val dynamicInputBottomPadding by animateDpAsState(
         targetValue = when {
             isImeVisible -> 4.dp
-            areMenusVisible -> if (PlatformInfo.isIos) 78.dp else 66.dp
+            // Con el vidrio nativo de iOS la barra inferior no se esconde: el campo siempre va encima.
+            areMenusVisible || nativeLiquidGlassAvailable() -> if (PlatformInfo.isIos) 78.dp else 66.dp
             else -> 6.dp
         },
         animationSpec = tween(durationMillis = 180),
@@ -1987,13 +1989,18 @@ fun BravIaChatScreen(
             }
         }
 
-        val dockedInputBgColor = if (darkMode) Color(0xFF0A0F1D) else MaterialTheme.colorScheme.background
+        // Sin bloque de color propio: un degradado suave al fondo de la app, para que los mensajes
+        // se lean al pasar por detrás y el campo flote en vidrio como el resto de las barras.
+        val appBackground = MaterialTheme.colorScheme.background
+        val dockedInputFade = remember(appBackground) {
+            Brush.verticalGradient(listOf(Color.Transparent, appBackground.copy(alpha = 0.72f), appBackground.copy(alpha = 0.9f)))
+        }
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(dockedInputBgColor)
+                .background(dockedInputFade)
                 .then(if (isImeVisible) Modifier else Modifier.navigationBarsPadding())
                 .padding(
                     start = 14.dp,
@@ -2090,14 +2097,9 @@ fun BravIaChatScreen(
                     )
                     .clip(RoundedCornerShape(999.dp))
                     .translucentBackdropEffect(darkMode = darkMode)
+                    // Vidrio: tinte translúcido sobre el desenfoque del fondo (antes era un color opaco).
                     .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                if (darkMode) Color(0xFF111827) else MaterialTheme.colorScheme.surface,
-                                if (darkMode) Color(0xFF172033) else MaterialTheme.colorScheme.surface,
-                                if (darkMode) Color(0xFF111827) else MaterialTheme.colorScheme.surface
-                            )
-                        )
+                        if (darkMode) Color(0xFF1B2333).copy(alpha = 0.42f) else Color.White.copy(alpha = 0.55f)
                     )
                     // Borde con el color animado, leído al dibujar (no reconstruye la barra en cada cuadro)
                     .drawWithContent {

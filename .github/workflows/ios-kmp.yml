@@ -66,7 +66,7 @@ jobs:
         run: brew install xcodegen
       - name: Generate Xcode project
         working-directory: ios/iosApp
-        run: xcodegen generate
+        run: bash ../scripts/generar_proyecto.sh
       - name: Build for iOS Simulator
         working-directory: ios/iosApp
         run: |

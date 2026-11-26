@@ -47,6 +47,18 @@ interface IosGlassHandle {
     )
     fun updateCartBar(count: Int, total: String, accentArgb: Int, dark: Boolean, onTap: () -> Unit)
     fun updateToast(text: String, symbol: String, accentArgb: Int, dark: Boolean)
+    fun updateSearchField(
+        text: String,
+        placeholder: String,
+        accentArgb: Int,
+        dark: Boolean,
+        trailingSymbol: String,
+        onChange: (String) -> Unit,
+        onSubmit: () -> Unit,
+        onFocus: (Boolean) -> Unit,
+        onTrailing: () -> Unit
+    )
+    fun focusSearchField()
 }
 
 interface IosGlassBridge {
@@ -55,6 +67,7 @@ interface IosGlassBridge {
     fun makeDock(): IosGlassHandle
     fun makeCartBar(): IosGlassHandle
     fun makeToast(): IosGlassHandle
+    fun makeSearchField(): IosGlassHandle
     fun presentQuickView(
         title: String,
         subtitle: String,
@@ -162,6 +175,41 @@ actual fun NativeGlassToast(text: String, symbol: String, accent: Color, darkMod
         factory = { handle.viewController() },
         modifier = modifier,
         update = { handle.updateToast(text, symbol, accent.argbInt(), darkMode) },
+        properties = overlayProps
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassSearchField(
+    text: String,
+    placeholder: String,
+    accent: Color,
+    darkMode: Boolean,
+    trailingSymbol: String,
+    focusSignal: Int,
+    onChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onFocus: (Boolean) -> Unit,
+    onTrailing: () -> Unit,
+    modifier: Modifier
+) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeSearchField() }
+    val change by rememberUpdatedState(onChange)
+    val submit by rememberUpdatedState(onSubmit)
+    val focus by rememberUpdatedState(onFocus)
+    val trailing by rememberUpdatedState(onTrailing)
+    androidx.compose.runtime.LaunchedEffect(focusSignal) { if (focusSignal > 0) handle.focusSearchField() }
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = {
+            handle.updateSearchField(
+                text, placeholder, accent.argbInt(), darkMode, trailingSymbol,
+                { change(it) }, { submit() }, { focus(it) }, { trailing() }
+            )
+        },
         properties = overlayProps
     )
 }

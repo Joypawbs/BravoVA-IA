@@ -374,3 +374,22 @@ fun LargeTitle(
         )
     }
 }
+
+/**
+ * Buscador de vidrio líquido nativo (iOS 26+): el campo de texto es de SwiftUI para que el vidrio
+ * refracte de verdad lo que hay detrás. [focusSignal] abre el teclado cada vez que cambia.
+ */
+@Composable
+expect fun NativeGlassSearchField(
+    text: String,
+    placeholder: String,
+    accent: Color,
+    darkMode: Boolean,
+    trailingSymbol: String,
+    focusSignal: Int,
+    onChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onFocus: (Boolean) -> Unit,
+    onTrailing: () -> Unit,
+    modifier: Modifier
+)

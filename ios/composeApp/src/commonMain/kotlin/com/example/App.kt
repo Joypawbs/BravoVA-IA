@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.pointer.pointerInput
+import com.example.ui.components.dismissKeyboardOnOutsideTouch
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -465,14 +466,13 @@ fun BravoVaApp(
                         .fillMaxSize()
                         .padding(top = innerPadding.calculateTopPadding())
                         .nestedScroll(menuScrollConnection)
+                        .dismissKeyboardOnOutsideTouch()
                 ) {
-                    val isAiAmbientActive = currentScreen == AppScreen.BRAVIA || isAiGenerating
+                    // Brav IA usa el mismo fondo que el resto de la app; el tono rosado solo aparece
+                    // como un brillo breve mientras la IA está pensando (antes teñía toda la pantalla).
+                    val isAiAmbientActive = isAiGenerating
                     val aiAmbientAlpha by animateFloatAsState(
-                        targetValue = when {
-                            isAiGenerating -> if (darkMode) 0.14f else 0.24f
-                            currentScreen == AppScreen.BRAVIA -> if (darkMode) 0.08f else 0.08f
-                            else -> 0f
-                        },
+                        targetValue = if (isAiGenerating) (if (darkMode) 0.10f else 0.16f) else 0f,
                         animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
                         label = "global_ai_ambient_alpha"
                     )
@@ -1113,8 +1113,8 @@ fun BravoVaApp(
                     }
 
                     // En iOS 26+ la barra nativa no se esconde al hacer scroll: se encoge (como en las apps de Apple)
-                    // En Brav IA la barra de escribir ocupa ese espacio, así que ahí la barra se esconde como antes
-                    val nativeDock = nativeLiquidGlassAvailable() && currentScreen != AppScreen.BRAVIA
+                    // También en Brav IA: el campo de escribir flota encima de la barra (misma barra en toda la app)
+                    val nativeDock = nativeLiquidGlassAvailable()
                     AnimatedVisibility(
                         visible = areMenusVisible || nativeDock,
                         enter = slideInVertically(
