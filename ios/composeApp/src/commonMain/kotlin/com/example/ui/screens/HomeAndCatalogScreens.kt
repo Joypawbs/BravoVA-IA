@@ -2161,11 +2161,17 @@ private fun DailyRotatingOffersCarouselSection(
                 }
             }
         }
+        // Margen final = ancho visible − tarjeta − margen inicial: así hasta la última tarjeta puede
+        // quedar alineada a la izquierda. Sin esto, al llegar al final la fila no podía desplazarse
+        // más y dejaba la tarjeta anterior cortada en el borde.
+        var offersRowWidthPx by remember { mutableIntStateOf(0) }
+        val offersEndPadding = with(LocalDensity.current) { (offersRowWidthPx.toDp() - 220.dp - 14.dp).coerceAtLeast(14.dp) }
         LazyRow(
             state = offersRowState,
             flingBehavior = rememberSnapFlingBehavior(offersRowState),
-            contentPadding = PaddingValues(horizontal = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = PaddingValues(start = 14.dp, end = offersEndPadding),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth().onSizeChanged { offersRowWidthPx = it.width }
         ) {
             items(
                 items = dailyRotatingOffers,
