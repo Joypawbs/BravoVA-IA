@@ -130,7 +130,8 @@ final class BravoVaTourUITests: XCTestCase {
         if #available(iOS 16.4, *) {
             app.open(URL(string: "bravova://bravisima")!)
             pause(3); shot("atajo_bravisima")
-            tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 2)
+            // Bravísima no tiene "Volver": se regresa por la pestaña Inicio
+            tap(["Inicio"], fallback: CGVector(dx: 0.10, dy: 0.95), wait: 2)
             pause(1)
         }
 
