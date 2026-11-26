@@ -148,6 +148,10 @@ def main():
         adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
         for _ in range(8):
             adb("shell", "input", "keyevent", "KEYCODE_DEL")
+        adb("shell", "input", "text", "jevil"); time.sleep(2.5); shot("efecto_jevil")
+        adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
+        for _ in range(6):
+            adb("shell", "input", "keyevent", "KEYCODE_DEL")
         adb("shell", "input", "text", "arroz"); time.sleep(3); shot("busqueda_filtros")
         if tap(["Menor precio"], wait=2):
             shot("busqueda_menor_precio")
@@ -175,6 +179,11 @@ def main():
         shot(name)
     if tap(["Tarjeta Bravísima"], wait=3):
         shot("bravisima")
+        # Código para la caja a pantalla completa (tocar cualquier parte lo cierra)
+        if tap(["BRV-"], prefix=True, wait=2):
+            time.sleep(1.5); shot("bravisima_codigo_caja")
+            w, h = screen_size()
+            adb("shell", "input", "tap", str(int(w * 0.5)), str(int(h * 0.85))); time.sleep(1.5)
         tap(["Volver"], wait=2, fallback=(0.06, 0.06))
 
     tap(["Mis pedidos"], wait=3, fallback=(0.4, 0.115)); shot("mis_pedidos")

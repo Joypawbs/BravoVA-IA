@@ -108,6 +108,8 @@ final class BravoVaTourUITests: XCTestCase {
             // Escribe directo en el campo (no en la app) para que ninguna letra se pierda
             search.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
             search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
+            search.typeText("jevil"); pause(2); shot("efecto_jevil")
+            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8))
             search.typeText("arroz"); pause(3); shot("busqueda_filtros")
             tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
             pause(2); shot("busqueda_menor_precio")
@@ -153,6 +155,10 @@ final class BravoVaTourUITests: XCTestCase {
         }
         tap(["Tarjeta Bravísima"], fallback: CGVector(dx: 0.5, dy: 0.25), wait: 3)
         pause(3); shot("bravisima")
+        // Código para la caja a pantalla completa (tocar cualquier parte lo cierra)
+        tap(["BRV-"], fallback: CGVector(dx: 0.5, dy: 0.33), wait: 2)
+        pause(2); shot("bravisima_codigo_caja")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85)).tap(); pause(1)
         tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
         pause(2)
 
