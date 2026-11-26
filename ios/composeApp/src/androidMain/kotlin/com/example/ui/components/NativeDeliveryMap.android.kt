@@ -102,14 +102,28 @@ private fun LibreDeliveryMap(
     val context = LocalContext.current
     val mapView = remember {
         MapLibre.getInstance(context.applicationContext)
-        MapView(context).apply {
-            onCreate(null)
-            onStart()
-            onResume()
-        }
+        // onStart/onResume los llama el observador del ciclo de vida de abajo (al registrarse recibe
+        // los eventos que ya pasaron), así no se llaman dos veces
+        MapView(context).apply { onCreate(null) }
     }
     var map by remember { mutableStateOf<MapLibreMap?>(null) }
     var style by remember { mutableStateOf<Style?>(null) }
+
+    // Pausa el mapa cuando la app pasa a segundo plano y lo reanuda al volver (ahorra batería)
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, mapView) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            when (event) {
+                androidx.lifecycle.Lifecycle.Event.ON_START -> mapView.onStart()
+                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> mapView.onResume()
+                androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> mapView.onPause()
+                androidx.lifecycle.Lifecycle.Event.ON_STOP -> mapView.onStop()
+                else -> Unit
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
 
     DisposableEffect(mapView) {
         mapView.getMapAsync { m ->

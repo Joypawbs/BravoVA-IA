@@ -210,8 +210,11 @@ fun BravoRoot(
                 viewModel.onSystemDarkThemeChanged(systemDark)
             }
 
-            // Aplica una sola vez lo elegido en la bienvenida
-            LaunchedEffect(Unit) {
+            // Aplica una sola vez lo elegido en la bienvenida. Espera a que termine el arranque:
+            // si no, la sucursal guardada que se carga al iniciar podía pisar la que eligió la persona.
+            val welcomeBooting by viewModel.isAppBooting.collectAsStateWithLifecycle()
+            LaunchedEffect(welcomeBooting) {
+                if (welcomeBooting) return@LaunchedEffect
                 val store = instantPrefs.getString("welcome_store", null)
                 val branch = instantPrefs.getString("welcome_branch", null)
                 if (store != null || branch != null) {

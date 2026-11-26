@@ -1,6 +1,7 @@
 package com.example.platform
 
 import platform.Foundation.NSProcessInfo
+import platform.Foundation.lowPowerModeEnabled
 
 actual object DevicePerformance {
     actual val isLowEnd: Boolean
