@@ -126,7 +126,13 @@ def main():
     dismiss_system_dialogs()
     adb("shell", "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")
     time.sleep(4); shot("splash")
-    time.sleep(8); shot("inicio_sesion")
+    time.sleep(8); shot("bienvenida_tienda")
+    # 2.0: bienvenida de la primera vez (tienda → sucursal → entrar)
+    if tap(["Continuar"], wait=2, fallback=(0.5, 0.93)):
+        shot("bienvenida_sucursal")
+        tap(["Bravo Winston Churchill"], wait=1)
+        tap(["Continuar", "Elegir después"], wait=3, fallback=(0.5, 0.93))
+    time.sleep(2); shot("inicio_sesion")
     tap(["Continuar como Invitado", "Invitado"], prefix=True, wait=6, fallback=(0.5, 0.77))
     time.sleep(12)  # el emulador es lento: espera a que cargue el catálogo
     shot("home")

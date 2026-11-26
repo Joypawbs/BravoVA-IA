@@ -251,11 +251,15 @@ fun BravisimaScreen(
     } else {
         cardNumber
     }
-    val barcodeBars = remember(cardNumber) {
-        val seedBase = abs(cardNumber.hashCode())
-        IntArray(32) { idx ->
-            1 + ((seedBase / (idx + 1) + idx * 5) % 3)
-        }
+    // Código de barras real (Code 128) para que el escáner de la caja lo lea
+    val barcodeModules = remember(cardNumber) { com.example.ui.components.Code128.modules(cardNumber) }
+    var showFullscreenCode by remember { mutableStateOf(false) }
+    if (showFullscreenCode) {
+        com.example.ui.components.BravisimaFullscreenCode(
+            cardNumber = cardNumber,
+            memberName = userProfile.name,
+            onDismiss = { showFullscreenCode = false }
+        )
     }
 
     val hazeState = LocalTranslucentHazeState.current
@@ -454,9 +458,9 @@ fun BravisimaScreen(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(Color.White)
-                                .clickable {
+                                .clickable(enabled = !bravisimaCard.isLocked, onClickLabel = "Mostrar el código en grande para la caja") {
                                     performCrispHaptic(view, HapticStyle.CONFIRM)
-                                    onOpenScanner()
+                                    showFullscreenCode = true
                                 }
                                 .padding(horizontal = 16.dp, vertical = 12.dp)
                                 .testTag("bravisima_barcode_plate"),
@@ -467,17 +471,13 @@ fun BravisimaScreen(
                                     .fillMaxWidth()
                                     .height(40.dp)
                             ) {
-                                val totalUnits = barcodeBars.sum() * 2
-                                val unitWidth = size.width / totalUnits
-                                var x = 0f
-                                barcodeBars.forEachIndexed { idx, w ->
-                                    val barWidth = w * unitWidth
-                                    drawRect(
+                                val unitWidth = size.width / barcodeModules.size
+                                barcodeModules.forEachIndexed { i, isBar ->
+                                    if (isBar) drawRect(
                                         color = if (bravisimaCard.isLocked) Tone.muted else Color(0xFF111827),
-                                        topLeft = Offset(x, 0f),
-                                        size = Size(barWidth, size.height)
+                                        topLeft = Offset(i * unitWidth, 0f),
+                                        size = Size(unitWidth + 0.5f, size.height)
                                     )
-                                    x += barWidth + (if (idx % 2 == 0) unitWidth * 1.4f else unitWidth * 0.9f)
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))

@@ -163,7 +163,21 @@ fun BravoRoot(
     val user = currentUser
     var isGuestSession by rememberSaveable { mutableStateOf(initialGuestPref) }
 
-    if (user == null && !isGuestSession && !fallbackGoogleActive) {
+    // Bienvenida de la primera vez (tienda y sucursal) antes de la pantalla de entrar
+    var welcomeDone by rememberSaveable { mutableStateOf(instantPrefs.getBoolean("welcome_done", false)) }
+
+    if (user == null && !isGuestSession && !fallbackGoogleActive && !welcomeDone) {
+        BravoVaTheme(darkTheme = authScreenDarkMode, isArcaStore = false, paletteId = "material_you") {
+            com.example.ui.screens.WelcomeFlow { store, branch ->
+                instantPrefs.edit()
+                    .putBoolean("welcome_done", true)
+                    .putString("welcome_store", store)
+                    .putString("welcome_branch", branch)
+                    .apply()
+                welcomeDone = true
+            }
+        }
+    } else if (user == null && !isGuestSession && !fallbackGoogleActive) {
         BravoVaTheme(
             darkTheme = authScreenDarkMode,
             isArcaStore = false,
@@ -192,6 +206,17 @@ fun BravoRoot(
 
             LaunchedEffect(systemDark) {
                 viewModel.onSystemDarkThemeChanged(systemDark)
+            }
+
+            // Aplica una sola vez lo elegido en la bienvenida
+            LaunchedEffect(Unit) {
+                val store = instantPrefs.getString("welcome_store", null)
+                val branch = instantPrefs.getString("welcome_branch", null)
+                if (store != null || branch != null) {
+                    if (store == "ARCA") viewModel.selectStore(com.example.model.StoreMode.ARCA)
+                    if (branch != null) viewModel.setActiveBranch(branch)
+                    instantPrefs.edit().remove("welcome_store").remove("welcome_branch").apply()
+                }
             }
 
             LaunchedEffect(darkMode) {

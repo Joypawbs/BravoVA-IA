@@ -77,7 +77,13 @@ final class BravoVaTourUITests: XCTestCase {
     func testRecorridoCompleto() throws {
         app.launch()
         pause(3); shot("splash")
-        pause(5); shot("inicio_sesion")
+        pause(5); shot("bienvenida_tienda")
+        // 2.0: bienvenida de la primera vez (tienda → sucursal → entrar)
+        tap(["Continuar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 2)
+        pause(1); shot("bienvenida_sucursal")
+        tap(["Bravo Winston Churchill"], fallback: CGVector(dx: 0.5, dy: 0.40), wait: 2)
+        tap(["Continuar", "Elegir después"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 2)
+        pause(2); shot("inicio_sesion")
 
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
