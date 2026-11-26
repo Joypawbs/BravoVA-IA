@@ -2147,7 +2147,6 @@ private fun DailyRotatingOffersCarouselSection(
 
         // Carrusel que avanza solo cada 4 s (se pausa si el usuario lo está moviendo)
         val offersRowState = rememberLazyListState()
-        val offersEdgePx = with(LocalDensity.current) { 14.dp.roundToPx() }
         val dataSaver = LocalDataSaver.current
         LaunchedEffect(dailyRotatingOffers.size, dataSaver) {
             // No avanza solo con ahorro de datos o con "reducir movimiento" activado
@@ -2156,8 +2155,9 @@ private fun DailyRotatingOffersCarouselSection(
                 delay(4000)
                 if (!offersRowState.isScrollInProgress) {
                     val next = (offersRowState.firstVisibleItemIndex + 1) % dailyRotatingOffers.size
-                    // Respeta el margen izquierdo para que la tarjeta no quede cortada
-                    offersRowState.animateScrollToItem(next, -offersEdgePx)
+                    // Desplazamiento 0: el contentPadding ya deja el margen de 14 dp. Un desplazamiento
+                    // negativo empujaba la tarjeta y dejaba asomar un trozo cortado de la anterior.
+                    offersRowState.animateScrollToItem(next)
                 }
             }
         }

@@ -332,7 +332,9 @@ fun DiagonalMetadataStrip(
     textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     fontSizeSp: Float = 12f,
     modifier: Modifier = Modifier,
-    onItemClick: ((Int, String) -> Unit)? = null
+    onItemClick: ((Int, String) -> Unit)? = null,
+    /** Líneas permitidas antes de cortar con "…". Usa 2 donde el texto no debe perderse. */
+    maxLines: Int = 1
 ) {
     val cleanItems = remember(items) { items.filter { it.isNotBlank() } }
     if (cleanItems.isEmpty()) return
@@ -365,7 +367,7 @@ fun DiagonalMetadataStrip(
         Text(
             text = annotated,
             fontSize = fontSizeSp.sp,
-            maxLines = 1,
+            maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
             modifier = modifier
         )

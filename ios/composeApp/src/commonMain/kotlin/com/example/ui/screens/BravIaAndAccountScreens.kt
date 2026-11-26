@@ -2310,7 +2310,8 @@ private fun VerifiedRecipeCard(
             DiagonalMetadataStrip(
                 items = listOf(recipe.kind, "${recipe.servings} porciones", "≈ ${recipe.totalMinutes} min"),
                 slashColor = primaryColor,
-                fontSizeSp = 12f
+                fontSizeSp = 12f,
+                maxLines = 2
             )
 
             Text("Ingredientes", fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)

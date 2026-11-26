@@ -416,7 +416,8 @@ fun BravisimaScreen(
                                     ),
                                     slashColor = Color.White,
                                     textColor = Color.White,
-                                    fontSizeSp = 12f
+                                    fontSizeSp = 12f,
+                                    maxLines = 2
                                 )
 
                                 Spacer(modifier = Modifier.height(6.dp))

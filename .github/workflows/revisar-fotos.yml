@@ -1,0 +1,21 @@
+name: Revisar fotos del catálogo
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  hojas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pillow
+      - name: Armar hojas de contacto
+        run: |
+          D=ios/composeApp/src/commonMain/kotlin/com/example/data
+          python3 .github/scripts/hojas_fotos.py out $D/BravoCatalogData.kt $D/ArcaCatalogData.kt
+      - name: Publicar en la rama revision-fotos
+        run: |
+          cd out && git init -q -b revision-fotos
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Hojas de revisión de fotos"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" revision-fotos
