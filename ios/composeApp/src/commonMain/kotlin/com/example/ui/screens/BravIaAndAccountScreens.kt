@@ -1430,6 +1430,7 @@ fun BravIaChatScreen(
                                 if (!isUser && verifiedRecipe != null) {
                                     VerifiedRecipeCard(
                                         recipe = verifiedRecipe,
+                                        multiplier = msg.recipeMultiplier,
                                         productLookup = productLookup,
                                         primaryColor = primaryColor,
                                         onOpenProduct = onOpenProduct
@@ -2291,6 +2292,7 @@ fun BravIaChatScreen(
 @Composable
 private fun VerifiedRecipeCard(
     recipe: Recipe,
+    multiplier: Int,
     productLookup: (String) -> Product?,
     primaryColor: Color,
     onOpenProduct: (String) -> Unit
@@ -2308,12 +2310,22 @@ private fun VerifiedRecipeCard(
             }
             Text(recipe.name, fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
             DiagonalMetadataStrip(
-                items = listOf(recipe.kind, "${recipe.servings} porciones", "≈ ${recipe.totalMinutes} min"),
+                items = listOf(recipe.kind, "${recipe.servings * multiplier} porciones", "≈ ${recipe.totalMinutes} min"),
                 slashColor = primaryColor,
                 fontSizeSp = 12f,
                 maxLines = 2
             )
 
+            if (multiplier > 1) {
+                // Las medidas de abajo son de la receta base; las unidades del carrito ya están multiplicadas.
+                Text(
+                    "Receta base para ${recipe.servings}. Para ${recipe.servings * multiplier} porciones, multiplica las cantidades × $multiplier (las unidades del carrito ya están ajustadas).",
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    color = primaryColor
+                )
+            }
             Text("Ingredientes", fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)
             recipe.ingredients.forEach { ing ->
                 val product = ing.skus.firstNotNullOfOrNull(productLookup)
@@ -2336,7 +2348,7 @@ private fun VerifiedRecipeCard(
                     val tag = when {
                         product == null -> "No disponible en BravoVa"
                         ing.pantry -> "Despensa · RD$${formatPesos(product.price)}"
-                        else -> (if (ing.unitsToBuy > 1) "${ing.unitsToBuy} × " else "") + "RD$${formatPesos(product.price)}"
+                        else -> (if (ing.unitsToBuy * multiplier > 1) "${ing.unitsToBuy * multiplier} × " else "") + "RD$${formatPesos(product.price)}"
                     }
                     Text(
                         text = tag,

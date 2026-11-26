@@ -56,6 +56,7 @@ import com.example.model.AppScreen
 import com.example.model.BranchGeoCoordinate
 import com.example.model.BravisimaCard
 import com.example.model.BravisimaMovement
+import com.example.model.BRAV_IA_RECIPES
 import com.example.model.CartItem
 import com.example.model.CartTotals
 import com.example.model.CatalogSection
@@ -604,9 +605,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         listOf(
             ChatMessage(
                 sender = "ai",
-                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu chef y asistente personal de compras.\n\n**¿En qué puedo ayudarte hoy?:**\n• **Recetas e instrucciones paso a paso:** Pídeme cualquier plato y te daré todos los ingredientes exactos con sus precios en RD$ y pasos numerados.\n• **Catálogo oficial completo:** Consulto al instante los **750 productos** de Supermercados Bravo y El Arca Petshop.\n• **Pedidos asistidos en el chat:** Puedo armar y pedir tu compra directamente con tu confirmación manual.",
-                skus = listOf("BRV-001", "BRV-009", "BRV-053", "BRV-075", "BRV-301", "BRV-412"),
-                modelLabel = "Brav IA • 750 Productos & Pedido Asistido"
+                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu asistente de compras.\n\n• **Recetas verificadas:** ${BRAV_IA_RECIPES.size} platos dominicanos e internacionales con sus ingredientes del catálogo y pasos numerados. Prueba: «¿Cómo hago un sancocho?».\n• **Productos con su precio real:** te recomiendo lo que hay en Supermercados Bravo y El Arca, y la app suma el total.\n• **Pedidos con tu confirmación:** armo la compra y tú decides si se pide.",
+                modelLabel = "Brav IA"
             )
         )
     )
@@ -2952,6 +2952,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         // Presupuesto: el que la persona escribe en el mensaje, o el que fijó a mano con el control.
         val budget = BravIaEngine.budgetFromQuery(query) ?: _targetBudgetInChat.value.takeIf { _budgetSetByUser.value }
         val matchedRecipe = if (isArca) null else BravIaEngine.matchRecipe(query)
+        val people = BravIaEngine.peopleFromQuery(query)
 
         _isAiGenerating.value = true
         val loadingMsgId = System.nanoTime() + 1L
@@ -2970,6 +2971,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     quantities = reply.items.associate { it.sku to it.qty },
                     recipeId = reply.recipe?.id,
                     budgetExceededBy = reply.budgetExceededBy,
+                    recipeMultiplier = reply.recipeMultiplier,
                     isLoading = false,
                     modelLabel = if (suggestion != null) "Brav IA • Sugerencia registrada" else label,
                     durationMs = durationMs,
@@ -3051,13 +3053,13 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 if (parsed == null) {
                     publish(localAnswer(), "Brav IA • Modo sin conexión", elapsed())
                 } else {
-                    val reply = BravIaEngine.ground(parsed, lookup, storePrefix, matchedRecipe, budget)
+                    val reply = BravIaEngine.ground(parsed, lookup, storePrefix, matchedRecipe, budget, people)
                     publish(reply, if (reply.recipe != null) "Brav IA • Receta verificada" else "Brav IA", elapsed())
                 }
             } catch (e: CancellationException) {
                 if (e is TimeoutCancellationException) {
                     val partial = BravIaEngine.parseReply(accumulated.toString())
-                    val reply = partial?.let { BravIaEngine.ground(it, lookup, storePrefix, matchedRecipe, budget) } ?: localAnswer()
+                    val reply = partial?.let { BravIaEngine.ground(it, lookup, storePrefix, matchedRecipe, budget, people) } ?: localAnswer()
                     publish(reply, "Brav IA • Respuesta parcial", elapsed())
                 } else {
                     throw e

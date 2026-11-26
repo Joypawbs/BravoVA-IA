@@ -48,12 +48,37 @@ class BravIaEngineTest {
     }
 
     @Test
+    fun ingredientWordsDoNotOpenRecipesWithoutCookingIntent() {
+        // Quien pide un producto no quiere una receta.
+        assertNull(BravIaEngine.matchRecipe("necesito arroz y habichuelas"))
+        assertNull(BravIaEngine.matchRecipe("quiero comprar pollo"))
+        assertNull(BravIaEngine.matchRecipe("tienen salmon?"))
+        // Con intención de cocinar, sí.
+        assertEquals("arroz_blanco", BravIaEngine.matchRecipe("como hago arroz blanco")?.id)
+        assertEquals("pollo_guisado", BravIaEngine.matchRecipe("receta de pollo")?.id)
+        assertEquals("salmon_horno", BravIaEngine.matchRecipe("como preparo el salmon")?.id)
+        // Los nombres de platos funcionan solos.
+        assertEquals("sancocho", BravIaEngine.matchRecipe("sancocho")?.id)
+        assertEquals("tostones", BravIaEngine.matchRecipe("hoy quiero tostones")?.id)
+    }
+
+    @Test
     fun recipeCartUsesRealProductsAndQuantities() {
         val mangu = BRAV_IA_RECIPES.first { it.id == "mangu" }
         val items = BravIaEngine.recipeCartItems(mangu, lookup)
         assertTrue(items.all { it.sku in bySku })
         assertEquals(4, items.first { it.sku == "BRV-083" }.qty, "el mangú lleva 4 plátanos")
         assertFalse(items.any { it.sku == "BRV-115" }, "la sal es de despensa: no se agrega sola")
+    }
+
+    @Test
+    fun scalesRecipeForMorePeople() {
+        assertEquals(8, BravIaEngine.peopleFromQuery("sancocho para 8 personas"))
+        assertNull(BravIaEngine.peopleFromQuery("arroz de 5 lb"))
+        val mangu = BRAV_IA_RECIPES.first { it.id == "mangu" } // 4 porciones
+        val g = BravIaEngine.ground(RawAiReply("ok", emptyList(), "mangu", null, null), lookup, "BRV", mangu, null, people = 6)
+        assertEquals(2, g.recipeMultiplier)
+        assertEquals(8, g.items.first { it.sku == "BRV-083" }.qty, "el doble de plátanos")
     }
 
     // ---------- Lectura del JSON ----------
