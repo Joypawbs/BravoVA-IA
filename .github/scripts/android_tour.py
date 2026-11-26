@@ -122,6 +122,9 @@ def main():
     # Evita que los avisos "X no responde" del emulador tapen la app.
     adb("shell", "settings", "put", "global", "hide_error_dialogs", "1")
     adb("shell", "cmd", "uimode", "night", "no")
+    # Con animaciones apagadas la app respeta "reducir movimiento" y no dibuja los efectos de los huevos
+    for key in ("animator_duration_scale", "transition_animation_scale", "window_animation_scale"):
+        print(key, adb("shell", "settings", "get", "global", key, capture=True))
     time.sleep(25)
     dismiss_system_dialogs()
     adb("shell", "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")

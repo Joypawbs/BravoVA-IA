@@ -255,17 +255,19 @@ private fun ParticleRain(style: ParticleStyle) {
     Canvas(Modifier.fillMaxSize()) {
         style.tint?.let { drawRect(it) }
         val center = Offset(size.width / 2, size.height / 2)
+        // Tamaños en puntos (dp), no en píxeles: así se ven igual en pantallas de distinta densidad
+        val d = density
         seeds.forEach { sd ->
-            val r = style.size * sd.scale
+            val r = style.size * sd.scale * d
             val t = (sd.y + clock * sd.speed) % 1f
             var alpha = 0.92f
             var angle = 0f
             val pos = when (style.motion) {
-                ParticleMotion.FALL -> Offset(sd.x * size.width + sin((clock * 2 + sd.phase) * 2 * PI).toFloat() * 14f, t * size.height)
-                ParticleMotion.RISE -> Offset(sd.x * size.width + sin((clock * 3 + sd.phase) * 2 * PI).toFloat() * 10f, (1f - t) * size.height)
+                ParticleMotion.FALL -> Offset(sd.x * size.width + sin((clock * 2 + sd.phase) * 2 * PI).toFloat() * 14f * d, t * size.height)
+                ParticleMotion.RISE -> Offset(sd.x * size.width + sin((clock * 3 + sd.phase) * 2 * PI).toFloat() * 10f * d, (1f - t) * size.height)
                 ParticleMotion.SPIN_FALL -> {
                     angle = (clock * 360f * sd.speed + sd.phase * 360f)
-                    Offset(sd.x * size.width + sin((clock + sd.phase) * 2 * PI).toFloat() * 26f, t * size.height)
+                    Offset(sd.x * size.width + sin((clock + sd.phase) * 2 * PI).toFloat() * 26f * d, t * size.height)
                 }
                 ParticleMotion.BURST -> {
                     val a = sd.x * 2 * PI
@@ -274,7 +276,7 @@ private fun ParticleRain(style: ParticleStyle) {
                     center + Offset((kotlin.math.cos(a) * dist).toFloat(), (sin(a) * dist).toFloat())
                 }
                 ParticleMotion.JITTER -> {
-                    val j = sin((clock * 40 + sd.phase * 10) * PI).toFloat() * 7f
+                    val j = sin((clock * 40 + sd.phase * 10) * PI).toFloat() * 7f * d
                     angle = j * 3f
                     Offset(sd.x * size.width + j, sd.y * size.height - j)
                 }
@@ -324,7 +326,7 @@ private fun DrawScope.drawShape(shape: ParticleShape, c: Offset, r: Float, color
         ParticleShape.DROP -> drawPath(dropPath(c, r, up = true), color)
         ParticleShape.FEATHER -> {
             drawOval(color, topLeft = c - Offset(r * 0.35f, r), size = androidx.compose.ui.geometry.Size(r * 0.7f, r * 2f))
-            drawLine(color.copy(alpha = color.alpha * 0.6f), c + Offset(0f, -r), c + Offset(0f, r * 1.3f), strokeWidth = 2f)
+            drawLine(color.copy(alpha = color.alpha * 0.6f), c + Offset(0f, -r), c + Offset(0f, r * 1.3f), strokeWidth = r * 0.12f)
         }
         ParticleShape.PELLET -> drawCircle(color, r * 0.45f, c)
         ParticleShape.SQUARE -> drawRect(color, c - Offset(r * 0.5f, r * 0.5f), androidx.compose.ui.geometry.Size(r, r))
