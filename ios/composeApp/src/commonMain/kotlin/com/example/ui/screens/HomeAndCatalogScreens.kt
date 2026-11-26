@@ -867,7 +867,7 @@ fun HomeScreen(
                                     }
                                 }
                                 Text(
-                                    text = "Brav IA conoce los 750 artículos del catálogo, calcula recetas exactas y puede pedir por ti con tu confirmación manual en el chat.",
+                                    text = "Brav IA recomienda productos del catálogo con precios reales, tiene un recetario verificado y puede pedir por ti cuando tú lo confirmas.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1690,7 +1690,7 @@ fun ProductDetailScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Nutrición e ingredientes",
+                            text = "Nutrición e ingredientes (estimado)",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 14.5.sp,
@@ -1698,6 +1698,16 @@ fun ProductDetailScreen(
                             textAlign = TextAlign.Center
                         )
                         BravoUnderline(isArca = isArca)
+                        // Estos valores se aproximan según el tipo de producto, no salen de su etiqueta.
+                        Text(
+                            text = "Valores aproximados según el tipo de producto. Si tienes alergias o sigues una dieta médica, revisa la etiqueta del empaque.",
+                            fontFamily = PlusJakartaSans,
+                            fontSize = 11.5.sp,
+                            lineHeight = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
 
                     Row(
@@ -1722,7 +1732,7 @@ fun ProductDetailScreen(
                                 )
                                 Text(
                                     text = if (nut.caloriesKcal != null) {
-                                        "${nut.caloriesKcal} kcal • ${nut.caloriesPortionLabel}"
+                                        "≈ ${nut.caloriesKcal} kcal • ${nut.caloriesPortionLabel}"
                                     } else {
                                         nut.caloriesPortionLabel
                                     },
@@ -1771,16 +1781,17 @@ fun ProductDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        nut.allergens.forEach { allergen ->
-                            val isFree = allergen.contains("Libre", ignoreCase = true)
-                            val badgeColor = if (isFree) Tone.success else Tone.warning
+                        // Solo avisamos posibles alérgenos; nunca afirmamos "libre de" sin la etiqueta real.
+                        nut.allergens.filterNot { it.contains("Libre", ignoreCase = true) }.forEach { allergen ->
+                            val isFree = false
+                            val badgeColor = Tone.warning
                             Surface(
                                 shape = CircleShape,
                                 color = badgeColor.copy(alpha = 0.14f),
                                 border = BorderStroke(1.dp, badgeColor.copy(alpha = 0.38f))
                             ) {
                                 Text(
-                                    text = if (isFree) "✓ $allergen" else "Alérgeno: $allergen",
+                                    text = if (isFree) allergen else "Puede contener: $allergen",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,

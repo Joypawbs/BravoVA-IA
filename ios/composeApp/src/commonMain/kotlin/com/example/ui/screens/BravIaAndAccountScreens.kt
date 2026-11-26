@@ -70,6 +70,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
@@ -144,6 +145,10 @@ import androidx.compose.ui.text.input.ImeAction
 import com.example.model.AccountSubScreen
 import com.example.model.CartTotals
 import com.example.model.ChatMessage
+import com.example.model.Recipe
+import com.example.model.BRAV_IA_RECIPES
+import com.example.ai.StoreFacts
+import com.example.model.findRecipeById
 import com.example.model.FcmTopicSubscription
 import com.example.model.FrequentProductStat
 import com.example.model.NpuHardwareStatus
@@ -523,14 +528,14 @@ private fun BravIaPersonalizedThinkingRow(
             lower.contains("pide") || lower.contains("pedir") || lower.contains("orden") || lower.contains("compra") -> listOf(
                 initialText,
                 "Verificando existencias de «$snippet» en $activeBranch...",
-                "Calculando precios exactos en RD$ y retorno Bravísima...",
+                "Tomando los precios del catálogo de $activeBranch...",
                 "Preparando tu resumen de confirmación manual en el chat..."
             )
             lower.contains("receta") || lower.contains("paso") || lower.contains("cocinar") || lower.contains("hacer") || lower.contains("mangu") || lower.contains("sancocho") || lower.contains("pasta") || lower.contains("pastelon") -> listOf(
                 initialText,
-                "Consultando medidas verificadas en la web para «$snippet»...",
-                "Detallando tiempos exactos en minutos y temperaturas en °C/°F...",
-                "Verificando cumplimiento matemático del presupuesto en $activeBranch..."
+                "Buscando «$snippet» en el recetario verificado...",
+                "Uniendo los ingredientes con productos del catálogo...",
+                "Sumando el total con los precios de $activeBranch..."
             )
             lower.contains("precio") || lower.contains("cuanto") || lower.contains("cuesta") -> listOf(
                 initialText,
@@ -687,23 +692,6 @@ private fun Modifier.glowingRedAiContour(
             drawContent()
         }
     }
-}
-
-private fun parseRecipeStepsFromText(rawText: String): List<String> {
-    val lines = rawText.lines()
-    val steps = mutableListOf<String>()
-    val stepRegex = Regex("""^\s*(?:\*\*?)?(?:Paso\s*\d+|Step\s*\d+|\d+[\.\)])(?:\*\*?)?[:\-\s]+(.+)$""", RegexOption.IGNORE_CASE)
-    for (line in lines) {
-        val cleanLine = line.trim()
-        val match = stepRegex.find(cleanLine)
-        if (match != null) {
-            val stepBody = match.groupValues[1].replace("**", "").trim()
-            if (stepBody.length > 8) {
-                steps.add(stepBody)
-            }
-        }
-    }
-    return steps
 }
 
 @Composable
@@ -916,10 +904,11 @@ fun BravIaChatScreen(
             )
         } else {
             listOf(
-                "Pasos: Pizza Casera" to "Explícame paso a paso cómo hacer una pizza casera con medidas exactas, temperaturas en °C/°F y presupuesto verificado.",
-                "Dieta Sin Lactosa" to "Recomiéndame una receta completa sin lactosa con productos del catálogo e indica sus calorías exactas y presupuesto.",
-                "Sin Gluten (Celíacos)" to "Dame una receta 100% libre de gluten con ingredientes verificados del catálogo y sus calorías exactas.",
-                "Keto y Calorías" to "Ármame una receta alta en proteína y baja en carbohidratos (Keto) detallando las calorías de cada ingrediente.",
+                "Sancocho" to "¿Cómo hago un sancocho dominicano?",
+                "Mangú con los tres golpes" to "Receta de mangú con los tres golpes",
+                "Sin lactosa" to "¿Qué productos sin lactosa tienen? Tengo intolerancia.",
+                "Comida con RD$1,000" to "Arma un almuerzo para 4 personas con 1,000 pesos",
+                "Alta en proteína" to "Recomiéndame productos altos en proteína para mis comidas de la semana",
                 "Pedir por mí (Confirmación)" to "Hazme el pedido de mi compra habitual del supermercado con confirmación manual aquí en el chat.",
                 "Facturación NCF y Horarios" to "Explícame cómo funcionan los comprobantes B01 y B02, los horarios de tienda y el retorno del 1% de la Tarjeta Bravísima.",
                 "Enviar Sugerencia" to "Sugiero agregar más opciones de postres artesanales sin azúcar marca Bravo en la sucursal."
@@ -1257,9 +1246,10 @@ fun BravIaChatScreen(
                 val recommendedProducts: List<Product> = remember(msg.skus) {
                     msg.skus.mapNotNull { sku -> productLookup(sku) }
                 }
-                val parsedRecipeSteps = remember(msg.text) {
-                    if (isUser) emptyList() else parseRecipeStepsFromText(msg.text)
-                }
+                // Solo las recetas del recetario verificado se muestran como pasos; nunca pasos escritos por el modelo.
+                val verifiedRecipe = remember(msg.recipeId) { findRecipeById(msg.recipeId) }
+                val parsedRecipeSteps = remember(verifiedRecipe) { verifiedRecipe?.steps ?: emptyList() }
+                fun qtyOf(sku: String) = msg.quantities[sku] ?: 1
                 val bubbleShape = RoundedCornerShape(
                     topStart = 22.dp,
                     topEnd = 22.dp,
@@ -1437,6 +1427,15 @@ fun BravIaChatScreen(
                                     )
                                 }
 
+                                if (!isUser && verifiedRecipe != null) {
+                                    VerifiedRecipeCard(
+                                        recipe = verifiedRecipe,
+                                        productLookup = productLookup,
+                                        primaryColor = primaryColor,
+                                        onOpenProduct = onOpenProduct
+                                    )
+                                }
+
                                 if (!isUser && parsedRecipeSteps.isNotEmpty()) {
                                     RecipeStepsVisualCard(
                                         steps = parsedRecipeSteps,
@@ -1572,8 +1571,10 @@ fun BravIaChatScreen(
                                                         maxLines = 1,
                                                         overflow = TextOverflow.Ellipsis
                                                     )
+                                                    val q = qtyOf(prod.sku)
                                                     DiagonalMetadataStrip(
-                                                        items = listOf("RD$${prod.price}.00", prod.unit, prod.category),
+                                                        items = if (q > 1) listOf("$q × RD$${formatPesos(prod.price)}", prod.unit)
+                                                        else listOf("RD$${formatPesos(prod.price)}", prod.unit, prod.category),
                                                         slashColor = primaryColor,
                                                         fontSizeSp = 12f
                                                     )
@@ -1602,8 +1603,33 @@ fun BravIaChatScreen(
                                     }
                                 }
 
-                                val totalCombo = recommendedProducts.sumOf { it.price }
+                                // Total con precios del catálogo × cantidades sugeridas: nunca un número del modelo.
+                                val totalCombo = recommendedProducts.sumOf { it.price * qtyOf(it.sku) }
                                 val cashbackCombo = totalCombo / 100
+
+                                if (msg.budgetExceededBy != null) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Tone.warning.copy(alpha = 0.14f),
+                                        border = BorderStroke(1.dp, Tone.warning),
+                                        modifier = Modifier.fillMaxWidth().testTag("budget_warning_${msg.id}")
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Icon(Icons.Default.Warning, contentDescription = null, tint = Tone.warning, modifier = Modifier.size(18.dp))
+                                            Text(
+                                                text = "Esta selección pasa tu presupuesto por RD$${formatPesos(msg.budgetExceededBy)}. Quita productos con el botón de cada uno o pídeme una versión más económica.",
+                                                fontFamily = PlusJakartaSans,
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+                                }
 
                                 if (msg.orderConfirmed) {
                                     Surface(
@@ -1712,7 +1738,7 @@ fun BravIaChatScreen(
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                                 Text(
-                                                    text = "RD$${formatPesos(totalCombo)}.00",
+                                                    text = "RD$${formatPesos(totalCombo)}",
                                                     fontFamily = PlusJakartaSans,
                                                     fontWeight = FontWeight.ExtraBold,
                                                     fontSize = 16.sp,
@@ -2258,6 +2284,95 @@ fun BravIaChatScreen(
     }
 }
 
+/**
+ * Receta del recetario verificado. Todo sale de [Recipe] y del catálogo: cantidades, pasos y
+ * precios. Si un ingrediente no se vende en BravoVa, se dice en vez de inventar un producto.
+ */
+@Composable
+private fun VerifiedRecipeCard(
+    recipe: Recipe,
+    productLookup: (String) -> Product?,
+    primaryColor: Color,
+    onOpenProduct: (String) -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.35f)),
+        modifier = Modifier.fillMaxWidth().testTag("verified_recipe_${recipe.id}")
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Tone.success, modifier = Modifier.size(16.dp))
+                Text("Receta verificada", fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, color = Tone.successStrong)
+            }
+            Text(recipe.name, fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+            DiagonalMetadataStrip(
+                items = listOf(recipe.kind, "${recipe.servings} porciones", "≈ ${recipe.totalMinutes} min"),
+                slashColor = primaryColor,
+                fontSizeSp = 12f
+            )
+
+            Text("Ingredientes", fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)
+            recipe.ingredients.forEach { ing ->
+                val product = ing.skus.firstNotNullOfOrNull(productLookup)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .then(if (product != null) Modifier.clickable { onOpenProduct(product.sku) } else Modifier)
+                        .padding(vertical = 4.dp, horizontal = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "• ${ing.amount} · ${ing.name}" + if (ing.optional) " (opcional)" else "",
+                        fontFamily = PlusJakartaSans,
+                        fontSize = 12.5.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
+                    )
+                    val tag = when {
+                        product == null -> "No disponible en BravoVa"
+                        ing.pantry -> "Despensa · RD$${formatPesos(product.price)}"
+                        else -> (if (ing.unitsToBuy > 1) "${ing.unitsToBuy} × " else "") + "RD$${formatPesos(product.price)}"
+                    }
+                    Text(
+                        text = tag,
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.5.sp,
+                        color = if (product == null) Tone.warning else primaryColor,
+                        textAlign = TextAlign.End
+                    )
+                }
+            }
+
+            Text("Preparación", fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)
+            recipe.steps.forEachIndexed { index, step ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(
+                        modifier = Modifier.size(22.dp).clip(CircleShape).background(primaryColor.copy(alpha = 0.14f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("${index + 1}", fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, color = primaryColor)
+                    }
+                    Text(step, fontFamily = PlusJakartaSans, fontSize = 12.5.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                }
+            }
+            recipe.serveWith?.let {
+                Text("Se sirve con: $it", fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(
+                "Tiempos y porciones aproximados. Si tienes alergias, revisa la etiqueta de cada producto.",
+                fontFamily = PlusJakartaSans,
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 @Composable
 private fun RecipeStepsVisualCard(
     steps: List<String>,
@@ -2290,7 +2405,7 @@ private fun RecipeStepsVisualCard(
                     modifier = Modifier.size(16.dp)
                 )
                 Text(
-                    text = "Guía de voz lista (${steps.size} pasos enumerados arriba)",
+                    text = "Escuchar los ${steps.size} pasos en voz alta",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 12.sp,
@@ -3791,14 +3906,14 @@ fun AccountSubScreenView(
                                 BravoUnderline(isArca = false)
                             }
                             Text(
-                                text = "Adjunta fotos directamente en Brav IA para auditoría técnica instantánea en $activeBranch:",
+                                text = "Envía una foto del producto a Brav IA para registrar tu reporte. El equipo de servicio al cliente de $activeBranch lo revisa.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             OutlinedButton(
                                 onClick = {
                                     performCrispHaptic(view, HapticStyle.CONFIRM)
-                                    onOpenBravIaSupportPrompt("Tengo un producto dañado o vencido en mi orden de $activeBranch y deseo reposición sin costo o nota de crédito en mi Tarjeta Bravísima.")
+                                    onOpenBravIaSupportPrompt("Quiero reportar un producto dañado o vencido de mi orden en $activeBranch.")
                                 },
                                 shape = RoundedCornerShape(14.dp),
                                 border = BorderStroke(1.2.dp, primaryColor.copy(alpha = 0.55f)),
@@ -4058,7 +4173,7 @@ fun AccountSubScreenView(
                                 BravoUnderline(isArca = false)
                             }
                             Text(
-                                text = "Horario de atención: Lunes a Sábado de 7:00 AM a 10:00 PM (Domingos cerrados por valores familiares). Delivery express en 8–12 minutos en el polígono central.",
+                                text = "Horario: ${StoreFacts.HOURS} El tiempo de entrega se calcula para tu dirección y lo ves al pagar y en el seguimiento.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -4084,10 +4199,10 @@ fun AccountSubScreenView(
 
             AccountSubScreen.AYUDA -> {
                 val faqs = listOf(
-                    "¿Cómo funciona el 1% de la Tarjeta Bravísima?" to "Retorno exacto del 1% (RD$1.00 por cada RD$100.00 de compra), canje directo en carrito o caja presentando el código de barras ${userProfile.bravisimaNumber}.",
-                    "¿Cuáles son los horarios y tiempos de entrega?" to "Lunes a Sábado de 7:00 AM a 10:00 PM (Domingos cerrados por valores familiares). Delivery express en 8-12 minutos en el polígono central.",
-                    "¿Cómo funciona la Facturación Fiscal (NCF)?" to "Emitimos Comprobantes B01 (Crédito Fiscal para empresas/RNC) y B02 (Consumidor Final) con desglose exacto de ITBIS (18%/16%).",
-                    "¿Qué hace Brav IA y Brav IA Soporte?" to "Brav IA verifica recetas en vivo en la web con medidas exactas, cumple matemáticamente tu presupuesto en RD$, audita fotos de productos/facturas NCF y envía sugerencias a bezaleelpatrocino0@gmail.com."
+                    "¿Cómo funciona el 1% de la Tarjeta Bravísima?" to "${StoreFacts.BRAVISIMA} Presenta el código ${userProfile.bravisimaNumber}.",
+                    "¿Cuáles son los horarios y tiempos de entrega?" to "${StoreFacts.HOURS} El tiempo de entrega depende de tu dirección: lo ves al pagar y en el seguimiento del pedido.",
+                    "¿Cómo funciona la Facturación Fiscal (NCF)?" to StoreFacts.NCF,
+                    "¿Qué hace Brav IA?" to "Te recomienda productos del catálogo con sus precios reales, te da recetas de su recetario verificado (${BRAV_IA_RECIPES.size} platos), avisa si una selección pasa tu presupuesto, mira las fotos que le envíes y registra tus sugerencias. No inventa precios ni recetas: si algo no está en el catálogo o en el recetario, te lo dice."
                 )
                 items(items = faqs, key = { it.first }) { (q, a) ->
                     TranslucentCard(

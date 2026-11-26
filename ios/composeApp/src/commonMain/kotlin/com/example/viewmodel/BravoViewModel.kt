@@ -29,6 +29,13 @@ import com.example.platform.TimeZone
 import com.example.platform.URLEncoder
 import com.example.platform.content
 import com.example.platform.createGenerativeModel
+import com.example.platform.AiModelConfig
+import com.example.platform.AiContent
+import com.example.ai.BravIaEngine
+import com.example.ai.BravIaText
+import com.example.ai.ChatTurn
+import com.example.ai.GroundedReply
+import com.example.ai.PromptContext
 import com.example.platform.currentDarkModeHint
 import com.example.platform.format
 import com.example.platform.hasPermission
@@ -154,6 +161,19 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     private val geminiFallbackModel by lazy {
         createGenerativeModel("gemini-3.5-flash-lite")
     }
+
+    /*
+     * Modelos del chat de Brav IA. Van aparte de los de arriba (que usan las listas y el chat del
+     * repartidor) porque responden en JSON, con las reglas como instrucción de sistema y con
+     * temperatura baja: menos creatividad = menos datos inventados.
+     */
+    private val bravIaChatConfig = AiModelConfig(
+        systemInstruction = BravIaEngine.SYSTEM_INSTRUCTION,
+        jsonOutput = true,
+        temperature = 0.3
+    )
+    private val bravIaChatModel by lazy { createGenerativeModel("gemini-3.8-flash", bravIaChatConfig) }
+    private val bravIaChatFallbackModel by lazy { createGenerativeModel("gemini-3.5-flash-lite", bravIaChatConfig) }
 
     private fun isFirebaseUserAuthenticatedForAi(): Boolean =
         runCatching { AuthPlatform.currentUser() != null }.getOrDefault(false)
@@ -540,6 +560,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     val realLocationMetrics: StateFlow<RealLocationDeliveryMetrics> = _realLocationMetrics.asStateFlow()
 
     private val _targetBudgetInChat = MutableStateFlow(1200)
+    /** true cuando la persona movió el control de presupuesto; si no, Brav IA no asume un límite. */
+    private val _budgetSetByUser = MutableStateFlow(false)
     val targetBudgetInChat: StateFlow<Int> = _targetBudgetInChat.asStateFlow()
 
     private val _isAiGenerating = MutableStateFlow(false)
@@ -1641,465 +1663,12 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         return instructionPatterns.any { q.contains(it) } || dishKeywords.any { q.contains(it) }
     }
 
-    private fun matchRecipeIngredientBundle(query: String): List<String> {
-        val q = normalizeSearchText(query)
-        return when {
-            q.contains("pizza") -> listOf(
-                "BRV-112", // Bravo Harina de Trigo Todo Uso 2 Lb
-                "BRV-202", // Bravo Queso Mozzarella en Barra 1 Lb
-                "BRV-389", // Chorizo Español Vela Dulce y Picante Bravo 250g
-                "BRV-058", // Pasta de Tomate La Famosa 16 Oz
-                "BRV-039", // Bravo Aceite de Oliva Virgen Extra 500 Ml
-                "BRV-243", // Bravo Orégano Molido Dominicano Puro
-                "BRV-401", // Queso Parmesano Reggiano Rallado Fresco Bravo 150g
-                "BRV-173"  // Ají Morrón Rojo Grande 1 Lb
-            )
-            q.contains("hamburguesa") || q.contains("burger") -> listOf(
-                "BRV-134", // Hamburguesas de Res Artesanales 4u
-                "BRV-222", // Pan Brioche para Hamburguesa 4u
-                "BRV-095", // Bravo Queso Cheddar 24 Lonjas
-                "BRV-008", // Bravo Tocino Ahumado Rebanado
-                "BRV-090", // Tomate Bugalú Fresco 1 Lb
-                "BRV-091", // Bravo Lechuga Romana Lavada
-                "BRV-089", // Cebolla Roja en Malla 1 Lb
-                "BRV-120"  // Bravo Ketchup Tradicional 14 Oz
-            )
-            q.contains("lasana") -> listOf(
-                "BRV-057", // Bravo Espaguetis Trigo Duro 400g
-                "BRV-078", // Carne Molida de Res Primera 1.5 Lb
-                "BRV-202", // Bravo Queso Mozzarella en Barra 1 Lb
-                "BRV-205", // Bravo Queso Crema Untable 225g
-                "BRV-401", // Queso Parmesano Reggiano Rallado Fresco Bravo 150g
-                "BRV-058", // Pasta de Tomate La Famosa 16 Oz
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-098"  // Bravo Leche Entera UHT 1 Litro
-            )
-            q.contains("taco") || q.contains("burrito") || q.contains("quesadilla") || q.contains("nacho") -> listOf(
-                "BRV-444", // Tortillas de Harina Suaves para Tacos y Wraps Bravo 10 uds
-                "BRV-078", // Carne Molida de Res Primera 1.5 Lb
-                "BRV-202", // Bravo Queso Mozzarella en Barra 1 Lb
-                "BRV-095", // Bravo Queso Cheddar 24 Lonjas
-                "BRV-088", // Aguacate Criollo Grande Unidad
-                "BRV-090", // Tomate Bugalú Fresco 1 Lb
-                "BRV-089", // Cebolla Roja en Malla 1 Lb
-                "BRV-176"  // Verdurita Cilantro Corriente Atado
-            )
-            q.contains("mofongo") || q.contains("tostones") -> listOf(
-                "BRV-083", // Plátano Verde Barahona Unidad
-                "BRV-318", // Capa de Chicharrón de Cerdo Fresca Bravo
-                "BRV-171", // Ajo Criollo Dominicano Malla 3 Cabezas
-                "BRV-037", // Bravo Aceite Vegetal Puro 1.8 L
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-201", // Bravo Queso Gouda Holandés 1 Lb
-                "BRV-242", // Bravo Sopitas Cubitos de Pollo 24 Und
-                "BRV-088"  // Aguacate Criollo Grande Unidad
-            )
-            q.contains("chofan") || q.contains("arroz chino") -> listOf(
-                "BRV-053", // Bravo Arroz Selecto Grado A 5 Lb
-                "BRV-076", // Pechuga de Pollo Fileteada 1.5 Lb
-                "BRV-124", // Chuleta Ahumada de Cerdo Especial 1 Lb
-                "BRV-005", // Bravo Jamón Cocido Seleccionado 1 Lb
-                "BRV-096", // Bravo Huevos Frescos 12 Und
-                "BRV-039", // Bravo Aceite de Oliva Virgen Extra 500 Ml
-                "BRV-191", // Zanahoria Criolla de Constanza 1 Lb
-                "BRV-173"  // Ají Morrón Rojo Grande 1 Lb
-            )
-            q.contains("sancocho") || q.contains("asopao") -> listOf(
-                "BRV-075", // Pollo Entero Fresco Bravo 3.8 Lb
-                "BRV-077", // Carne de Res para Guisar 1.5 Lb
-                "BRV-079", // Costillita de Cerdo Ahumada 1.5 Lb
-                "BRV-303", // Longaniza Criolla Casera Ahumada Bravo
-                "BRV-083", // Plátano Verde Barahona Unidad
-                "BRV-085", // Yuca Fresca Seleccionada 1 Lb
-                "BRV-086", // Yautía Blanca Criolla 1 Lb
-                "BRV-087", // Auyama Criolla en Trozos 1 Lb
-                "BRV-053"  // Bravo Arroz Selecto Grado A 5 Lb
-            )
-            q.contains("mangu") || q.contains("tres golpes") -> listOf(
-                "BRV-083", // Plátano Verde Barahona Unidad
-                "BRV-004", // Salami Induveca Súper Especial 1.5 Lb
-                "BRV-093", // Bravo Queso de Freír 1 Lb
-                "BRV-096", // Bravo Huevos Frescos 12 Und
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-089", // Cebolla Roja en Malla 1 Lb
-                "BRV-040"  // Bravo Vinagre Blanco Destilado 1 L
-            )
-            q.contains("pastelon") || q.contains("maduro") -> listOf(
-                "BRV-084", // Plátano Maduro Amarillo Unidad
-                "BRV-078", // Carne Molida de Res Primera 1.5 Lb
-                "BRV-201", // Bravo Queso Gouda Holandés 1 Lb
-                "BRV-202", // Bravo Queso Mozzarella en Barra 1 Lb
-                "BRV-058", // Pasta de Tomate La Famosa 16 Oz
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-098", // Bravo Leche Entera UHT 1 Litro
-                "BRV-172"  // Ají Cubanela Verde Tradicional 1 Lb
-            )
-            q.contains("bandera") || q.contains("locrio") || q.contains("moro") -> listOf(
-                "BRV-053", // Bravo Arroz Selecto Grado A 5 Lb
-                "BRV-055", // Bravo Habichuelas Rojas 800 Gr
-                "BRV-075", // Pollo Entero Fresco Bravo 3.8 Lb
-                "BRV-056", // Guandules Verdes con Coco La Famosa
-                "BRV-058", // Pasta de Tomate La Famosa 16 Oz
-                "BRV-087", // Auyama Criolla en Trozos 1 Lb
-                "BRV-037", // Bravo Aceite Vegetal Puro 1.8 L
-                "BRV-088"  // Aguacate Criollo Grande Unidad
-            )
-            q.contains("pasta") || q.contains("alfredo") || q.contains("espagueti") || q.contains("carbonara") || q.contains("codito") || q.contains("penne") -> listOf(
-                "BRV-057", // Bravo Espaguetis Trigo Duro 400g
-                "BRV-076", // Pechuga de Pollo Fileteada 1.5 Lb
-                "BRV-206", // Bravo Crema de Leche para Cocinar 1 L
-                "BRV-401", // Queso Parmesano Reggiano Rallado Fresco Bravo 150g
-                "BRV-201", // Bravo Queso Gouda Holandés 1 Lb
-                "BRV-008", // Bravo Tocino Ahumado Rebanado 250 Gr
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-171"  // Ajo Criollo Dominicano Malla 3 Cabezas
-            )
-            q.contains("arroz con leche") || q.contains("habichuelas con dulce") || q.contains("flan") || q.contains("postre") -> listOf(
-                "BRV-053", // Bravo Arroz Selecto Grado A 5 Lb
-                "BRV-055", // Bravo Habichuelas Rojas 800 Gr
-                "BRV-099", // Leche Evaporada Carnation 315g
-                "BRV-360", // Leche Condensada Azucarada Cremosa Bravo 395g
-                "BRV-098", // Bravo Leche Entera UHT 1 Litro
-                "BRV-060", // Bravo Azúcar Crema 5 Lb
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-165"  // Batata Dulce Dominicana Fresca 1 Lb
-            )
-            q.contains("panqueque") || q.contains("hotcake") || q.contains("pancake") || q.contains("waffle") || q.contains("tostada francesa") -> listOf(
-                "BRV-112", // Bravo Harina de Trigo Todo Uso 2 Lb
-                "BRV-096", // Bravo Huevos Frescos 12 Und
-                "BRV-098", // Bravo Leche Entera UHT 1 Litro
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-033", // Bravo Miel de Abejas 100% Pura 500 Ml
-                "BRV-183", // Fresas Frescas de Constanza 1 Lb
-                "BRV-092"  // Guineo Maduro Criollo Mano 5u
-            )
-            q.contains("ensalada") || q.contains("cesar") -> listOf(
-                "BRV-091", // Bravo Lechuga Romana Lavada 250 Gr
-                "BRV-076", // Pechuga de Pollo Fileteada 1.5 Lb
-                "BRV-119", // Bravo Mayonesa Real Frasco 16 Oz
-                "BRV-401", // Queso Parmesano Reggiano Rallado Fresco Bravo 150g
-                "BRV-090", // Tomate Bugalú Fresco 1 Lb
-                "BRV-193", // Pepino de Ensalada Fresco Pack 3u
-                "BRV-088", // Aguacate Criollo Grande Unidad
-                "BRV-039"  // Bravo Aceite de Oliva Virgen Extra 500 Ml
-            )
-            q.contains("salmon") || q.contains("camaron") || q.contains("pescado") || q.contains("marisco") || q.contains("bacalao") -> listOf(
-                "BRV-141", // Filete de Salmón Fresco Noruego 1 Lb
-                "BRV-142", // Camarones Jumbo Limpios Pelados 1 Lb
-                "BRV-339", // Filete de Tilapia Roja Fresca sin Espinas Bravo
-                "BRV-039", // Bravo Aceite de Oliva Virgen Extra 500 Ml
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-171", // Ajo Criollo Dominicano Malla 3 Cabezas
-                "BRV-177", // Limón Persa Jugoso sin Semillas 1 Lb
-                "BRV-206"  // Bravo Crema de Leche para Cocinar 1 L
-            )
-            q.contains("churrasco") || q.contains("parrilla") || q.contains("bbq") || q.contains("asado") || q.contains("ribeye") -> listOf(
-                "BRV-301", // Churrasco Angus Importado Choice Bravo
-                "BRV-302", // Picaña de Res Premium con Capa de Grasa Bravo
-                "BRV-389", // Chorizo Español Vela Dulce y Picante Bravo 250g
-                "BRV-125", // Costilla de Cerdo BBQ Baby Back 1 Lb
-                "BRV-085", // Yuca Fresca Seleccionada 1 Lb
-                "BRV-014"  // Bravo Casabe Natural Tostado
-            )
-            q.contains("sandwich") || q.contains("emparedado") || q.contains("desayuno") -> listOf(
-                "BRV-009", // Bravo Viga Mediana 875 Gr
-                "BRV-005", // Bravo Jamón Cocido Seleccionado 1 Lb
-                "BRV-201", // Bravo Queso Gouda Holandés 1 Lb
-                "BRV-008", // Bravo Tocino Ahumado Rebanado 250 Gr
-                "BRV-096", // Bravo Huevos Frescos 12 Und
-                "BRV-100", // Bravo Mantequilla Con Sal 400g
-                "BRV-059", // Café Santo Domingo Molido 1 Lb
-                "BRV-049"  // Bravo Jugo 100% Naranja 1.5 L
-            )
-            else -> emptyList()
-        }
-    }
-
-    private fun scoreProductsForQuery(query: String, allProducts: List<Product>): List<Product> {
-        val normQuery = normalizeSearchText(query)
-        val recipeBundleSkus = matchRecipeIngredientBundle(query)
-        val stopWords = setOf(
-            "para", "como", "con", "los", "las", "una", "uno", "unos", "unas", "del", "por",
-            "que", "cual", "cuales", "cuanto", "cuesta", "precio", "precios", "tienes", "tienen",
-            "hay", "dame", "quiero", "necesito", "busco", "bravo", "arca", "favor", "puedes",
-            "pedir", "pide", "pideme", "ordenar", "ordename", "comprame", "hacer", "pedido",
-            "hola", "buenos", "buenas", "dias", "tardes", "noches", "gracias", "donde",
-            "cuando", "quien", "algo", "cosa", "cosas", "todo", "todos", "catalogo", "articulos",
-            "articulo", "producto", "productos", "recomienda", "recomiendame", "sugiere",
-            "paso", "pasos", "receta", "preparar", "cocinar", "instrucciones"
-        )
-        val rawTokens = normQuery.split(Regex("""[^a-z0-9]+"""))
-            .filter { it.length >= 3 && it !in stopWords }
-        val synonymMap = mapOf(
-            "pizza" to listOf("pepperoni", "mozzarella", "harina", "pasta de tomate", "aceite de oliva", "oregano", "parmesano", "morron"),
-            "hamburguesa" to listOf("hamburguesa", "brioche", "cheddar", "tocino", "tomate", "lechuga", "cebolla", "cachu"),
-            "burger" to listOf("hamburguesa", "brioche", "cheddar", "tocino", "tomate", "lechuga"),
-            "lasana" to listOf("lasana", "molida", "mozzarella", "ricotta", "parmesano", "pasta de tomate", "mantequilla", "leche"),
-            "taco" to listOf("tortilla", "molida", "mozzarella", "cheddar", "guacamole", "tomate", "cebolla", "cilantro"),
-            "burrito" to listOf("tortilla", "molida", "habichuela", "mozzarella", "guacamole", "arroz"),
-            "quesadilla" to listOf("tortilla", "mozzarella", "gouda", "pechuga", "guacamole"),
-            "mofongo" to listOf("platano verde", "chicharron", "tocino", "ajo", "aceite", "mantequilla", "queso", "aguacate"),
-            "chofan" to listOf("arroz", "pechuga", "chuleta", "jamon", "huevo", "ajonjoli", "zanahoria", "morron"),
-            "refresco" to listOf("coca", "sprite", "country", "pepsi", "seven", "soda", "merengue", "frambuesa"),
-            "gaseosa" to listOf("coca", "sprite", "country", "soda"),
-            "cerveza" to listOf("presidente", "modelo", "corona", "stella", "heineken", "ceniza", "one"),
-            "bodega" to listOf("vino", "ron", "whisky", "sangria", "espumante", "cerveza", "brugal", "barcelo"),
-            "licor" to listOf("ron", "whisky", "baileys", "tequila", "vodka", "gin", "vino"),
-            "helado" to listOf("helado", "paleta", "cono", "bon"),
-            "dulce" to listOf("chocolate", "galleta", "helado", "mermelada", "nutella", "caramelo", "gomita", "bocadillo"),
-            "postre" to listOf("helado", "bizcocho", "flan", "leche condensada", "evaporada", "chocolate", "galleta"),
-            "picadera" to listOf("salami", "queso", "papitas", "nachos", "tostitos", "chorizo", "salchicha", "aceituna", "cerveza"),
-            "desayuno" to listOf("platano", "huevo", "salami", "queso", "pan", "leche", "cafe", "avena", "mantequilla", "jugo"),
-            "cena" to listOf("pan", "queso", "jamon", "yogurt", "platano", "huevo", "atun", "ensalada"),
-            "almuerzo" to listOf("arroz", "pollo", "habichuela", "carne", "chuleta", "aguacate", "ensalada", "platano"),
-            "pescado" to listOf("filete", "salmon", "bacalao", "tilapia", "mero", "dorado", "atun", "sardina"),
-            "marisco" to listOf("camaron", "calamar", "pulpo", "mejillon", "marisco", "lambí"),
-            "res" to listOf("res", "churrasco", "molida", "bistec", "filete", "hamburguesa", "guisar"),
-            "cerdo" to listOf("cerdo", "chuleta", "costilla", "lomo", "tocineta", "jamon", "longaniza"),
-            "viveres" to listOf("platano", "yuca", "yautia", "name", "auyama", "batata", "papa", "guineo"),
-            "aseo" to listOf("shampoo", "jabon", "desodorante", "pasta dental", "cepillo", "crema", "afeitar"),
-            "higiene" to listOf("shampoo", "jabon", "desodorante", "pasta dental", "papel higienico", "toalla"),
-            "mascota" to listOf("perro", "gato", "cachorro", "arena", "alimento", "collar", "juguete", "antipulgas")
-        )
-
-        val expandedStems = buildList {
-            for (token in rawTokens) {
-                val singular = token.removeSuffix("es").removeSuffix("s")
-                if (token.length >= 3) add(token)
-                if (singular.length >= 3) add(singular)
-                synonymMap[token]?.let { addAll(it) }
-                synonymMap[singular]?.let { addAll(it) }
-            }
-        }.distinct()
-
-        val categoryHints = mutableListOf<String>()
-        if (normQuery.contains("embutido") || normQuery.contains("salami") || normQuery.contains("jamon") || normQuery.contains("salchicha") || normQuery.contains("chorizo") || normQuery.contains("longaniza") || normQuery.contains("tocineta")) {
-            categoryHints.add("quesos y embutidos")
-            categoryHints.add("embutidos")
-        }
-        if (normQuery.contains("pan") || normQuery.contains("galleta") || normQuery.contains("bizcocho") || normQuery.contains("tostada") || normQuery.contains("casabe") || normQuery.contains("reposteria")) {
-            categoryHints.add("panaderia")
-            categoryHints.add("panes y galletas")
-        }
-        if (normQuery.contains("limpieza") || normQuery.contains("hogar") || normQuery.contains("detergente") || normQuery.contains("cloro") || normQuery.contains("jabon") || normQuery.contains("papel") || normQuery.contains("desinfectante") || normQuery.contains("fregaza")) {
-            categoryHints.add("limpieza y hogar")
-            categoryHints.add("hogar y limpieza")
-        }
-        if (normQuery.contains("aceite") || normQuery.contains("vinagre") || normQuery.contains("oliva") || normQuery.contains("aderezo") || normQuery.contains("balsamico")) {
-            categoryHints.add("aceite")
-            categoryHints.add("despensa")
-        }
-        if (normQuery.contains("agua") || normQuery.contains("refresco") || normQuery.contains("jugo") || normQuery.contains("soda") || normQuery.contains("hidratante") || normQuery.contains("malta") || normQuery.contains("bebida")) {
-            categoryHints.add("bebidas y jugos")
-            categoryHints.add("agua y refrescos")
-        }
-        if (normQuery.contains("arroz") || normQuery.contains("habichuela") || normQuery.contains("pasta") || normQuery.contains("espagueti") || normQuery.contains("salsa") || normQuery.contains("cereal") || normQuery.contains("avena") || normQuery.contains("cafe") || normQuery.contains("azucar") || normQuery.contains("despensa") || normQuery.contains("abarrote")) {
-            categoryHints.add("despensa y abarrotes")
-            categoryHints.add("alimentacion general")
-        }
-        if (normQuery.contains("bebe") || normQuery.contains("panal") || normQuery.contains("pampers") || normQuery.contains("huggies") || normQuery.contains("formula") || normQuery.contains("compota") || normQuery.contains("toallita") || normQuery.contains("shampoo") || normQuery.contains("desodorante") || normQuery.contains("dental")) {
-            categoryHints.add("cuidado personal y bebe")
-            categoryHints.add("bebes")
-        }
-        if (normQuery.contains("vino") || normQuery.contains("cerveza") || normQuery.contains("ron") || normQuery.contains("whisky") || normQuery.contains("bodega") || normQuery.contains("sangria") || normQuery.contains("espumante") || normQuery.contains("licor")) {
-            categoryHints.add("cervezas, vinos y licores")
-            categoryHints.add("bodega")
-        }
-        if (normQuery.contains("carne") || normQuery.contains("pollo") || normQuery.contains("res") || normQuery.contains("cerdo") || normQuery.contains("chuleta") || normQuery.contains("costilla") || normQuery.contains("molida") || normQuery.contains("churrasco") || normQuery.contains("filete") || normQuery.contains("pavo") || normQuery.contains("pescado") || normQuery.contains("camaron") || normQuery.contains("salmon") || normQuery.contains("marisco")) {
-            categoryHints.add("carnes, pescados y mariscos")
-            categoryHints.add("carne")
-        }
-        if (normQuery.contains("fruta") || normQuery.contains("vegetal") || normQuery.contains("platano") || normQuery.contains("yuca") || normQuery.contains("aguacate") || normQuery.contains("tomate") || normQuery.contains("cebolla") || normQuery.contains("papa") || normQuery.contains("guineo") || normQuery.contains("manzana") || normQuery.contains("ensalada") || normQuery.contains("viveres")) {
-            categoryHints.add("frutas y vegetales")
-        }
-        if (normQuery.contains("leche") || normQuery.contains("queso") || normQuery.contains("huevo") || normQuery.contains("yogurt") || normQuery.contains("mantequilla") || normQuery.contains("lacteo") || normQuery.contains("crema")) {
-            categoryHints.add("lacteos y huevos")
-            categoryHints.add("quesos y embutidos")
-        }
-        if (normQuery.contains("snack") || normQuery.contains("papita") || normQuery.contains("chocolate") || normQuery.contains("dulce") || normQuery.contains("maní") || normQuery.contains("mani") || normQuery.contains("palomita")) {
-            categoryHints.add("snacks y dulces")
-        }
-        if (normQuery.contains("congelado") || normQuery.contains("helado") || normQuery.contains("nugget")) {
-            categoryHints.add("congelados")
-        }
-        if (normQuery.contains("perro") || normQuery.contains("gato") || normQuery.contains("mascota") || normQuery.contains("cachorro") || normQuery.contains("arena") || normQuery.contains("croqueta") || normQuery.contains("pulga")) {
-            categoryHints.add("arca")
-        }
-
-        if (expandedStems.isEmpty() && categoryHints.isEmpty() && recipeBundleSkus.isEmpty()) {
-            return emptyList()
-        }
-
-        val scoredList = allProducts
-            .mapNotNull { prod ->
-                val normName = normalizeSearchText(prod.name)
-                val normCat = normalizeSearchText(prod.category)
-                val normBadge = normalizeSearchText(prod.badge)
-                val normSku = prod.sku.lowercase()
-                val nameWords = normName.split(Regex("""[^a-z0-9]+""")).filter { it.isNotBlank() }
-                var score = 0
-
-                val bundleIndex = recipeBundleSkus.indexOf(prod.sku)
-                if (bundleIndex >= 0) {
-                    score += 180 - (bundleIndex * 4)
-                }
-                if (normQuery.contains(normSku)) score += 150
-                for (stem in expandedStems) {
-                    if (nameWords.any { it == stem || it.startsWith(stem) }) {
-                        score += 48
-                    } else if (normName.contains(stem)) {
-                        score += 28
-                    }
-                    if (normCat.contains(stem)) score += 14
-                    if (normBadge.contains(stem)) score += 10
-                }
-                for (catHint in categoryHints) {
-                    if (catHint == "arca" && prod.sku.startsWith("ARC-")) score += 26
-                    else if (normCat.contains(catHint)) score += 20
-                }
-                if (score >= 20) prod to score else null
-            }
-            .sortedByDescending { it.second }
-            .map { it.first }
-
-        return scoredList
-    }
-
+    /** Productos relevantes de la tienda activa para un pedido a la IA (sin precios ni nutrición: eso lo pone la app). */
     private fun buildFocusedCatalogContext(query: String): String {
-        val allProducts = getAllProducts()
-        val recipeBundleProducts = matchRecipeIngredientBundle(query).mapNotNull { findProductBySku(it) }
-        val scoredMatches = scoreProductsForQuery(query, allProducts)
-
-        val historySkus = getPurchaseHistoryStats().map { it.product.sku }.take(12)
-        val cartSkus = _cart.value.map { it.sku }
-
-        val prioritizedProducts = (
-            recipeBundleProducts +
-                scoredMatches.take(80) +
-                (cartSkus + historySkus).mapNotNull { findProductBySku(it) }
-            )
-            .distinctBy { it.sku }
-            .take(100)
-
-        val prioritizedLines = prioritizedProducts.joinToString("\n") { p ->
-            val storeTag = if (p.sku.startsWith("ARC-")) "El Arca Petshop" else "Bravo"
-            val nut = p.nutritionProfile()
-            val calTag = nut.caloriesKcal?.let { "${it} kcal (${nut.caloriesPortionLabel})" } ?: "Artículo no comestible (0 kcal)"
-            val allergenTag = nut.allergens.joinToString(", ")
-            val dietTag = nut.dietaryTags.joinToString(", ")
-            "[${p.sku}] ${p.name} - RD$${p.price} (${p.unit} • ${p.category} • $storeTag) | Calorías: $calTag | Ingredientes: ${nut.ingredients} | Alérgenos: $allergenTag | Dietas: $dietTag"
-        }
-
-        val fullCatalogCompact = allProducts.joinToString("\n") { p ->
-            val nut = p.nutritionProfile()
-            val calCompact = nut.caloriesKcal?.let { "${it}kcal" } ?: "NoComestible"
-            val dietCompact = nut.dietaryTags.take(2).joinToString("/")
-            "[${p.sku}] ${p.name} | RD$${p.price} | ${p.unit} | ${p.category} | $calCompact | Alérgenos:${nut.allergens.firstOrNull().orEmpty()} | $dietCompact"
-        }
-
-        return "INGREDIENTES Y ARTÍCULOS PRIORITARIOS CON CALORÍAS EXACTAS, INGREDIENTES, ALÉRGENOS Y DIETAS:\n$prioritizedLines\n\nCATÁLOGO COMPLETO OFICIAL CON NUTRICIÓN E INGREDIENTES:\n$fullCatalogCompact"
-    }
-
-    fun getStoreInventoryContext(query: String = ""): String {
-        return buildFocusedCatalogContext(query)
-    }
-
-    private suspend fun fetchInternetRecipeVerification(query: String): String? = withContext(Dispatchers.IO) {
-        try {
-            // Saca el nombre del plato de la pregunta
-            val cleaned = query.lowercase()
-                .replace(Regex("""¿|\?|!|¡|,|\."""), " ")
-                .replace(
-                    Regex("""\b(como|cómo|hacer|se hace|preparar|preparo|receta|paso a paso|pasos|dame|enseñame|enséñame|cocinar|cocino|quiero|necesito|ingredientes|para|una|un|el|la|los|las|de|del|con|sin|alergia|dieta|calorias|calorías)\b"""),
-                    " "
-                )
-                .trim()
-                .replace(Regex("""\s+"""), " ")
-            if (cleaned.length < 3) return@withContext null
-
-            val results = mutableListOf<String>()
-
-            // 1. Query Wikipedia ES REST summary for authentic culinary description & ingredients
-            val wikiSlug = URLEncoder.encode(cleaned.replaceFirstChar { it.uppercase() }, "UTF-8").replace("+", "%20")
-            val wikiResp = runCatching {
-                httpGetText(
-                    "https://es.wikipedia.org/api/rest_v1/page/summary/$wikiSlug",
-                    mapOf("User-Agent" to "BravoVaRD/3.0 (KMP; CulinaryAssistant)")
-                )
-            }.getOrNull()
-            if (wikiResp != null && wikiResp.code == 200) {
-                val body = wikiResp.body
-                val json = JSONObject(body)
-                val extract = json.optString("extract", "").trim()
-                if (extract.length > 35) {
-                    results.add("Referencia Culinaria Verificada en Web (Wikipedia Gastronomía): $extract")
-                }
-            }
-
-            // 1b. If direct slug did not match, search Wikipedia ES API for the recipe/dish
-            if (results.isEmpty()) {
-                val searchEncoded = URLEncoder.encode("$cleaned receta gastronomía", "UTF-8")
-                val searchResp = runCatching {
-                    httpGetText(
-                        "https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=$searchEncoded&utf8=&format=json&srlimit=2",
-                        mapOf("User-Agent" to "BravoVaRD/3.0 (KMP; CulinaryAssistant)")
-                    )
-                }.getOrNull()
-                if (searchResp != null && searchResp.code == 200) {
-                    val body = searchResp.body
-                    val json = JSONObject(body)
-                    val searchArr = json.optJSONObject("query")?.optJSONArray("search")
-                    if (searchArr != null && searchArr.length() > 0) {
-                        val snippets = mutableListOf<String>()
-                        for (i in 0 until searchArr.length()) {
-                            val item = searchArr.getJSONObject(i)
-                            val title = item.optString("title")
-                            val rawSnippet = item.optString("snippet").replace(Regex("<[^>]*>"), "")
-                            if (rawSnippet.isNotBlank()) {
-                                snippets.add("$title: $rawSnippet")
-                            }
-                        }
-                        if (snippets.isNotEmpty()) {
-                            results.add("Búsqueda Gastronómica en Vivo: ${snippets.joinToString(" | ")}")
-                        }
-                    }
-                }
-            }
-
-            // 2. Query TheMealDB API for structured international recipe ingredients & instructions
-            val mealQuery = URLEncoder.encode(cleaned, "UTF-8")
-            val mealResp = runCatching {
-                httpGetText("https://www.themealdb.com/api/json/v1/1/search.php?s=$mealQuery")
-            }.getOrNull()
-            if (mealResp != null && mealResp.code == 200) {
-                val body = mealResp.body
-                val json = JSONObject(body)
-                val meals = json.optJSONArray("meals")
-                if (meals != null && meals.length() > 0) {
-                    val firstMeal = meals.getJSONObject(0)
-                    val mealName = firstMeal.optString("strMeal")
-                    val mealCategory = firstMeal.optString("strCategory")
-                    val mealArea = firstMeal.optString("strArea")
-                    val instructions = firstMeal.optString("strInstructions").take(650)
-                    val ingList = mutableListOf<String>()
-                    for (i in 1..12) {
-                        val ing = firstMeal.optString("strIngredient$i").trim()
-                        val measure = firstMeal.optString("strMeasure$i").trim()
-                        if (ing.isNotEmpty() && ing != "null") {
-                            ingList.add("$ing ($measure)")
-                        }
-                    }
-                    results.add(
-                        "Receta Verificada en TheMealDB ($mealName - $mealArea / $mealCategory): " +
-                            "Ingredientes con medidas: ${ingList.joinToString(", ")}. Método y tiempos: $instructions"
-                    )
-                }
-            }
-
-            if (results.isNotEmpty()) results.joinToString("\n") else null
-        } catch (_: Exception) {
-            null
-        }
+        val habitual = runCatching { getPurchaseHistoryStats().map { it.product.sku } }.getOrDefault(emptyList())
+        return "PRODUCTOS DISPONIBLES (SKU | nombre | presentación):\n" +
+            BravIaEngine.selectCandidates(query, getActiveProducts(), BravIaEngine.matchRecipe(query), habitual, limit = 80)
+                .joinToString("\n") { "${it.sku} | ${it.name} | ${it.unit}" }
     }
 
     fun populateListWithBravIa(listId: String, focusHint: String = "") {
@@ -2137,10 +1706,12 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                         geminiModel.generateContent(prompt)
                     }
                     val rawText = response.text.orEmpty()
-                    val (cleanText, parsedSkus) = extractSkusFromResponse(rawText)
+                    val (cleanText, allParsedSkus) = extractSkusFromResponse(rawText)
+                    val storePrefix = if (_activeStore.value == StoreMode.ARCA) "ARC-" else "BRV-"
+                    val parsedSkus = allParsedSkus.filter { it.startsWith(storePrefix) }
                     val noteLine = cleanText
                         .lineSequence()
-                        .map { it.replace(Regex("""^[\*\s]*NOTA:\s*""", RegexOption.IGNORE_CASE), "").replace("**", "").trim() }
+                        .map { BravIaEngine.sanitize(it.replace(Regex("""^[\*\s]*NOTA:\s*""", RegexOption.IGNORE_CASE), "").replace("**", "")).trim() }
                         .firstOrNull { it.length > 12 }
 
                     if (parsedSkus.size >= 3) {
@@ -3015,11 +2586,55 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
 
     fun setTargetBudgetInChat(budget: Int) {
         _targetBudgetInChat.value = budget.coerceIn(400, 3500)
+        _budgetSetByUser.value = true
     }
 
+    /**
+     * Botones de presupuesto del chat.
+     * - optimizeExisting = true: recorta TU carrito (quita unidades de lo más caro) hasta caber en el límite.
+     *   Antes reemplazaba el carrito entero por una lista fija; ahora nunca agrega cosas que no elegiste.
+     * - optimizeExisting = false: propone una compra básica dentro del límite, sin tocar el carrito.
+     *   La persona la agrega con el botón del mensaje.
+     */
     fun applyBudgetInChat(optimizeExisting: Boolean) {
         val limit = _targetBudgetInChat.value
+        _budgetSetByUser.value = true
         val isArca = _activeStore.value == StoreMode.ARCA
+        val storeName = if (isArca) "El Arca Petshop" else "Supermercados Bravo"
+        val userMsg = ChatMessage(
+            sender = "user",
+            text = if (optimizeExisting) "Ajustar mi carrito actual para no pasarme de RD$$limit" else "Armar una compra básica dentro de RD$$limit"
+        )
+
+        if (optimizeExisting) {
+            val working = _cart.value.mapNotNull { item -> findProductBySku(item.sku)?.let { it to item.qty } }.toMutableList()
+            val before = working.sumOf { it.first.price * it.second }
+            if (working.isEmpty()) {
+                _chatHistory.value = _chatHistory.value + userMsg + ChatMessage(sender = "ai", text = "Tu carrito está vacío. Agrega productos o pídeme una compra básica y la ajusto a tu presupuesto.", modelLabel = "Planificador de presupuesto")
+                return
+            }
+            var total = before
+            // Quita una unidad a la vez de lo más caro hasta caber; así se conserva la variedad.
+            while (total > limit && working.isNotEmpty()) {
+                val idx = working.indices.maxBy { working[it].first.price }
+                val (product, qty) = working[idx]
+                if (qty > 1) working[idx] = product to (qty - 1) else working.removeAt(idx)
+                total -= product.price
+            }
+            val newCart = working.map { CartItem(it.first.sku, it.second) }
+            val removedUnits = _cart.value.sumOf { it.qty } - newCart.sumOf { it.qty }
+            _cart.value = newCart
+            viewModelScope.launch { localRepo.replaceCart(newCart.associate { it.sku to it.qty }) }
+            val text = if (removedUnits == 0) {
+                "Tu carrito ya cabe en el presupuesto: **RD$$before** de **RD$$limit**. No cambié nada."
+            } else {
+                "Ajusté tu carrito de **RD$$before** a **RD$$total** quitando $removedUnits ${if (removedUnits == 1) "unidad" else "unidades"} de los productos más caros. Te quedan **RD$${limit - total}** de margen."
+            }
+            _chatHistory.value = _chatHistory.value + userMsg + ChatMessage(sender = "ai", text = text, skus = newCart.map { it.sku }, quantities = newCart.associate { it.sku to it.qty }, modelLabel = "Planificador de presupuesto")
+            showToast("💰", "Carrito: RD$$total")
+            return
+        }
+
         val essentials = if (isArca) {
             listOf("ARC-001", "ARC-009", "ARC-012", "ARC-015", "ARC-021", "ARC-025", "ARC-028", "ARC-010")
         } else {
@@ -3034,75 +2649,36 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 sum += p.price
             }
         }
-
-        _cart.value = chosen.map { CartItem(it, 1) }
-        viewModelScope.launch {
-            localRepo.replaceCart(chosen.associateWith { 1 })
-        }
-
-        val cashback = sum / 100
-        val storeName = if (isArca) "El Arca Petshop" else "Supermercados Bravo"
-        val userMsg = ChatMessage(
-            sender = "user",
-            text = if (optimizeExisting) {
-                "Ajustar mi carrito actual para no pasarme de RD$$limit"
-            } else {
-                "Armar una compra inteligente dentro de RD$$limit"
-            }
-        )
         val aiMsg = ChatMessage(
             sender = "ai",
-            text = "¡Con mucho gusto! Te armé una selección de **${chosen.size} productos esenciales de $storeName** por **RD$$sum.00** (ahorras **RD$${limit - sum}** respecto a tu meta de RD$$limit y sumas **+RD$$cashback** en Bravísima). También puedes guardarla como lista de compras con un toque.",
+            text = "Te propongo **${chosen.size} productos básicos de $storeName** por **RD$$sum** (te quedan **RD$${limit - sum}** de tu meta). Si te sirven, agrégalos con el botón de abajo; tu carrito actual no cambió.",
             skus = chosen,
-            modelLabel = "Planificador Inteligente de Presupuesto"
+            modelLabel = "Planificador de presupuesto"
         )
         _chatHistory.value = _chatHistory.value + userMsg + aiMsg
-        showToast("💰", "Carrito ajustado a RD$$sum.00")
     }
 
     fun askAiAboutProduct(sku: String) {
         val p = findProductBySku(sku) ?: return
         navigateTo(AppScreen.BRAVIA)
-        sendCustomChatMsg("Dame una receta exacta, concisa y paso a paso usando ${p.name} (RD$${p.price}) y dime qué otros productos del catálogo necesito.")
+        // Si el producto es ingrediente principal de una receta verificada, abrimos esa receta.
+        val recipe = BravIaEngine.recipesUsing(sku).firstOrNull { r -> r.ingredients.any { sku in it.skus && !it.pantry } }
+        sendCustomChatMsg(
+            if (recipe != null) "Receta de ${recipe.name} con ${p.name}"
+            else "¿Qué puedo preparar o combinar con ${p.name}? Recomiéndame productos del catálogo."
+        )
     }
 
     fun addAiBundleToCart(messageId: Long) {
         val msg = _chatHistory.value.find { it.id == messageId } ?: return
         if (msg.skus.isEmpty()) return
-        msg.skus.forEach { sku -> changeProductQty(sku, 1) }
-        showToast("✓", "Ingredientes y productos agregados al carrito")
-    }
-
-    private fun isOffTopicQuery(query: String): Boolean {
-        val q = query.lowercase()
-        val offTopicKeywords = listOf(
-            "presidente", "política", "politica", "elecciones", "partido", "diputado",
-            "senador", "gobierno", "guerra", "religión", "religion", "fútbol", "futbol",
-            "pelota", "béisbol", "beisbol", "nba", "messi", "cristiano", "licey", "aguilas",
-            "python", "javascript", "kotlin", "java", "código", "codigo", "programar",
-            "html", "css", "sql", "ecuación", "ecuacion", "derivada", "integral",
-            "matemática", "matematica", "historia de", "capital de", "quién descubrió",
-            "quien descubrio", "chiste", "poema", "canción", "cancion", "horóscopo",
-            "horoscopo", "bitcoin", "cripto", "novio", "novia", "tarea de", "ensayo sobre"
-        )
-        val businessAndCulinaryKeywords = listOf(
-            "bravo", "arca", "precio", "rd$", "peso", "comprar", "carrito", "receta",
-            "pasos", "paso a paso", "preparar", "preparación", "preparacion", "cómo hacer",
-            "como hacer", "cómo se hace", "como se hace", "cómo cocino", "como cocino",
-            "cocinar", "comida", "cena", "almuerzo", "desayuno", "sancocho", "mangú",
-            "mangu", "arroz", "pollo", "carne", "salami", "queso", "leche", "pan",
-            "pasta", "espagueti", "lasaña", "lasana", "pastelón", "pastelon", "plátano",
-            "platano", "yuca", "habichuela", "moro", "locrio", "asopao", "ensalada",
-            "hornear", "freír", "freir", "hervir", "guisar", "sazonar", "adobar",
-            "limpieza", "jabón", "jabon", "cloro", "papel", "perro", "gato", "mascota",
-            "alimento", "croqueta", "arena", "veterinari", "bravísima", "bravisima",
-            "sucursal", "envío", "envio", "delivery", "oferta", "descuento", "presupuesto",
-            "ingrediente", "producto", "catálogo", "catalogo", "pasillo", "chef",
-            "lista", "listas", "historial", "habitual", "siempre", "frecuente"
-        )
-        val hasOffTopic = offTopicKeywords.any { q.contains(it) }
-        val hasBusinessOrRecipe = businessAndCulinaryKeywords.any { q.contains(it) }
-        return hasOffTopic && !hasBusinessOrRecipe
+        var units = 0
+        msg.skus.forEach { sku ->
+            val qty = msg.quantities[sku] ?: 1
+            changeProductQty(sku, qty, silent = true)
+            units += qty
+        }
+        showToast("✓", "$units ${if (units == 1) "artículo agregado" else "artículos agregados"} al carrito")
     }
 
     private val inlineSkuExtractRegex = Regex("""\b(BRV-\d{3}|ARC-\d{3})\b""", RegexOption.IGNORE_CASE)
@@ -3110,11 +2686,6 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         pattern = """\s*(?:\[\s*(?:SKU\s*:?\s*)?(?:BRV|ARC)-\d{3}\s*\]|\(\s*(?:SKU\s*:?\s*)?(?:BRV|ARC)-\d{3}\s*\)|\b(?:SKU\s*:?\s*)?(?:BRV|ARC)-\d{3}\b)""",
         option = RegexOption.IGNORE_CASE
     )
-    private val suggestionPayloadExtractRegex = Regex(
-        pattern = """[\*\s_]*SUGGESTION_MAIL_PAYLOAD\s*:\s*(\{[\s\S]*?\})""",
-        option = RegexOption.IGNORE_CASE
-    )
-
     fun setPendingChatImageUri(uri: String?) {
         _pendingChatImageUri.value = uri
         if (!uri.isNullOrBlank()) {
@@ -3126,174 +2697,6 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
         sdf.timeZone = TimeZone.getTimeZone("UTC")
         return sdf.format(Date())
-    }
-
-    private fun isSuggestionOrFeedbackQuery(query: String): Boolean {
-        val q = normalizeSearchText(query)
-        val suggestionMarkers = listOf(
-            "sugerencia", "sugiero", "sugerir", "reportar un fallo", "reporte de fallo",
-            "error en la app", "fallo en la app", "bug", "buzon", "comentario de mejora",
-            "solicitar producto", "agreguen al catalogo", "anadan al catalogo",
-            "deberian agregar", "seria bueno que", "felicitacion", "felicitar al equipo",
-            "enviar sugerencia", "bezaleelpatrocino0"
-        )
-        return suggestionMarkers.any { q.contains(it) }
-    }
-
-    private fun isSupportOrOperationalQuery(query: String, hasAttachedImage: Boolean): Boolean {
-        if (hasAttachedImage || isSuggestionOrFeedbackQuery(query)) return true
-        val q = normalizeSearchText(query)
-        val supportMarkers = listOf(
-            "producto danado", "vencido", "empaque roto", "defectuoso", "reposicion",
-            "reembolso", "nota de credito", "factura", "ticket de caja", "ncf",
-            "comprobante fiscal", "b01", "b02", "itbis", "soporte", "reclamo",
-            "queja", "devolucion"
-        )
-        return supportMarkers.any { q.contains(it) }
-    }
-
-    /**
-     * Mathematical budget enforcement:
-     * Ensures sum(SKU_i) <= budgetLimit by substituting higher-cost items with Marca Exclusiva Bravo
-     * equivalents in the same category/artType first, and then trimming optional highest-cost items.
-     */
-    private fun enforceBudgetLimitOnSkus(skus: List<String>, budgetLimit: Int): List<String> {
-        if (skus.isEmpty()) return emptyList()
-        val allProds = getAllProducts()
-        val distinctProducts = skus.mapNotNull { findProductBySku(it) }.distinctBy { it.sku }.toMutableList()
-        if (distinctProducts.isEmpty()) return emptyList()
-
-        // Step 1: If over budget, substitute non-Bravo or expensive items with cheaper Marca Exclusiva Bravo items of same artType/category
-        var currentSum = distinctProducts.sumOf { it.price }
-        if (currentSum > budgetLimit) {
-            for (i in distinctProducts.indices) {
-                if (currentSum <= budgetLimit) break
-                val item = distinctProducts[i]
-                val cheaperBravoAlt = allProds
-                    .filter { candidate ->
-                        candidate.sku != item.sku &&
-                            candidate.isBravo == item.isBravo &&
-                            candidate.name.startsWith("Bravo", ignoreCase = true) &&
-                            (candidate.artType == item.artType || candidate.category == item.category) &&
-                            candidate.price < item.price &&
-                            distinctProducts.none { it.sku == candidate.sku }
-                    }
-                    .minByOrNull { it.price }
-                if (cheaperBravoAlt != null) {
-                    currentSum = currentSum - item.price + cheaperBravoAlt.price
-                    distinctProducts[i] = cheaperBravoAlt
-                }
-            }
-        }
-
-        // Step 2: Greedily keep core items within budgetLimit (always keeping at least the most affordable core item if budget allows)
-        if (currentSum > budgetLimit) {
-            val withinBudget = mutableListOf<Product>()
-            var running = 0
-            // Prioritize Marca Bravo items and core ingredients in original order
-            val orderedCandidates = distinctProducts.sortedWith(
-                compareByDescending<Product> { it.name.startsWith("Bravo", ignoreCase = true) }
-                    .thenBy { it.price }
-            )
-            for (candidate in distinctProducts) {
-                if (running + candidate.price <= budgetLimit) {
-                    withinBudget.add(candidate)
-                    running += candidate.price
-                }
-            }
-            if (withinBudget.isEmpty()) {
-                val cheapest = orderedCandidates.firstOrNull()
-                if (cheapest != null) withinBudget.add(cheapest)
-            }
-            return withinBudget.map { it.sku }
-        }
-
-        return distinctProducts.map { it.sku }
-    }
-
-    private fun buildFinancialBreakdownText(skus: List<String>, budgetLimit: Int): String {
-        val products = skus.mapNotNull { findProductBySku(it) }
-        if (products.isEmpty()) return ""
-        val subtotal = products.sumOf { it.price }
-        val savingsMargin = (budgetLimit - subtotal).coerceAtLeast(0)
-        val bravisimaReturn = subtotal / 100
-        return """
-            **Resumen de Presupuesto y Fidelidad (Límite RD$$budgetLimit.00):**
-            • **Subtotal de la compra:** RD$$subtotal.00
-            • **Margen de ahorro bajo tu presupuesto:** RD$$savingsMargin.00
-            • **Retorno Tarjeta Bravísima (1%):** +RD$$bravisimaReturn.00 (RD$1.00 por cada RD$100.00)
-        """.trimIndent()
-    }
-
-    private fun extractSuggestionPayloadFromResponse(
-        rawText: String,
-        userQuery: String,
-        forceIfSuggestionQuery: Boolean = false
-    ): Pair<String, SuggestionMailPayload?> {
-        val match = suggestionPayloadExtractRegex.find(rawText)
-        val activeStoreCode = if (_activeStore.value == StoreMode.ARCA) "arca" else "bravo"
-        val userProfile = _profile.value
-        val isoNow = currentIsoTimestamp()
-
-        if (match != null) {
-            val jsonBlock = match.groupValues[1].trim()
-            val cleanedText = rawText.replace(match.value, "").trim()
-            val parsedPayload = try {
-                val obj = JSONObject(jsonBlock)
-                SuggestionMailPayload(
-                    toEmail = obj.optString("to_email", SUGGESTION_TARGET_EMAIL).ifBlank { SUGGESTION_TARGET_EMAIL },
-                    fromUser = obj.optString("from_user", userProfile.name).ifBlank { userProfile.name },
-                    userContact = obj.optString("user_contact", "${userProfile.email} | ${userProfile.phone}"),
-                    activeBranch = obj.optString("active_branch", _activeBranch.value),
-                    activeStore = obj.optString("active_store", activeStoreCode),
-                    category = obj.optString("category", "MEJORA_UI_UX"),
-                    priority = obj.optString("priority", "MEDIA"),
-                    subject = obj.optString("subject", "[BravoVa Feedback] Sugerencia de ${userProfile.name}"),
-                    summaryBody = obj.optString("summary_body", userQuery),
-                    timestampIso = obj.optString("timestamp_iso", isoNow).ifBlank { isoNow }
-                )
-            } catch (_: Exception) {
-                SuggestionMailPayload(
-                    toEmail = SUGGESTION_TARGET_EMAIL,
-                    fromUser = userProfile.name,
-                    userContact = "${userProfile.email} | ${userProfile.phone}",
-                    activeBranch = _activeBranch.value,
-                    activeStore = activeStoreCode,
-                    category = "MEJORA_UI_UX",
-                    priority = "MEDIA",
-                    subject = "[BravoVa Feedback] ${userQuery.take(48)}",
-                    summaryBody = userQuery,
-                    timestampIso = isoNow
-                )
-            }
-            return cleanedText to parsedPayload
-        }
-
-        if (forceIfSuggestionQuery) {
-            val q = normalizeSearchText(userQuery)
-            val inferredCategory = when {
-                q.contains("producto") || q.contains("catalogo") || q.contains("articulo") -> "SUGERENCIA_PRODUCTO"
-                q.contains("fallo") || q.contains("error") || q.contains("bug") || q.contains("soporte") -> "REPORTE_SOPORTE"
-                q.contains("felicit") || q.contains("excelente") || q.contains("gracias") -> "FELICITACION"
-                else -> "MEJORA_UI_UX"
-            }
-            val inferredPriority = if (inferredCategory == "REPORTE_SOPORTE") "ALTA" else "MEDIA"
-            val autoPayload = SuggestionMailPayload(
-                toEmail = SUGGESTION_TARGET_EMAIL,
-                fromUser = userProfile.name,
-                userContact = "${userProfile.email} | ${userProfile.phone}",
-                activeBranch = _activeBranch.value,
-                activeStore = activeStoreCode,
-                category = inferredCategory,
-                priority = inferredPriority,
-                subject = "[BravoVa Feedback] ${userQuery.take(52)}",
-                summaryBody = userQuery,
-                timestampIso = isoNow
-            )
-            return rawText.trim() to autoPayload
-        }
-
-        return rawText.trim() to null
     }
 
     private fun dispatchSuggestionMailPayloadAsync(payload: SuggestionMailPayload) {
@@ -3420,16 +2823,25 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             return
         }
 
-        // Pasa los productos del mensaje al carrito y hace el pedido
-        val mergedMap = LinkedHashMap<String, Int>()
-        _cart.value.forEach { item -> mergedMap[item.sku] = item.qty }
-        orderSkus.forEach { sku -> mergedMap[sku] = (mergedMap[sku] ?: 0).coerceAtLeast(1) }
-        _cart.value = mergedMap.map { (sku, qty) -> CartItem(sku, qty) }
-        viewModelScope.launch {
-            localRepo.replaceCart(mergedMap)
-        }
+        // Se pide EXACTAMENTE lo que muestra la tarjeta (con sus cantidades). Antes se mezclaba con
+        // todo el carrito y se cobraba más de lo que decía "Total a autorizar".
+        val previousCart = _cart.value
+        val orderItems = orderSkus.map { sku -> CartItem(sku, (msg.quantities[sku] ?: 1).coerceIn(1, 20)) }
+        _cart.value = orderItems
 
         completeCheckoutOrder()
+
+        // Lo que la persona ya tenía en el carrito se conserva para su próxima compra.
+        if (previousCart.isNotEmpty()) {
+            _cart.value = previousCart
+            val uid = getVerifiedActiveUid()
+            viewModelScope.launch {
+                // El pedido vacía el carrito guardado en segundo plano; esperamos a que termine y lo reponemos.
+                delay(900L)
+                localRepo.replaceCart(previousCart.associate { it.sku to it.qty })
+                if (uid != null) previousCart.forEach { firestoreRepo.setCartItemQuantity(uid, it.sku, it.qty, if (it.sku.startsWith("ARC-")) "ARCA" else "BRAVO") }
+            }
+        }
         val createdOrderId = _trackedOrderId.value
         val createdOrder = _trackedOrder.value
 
@@ -3456,80 +2868,24 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         } + confirmationMsg
     }
 
-    private fun isConversationalOrStoreInfoQuery(query: String): Boolean {
-        val q = normalizeSearchText(query)
-        val infoPatterns = listOf(
-            "hola", "buenos dias", "buenas tardes", "buenas noches", "como estas", "quien eres",
-            "que puedes hacer", "ayuda", "horario", "abierto", "cierran", "abren", "domingo",
-            "sucursal", "direccion", "ubicacion", "telefono", "contacto", "soporte",
-            "como funciona", "tarjeta bravisima", "puntos", "balance", "metodo de pago",
-            "efectivo", "impuesto", "itbis", "ncf", "comprobante", "tiempo de entrega",
-            "cuanto tarda", "costo de envio", "gracias", "muchas gracias", "ok", "vale"
-        )
-        return infoPatterns.any { q.contains(it) } && scoreProductsForQuery(query, getAllProducts()).isEmpty()
-    }
-
-    private fun matchFallbackSkus(query: String): List<String> {
-        val q = normalizeSearchText(query)
-        val recipeBundle = matchRecipeIngredientBundle(query)
-        if (recipeBundle.isNotEmpty()) {
-            return recipeBundle
-        }
-        val scored = scoreProductsForQuery(query, getAllProducts())
-
-        return when {
-            q.contains("oferta") || q.contains("especial") || q.contains("descuento") -> {
-                getDailyRotatingOffersForCurrentStore().map { it.sku }.distinct().take(6)
-            }
-            scored.isNotEmpty() -> {
-                if (isInstructionOrRecipeQuery(query) && scored.size < 5) {
-                    // Ensure any culinary instruction has complementary cooking staples (oil, garlic, onion, salt/seasoning)
-                    (scored.map { it.sku } + listOf("BRV-039", "BRV-523", "BRV-089", "BRV-100", "BRV-058"))
-                        .distinct()
-                        .take(7)
-                } else {
-                    scored.take(8).map { it.sku }
-                }
-            }
-            isInstructionOrRecipeQuery(query) -> {
-                // Open-ended culinary preparation request: provide foundational chef pantry bundle
-                listOf("BRV-076", "BRV-053", "BRV-039", "BRV-523", "BRV-089", "BRV-090", "BRV-202")
-            }
-            q.contains("historial") || q.contains("habitual") || q.contains("lista") || isOrderIntentQuery(query) -> {
-                val cartSkus = _cart.value.map { it.sku }
-                if (cartSkus.isNotEmpty()) {
-                    cartSkus.take(8)
-                } else {
-                    getPurchaseHistoryStats().map { it.product.sku }.take(7).ifEmpty {
-                        listOf("BRV-001", "BRV-009", "BRV-053", "BRV-075", "BRV-093", "BRV-017")
-                    }
-                }
-            }
-            // Si nada coincide con lo pedido, no devolver productos al azar
-            else -> emptyList()
-        }
-    }
-
     fun buildPersonalizedThinkingText(query: String, hasAttachedImage: Boolean = false): String {
         val q = normalizeSearchText(query)
         val storeName = if (_activeStore.value == StoreMode.ARCA) "El Arca Petshop" else "Supermercados Bravo"
         val cleanSnippet = query.trim().replace("\n", " ").take(26)
         return when {
-            hasAttachedImage -> "Brav IA Soporte auditando visualmente tu imagen adjunta (empaque, NCF o etiqueta)..."
+            hasAttachedImage -> "Mirando tu imagen…"
             q.contains("sugerencia") || q.contains("sugiero") || q.contains("queja") || q.contains("reclamo") || q.contains("reporte") || q.contains("felicit") ->
-                "Registrando tu reporte oficial y preparando envío a bezaleelpatrocino0@gmail.com..."
-            isOrderIntentQuery(query) -> "Preparando tu orden asistida bajo tu presupuesto de RD$${_targetBudgetInChat.value}.00..."
-            q.contains("alergia") || q.contains("sin lactosa") || q.contains("sin gluten") || q.contains("vegano") || q.contains("keto") || q.contains("caloria") || q.contains("diabet") ->
-                "Verificando ingredientes, alérgenos y calorías exactas para «$cleanSnippet»..."
-            isInstructionOrRecipeQuery(query) ->
-                "Consultando receta verificada en la web y calculando presupuesto (≤ RD$${_targetBudgetInChat.value}.00) para «$cleanSnippet»..."
+                "Registrando tu comentario…"
+            isOrderIntentQuery(query) -> "Armando tu pedido con productos de $storeName…"
+            q.contains("alergia") || q.contains("sin lactosa") || q.contains("sin gluten") || q.contains("vegano") || q.contains("keto") || q.contains("diabet") ->
+                "Buscando opciones para «$cleanSnippet»…"
+            BravIaEngine.matchRecipe(query) != null -> "Abriendo la receta verificada de ${BravIaEngine.matchRecipe(query)?.name}…"
+            isInstructionOrRecipeQuery(query) -> "Buscando en el recetario y el catálogo…"
             q.contains("oferta") || q.contains("descuento") || q.contains("barato") ->
-                "Verificando los descuentos del día en ${_activeBranch.value}..."
+                "Buscando ofertas en ${_activeBranch.value}…"
             q.contains("historial") || q.contains("habitual") || q.contains("lista") ->
-                "Analizando tus compras frecuentes y listas en $storeName..."
-            q.contains("precio") || q.contains("cuanto") || q.contains("cuesta") ->
-                "Consultando precios exactos en RD$ y calorías para «$cleanSnippet»..."
-            else -> "Analizando «$cleanSnippet» en el inventario oficial de $storeName..."
+                "Revisando tus compras frecuentes…"
+            else -> "Buscando «$cleanSnippet» en $storeName…"
         }
     }
 
@@ -3548,453 +2904,6 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             q.contains("felicitacion") ||
             q.contains("felicito") ||
             q.contains("excelente servicio")
-    }
-
-    private fun formatIngredientsBlock(products: List<Product>): String {
-        return products.joinToString("\n") { p ->
-            val nut = p.nutritionProfile()
-            val calPart = nut.caloriesKcal?.let { " • **${it} kcal** (${nut.caloriesPortionLabel})" } ?: " • *Uso general / mascota*"
-            val dietPart = nut.dietaryTags.take(2).joinToString(", ").let { if (it.isNotBlank()) " • $it" else "" }
-            "• **${p.name}** — Medida comercial: **${p.unit}** — **RD$${p.price}.00** ($calPart$dietPart)"
-        }
-    }
-
-    private fun buildFallbackRecipeOrCatalogResponse(
-        query: String,
-        enforcedSkusOverride: List<String>? = null,
-        hasAttachedImage: Boolean = false
-    ): String {
-        val q = normalizeSearchText(query)
-        val firstName = _profile.value.name.substringBefore(" ").ifBlank { "Cliente" }
-        val isArca = _activeStore.value == StoreMode.ARCA
-        val storeName = if (isArca) "El Arca Petshop" else "Supermercados Bravo"
-        val budgetLimit = _targetBudgetInChat.value.coerceAtLeast(150)
-        val matchedSkus = enforcedSkusOverride ?: enforceBudgetLimitOnSkus(matchFallbackSkus(query), budgetLimit)
-        val matchedProducts = matchedSkus.mapNotNull { findProductBySku(it) }
-        val totalBundle = matchedProducts.sumOf { it.price }
-        val isOrderIntent = isOrderIntentQuery(query)
-        val ingredientsSummary = formatIngredientsBlock(matchedProducts)
-        val financialSummary = if (matchedProducts.isNotEmpty()) {
-            buildFinancialBreakdownText(matchedSkus, budgetLimit)
-        } else {
-            ""
-        }
-
-        val rawResponse = if (hasAttachedImage) {
-            when {
-                q.contains("danad") || q.contains("vencid") || q.contains("abiert") || q.contains("mal estado") || q.contains("defect") -> {
-                    """
-                        **Auditoría Visual de Calidad — Brav IA Soporte (${_activeBranch.value}):**
-                        • **Estimado/a $firstName**, hemos analizado con rigor técnico la fotografía adjunta y verificado la incidencia en el sello/estado del producto.
-                        • En nombre de **$storeName**, te ofrecemos una **disculpa cálida y sincera**. Nuestro compromiso con tu familia es entregar siempre frescura garantizada.
-                        • **Autorización Inmediata:** Queda aprobada la **reposición sin costo** en tu próximo envío express (8–12 min) o la acreditación directa de una **Nota de Crédito en tu Tarjeta Bravísima (${_profile.value.bravisimaNumber})** en la sucursal **${_activeBranch.value}**.
-                    """.trimIndent()
-                }
-                q.contains("factura") || q.contains("ticket") || q.contains("recibo") || q.contains("ncf") || q.contains("itbis") -> {
-                    """
-                        **Auditoría OCR de Factura / Comprobante Fiscal (NCF) — Brav IA Soporte:**
-                        • **Verificación de Comprobante:** Hemos procesado la imagen de tu ticket de compra de **${_activeBranch.value}** (modalidad **B02 Consumidor Final** / **B01 Crédito Fiscal**).
-                        • **Desglose de Impuestos y Descuentos:** Los artículos exentos de la canasta básica mantienen **0% ITBIS**, los gravados reducidos aplican **16% ITBIS** y los generales **18% ITBIS**, respetando íntegramente los descuentos de **Marca Exclusiva Bravo**.
-                        • **Retorno Tarjeta Bravísima (1%):** Tu compra genera **+RD$1.00 por cada RD$100.00 facturados** acreditados directamente al código **${_profile.value.bravisimaNumber}**.
-                    """.trimIndent()
-                }
-                else -> {
-                    val sampleItems = if (matchedProducts.isNotEmpty()) matchedProducts else getAllProducts().filter { it.isBravo }.take(4)
-                    val sampleBlock = formatIngredientsBlock(sampleItems)
-                    """
-                        **Identificación Visual de Producto / Alacena — Brav IA Soporte:**
-                        • **¡Hola, $firstName!** He inspeccionado la imagen que compartiste y la crucé con el inventario oficial de **$storeName (${_activeBranch.value})**.
-                        
-                        **Equivalentes Exactos Disponibles en Nuestro Catálogo:**
-                        $sampleBlock
-                        
-                        **Recomendación de Conservación y Uso:**
-                        1. Conserva los productos frescos refrigerados entre **2°C y 4°C** o en lugar fresco y seco si son de despensa.
-                        2. Prioriza las presentaciones **Marca Exclusiva Bravo** para obtener la misma calidad certificada con hasta un **25% de ahorro directo**.
-                    """.trimIndent()
-                }
-            }
-        } else if (isSuggestionOrSupportFeedbackQuery(query)) {
-            """
-                **Confirmación de Registro — Gestión de Mejora Continua Bravo & El Arca:**
-                • **¡Muchas gracias por tu valioso aporte, $firstName!** He procesado tu mensaje en la sucursal **${_activeBranch.value}** con máxima prioridad de atención.
-                • **Envío Oficial:** Tu sugerencia/reporte ha sido estructurada y despachada al buzón central de mejora continua (**bezaleelpatrocino0@gmail.com**) con tus datos de contacto y contexto de tienda (**$storeName**).
-                • **Seguimiento Bravísima:** Nuestro equipo de calidad revisará tu solicitud para seguir mejorando tu experiencia de compra.
-            """.trimIndent()
-        } else if (q.contains("b01") || q.contains("b02") || q.contains("credito fiscal") || q.contains("comprobante") || q.contains("rnc") || q.contains("facturacion")) {
-            """
-                **Facturación Fiscal (NCF B01 y B02) en $storeName (${_activeBranch.value}):**
-                • **Comprobante B01 (Crédito Fiscal):** Disponible para empresas y profesionales con RNC activo para deducción de ITBIS (16% / 18%) y gastos ante la DGII.
-                • **Comprobante B02 (Consumidor Final):** Emitido por defecto en todas tus órdenes express y compras en caja con tu cédula o **Tarjeta Bravísima (${_profile.value.bravisimaNumber})**.
-                • **Retorno de Fidelidad:** Ambas modalidades acumulan el **1% de retorno directo** (RD$1.00 por cada RD$100.00 de compra).
-            """.trimIndent()
-        } else if (isOrderIntent && matchedProducts.isNotEmpty()) {
-            """
-                **¡Con mucho gusto, $firstName! Tu Pedido Asistido en ${_activeBranch.value} está listo:**
-                
-                **Lista Exacta de Ingredientes / Productos:**
-                $ingredientsSummary
-                
-                **Resumen de Confirmación:**
-                • Revisa los artículos seleccionados estrictamente dentro de tu presupuesto y presiona **Confirmar Pedido** aquí debajo para despacharlo en **8–12 minutos**.
-                $financialSummary
-            """.trimIndent()
-        } else {
-            when {
-                q == "hola" || q.startsWith("hola ") || q.contains("buenos dias") || q.contains("buenas tardes") || q.contains("buenas noches") || q.contains("como estas") || q.contains("quien eres") || q.contains("que puedes hacer") -> {
-                    """
-                        **¡Hola, $firstName! Bienvenido a $storeName (${_activeBranch.value}):**
-                        Soy **Brav IA**, tu Asistente Personal de Compras, Chef Ejecutivo, Asesor Veterinario y Especialista de Soporte Multimodal de **Supermercados Bravo** (*«Los expertos en vender barato»*) y **El Arca Petshop**.
-                        
-                        **¿Cómo puedo servirte hoy bajo tu presupuesto de RD$$budgetLimit.00?:**
-                        • **Chef Ejecutivo con Búsqueda Web:** Pídeme cualquier receta dominicana o internacional (*pizza, lasaña, mofongo, sancocho, chofán, mangú, postres o dietas especiales*) con medidas exactas, tiempos en minutos, temperaturas en °C/°F y cálculo matemático bajo tu presupuesto.
-                        • **Soporte y Visión Multimodal (Fotos):** Adjunta una foto con el botón de cámara/galería para auditar un **producto dañado/vencido**, leer una **factura NCF (B01/B02)** o identificar **ingredientes de tu alacena o mascota**.
-                        • **Buzón de Sugerencias Directo:** Cuéntame cualquier idea o mejora y la registraré automáticamente hacia **bezaleelpatrocino0@gmail.com**.
-                    """.trimIndent()
-                }
-                q.contains("horario") || q.contains("abierto") || q.contains("cierran") || q.contains("abren") || q.contains("domingo") -> {
-                    """
-                        **Horarios Oficiales y Logística Express para $firstName:**
-                        • **Horario de ${_activeBranch.value}:** Lunes a Sábado de **7:00 AM a 10:00 PM** en jornada continua.
-                        • **Domingos Cerrados:** En **Supermercados Bravo** y **El Arca Petshop** cerramos todos los domingos por nuestros valores familiares.
-                        • **Delivery Express (Polígono Central):** Entrega ultrarrápida en **8 a 12 minutos** (sucursal a **${_realLocationMetrics.value.roadDistanceKm} km** de tu ubicación GPS).
-                    """.trimIndent()
-                }
-                q.contains("bravisima") || q.contains("puntos") || q.contains("balance") || q.contains("recompensa") -> {
-                    """
-                        **Fidelidad Tarjeta Bravísima (${_profile.value.bravisimaNumber}):**
-                        • **Balance disponible:** **RD$${_accumulatedBravisimaBalance.value}.00** listos para canje directo en carrito o caja.
-                        • **Retorno Exacto del 1%:** Acumulas **RD$1.00 por cada RD$100.00 de compra** en todos los pasillos de Bravo y El Arca Petshop, priorizando aún más ahorro con **Marca Exclusiva Bravo**.
-                        • **Canje sin fricción:** Activa el descuento inmediato en la pestaña **Tarjeta** o en **Mi Carrito** presentando tu código de barras `${_profile.value.bravisimaNumber}`.
-                    """.trimIndent()
-                }
-                q.contains("envio") || q.contains("delivery") || q.contains("cuanto tarda") || q.contains("sucursal") || q.contains("ubicacion") -> {
-                    """
-                        **Logística y Entrega en Tiempo Real para $firstName:**
-                        • **Sucursal Activa:** **${_activeBranch.value}** (a **${_realLocationMetrics.value.roadDistanceKm} km** por ruta GPS).
-                        • **Tiempo Estimado de Entrega:** **~${_realLocationMetrics.value.stageAdjustedEtaMinutes} minutos** (polígono express de **8–12 minutos** • ${_driverTelemetry.value.trafficCondition}).
-                        • **Velocidad del Repartidor:** **${_driverTelemetry.value.currentSpeedKmh} km/h** con envío Express **GRATIS** en la app.
-                    """.trimIndent()
-                }
-                q.contains("oferta") || q.contains("especial") || q.contains("descuento") -> {
-                    val offers = getDailyRotatingOffersForCurrentStore()
-                    val offerLines = offers.joinToString("\n") { off ->
-                        "• **${off.title}** — Baja de RD$${off.originalPrice} a **RD$${off.offerPrice}.00** (**-${off.discountPct}%** • ${off.dayLabel})"
-                    }
-                    """
-                        **Ofertas Oficiales del Día en $storeName (${_activeBranch.value}):**
-                        $offerLines
-                    """.trimIndent()
-                }
-                q.contains("historial") || q.contains("habitual") || q.contains("lista") -> {
-                    val stats = getPurchaseHistoryStats().take(6)
-                    val summary = stats.joinToString("\n") { st ->
-                        "• **${st.product.name}** — **${st.product.unit}** — **RD$${st.product.price}.00** (comprado ${st.purchaseCount} veces)"
-                    }
-                    """
-                        **Tu Selección Habitual Basada en tus ${_orders.value.size} Órdenes:**
-                        $summary
-                    """.trimIndent()
-                }
-                q.contains("pizza") -> """
-                    **¡Excelente elección, $firstName! Aquí tienes tu receta verificada de Pizza Artesanal en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (35 min • 220°C / 425°F • 8 porciones):**
-                    1. Mezcla **350g (3 tazas)** de **Bravo Harina de Trigo Todo Uso** con **240ml** de agua tibia, **5g** de sal y **30ml (2 cucharadas)** de **Bravo Aceite de Oliva Virgen Extra**; amasa durante **8 minutos** y deja reposar **15 minutos**.
-                    2. Combina **120g** de **Pasta de Tomate La Famosa** con **100ml** de agua tibia, **15ml** de **Aceite de Oliva** y **5g** de **Bravo Orégano Molido Dominicano**.
-                    3. Precalienta el horno a **220°C (425°F)**; estira la masa en bandeja engrasada y pre-hornea la base durante **5 minutos** para lograr un piso crujiente.
-                    4. Distribuye la salsa pizzera, **250g** de **Bravo Queso Mozzarella en Barra** rallado, **40g** de **Queso Parmesano Rallado Bravo**, **100g** de **Bravo Pepperoni Rebanado** y julianas de **Ají Morrón**.
-                    5. Hornea a **220°C (425°F) durante 12 a 15 minutos** hasta gratinar; reposa **3 minutos** antes de porcionar.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("hamburguesa") || q.contains("burger") -> """
-                    **¡Con gusto, $firstName! Receta verificada de Hamburguesas Gourmet en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (20 min • 200°C / 390°F • 4 porciones):**
-                    1. Dora **120g** de **Bravo Tocino Ahumado Rebanado** en sartén de hierro a **190°C (375°F)** durante **5 minutos** hasta que esté crujiente y resérvalo.
-                    2. Sella las **Hamburguesas de Res Artesanales (150g c/u)** a **200°C (390°F)** durante **4 minutos por lado** para mantener un centro jugoso a **71°C internos**.
-                    3. Coloca **2 lonjas (40g)** de **Bravo Queso Cheddar** sobre cada carne en el último minuto y tapa **45 segundos** para fundir uniformemente.
-                    4. Tuesta el **Pan Brioche para Hamburguesa** durante **60 segundos** sobre la plancha caliente.
-                    5. Monta con base de **Bravo Lechuga Romana Lavada (30g)**, rodajas de **Tomate Bugalú (50g)**, la carne con cheddar, tocino crujiente, aros de **Cebolla Roja** y **Cachú Baldom (15g)**.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("lasana") -> """
-                    **¡Por supuesto, $firstName! Receta clásica verificada de Lasaña Boloñesa en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (45 min • 195°C / 385°F • 6 porciones):**
-                    1. Sofríe **450g (1 Lb)** de **Carne Molida de Res Primera** a **180°C (355°F)** durante **10 minutos**; añade **150g** de **Pasta de Tomate La Famosa** y **200ml** de agua, cocinando **8 minutos** a fuego lento.
-                    2. Mezcla **250g** de **Bravo Queso Ricotta Fresco Artesanal** con **60ml** de **Bravo Leche Entera UHT** y **50g** de **Queso Parmesano Rallado Bravo**.
-                    3. Engrasa un refractario con **15g** de **Bravo Mantequilla Con Sal**, extiende una base de salsa boloñesa y coloca una capa de **Bravo Láminas de Lasaña Directo al Horno**.
-                    4. Alterna **3 capas** de boloñesa, crema de ricotta y **300g** de **Bravo Queso Mozzarella** rallado, coronando con parmesano.
-                    5. Hornea cubierto a **195°C (385°F) durante 20 minutos** y gratina descubierto **8 minutos adicionales** hasta dorar.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("taco") || q.contains("burrito") || q.contains("quesadilla") || q.contains("nacho") -> """
-                    **¡Con mucho gusto, $firstName! Preparación verificada de Tacos & Tex-Mex en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (22 min • 190°C / 375°F • 4 porciones):**
-                    1. Dora **450g (1 Lb)** de **Carne Molida de Res Primera** a **190°C (375°F)** durante **10 minutos** con **60g** de cebolla picada y especias hasta caramelizar.
-                    2. Corta en brunoise **150g** de **Tomate Bugalú Fresco**, **50g** de **Cebolla Roja** y **15g** de **Cilantro Fresco** para el pico de gallo.
-                    3. Calienta las **Bravo Tortillas de Harina para Tacos** en comal o sartén a **175°C (350°F)** durante **30 segundos por lado**.
-                    4. Rellena cada tortilla con **90g** de carne caliente, **30g** de **Bravo Queso Mozzarella** y **30g** de **Bravo Queso Cheddar**.
-                    5. Sirve al instante coronando con **40g** de **Bravo Guacamole Fresco Artesanal** y el pico de gallo.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("mofongo") || q.contains("tostones") -> """
-                    **¡Un clásico dominicano, $firstName! Receta tradicional verificada de Mofongo Criollo en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (30 min • 175°C / 350°F • 4 porciones):**
-                    1. Corta **350g** de **Tocino de Cerdo con Capa** en dados de **2 cm** y fríelos a **175°C (350°F)** durante **15 minutos** hasta lograr chicharrones crujientes.
-                    2. Pela **4 unidades** de **Plátanos Verdes Barahona**, córtalos en ruedas de **2.5 cm** y fríelos en **Bravo Aceite Vegetal Puro** a **170°C (340°F)** durante **7 minutos** hasta que estén tiernos por dentro.
-                    3. Elabora el majado aromático triturando **4 dientes (16g)** de **Ajo Importado** con **30g** de **Bravo Mantequilla Con Sal** y **120ml** de caldo caliente con **Sopitas Bravo**.
-                    4. Maja en pilón los plátanos calientes con la pasta de ajo, mantequilla y **150g** de chicharrón crujiente, hidratando con toques del caldo.
-                    5. Moldea en semiesfera y sirve caliente coronado con **80g** de **Bravo Queso Gouda Holandés** fundido y lonjas de **Aguacate Criollo Grande**.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("chofan") || q.contains("arroz chino") -> """
-                    **¡Excelente plato, $firstName! Receta verificada de Chofán Dominicano en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (35 min • 210°C / 410°F • 6 porciones):**
-                    1. Cocina **450g (2 tazas)** de **Bravo Arroz Selecto Grado A** a **100°C (212°F)** durante **18 minutos** con poca agua y enfríalo extendido por **10 minutos**.
-                    2. Corta en dados de **1.5 cm** **300g** de **Pechuga de Pollo Fileteada**, **200g** de **Bravo Chuleta Ahumada** y **150g** de **Bravo Jamón Cocido**; saltea a **210°C (410°F)** por **8 minutos**.
-                    3. Cuaja un revoltillo suave con **3 unidades** de **Bravo Huevos Frescos** durante **90 segundos**, pícalo y reserva.
-                    4. Saltea en wok a fuego alto durante **4 minutos** **100g** de **Zanahoria de Constanza** y **100g** de **Ají Morrón** en brunoise con **15ml** de **Bravo Aceite de Ajonjolí Tostado**.
-                    5. Integra el arroz frío, las carnes y el huevo a **210°C (410°F)** removiendo vigorosamente durante **5 minutos** antes de servir.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("mangu") || q.contains("tres golpes") -> """
-                    **¡El desayuno rey dominicano, $firstName! Receta verificada de Mangú con Los Tres Golpes en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (25 min • 100°C / 212°F • 4 porciones):**
-                    1. Pela **4 unidades** de **Plátanos Verdes Barahona**, córtalos en cuartos y hiérvelos en agua con **8g** de sal a **100°C (212°F)** durante **18 minutos**.
-                    2. Maja los plátanos al instante con **45g (3 cucharadas)** de **Bravo Mantequilla Con Sal** y **120ml** de agua fría hasta lograr una textura sedosa.
-                    3. Dora en sartén a **185°C (365°F)** **200g** de **Salami Induveca Súper Especial** y **200g** de **Bravo Queso de Freír** durante **3 minutos por lado**.
-                    4. Fríe **4 unidades** de **Bravo Huevos Frescos** a **160°C (320°F)** durante **2 minutos** para mantener la yema cremosa.
-                    5. Saltea **120g** de **Cebolla Roja** en plumas con **30ml** de **Bravo Vinagre Blanco** por **2 minutos** y corona el mangú junto a los tres golpes.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("sancocho") || q.contains("asopao") -> """
-                    **¡Tradición pura, $firstName! Receta verificada de Sancocho Dominicano en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (55 min • 100°C / 212°F • 8 porciones):**
-                    1. Sazona y sella en caldero a **200°C (390°F)** durante **10 minutos** **450g** de **Pollo Fresco Bravo**, **450g** de **Carne de Res para Guisar**, **300g** de **Costillita Ahumada** y **200g** de **Longaniza Criolla**.
-                    2. Incorpora **2.5 Litros** de agua hirviendo y cocina a **100°C (212°F)** fuego medio durante **20 minutos**.
-                    3. Agrega **2 unidades** de **Plátano Verde**, **400g** de **Yuca Fresca** y **350g** de **Yautía Blanca** troceados en bocados de **4 cm**.
-                    4. Añade **350g** de **Auyama Criolla** y hierve **15 minutos adicionales**; maja un tercio de la auyama para espesar y dar color dorado al caldo.
-                    5. Reposa **5 minutos** y sirve caliente acompañado de **Bravo Arroz Selecto Grado A** blanco.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("pastelon") || q.contains("maduro") -> """
-                    **¡Delicia criolla, $firstName! Receta verificada de Pastelón de Plátano Maduro en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (45 min • 190°C / 375°F • 6 porciones):**
-                    1. Hierve **5 unidades** de **Plátanos Maduros Amarillos** a **100°C (212°F)** durante **15 minutos** y májalos con **30g** de **Bravo Mantequilla Con Sal** y **50ml** de **Bravo Leche Entera**.
-                    2. Sofríe **450g (1 Lb)** de **Carne Molida de Res Primera** a **180°C (355°F)** con **60g** de **Ají Cubanela** y **80g** de **Pasta de Tomate La Famosa** durante **12 minutos**.
-                    3. Engrasa un molde refractario y extiende el **50%** del puré de plátano maduro como primera capa.
-                    4. Distribuye el relleno de carne y cubre con **150g** de **Bravo Queso Gouda Holandés** en lonjas.
-                    5. Cierra con el resto del puré, corona con **200g** de **Bravo Queso Mozzarella** rallado y hornea a **190°C (375°F) durante 20 minutos**.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("bandera") || q.contains("locrio") || q.contains("moro") -> """
-                    **¡El almuerzo insignia dominicano, $firstName! Receta verificada de La Bandera Dominicana en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (40 min • 185°C / 365°F • 5 porciones):**
-                    1. Dora **900g** de **Pollo Entero Fresco Bravo** en piezas con **30ml** de **Bravo Aceite Vegetal Puro** a **185°C (365°F)** durante **10 minutos**.
-                    2. Incorpora **60g** de **Pasta de Tomate La Famosa** y **150ml** de agua para guisar tapado durante **15 minutos**.
-                    3. Cocina **450g (1 Lb)** de **Bravo Arroz Selecto Grado A** tapado a fuego bajo (**95°C / 203°F**) durante **18 minutos**.
-                    4. Guisa **400g** de **Bravo Habichuelas Rojas** con **150g** de **Auyama Criolla** a fuego medio durante **12 minutos** hasta espesar.
-                    5. Sirve el arroz graneado, las habichuelas cremosas, el pollo guisado y lonjas de **Aguacate Criollo Grande**.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("pasta") || q.contains("alfredo") || q.contains("espagueti") || q.contains("carbonara") || q.contains("codito") || q.contains("penne") -> """
-                    **¡Con mucho gusto, $firstName! Receta verificada de Pasta Cremosa Alfredo en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (25 min • 100°C / 212°F • 4 porciones):**
-                    1. Hierve **400g** de **Bravo Espaguetis Trigo Duro** en **3 Litros** de agua con sal a **100°C (212°F)** durante **9 minutos** (*al dente*) y reserva **100ml** del agua de cocción.
-                    2. Saltea **150g** de **Bravo Tocino Ahumado** y **300g** de **Pechuga de Pollo Fileteada** con **30g** de **Bravo Mantequilla Con Sal** y **10g** de **Ajo** a **175°C (350°F)** por **7 minutos**.
-                    3. Reduce a fuego lento (**85°C / 185°F**) e incorpora **250ml** de **Bravo Crema de Leche para Cocinar**, **100g** de **Bravo Queso Gouda** y **60g** de **Queso Parmesano Rallado Bravo**.
-                    4. Emulsiona durante **4 minutos** hasta que los quesos fundan en una salsa sedosa.
-                    5. Integra la pasta con el agua reservada durante **1 minuto** y sirve inmediatamente.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("arroz con leche") || q.contains("habichuelas con dulce") || q.contains("flan") || q.contains("postre") -> """
-                    **¡Dulzura tradicional, $firstName! Receta verificada de Postre Dominicano en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (35 min • 95°C / 203°F • 6 porciones):**
-                    1. Cocina **250g** de la base (**Bravo Arroz Selecto** o **Bravo Habichuelas Rojas**) en **600ml** de agua a **95°C (203°F)** durante **15 minutos**.
-                    2. Incorpora **500ml** de **Bravo Leche Entera UHT** y **315g (1 lata)** de **Leche Evaporada Carnation**, removiendo constantemente durante **8 minutos**.
-                    3. Añade **200g** de **Leche Condensada La Lechera**, **60g** de **Bravo Azúcar Crema** y **15g** de **Bravo Mantequilla Con Sal**.
-                    4. Si elaboras habichuelas con dulce, agrega **250g** de **Batata Dulce Dominicana** en dados de **1.5 cm** y cocina **12 minutos más**.
-                    5. Sirve tibio o refrigera a **4°C (39°F)** durante **60 minutos** antes de degustar.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("panqueque") || q.contains("hotcake") || q.contains("pancake") || q.contains("waffle") -> """
-                    **¡Desayuno perfecto, $firstName! Receta verificada de Panqueques Esponjosos en ${_activeBranch.value}:**
-                    
-                    **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                    $ingredientsSummary
-                    
-                    **Preparación Paso a Paso Fundamentada (18 min • 175°C / 350°F • 4 porciones):**
-                    1. Bate **2 unidades** de **Bravo Huevos Frescos** con **240ml (1 taza)** de **Bravo Leche Entera UHT** y **30g** de **Bravo Mantequilla Con Sal** fundida.
-                    2. Incorpora **200g (1.5 tazas)** de **Bravo Harina de Trigo Todo Uso** con movimientos envolventes durante **60 segundos**.
-                    3. Precalienta la sartén antiadherente a **175°C (350°F)** y vierte **60ml** de mezcla por unidad.
-                    4. Cocina **2 minutos** del primer lado hasta formar burbujas y dora **1 minuto** del lado opuesto.
-                    5. Sirve coronando con **100g** de **Fresas Frescas de Constanza**, **1 unidad** de **Guineo Maduro** rebanado y **30ml** de **Bravo Miel de Abejas 100% Pura**.
-                    $financialSummary
-                """.trimIndent()
-                q.contains("sin lactosa") || q.contains("intolerante a la lactosa") || q.contains("alergia a la leche") -> {
-                    val lactoseFreeSkus = enforceBudgetLimitOnSkus(
-                        getAllProducts()
-                            .filter { prod ->
-                                prod.isBravo &&
-                                    prod.nutritionProfile().caloriesKcal != null &&
-                                    prod.nutritionProfile().dietaryTags.any { it.contains("Sin Lactosa", ignoreCase = true) }
-                            }
-                            .take(7)
-                            .map { it.sku },
-                        budgetLimit
-                    )
-                    val lfProducts = lactoseFreeSkus.mapNotNull { findProductBySku(it) }
-                    val lfSummary = formatIngredientsBlock(lfProducts)
-                    val lfFinancial = buildFinancialBreakdownText(lactoseFreeSkus, budgetLimit)
-                    """
-                        **¡Con gusto, $firstName! Selección y Receta 100% Libre de Lactosa en ${_activeBranch.value}:**
-                        
-                        **Lista Exacta de Ingredientes / Productos (${lfProducts.size} artículos verificados):**
-                        $lfSummary
-                        
-                        **Preparación Paso a Paso Fundamentada (20 min • 180°C / 355°F):**
-                        1. Sazona **250g** de proteína fresca o vegetales con **15ml** de **Aceite de Oliva Virgen Extra**, ajo y orégano natural (**0% derivados lácteos**).
-                        2. Para desayunos o batidos utiliza **240ml** de **Leche de Almendra Sin Azúcar** (**24 kcal/100ml**) y **60g** de **Avena Integral**.
-                        3. Saltea los ingredientes a **180°C (355°F)** durante **10 a 12 minutos** preservando sus jugos naturales.
-                        4. Acompaña con **100g** de **Aguacate Criollo** (**160 kcal/100g**) o **Casabe Natural**.
-                        $lfFinancial
-                    """.trimIndent()
-                }
-                q.contains("sin gluten") || q.contains("celiac") || q.contains("celíac") || q.contains("alergia al trigo") -> {
-                    val glutenFreeSkus = enforceBudgetLimitOnSkus(
-                        getAllProducts()
-                            .filter { prod ->
-                                prod.isBravo &&
-                                    prod.nutritionProfile().caloriesKcal != null &&
-                                    prod.nutritionProfile().dietaryTags.any { it.contains("Sin Gluten", ignoreCase = true) }
-                            }
-                            .take(7)
-                            .map { it.sku },
-                        budgetLimit
-                    )
-                    val gfProducts = glutenFreeSkus.mapNotNull { findProductBySku(it) }
-                    val gfSummary = formatIngredientsBlock(gfProducts)
-                    val gfFinancial = buildFinancialBreakdownText(glutenFreeSkus, budgetLimit)
-                    """
-                        **¡Por supuesto, $firstName! Selección y Receta 100% Libre de Gluten en ${_activeBranch.value}:**
-                        
-                        **Lista Exacta de Ingredientes / Productos (${gfProducts.size} artículos aptos para celíacos):**
-                        $gfSummary
-                        
-                        **Preparación Paso a Paso Fundamentada (25 min • 185°C / 365°F):**
-                        1. Cocina **250g** de **Bravo Arroz Selecto** (**360 kcal/100g**) o **300g** de **Yuca Fresca** (**159 kcal/100g**) a **100°C (212°F)** durante **18 minutos** como base libre de trigo.
-                        2. Sella **250g** de **Pechuga de Pollo** (**165 kcal/100g**) a **185°C (365°F)** con **15ml** de **Aceite de Oliva Virgen Extra** durante **8 minutos por lado**.
-                        3. Prepara una ensalada fresca con **100g** de **Aguacate Criollo**, **120g** de **Tomate Bugalú** y **80g** de **Lechuga Romana**.
-                        4. Emplata garantizando **0% contaminación cruzada** con harinas de trigo o cebada.
-                        $gfFinancial
-                    """.trimIndent()
-                }
-                q.contains("keto") || q.contains("low carb") || q.contains("bajo en carbohidratos") || q.contains("proteina") || q.contains("proteína") || q.contains("fitness") || q.contains("caloria") || q.contains("calorías") || q.contains("dieta") -> {
-                    val fitProducts = (if (matchedProducts.isNotEmpty()) matchedProducts else getAllProducts().filter {
-                        it.isBravo && it.nutritionProfile().dietaryTags.any { tag -> tag.contains("Keto") || tag.contains("Proteína") }
-                    }.take(6))
-                    val fitSkus = enforceBudgetLimitOnSkus(fitProducts.map { it.sku }, budgetLimit)
-                    val enforcedFitProducts = fitSkus.mapNotNull { findProductBySku(it) }
-                    val fitSummary = formatIngredientsBlock(enforcedFitProducts)
-                    val fitFinancial = buildFinancialBreakdownText(fitSkus, budgetLimit)
-                    """
-                        **¡Excelente meta nutricional, $firstName! Plan Proteico / Keto Verificado en ${_activeBranch.value}:**
-                        
-                        **Lista Exacta de Ingredientes / Productos (${enforcedFitProducts.size} artículos):**
-                        $fitSummary
-                        
-                        **Preparación Paso a Paso Fundamentada (20 min • 190°C / 375°F):**
-                        1. Selecciona **220g** de **Pechuga de Pollo** (**165 kcal/100g**, **23.5g proteína**) o **3 unidades** de **Bravo Huevos Frescos** (**155 kcal/100g**).
-                        2. Cocina a la plancha a **190°C (375°F)** con **5ml (1 cdta)** de **Aceite de Oliva Virgen Extra** durante **7 minutos por lado**.
-                        3. Acompaña con **150g** de vegetales verdes (**Lechuga Romana** / **Brócoli**, **<34 kcal/100g**) y **100g** de **Aguacate Criollo** (**160 kcal/100g**).
-                        4. Sirve al instante con control exacto de macronutrientes y cero azúcares refinados.
-                        $fitFinancial
-                    """.trimIndent()
-                }
-                isInstructionOrRecipeQuery(query) && matchedProducts.isNotEmpty() -> {
-                    val primaryName = matchedProducts.first().name
-                    """
-                        **¡Con mucho gusto, $firstName! Preparación verificada para «$query» en ${_activeBranch.value}:**
-                        
-                        **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                        $ingredientsSummary
-                        
-                        **Preparación Paso a Paso Fundamentada (25 min • 185°C / 365°F • 4 porciones):**
-                        1. Pesa y organiza tu *mise en place* con **300g** de **$primaryName** y el resto de los ingredientes seleccionados del catálogo oficial.
-                        2. Realiza el corte técnico y sazona con **15ml** de grasa noble y aromáticos frescos durante **5 minutos**.
-                        3. Cocina el ingrediente principal a **185°C (365°F)** durante **12 a 15 minutos** respetando su temperatura interna óptima.
-                        4. Incorpora los complementos, lácteos o reducciones en los últimos **5 minutos** a fuego medio-bajo (**140°C / 285°F**).
-                        5. Reposa **3 minutos** antes de servir para estabilizar los jugos y realzar el sabor.
-                        $financialSummary
-                    """.trimIndent()
-                }
-                matchedProducts.isNotEmpty() -> {
-                    """
-                        **¡Hola, $firstName! Selección Oficial de $storeName para «$query» en ${_activeBranch.value}:**
-                        
-                        **Lista Exacta de Ingredientes / Productos (${matchedProducts.size} artículos):**
-                        $ingredientsSummary
-                        $financialSummary
-                    """.trimIndent()
-                }
-                else -> {
-                    """
-                        **Atención Personalizada $storeName (${_activeBranch.value}):**
-                        • Hola **$firstName**, busqué **«$query»** en el inventario oficial de **${_activeBranch.value}** y no figura bajo ese nombre exacto en este momento.
-                        • **¿Deseas que lo registremos como sugerencia de producto?** Dime *"Sugiero agregar $query"* y lo enviaré inmediatamente a nuestro buzón oficial (**bezaleelpatrocino0@gmail.com**).
-                        • También puedes adjuntar una **foto** con el botón de imagen o pedirme cualquier **receta con medidas exactas** bajo tu presupuesto de **RD$$budgetLimit.00**.
-                    """.trimIndent()
-                }
-            }
-        }
-        return rawResponse.replace(skuDisplayStripRegex, "").trim()
     }
 
     fun pauseOrStopAiGeneration() {
@@ -4019,451 +2928,170 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         val attachedUri = imageUriOverride ?: _pendingChatImageUri.value
         val hasImage = !attachedUri.isNullOrBlank()
         val query = rawQuery.trim().ifEmpty {
-            if (hasImage) {
-                "Analiza técnicamente esta imagen adjunta (producto dañado/vencido, factura NCF o ingrediente/alacena/mascota) según el protocolo de Brav IA Soporte."
-            } else {
-                ""
-            }
+            if (hasImage) "¿Qué ves en esta imagen y cómo me puedes ayudar con ella?" else ""
         }
         if (query.isEmpty()) return
         checkEasterEgg(query)
-        if (_isAiGenerating.value) {
-            pauseOrStopAiGeneration()
-        }
+        if (_isAiGenerating.value) pauseOrStopAiGeneration()
         _pendingChatImageUri.value = null
 
-        val userMsg = ChatMessage(
-            sender = "user",
-            text = query,
-            attachedImageUri = attachedUri
-        )
-        val orderIntent = isOrderIntentQuery(query)
-        val recipeOrInstructionIntent = isInstructionOrRecipeQuery(query)
-        val suggestionIntent = isSuggestionOrSupportFeedbackQuery(query)
-        val firstName = _profile.value.name.substringBefore(" ").ifBlank { "Cliente" }
-        val budgetLimit = _targetBudgetInChat.value.coerceAtLeast(150)
+        // Historial previo (antes de agregar este turno), para que Brav IA recuerde la conversación.
+        val previousTurns = _chatHistory.value
+            .filter { !it.isLoading && it.text.isNotBlank() }
+            .takeLast(6)
+            .map { ChatTurn(fromUser = it.sender == "user", text = it.text) }
 
-        if (!hasImage && !suggestionIntent && isOffTopicQuery(query) && !orderIntent && !recipeOrInstructionIntent) {
-            val guardrailMsg = ChatMessage(
-                sender = "ai",
-                text = "**Asesoría Exclusiva Bravo & El Arca:**\n• ¡Hola **$firstName**! Soy **Brav IA** y **Brav IA Soporte**, tu Chef Ejecutivo, Asesor Veterinario y Especialista de Atención al Cliente de **Supermercados Bravo** y **El Arca Petshop**.\n• Conozco el inventario completo con **precios en RD$, calorías exactas y equivalencias Marca Bravo**, verifico recetas en la web bajo tu presupuesto (**RD$$budgetLimit.00**), audito **fotos de productos o facturas NCF** y envío tus **sugerencias a bezaleelpatrocino0@gmail.com**.\n• ¿En qué puedo asistirte hoy?",
-                skus = emptyList(),
-                modelLabel = "Brav IA & Soporte Oficial"
-            )
-            _chatHistory.value = _chatHistory.value + userMsg + guardrailMsg
-            return
-        }
+        val userMsg = ChatMessage(sender = "user", text = query, attachedImageUri = attachedUri)
+        val orderIntent = isOrderIntentQuery(query)
+        val suggestionIntent = isSuggestionOrSupportFeedbackQuery(query)
+        val isArca = _activeStore.value == StoreMode.ARCA
+        val storePrefix = if (isArca) "ARC" else "BRV"
+        val storeName = if (isArca) "El Arca Petshop" else "Supermercados Bravo"
+        val storeProducts = getActiveProducts().ifEmpty { getAllProducts().filter { it.sku.startsWith(storePrefix) } }
+        val lookup: (String) -> Product? = { sku -> findProductBySku(sku) }
+        // Presupuesto: el que la persona escribe en el mensaje, o el que fijó a mano con el control.
+        val budget = BravIaEngine.budgetFromQuery(query) ?: _targetBudgetInChat.value.takeIf { _budgetSetByUser.value }
+        val matchedRecipe = if (isArca) null else BravIaEngine.matchRecipe(query)
 
         _isAiGenerating.value = true
         val loadingMsgId = System.nanoTime() + 1L
-        val personalizedThinking = buildPersonalizedThinkingText(query, hasAttachedImage = hasImage)
-        val loadingMsg = ChatMessage(
-            id = loadingMsgId,
-            sender = "ai",
-            text = personalizedThinking,
-            isLoading = true
-        )
-        _chatHistory.value = _chatHistory.value + userMsg + loadingMsg
+        val thinking = buildPersonalizedThinkingText(query, hasAttachedImage = hasImage)
+        _chatHistory.value = _chatHistory.value + userMsg + ChatMessage(id = loadingMsgId, sender = "ai", text = thinking, isLoading = true)
 
-        val isArca = _activeStore.value == StoreMode.ARCA
-        val activeStoreCode = if (isArca) "arca" else "bravo"
-        val storeDisplayName = if (isArca) "El Arca Petshop" else "Supermercados Bravo"
-        val historySummary = buildPurchaseHistorySummaryForAi()
-        val storeInventoryRag = getStoreInventoryContext(query)
-        val focusedCatalog = buildFocusedCatalogContext(query)
+        fun publish(reply: GroundedReply, label: String, durationMs: Long) {
+            val suggestion = reply.suggestion?.let { draft -> buildSuggestionPayload(draft.subject, draft.summary.ifBlank { query }, query) }
+                ?: if (suggestionIntent) buildSuggestionPayload("Sugerencia de cliente", query, query) else null
+            suggestion?.let { dispatchSuggestionMailPayloadAsync(it) }
+            val skus = reply.items.map { it.sku }
+            _chatHistory.value = _chatHistory.value.map { msg ->
+                if (msg.id != loadingMsgId) msg else msg.copy(
+                    text = reply.text.ifBlank { "Listo." },
+                    skus = skus,
+                    quantities = reply.items.associate { it.sku to it.qty },
+                    recipeId = reply.recipe?.id,
+                    budgetExceededBy = reply.budgetExceededBy,
+                    isLoading = false,
+                    modelLabel = if (suggestion != null) "Brav IA • Sugerencia registrada" else label,
+                    durationMs = durationMs,
+                    requiresOrderConfirmation = orderIntent && skus.isNotEmpty(),
+                    suggestionPayload = suggestion
+                )
+            }
+        }
 
         activeAiChatJob = viewModelScope.launch {
             val startTime = System.currentTimeMillis()
-            val attachedBitmap: ByteArray? = if (attachedUri != null) {
-                loadScaledJpeg(application, attachedUri)
-            } else {
-                null
-            }
-
-            // Grounding Search for Recipes (Zero Hallucination)
-            val internetCulinaryContext = if (recipeOrInstructionIntent) {
-                fetchInternetRecipeVerification(query)
-            } else {
-                null
-            }
-
-            val isoTimestampNow = currentIsoTimestamp()
-
-            val systemPrompt = """
-                # ROL E IDENTIDAD DEL SISTEMA
-                Eres **Brav IA**, el Asistente Personal de Compras, Chef Ejecutivo y Asesor Veterinario oficial de **Supermercados Bravo** («Los expertos en vender barato») y **El Arca Petshop** en la República Dominicana.
-                También actúas como **Brav IA Soporte**, el Especialista Senior de Atención al Cliente, Auditor de Calidad Visual y Gestor de Mejora Continua cuando el cliente adjunta una imagen, consulta dudas operativas o expresa una sugerencia/reporte.
-                Tu tono es cálido, hospitalario y cercano con **$firstName** (${_profile.value.name}), pero estrictamente profesional, resolutivo y a entera disposición del cliente.
-
-                # CONTEXTO DINÁMICO DE LA SESIÓN
-                - **Sucursal Activa:** ${_activeBranch.value} (Distancia GPS: ${_realLocationMetrics.value.roadDistanceKm} km | ETA Express: ~${_realLocationMetrics.value.stageAdjustedEtaMinutes} min)
-                - **Tienda Activa:** $activeStoreCode ("bravo" = Supermercados Bravo | "arca" = El Arca Petshop)
-                - **Cliente:** ${_profile.value.name} | Contacto: ${_profile.value.email} / ${_profile.value.phone} | Tarjeta Bravísima: ${_profile.value.bravisimaNumber} (Balance: RD$${_accumulatedBravisimaBalance.value}.00)
-                - **Presupuesto Límite Acordado:** RD$$budgetLimit.00
-                - **Inventario Oficial Disponible (RAG Context):**
-                $storeInventoryRag
-
-                $focusedCatalog
-
-                $historySummary
-                ${if (internetCulinaryContext != null) "\n# RESULTADO DE BÚSQUEDA WEB EN VIVO PARA LA RECETA (GROUNDING SEARCH):\n$internetCulinaryContext\n" else ""}
-                # REGLAS INQUEBRANTABLES DE EXACTITUD Y FUNDAMENTACIÓN (ZERO HALLUCINATION)
-                1. **PROHIBICIÓN DE RESPUESTAS VAGAS Y CERO CÓDIGOS SKU EN EL TEXTO VISIBLE:**
-                   - Jamás respondas con generalidades como "compra algunos vegetales", "añade condimentos al gusto" o "busca una comida para perro".
-                   - Toda respuesta debe estar fundamentada en datos concretos: nombres exactos del catálogo en **negrita**, gramajes/unidades (Lb, Gr, Oz, Kg, Litro), precios unitarios en RD$${'$'}, calorías exactas (kcal) y justificación culinaria, veterinaria o nutricional.
-                   - No escribas los códigos internos [BRV-xxx] o [ARC-xxx] dentro de los párrafos visibles al usuario; colócalos ÚNICAMENTE en el arreglo final SKUS: [...].
-                2. **BÚSQUEDA WEB OBLIGATORIA PARA RECETAS (GROUNDING SEARCH):**
-                   - Usa los datos verificados de la búsqueda web para indicar cantidades exactas por porción (en gramos/ml/tazas), tiempos exactos de cocción en minutos y temperaturas en °C y °F.
-                3. **EXACTITUD DEL 100% EN INGREDIENTES Y EQUIVALENCIAS:**
-                   - Cruza cada ingrediente con el **Inventario Oficial Disponible**.
-                   - Especifica la cantidad exacta a utilizar en la receta (ej. "250g de arroz") y la unidad comercial exacta que el cliente llevará en su carrito con su precio en RD$${'$'}.
-                   - Prioriza siempre los productos de **Marca Exclusiva Bravo** para maximizar el ahorro del cliente.
-                4. **CUMPLIMIENTO MATEMÁTICO DEL PRESUPUESTO (RD$$budgetLimit.00):**
-                   - Suma internamente el precio de todos los productos que vas a recomendar: la suma total DEBE ser menor o igual a RD$$budgetLimit.00.
-                   - Si la suma supera los RD$$budgetLimit.00, sustituye automáticamente los artículos más costosos por presentaciones medianas o equivalentes **Marca Exclusiva Bravo** hasta quedar estrictamente por debajo del límite.
-                   - Muestra siempre al final un desglose financiero claro:
-                     * **Subtotal de la compra:** RD$ X.00
-                     * **Margen de ahorro bajo tu presupuesto:** RD$ Y.00
-                     * **Retorno Tarjeta Bravísima (1%):** +RD$ Z.00 (RD$1 por cada RD$100).
-
-                # ESTRUCTURA DE SALIDA OBLIGATORIA (MODO COMPRAS / CHEF / VETERINARIO)
-                1. **Saludo cálido y confirmación del objetivo:** Breve, cortés y enfocado en la solicitud de $firstName.
-                2. **Lista Exacta de Ingredientes / Productos:** Viñetas (•) con **[Nombre Exacto]** — [Medida para la receta y unidad comercial] — **RD$[Precio].00**.
-                3. **Preparación Paso a Paso Fundamentada:** Instrucciones numeradas (1., 2., 3., 4., 5.) con tiempos exactos en minutos y temperaturas en °C/°F o guía de aplicación veterinaria.
-                4. **Resumen de Presupuesto y Fidelidad:** Cálculo verificado frente al límite de RD$$budgetLimit.00.
-                5. **Arreglo de SKUs para el Carrito (Última línea obligatoria cuando recomiendes productos):**
-                SKUS: ["SKU-1", "SKU-2", "SKU-3"]
-
-                # MODO SOPORTE Y VISIÓN MULTIMODAL (BRAV IA SOPORTE)
-                - **CAPACIDAD 1 (ANÁLISIS VISUAL MULTIMODAL):** Si el cliente adjuntó una imagen (${if (attachedBitmap != null) "IMAGEN ADJUNTA PRESENTE EN ESTA CONSULTA: analízala visualmente en detalle" else "sin imagen en este turno"}):
-                  1. *Producto dañado, vencido o empaque defectuoso:* Identifica visualmente el producto, verifica el estado del sello/empaque o fecha impresa, ofrece una disculpa cálida en nombre de $storeDisplayName y autoriza inmediatamente la reposición sin costo o nota de crédito en su **Tarjeta Bravísima (${_profile.value.bravisimaNumber})** indicando la sucursal **${_activeBranch.value}**.
-                  2. *Foto de factura o ticket de caja (NCF):* Extrae mediante OCR el número de factura/NCF, los artículos cobrados y el total en RD$${'$'}, aclarando descuentos, ITBIS (18%/16%) o puntos Bravísima generados.
-                  3. *Foto de ingrediente, alacena o etiqueta de mascota:* Identifica qué tiene el cliente en mano, busca su equivalente exacto en nuestro catálogo y explica cómo usarlo o conservarlo.
-                - **CAPACIDAD 2 (RESOLUCIÓN EXACTA DE DUDAS OPERATIVAS):**
-                  * *Fidelidad Bravísima:* Retorno exacto del 1% (RD$1.00 por cada RD$100.00 de compra), canje directo en carrito o caja presentando el código de barras ${_profile.value.bravisimaNumber}.
-                  * *Horarios y Logística:* Lunes a Sábado de 7:00 AM a 10:00 PM (Domingos cerrados por valores familiares). Delivery express en 8–12 minutos en el polígono central.
-                  * *Facturación Fiscal:* Emisión de Comprobantes B01 (Crédito Fiscal) y B02 (Consumidor Final).
-                - **CAPACIDAD 3 (CAPTURA Y ENVÍO DE SUGERENCIAS A CORREO ELECTRÓNICO):**
-                  Cuando el cliente exprese una sugerencia de nuevo producto, mejora de la aplicación, felicitación o reporte de soporte/calidad, confirma amablemente que su mensaje ha sido registrado para **bezaleelpatrocino0@gmail.com** e incluye al final de tu respuesta (justo antes de SKUS:) el bloque JSON exacto:
-                  SUGGESTION_MAIL_PAYLOAD: {"to_email":"bezaleelpatrocino0@gmail.com","from_user":"${_profile.value.name}","user_contact":"${_profile.value.email} / ${_profile.value.phone}","active_branch":"${_activeBranch.value}","active_store":"$activeStoreCode","category":"SUGERENCIA_PRODUCTO | MEJORA_UI_UX | REPORTE_SOPORTE | FELICITACION","priority":"ALTA | MEDIA | BAJA","subject":"Asunto ejecutivo claro","summary_body":"Resumen estructurado de la sugerencia o reporte del cliente","timestamp_iso":"$isoTimestampNow"}
-
-                Solicitud actual del cliente ($firstName): $query
-            """.trimIndent()
-
-            val accumulatedText = StringBuilder()
+            fun elapsed() = (System.currentTimeMillis() - startTime).coerceAtMost(MAX_AI_RESPONSE_TIMEOUT_MS)
+            fun localAnswer() = BravIaEngine.localReply(query, storeProducts, lookup, storePrefix, budget, hasImage)
+            val accumulated = StringBuilder()
             try {
+                // Sin sesión de Firebase no hay modelo: respondemos con datos del catálogo y del recetario.
                 if (!isFirebaseUserAuthenticatedForAi()) {
-                    delay(280L)
-                    val fallbackSkus = if (suggestionIntent) emptyList() else enforceBudgetLimitOnSkus(matchFallbackSkus(query), budgetLimit)
-                    val fallbackSuggestionPayload = if (suggestionIntent) {
-                        SuggestionMailPayload(
-                            toEmail = "bezaleelpatrocino0@gmail.com",
-                            fromUser = _profile.value.name,
-                            userContact = "${_profile.value.email} / ${_profile.value.phone}",
-                            activeBranch = _activeBranch.value,
-                            activeStore = activeStoreCode,
-                            category = if (query.contains("producto", ignoreCase = true)) "SUGERENCIA_PRODUCTO" else "MEJORA_UI_UX",
-                            priority = "ALTA",
-                            subject = "[Brav IA Soporte] Sugerencia de ${_profile.value.name} (${_activeBranch.value})",
-                            summaryBody = query,
-                            timestampIso = isoTimestampNow
-                        ).also { dispatchSuggestionMailPayloadAsync(it) }
-                    } else {
-                        null
-                    }
-                    val duration = (System.currentTimeMillis() - startTime).coerceAtMost(MAX_AI_RESPONSE_TIMEOUT_MS)
-                    _chatHistory.value = _chatHistory.value.map { msg ->
-                        if (msg.id == loadingMsgId) {
-                            msg.copy(
-                                text = buildFallbackRecipeOrCatalogResponse(query, fallbackSkus, hasAttachedImage = hasImage),
-                                skus = fallbackSkus,
-                                isLoading = false,
-                                modelLabel = when {
-                                    fallbackSuggestionPayload != null -> "Brav IA Soporte • Enviado a bezaleelpatrocino0@gmail.com"
-                                    hasImage -> "Brav IA Soporte • Auditoría Visual Multimodal"
-                                    orderIntent && fallbackSkus.isNotEmpty() -> "Brav IA • Pedido Listo para Confirmación Manual"
-                                    else -> "Brav IA • Chef Ejecutivo & Asesor Oficial"
-                                },
-                                durationMs = duration,
-                                requiresOrderConfirmation = orderIntent && fallbackSkus.isNotEmpty(),
-                                suggestionPayload = fallbackSuggestionPayload
-                            )
-                        } else {
-                            msg
-                        }
-                    }
+                    delay(250L)
+                    publish(localAnswer(), "Brav IA • Modo sin conexión", elapsed())
                     return@launch
                 }
 
+                val imageBytes: ByteArray? = attachedUri?.let { loadScaledJpeg(application, it) }
+                val frequent = runCatching { getPurchaseHistoryStats().take(5).map { it.product.name } }.getOrDefault(emptyList())
+                val cartLines = _cart.value.mapNotNull { item -> findProductBySku(item.sku)?.let { "${item.qty} × ${it.name}" } }
+                val prompt = BravIaEngine.buildPrompt(
+                    PromptContext(
+                        query = query,
+                        storeName = storeName,
+                        branch = _activeBranch.value,
+                        etaMinutes = _realLocationMetrics.value.stageAdjustedEtaMinutes.takeIf { it > 0 },
+                        candidates = BravIaEngine.selectCandidates(
+                            query = query + " " + previousTurns.lastOrNull { it.fromUser }?.text.orEmpty(),
+                            storeProducts = storeProducts,
+                            recipe = matchedRecipe,
+                            extraSkus = _cart.value.map { it.sku }
+                        ),
+                        matchedRecipe = matchedRecipe,
+                        history = previousTurns,
+                        cartSummary = cartLines.takeIf { it.isNotEmpty() }?.joinToString(", ")?.take(500),
+                        budget = budget,
+                        frequentProducts = frequent,
+                        hasImage = imageBytes != null
+                    )
+                )
+                val input = AiContent(prompt, imageBytes)
+
                 withTimeout(MAX_AI_RESPONSE_TIMEOUT_MS) {
-                    val activeModelStream = try {
-                        if (attachedBitmap != null) {
-                            val multimodalInput = content {
-                                image(attachedBitmap)
-                                text(systemPrompt)
-                            }
-                            geminiModel.generateContentStream(multimodalInput)
-                        } else {
-                            geminiModel.generateContentStream(systemPrompt)
-                        }
+                    val stream = try {
+                        bravIaChatModel.generateContentStream(input)
                     } catch (_: Exception) {
-                        if (attachedBitmap != null) {
-                            val multimodalInput = content {
-                                image(attachedBitmap)
-                                text(systemPrompt)
-                            }
-                            geminiFallbackModel.generateContentStream(multimodalInput)
-                        } else {
-                            geminiFallbackModel.generateContentStream(systemPrompt)
-                        }
+                        bravIaChatFallbackModel.generateContentStream(input)
                     }
                     try {
-                        activeModelStream.collect { chunk ->
+                        stream.collect { chunk ->
                             val part = chunk.text.orEmpty()
-                            if (part.isNotEmpty()) {
-                                accumulatedText.append(part)
-                                val (withoutMail, _) = extractSuggestionPayloadFromResponse(accumulatedText.toString(), query)
-                                val (cleanPreview, _) = extractSkusFromResponse(withoutMail)
+                            if (part.isEmpty()) return@collect
+                            accumulated.append(part)
+                            // Vista previa en vivo: solo el campo "respuesta", ya sin precios ni SKUs.
+                            val preview = BravIaEngine.streamingAnswer(accumulated.toString())?.let { BravIaEngine.sanitize(it) }
+                            if (!preview.isNullOrBlank()) {
                                 _chatHistory.value = _chatHistory.value.map { msg ->
-                                    if (msg.id == loadingMsgId) {
-                                        msg.copy(
-                                            text = cleanPreview.ifBlank { personalizedThinking },
-                                            isLoading = false,
-                                            modelLabel = if (hasImage) {
-                                                "Brav IA Soporte • Auditoría Visual Multimodal"
-                                            } else {
-                                                "Brav IA • Chef Ejecutivo & Asesor Oficial"
-                                            }
-                                        )
-                                    } else {
-                                        msg
-                                    }
+                                    if (msg.id == loadingMsgId) msg.copy(text = preview, isLoading = false, modelLabel = "Brav IA") else msg
                                 }
                             }
                         }
                     } catch (streamErr: Exception) {
-                        if (accumulatedText.length < 40) {
-                            val backupResp = if (attachedBitmap != null) {
-                                geminiFallbackModel.generateContent(
-                                    content {
-                                        image(attachedBitmap)
-                                        text(systemPrompt)
-                                    }
-                                )
-                            } else {
-                                geminiFallbackModel.generateContent(systemPrompt)
-                            }
-                            val backupText = backupResp.text.orEmpty()
-                            if (backupText.isNotBlank()) {
-                                accumulatedText.clear()
-                                accumulatedText.append(backupText)
-                            } else {
-                                throw streamErr
-                            }
+                        if (BravIaEngine.parseReply(accumulated.toString()) == null) {
+                            val backup = bravIaChatFallbackModel.generateContent(input).text.orEmpty()
+                            if (backup.isBlank()) throw streamErr
+                            accumulated.clear()
+                            accumulated.append(backup)
                         }
                     }
                 }
 
-                val duration = (System.currentTimeMillis() - startTime).coerceAtMost(MAX_AI_RESPONSE_TIMEOUT_MS)
-                val fullText = accumulatedText.toString()
-                val (textWithoutMail, parsedSuggestionPayload) = extractSuggestionPayloadFromResponse(fullText, query)
-                val (rawCleanText, parsedSkus) = extractSkusFromResponse(textWithoutMail)
-
-                val finalSuggestionPayload = parsedSuggestionPayload ?: if (suggestionIntent) {
-                    SuggestionMailPayload(
-                        toEmail = "bezaleelpatrocino0@gmail.com",
-                        fromUser = _profile.value.name,
-                        userContact = "${_profile.value.email} / ${_profile.value.phone}",
-                        activeBranch = _activeBranch.value,
-                        activeStore = activeStoreCode,
-                        category = if (query.contains("producto", ignoreCase = true)) "SUGERENCIA_PRODUCTO" else "MEJORA_UI_UX",
-                        priority = "ALTA",
-                        subject = "[Brav IA Soporte] Sugerencia de ${_profile.value.name} (${_activeBranch.value})",
-                        summaryBody = query,
-                        timestampIso = isoTimestampNow
-                    )
+                val raw = accumulated.toString()
+                val parsed = BravIaEngine.parseReply(raw) ?: raw.takeIf { it.length >= 20 }?.let { BravIaEngine.fromPlainText(it) }
+                if (parsed == null) {
+                    publish(localAnswer(), "Brav IA • Modo sin conexión", elapsed())
                 } else {
-                    null
-                }
-
-                if (finalSuggestionPayload != null) {
-                    dispatchSuggestionMailPayloadAsync(finalSuggestionPayload)
-                }
-
-                val hasNumberedSteps = rawCleanText.contains("Paso 1", ignoreCase = true) ||
-                    Regex("""(?m)^\s*(?:\*\*?)?(?:Paso\s*\d+|\d+[\.\)])""").containsMatchIn(rawCleanText)
-
-                if (rawCleanText.length >= 35 && (!recipeOrInstructionIntent || hasNumberedSteps)) {
-                    val isRefusalOrNoProduct = !recipeOrInstructionIntent && !hasImage && (
-                        rawCleanText.contains("solo asisto", ignoreCase = true) ||
-                            rawCleanText.contains("Solo estoy autorizado", ignoreCase = true) ||
-                            rawCleanText.contains("no tenemos", ignoreCase = true) ||
-                            rawCleanText.contains("no está actualmente", ignoreCase = true) ||
-                            rawCleanText.contains("no se encuentra", ignoreCase = true) ||
-                            isConversationalOrStoreInfoQuery(query)
-                        )
-
-                    val rawCandidateSkus = when {
-                        isRefusalOrNoProduct || suggestionIntent -> emptyList()
-                        recipeOrInstructionIntent -> {
-                            (parsedSkus + matchFallbackSkus(query)).distinct().take(8)
-                        }
-                        parsedSkus.isNotEmpty() -> parsedSkus
-                        else -> matchFallbackSkus(query)
-                    }
-                    // Enforce mathematical budget compliance: sum(SKU_i) <= targetBudgetInChat
-                    val finalSkus = enforceBudgetLimitOnSkus(rawCandidateSkus, budgetLimit)
-
-                    // Ensure financial breakdown is always present when SKUs are recommended
-                    val cleanTextWithBudget = if (finalSkus.isNotEmpty() &&
-                        !rawCleanText.contains("Retorno Tarjeta Bravísima", ignoreCase = true) &&
-                        !rawCleanText.contains("Subtotal de la compra", ignoreCase = true)
-                    ) {
-                        rawCleanText.trimEnd() + buildFinancialBreakdownText(finalSkus, budgetLimit)
-                    } else {
-                        rawCleanText
-                    }
-
-                    val needsManualOrderConfirm = !isRefusalOrNoProduct && finalSkus.isNotEmpty() && (
-                        orderIntent ||
-                            cleanTextWithBudget.contains("Confirmar Pedido", ignoreCase = true)
-                        )
-                    _chatHistory.value = _chatHistory.value.map { msg ->
-                        if (msg.id == loadingMsgId) {
-                            msg.copy(
-                                text = cleanTextWithBudget,
-                                skus = finalSkus,
-                                isLoading = false,
-                                modelLabel = when {
-                                    finalSuggestionPayload != null -> "Brav IA Soporte • Enviado a bezaleelpatrocino0@gmail.com"
-                                    hasImage -> "Brav IA Soporte • Auditoría Visual Multimodal"
-                                    needsManualOrderConfirm -> "Brav IA • Pedido Listo para Confirmación Manual"
-                                    else -> "Brav IA • Chef Ejecutivo & Asesor Oficial"
-                                },
-                                durationMs = duration,
-                                requiresOrderConfirmation = needsManualOrderConfirm,
-                                suggestionPayload = finalSuggestionPayload
-                            )
-                        } else {
-                            msg
-                        }
-                    }
-                } else {
-                    val fallbackSkus = if (suggestionIntent) emptyList() else enforceBudgetLimitOnSkus(matchFallbackSkus(query), budgetLimit)
-                    _chatHistory.value = _chatHistory.value.map { msg ->
-                        if (msg.id == loadingMsgId) {
-                            msg.copy(
-                                text = buildFallbackRecipeOrCatalogResponse(query, fallbackSkus, hasAttachedImage = hasImage),
-                                skus = fallbackSkus,
-                                isLoading = false,
-                                modelLabel = when {
-                                    finalSuggestionPayload != null -> "Brav IA Soporte • Enviado a bezaleelpatrocino0@gmail.com"
-                                    hasImage -> "Brav IA Soporte • Auditoría Visual Multimodal"
-                                    orderIntent && fallbackSkus.isNotEmpty() -> "Brav IA • Pedido Listo para Confirmación Manual"
-                                    else -> "Brav IA • Chef Ejecutivo & Asesor Oficial"
-                                },
-                                durationMs = duration,
-                                requiresOrderConfirmation = orderIntent && fallbackSkus.isNotEmpty(),
-                                suggestionPayload = finalSuggestionPayload
-                            )
-                        } else {
-                            msg
-                        }
-                    }
-                }
-            } catch (e: TimeoutCancellationException) {
-                val duration = (System.currentTimeMillis() - startTime).coerceAtMost(MAX_AI_RESPONSE_TIMEOUT_MS)
-                val partial = accumulatedText.toString()
-                val (withoutMail, parsedMail) = extractSuggestionPayloadFromResponse(partial, query)
-                val (cleanPartial, partialSkus) = extractSkusFromResponse(withoutMail)
-                val partialHasSteps = cleanPartial.contains("Paso 1", ignoreCase = true) ||
-                    Regex("""(?m)^\s*(?:\*\*?)?(?:Paso\s*\d+|\d+[\.\)])""").containsMatchIn(cleanPartial)
-                val rawSkus = when {
-                    isConversationalOrStoreInfoQuery(query) || suggestionIntent -> emptyList()
-                    recipeOrInstructionIntent -> (partialSkus + matchFallbackSkus(query)).distinct().take(8)
-                    partialSkus.isNotEmpty() -> partialSkus
-                    else -> matchFallbackSkus(query)
-                }
-                val finalSkus = enforceBudgetLimitOnSkus(rawSkus, budgetLimit)
-                val finalAnswer = if (cleanPartial.length >= 120 && (!recipeOrInstructionIntent || partialHasSteps)) {
-                    if (finalSkus.isNotEmpty() && !cleanPartial.contains("Subtotal de la compra", ignoreCase = true)) {
-                        cleanPartial.trimEnd() + buildFinancialBreakdownText(finalSkus, budgetLimit)
-                    } else {
-                        cleanPartial
-                    }
-                } else {
-                    buildFallbackRecipeOrCatalogResponse(query, finalSkus, hasAttachedImage = hasImage)
-                }
-                if (parsedMail != null) {
-                    dispatchSuggestionMailPayloadAsync(parsedMail)
-                }
-                _chatHistory.value = _chatHistory.value.map { msg ->
-                    if (msg.id == loadingMsgId) {
-                        msg.copy(
-                            text = finalAnswer,
-                            skus = finalSkus,
-                            isLoading = false,
-                            modelLabel = when {
-                                parsedMail != null -> "Brav IA Soporte • Enviado a bezaleelpatrocino0@gmail.com"
-                                hasImage -> "Brav IA Soporte • Auditoría Visual Multimodal"
-                                orderIntent && finalSkus.isNotEmpty() -> "Brav IA • Pedido Listo para Confirmación Manual"
-                                else -> "Brav IA • Chef Ejecutivo & Asesor Oficial"
-                            },
-                            durationMs = duration,
-                            requiresOrderConfirmation = orderIntent && finalSkus.isNotEmpty(),
-                            suggestionPayload = parsedMail
-                        )
-                    } else {
-                        msg
-                    }
+                    val reply = BravIaEngine.ground(parsed, lookup, storePrefix, matchedRecipe, budget)
+                    publish(reply, if (reply.recipe != null) "Brav IA • Receta verificada" else "Brav IA", elapsed())
                 }
             } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.d(TAG, "Brav IA local fallback used: ${e.message}")
-                val duration = (System.currentTimeMillis() - startTime).coerceAtMost(MAX_AI_RESPONSE_TIMEOUT_MS)
-                val fallbackSkus = if (suggestionIntent) emptyList() else enforceBudgetLimitOnSkus(matchFallbackSkus(query), budgetLimit)
-                val fallbackSuggestionPayload = if (suggestionIntent) {
-                    SuggestionMailPayload(
-                        toEmail = "bezaleelpatrocino0@gmail.com",
-                        fromUser = _profile.value.name,
-                        userContact = "${_profile.value.email} / ${_profile.value.phone}",
-                        activeBranch = _activeBranch.value,
-                        activeStore = activeStoreCode,
-                        category = if (query.contains("producto", ignoreCase = true)) "SUGERENCIA_PRODUCTO" else "MEJORA_UI_UX",
-                        priority = "ALTA",
-                        subject = "[Brav IA Soporte] Sugerencia de ${_profile.value.name} (${_activeBranch.value})",
-                        summaryBody = query,
-                        timestampIso = isoTimestampNow
-                    ).also { dispatchSuggestionMailPayloadAsync(it) }
+                if (e is TimeoutCancellationException) {
+                    val partial = BravIaEngine.parseReply(accumulated.toString())
+                    val reply = partial?.let { BravIaEngine.ground(it, lookup, storePrefix, matchedRecipe, budget) } ?: localAnswer()
+                    publish(reply, "Brav IA • Respuesta parcial", elapsed())
                 } else {
-                    null
+                    throw e
                 }
-                _chatHistory.value = _chatHistory.value.map { msg ->
-                    if (msg.id == loadingMsgId) {
-                        msg.copy(
-                            text = buildFallbackRecipeOrCatalogResponse(query, fallbackSkus, hasAttachedImage = hasImage),
-                            skus = fallbackSkus,
-                            isLoading = false,
-                            modelLabel = when {
-                                fallbackSuggestionPayload != null -> "Brav IA Soporte • Enviado a bezaleelpatrocino0@gmail.com"
-                                hasImage -> "Brav IA Soporte • Auditoría Visual Multimodal"
-                                orderIntent && fallbackSkus.isNotEmpty() -> "Brav IA • Pedido Listo para Confirmación Manual"
-                                else -> "Brav IA • Chef Ejecutivo & Asesor Oficial"
-                            },
-                            durationMs = duration,
-                            requiresOrderConfirmation = orderIntent && fallbackSkus.isNotEmpty(),
-                            suggestionPayload = fallbackSuggestionPayload
-                        )
-                    } else {
-                        msg
-                    }
-                }
+            } catch (e: Exception) {
+                Log.d(TAG, "Brav IA usa la respuesta local: ${e.message}")
+                publish(localAnswer(), "Brav IA • Modo sin conexión", elapsed())
             } finally {
                 _isAiGenerating.value = false
                 activeAiChatJob = null
             }
         }
+    }
+
+    /** Sugerencia para el buzón. Los datos de contacto quedan en el dispositivo; nunca se le pasan al modelo. */
+    private fun buildSuggestionPayload(subject: String, summary: String, query: String): SuggestionMailPayload {
+        val n = BravIaText.normalize(query)
+        return SuggestionMailPayload(
+            toEmail = "bezaleelpatrocino0@gmail.com",
+            fromUser = _profile.value.name,
+            userContact = "${_profile.value.email} / ${_profile.value.phone}",
+            activeBranch = _activeBranch.value,
+            activeStore = if (_activeStore.value == StoreMode.ARCA) "arca" else "bravo",
+            category = when {
+                listOf("danad", "vencid", "error", "fallo", "bug", "reclamo", "queja").any { n.contains(it) } -> "REPORTE_SOPORTE"
+                n.contains("felicit") || n.contains("gracias") -> "FELICITACION"
+                n.contains("producto") || n.contains("agreguen") || n.contains("vendan") -> "SUGERENCIA_PRODUCTO"
+                else -> "MEJORA_UI_UX"
+            },
+            priority = "MEDIA",
+            subject = "[Brav IA] ${subject.take(80)}",
+            summaryBody = summary,
+            timestampIso = currentIsoTimestamp()
+        )
     }
 
     // =========================================================================

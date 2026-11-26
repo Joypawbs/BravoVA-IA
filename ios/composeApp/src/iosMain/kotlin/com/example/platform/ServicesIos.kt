@@ -449,6 +449,9 @@ interface IosAiBridge {
         model: String,
         prompt: String,
         imageJpeg: platform.Foundation.NSData?,
+        systemInstruction: String?,
+        jsonOutput: Boolean,
+        temperature: Double,
         onChunk: (String) -> Unit,
         onComplete: (String?) -> Unit
     )
@@ -460,13 +463,16 @@ object IosBridges {
     var glass: com.example.ui.components.IosGlassBridge? = null
 }
 
-private class BridgedGenerativeModel(private val modelName: String) : GenerativeModelCompat {
+private class BridgedGenerativeModel(private val modelName: String, private val config: AiModelConfig) : GenerativeModelCompat {
     override fun generateContentStream(content: AiContent): Flow<AiResponseChunk> = callbackFlow {
         val bridge = IosBridges.ai ?: throw IllegalStateException("Firebase AI no está configurado en iOS")
         bridge.generate(
             model = modelName,
             prompt = content.text,
             imageJpeg = content.image?.toNSData(),
+            systemInstruction = config.systemInstruction,
+            jsonOutput = config.jsonOutput,
+            temperature = config.temperature,
             onChunk = { text -> trySend(AiResponseChunk(text)) },
             onComplete = { error ->
                 if (error == null) close() else close(IllegalStateException(error))
@@ -482,4 +488,4 @@ private class BridgedGenerativeModel(private val modelName: String) : Generative
     }
 }
 
-actual fun createGenerativeModel(modelName: String): GenerativeModelCompat = BridgedGenerativeModel(modelName)
+actual fun createGenerativeModel(modelName: String, config: AiModelConfig): GenerativeModelCompat = BridgedGenerativeModel(modelName, config)

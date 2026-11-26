@@ -330,7 +330,18 @@ interface GenerativeModelCompat {
     suspend fun generateContent(prompt: String): AiResponseChunk = generateContent(AiContent(prompt, null))
 }
 
-expect fun createGenerativeModel(modelName: String): GenerativeModelCompat
+/**
+ * Cómo se comporta el modelo. [systemInstruction] va aparte del mensaje (el modelo la trata como
+ * reglas, no como conversación), [jsonOutput] obliga a responder en JSON y [temperature] baja hace
+ * las respuestas más predecibles. Un valor negativo deja la temperatura por defecto del modelo.
+ */
+data class AiModelConfig(
+    val systemInstruction: String? = null,
+    val jsonOutput: Boolean = false,
+    val temperature: Double = -1.0
+)
+
+expect fun createGenerativeModel(modelName: String, config: AiModelConfig = AiModelConfig()): GenerativeModelCompat
 
 /* ------------------------------------------------------------------ */
 /*  Misc                                                                */

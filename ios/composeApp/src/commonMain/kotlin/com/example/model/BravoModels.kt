@@ -391,7 +391,13 @@ data class ChatMessage(
     val orderConfirmed: Boolean = false,
     val confirmedOrderId: String? = null,
     val attachedImageUri: String? = null,
-    val suggestionPayload: SuggestionMailPayload? = null
+    val suggestionPayload: SuggestionMailPayload? = null,
+    /** Receta del recetario verificado ([BRAV_IA_RECIPES]) que se muestra como tarjeta. */
+    val recipeId: String? = null,
+    /** Unidades sugeridas por SKU (por ejemplo 4 plátanos). Si falta un SKU, se asume 1. */
+    val quantities: Map<String, Int> = emptyMap(),
+    /** Cuánto pasa el total del presupuesto del cliente; null si cabe o no hay presupuesto. */
+    val budgetExceededBy: Int? = null
 )
 
 data class ToastNotification(
@@ -667,28 +673,16 @@ fun Product.nutritionProfile(): ProductNutritionProfile {
     }
 
     // Dietary & Specialty tags
+    // Etiquetas orientativas. Antes se deducían "Sin Gluten", "Sin Lactosa", "Vegano", "Apto Diabéticos"
+    // y "Bajo en Sodio" por no encontrar una palabra en el nombre: eso es una afirmación de salud sin
+    // datos reales, así que solo quedan etiquetas que no ponen en riesgo a nadie.
     val dietTags = buildList {
-        val hasGluten = allergensList.any { it.contains("Gluten") }
-        val hasLactose = allergensList.any { it.contains("Lactosa") && !it.contains("Sin Lactosa") }
-        val isAnimalProduct = cat in listOf("carnes", "embutidos", "lacteos") ||
-            n.contains("huevo") || n.contains("miel") || n.contains("atún") || n.contains("sardina") ||
-            n.contains("pollo") || n.contains("res") || n.contains("cerdo") || n.contains("mayonesa")
-
-        if (!hasGluten) add("Sin Gluten")
-        if (!hasLactose) add("Sin Lactosa")
-        if (!isAnimalProduct) add("Vegano / Plant-Based")
         if (cat == "carnes" || n.contains("huevo") || n.contains("atún") || n.contains("salmón") || n.contains("yogurt griego") || n.contains("queso") || n.contains("pechuga") || n.contains("jamón de pavo")) {
-            add("Alto en Proteína")
+            add("Fuente de proteína")
         }
-        if (cat == "carnes" || n.contains("huevo") || n.contains("aguacate") || n.contains("aceite de oliva") || n.contains("queso") || n.contains("salmón") || n.contains("lechuga") || n.contains("espinaca") || n.contains("brócoli")) {
-            add("Keto / Low-Carb")
-        }
-        if (cat == "frutas" || n.contains("agua") || n.contains("avena") || n.contains("integral") || n.contains("zero") || n.contains("sin azúcar") || n.contains("almendra") || n.contains("yogurt griego") || n.contains("pechuga")) {
-            add("Apto Diabéticos / Bajo Índice Glucémico")
-        }
-        if (cat == "frutas" || n.contains("agua") || n.contains("arroz") || n.contains("avena") || n.contains("huevo")) {
-            add("Bajo en Sodio")
-        }
+        if (n.contains("sin azúcar") || n.contains("zero")) add("Sin azúcar (según su nombre)")
+        if (n.contains("sin lactosa") || n.contains("deslactosad")) add("Sin lactosa (según su nombre)")
+        if (n.contains("sin gluten")) add("Sin gluten (según su nombre)")
     }
 
     val (prot, carbs, fat) = when {

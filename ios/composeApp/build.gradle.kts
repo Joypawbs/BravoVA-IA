@@ -95,6 +95,10 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+        // Banco de pruebas de Brav IA (src/commonTest). Corre en la JVM con testDebugUnitTest.
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 

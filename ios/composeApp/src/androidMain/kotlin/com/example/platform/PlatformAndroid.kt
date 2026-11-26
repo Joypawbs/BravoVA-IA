@@ -699,5 +699,14 @@ private class FirebaseGenerativeModel(private val model: GenerativeModel) : Gene
     }
 }
 
-actual fun createGenerativeModel(modelName: String): GenerativeModelCompat =
-    FirebaseGenerativeModel(Firebase.ai.generativeModel(modelName))
+actual fun createGenerativeModel(modelName: String, config: AiModelConfig): GenerativeModelCompat =
+    FirebaseGenerativeModel(
+        Firebase.ai.generativeModel(
+            modelName = modelName,
+            generationConfig = com.google.firebase.ai.type.generationConfig {
+                if (config.jsonOutput) responseMimeType = "application/json"
+                if (config.temperature >= 0) temperature = config.temperature.toFloat()
+            },
+            systemInstruction = config.systemInstruction?.let { rules -> com.google.firebase.ai.type.content { text(rules) } }
+        )
+    )
