@@ -14,6 +14,13 @@ import com.example.ui.theme.BravoCtaGradient
 import com.example.ui.theme.formatRd
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Badge
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.expandVertically
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material.icons.outlined.AutoAwesome
@@ -414,6 +421,14 @@ fun AnimatedPurchaseButton(
         label = "btnScale"
     )
 
+    // Android (Material 3 Expressive): al tocar, la píldora se vuelve un rectángulo redondeado con un
+    // resorte. iPhone conserva la píldora y solo se encoge un poco, como los botones del sistema.
+    val cornerPercent by animateIntAsState(
+        targetValue = if (com.example.platform.PlatformInfo.isAndroid && filledState) 22 else 50,
+        animationSpec = spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMedium),
+        label = "btnShapeMorph"
+    )
+
     val taggedModifier = if (testTag != null) modifier.testTag(testTag) else modifier
 
     Surface(
@@ -429,7 +444,7 @@ fun AnimatedPurchaseButton(
         },
         enabled = !loading,
         interactionSource = interactionSource,
-        shape = RoundedCornerShape(999.dp),
+        shape = RoundedCornerShape(percent = cornerPercent),
         color = bgColor,
         border = BorderStroke(1.8.dp, primaryColor),
         modifier = taggedModifier.graphicsLayer {
@@ -1684,12 +1699,20 @@ fun VerticalProductCard(
                     modifier = Modifier.weight(1f)
                 )
                 if (qtyInCart <= 0) {
+                    // Android (Expressive): el círculo se vuelve "squircle" con un resorte mientras se presiona
+                    val addInteraction = remember { MutableInteractionSource() }
+                    val addPressed by addInteraction.collectIsPressedAsState()
+                    val addCorner by animateIntAsState(
+                        targetValue = if (com.example.platform.PlatformInfo.isAndroid && addPressed) 30 else 50,
+                        animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMedium),
+                        label = "addShapeMorph"
+                    )
                     Box(
                         modifier = Modifier
                             .size(40.dp)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(percent = addCorner))
                             .background(softAccent)
-                            .clickable {
+                            .clickable(interactionSource = addInteraction, indication = LocalIndication.current) {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
                                 addWithFlight()
                             }
@@ -1700,7 +1723,13 @@ fun VerticalProductCard(
                     }
                 }
             }
-            if (qtyInCart > 0) {
+            // El selector de cantidad entra con un resorte (crece desde el botón "+")
+            AnimatedVisibility(
+                visible = qtyInCart > 0,
+                enter = expandVertically(spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
+                exit = shrinkVertically(spring(stiffness = Spring.StiffnessMedium)) + fadeOut()
+            ) {
+              Column {
                 Spacer(Modifier.height(6.dp))
                 Row(
                     modifier = Modifier
@@ -1755,6 +1784,7 @@ fun VerticalProductCard(
                         )
                     }
                 }
+              }
             }
         }
     }
