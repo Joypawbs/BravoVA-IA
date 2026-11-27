@@ -18,3 +18,6 @@ local.properties
 debug.keystore
 *-debug.log
 __pycache__/
+
+# Archivos que AI Studio crea al sincronizar (bocetos, capturas)
+.aistudio/

@@ -1,16 +1,16 @@
 name: BravoVa KMP (Android + iOS)
 
-# Versión Compose Multiplatform (Android + iOS) que vive en la carpeta ios/.
-# Se ejecuta a mano (Actions → Run workflow) o cuando cambia algo dentro de ios/.
+# Versión Compose Multiplatform (Android + iOS) que vive en la carpeta bravova/.
+# Se ejecuta a mano (Actions → Run workflow) o cuando cambia algo dentro de bravova/.
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
-    paths: [ 'ios/**', '.github/workflows/ios-kmp.yml' ]
+    paths: [ 'bravova/**', '.github/workflows/ios-kmp.yml' ]
 
 defaults:
   run:
-    working-directory: ios
+    working-directory: bravova
 
 concurrency:
   group: build-${{ github.ref }}
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: BravoVa-android-debug
-          path: ios/composeApp/build/outputs/apk/debug/*.apk
+          path: bravova/composeApp/build/outputs/apk/debug/*.apk
 
   ios:
     name: iOS (simulator build + unsigned device IPA)
@@ -65,10 +65,10 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project
-        working-directory: ios/iosApp
+        working-directory: bravova/iosApp
         run: bash ../scripts/generar_proyecto.sh
       - name: Build for iOS Simulator
-        working-directory: ios/iosApp
+        working-directory: bravova/iosApp
         run: |
           set -o pipefail
           xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Debug \
@@ -76,7 +76,7 @@ jobs:
             -derivedDataPath build/sim \
             CODE_SIGNING_ALLOWED=NO ARCHS=arm64 build | tail -n 200
       - name: Build unsigned device IPA (for Sideloadly / AltStore)
-        working-directory: ios/iosApp
+        working-directory: bravova/iosApp
         run: |
           set -o pipefail
           xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Release \
@@ -100,4 +100,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: BravoVa-ios-unsigned-ipa
-          path: ios/iosApp/BravoVa-unsigned.ipa
+          path: bravova/iosApp/BravoVa-unsigned.ipa

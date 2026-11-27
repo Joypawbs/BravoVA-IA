@@ -1,6 +1,6 @@
 name: Vista en simulador iOS
 
-# Compila la app de ios/, la abre en un iPhone simulado y guarda capturas y un video.
+# Compila la app de bravova/, la abre en un iPhone simulado y guarda capturas y un video.
 on:
   workflow_dispatch:
     inputs:
@@ -34,12 +34,12 @@ jobs:
           fi
           xcodebuild -version
       - name: Build Kotlin framework (simulator)
-        working-directory: ios
+        working-directory: bravova
         run: ./gradlew --no-daemon :composeApp:linkDebugFrameworkIosSimulatorArm64
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project
-        working-directory: ios/iosApp
+        working-directory: bravova/iosApp
         run: bash ../scripts/generar_proyecto.sh
       - name: Boot iPhone
         run: |
@@ -48,7 +48,7 @@ jobs:
           xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
           xcrun simctl ui "$UDID" appearance light
       - name: Recorrido automático (XCUITest)
-        working-directory: ios/iosApp
+        working-directory: bravova/iosApp
         run: |
           mkdir -p "$GITHUB_WORKSPACE/sim-out"
           xcrun simctl io "$UDID" recordVideo --codec=h264 --force "$GITHUB_WORKSPACE/sim-out/recorrido.mp4" &

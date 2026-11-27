@@ -34,11 +34,14 @@ jobs:
     timeout-minutes: 60
     defaults:
       run:
-        working-directory: ios
+        working-directory: bravova
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.SRC }}
+      - name: Commits anteriores al cambio de nombre (ios/ -> bravova/)
+        working-directory: .
+        run: if [ -d ios ] && [ ! -d bravova ]; then mv ios bravova; fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -87,6 +90,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.SRC }}
+      - name: Commits anteriores al cambio de nombre (ios/ -> bravova/)
+        working-directory: .
+        run: if [ -d ios ] && [ ! -d bravova ]; then mv ios bravova; fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -98,11 +104,12 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
       - name: Compilar IPA sin firmar
-        working-directory: ios/iosApp
+        working-directory: bravova/iosApp
         run: |
           set -o pipefail
           brew install xcodegen
-          bash ../scripts/generar_proyecto.sh
+          # Commits anteriores a scripts/generar_proyecto.sh generan el proyecto directo
+          if [ -f ../scripts/generar_proyecto.sh ]; then bash ../scripts/generar_proyecto.sh; else xcodegen generate; fi
           V="${TAG#v}"; BASE="${V%%-*}"; IFS=. read -r MA MI PA <<< "$BASE"
           CODE=$((MA*10000 + MI*100 + ${PA:-0}))
           # Beta (v2.0.0-beta1): queda por debajo de la versión final, pero por encima de la anterior

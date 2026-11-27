@@ -11,7 +11,7 @@ jobs:
       - run: pip install pillow
       - name: Armar hojas de contacto
         run: |
-          D=ios/composeApp/src/commonMain/kotlin/com/example/data
+          D=bravova/composeApp/src/commonMain/kotlin/com/example/data
           python3 .github/scripts/hojas_fotos.py out $D/BravoCatalogData.kt $D/ArcaCatalogData.kt
       - name: Publicar en la rama revision-fotos
         run: |

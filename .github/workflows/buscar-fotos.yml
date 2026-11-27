@@ -11,7 +11,7 @@ jobs:
       - run: pip install pillow
       - name: Buscar candidatas y armar hojas
         run: |
-          D=ios/composeApp/src/commonMain/kotlin/com/example/data
+          D=bravova/composeApp/src/commonMain/kotlin/com/example/data
           python3 -u .github/scripts/buscar_fotos.py out $D/BravoCatalogData.kt $D/ArcaCatalogData.kt
       - name: Publicar en la rama fotos-candidatas
         run: |
