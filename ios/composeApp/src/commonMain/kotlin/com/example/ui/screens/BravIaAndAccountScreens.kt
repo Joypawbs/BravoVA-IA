@@ -150,6 +150,9 @@ import com.example.model.BRAV_IA_RECIPES
 import com.example.ai.StoreFacts
 import com.example.ui.components.nativeLiquidGlassAvailable
 import com.example.ui.components.NativeGlassBudgetPanel
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import com.example.ai.BravIaEngine
 import com.example.model.findRecipeById
 import com.example.model.FcmTopicSubscription
@@ -947,6 +950,13 @@ fun BravIaChatScreen(
     val imeInsets = WindowInsets.ime
     var isImeVisible by remember { mutableStateOf(false) }
     var topOverlayHeightPx by remember { mutableIntStateOf(0) }
+    // Borde inferior de la barra superior y borde superior del panel de vidrio (en coordenadas de la ventana):
+    // el panel nativo se dibuja encima de Compose, así que se desvanece al pasar bajo la barra
+    val topOverlayBottomPx = remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    val budgetPanelTopPx = remember { androidx.compose.runtime.mutableFloatStateOf(Float.MAX_VALUE) }
+    val budgetPanelUncovered by remember {
+        androidx.compose.runtime.derivedStateOf { budgetPanelTopPx.floatValue >= topOverlayBottomPx.floatValue - 8f }
+    }
     val topOverlayPadding by animateDpAsState(
         targetValue = with(density) { topOverlayHeightPx.toDp() },
         animationSpec = tween(durationMillis = 200),
@@ -1086,6 +1096,7 @@ fun BravIaChatScreen(
                         }
                         if (nativeLiquidGlassAvailable()) {
                             // iOS 26+: panel nativo de Liquid Glass (deslizador del sistema, botones y sugerencias de vidrio)
+                            com.example.ui.components.GlassPresence(budgetPanelUncovered) {
                             NativeGlassBudgetPanel(
                                 value = budgetAmount,
                                 min = 400,
@@ -1110,8 +1121,10 @@ fun BravIaChatScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(132.dp)
+                                    .onGloballyPositioned { budgetPanelTopPx.floatValue = it.positionInRoot().y }
                                     .testTag("budget_glass_panel")
                             )
+                            }
                         } else {
 
                             Row(
@@ -1915,6 +1928,7 @@ fun BravIaChatScreen(
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .onSizeChanged { topOverlayHeightPx = it.height }
+                .onGloballyPositioned { topOverlayBottomPx.floatValue = it.boundsInRoot().bottom }
         ) {
             GlassTopBar(
                 darkMode = darkMode,
