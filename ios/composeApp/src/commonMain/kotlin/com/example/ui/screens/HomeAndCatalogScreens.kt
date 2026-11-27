@@ -1150,7 +1150,7 @@ fun CatalogScreen(
                     label = "catalog_title"
                 ) { scrolled ->
                     if (scrolled) {
-                        GlassTopBar(darkMode = darkMode, accent = primaryColor, title = catalogTitle)
+                        com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) { GlassTopBar(darkMode = darkMode, accent = primaryColor, title = catalogTitle) }
                     } else {
                         LargeTitle(title = catalogTitle, accent = primaryColor)
                     }

@@ -64,6 +64,7 @@ fun QuickViewBottomSheet(
     onShare: () -> Unit
 ) {
     var favorite by remember { mutableStateOf(isFavorite) }
+    com.example.ui.components.SuppressNativeGlass() // el vidrio nativo se dibujaría encima del diálogo
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 28.dp),
@@ -99,6 +100,7 @@ fun QuickViewBottomSheet(
 /** Foto a pantalla completa: pellizca para hacer zoom, doble toque para acercar o alejar. */
 @Composable
 fun ZoomableProductImage(product: Product, onDismiss: () -> Unit) {
+    com.example.ui.components.SuppressNativeGlass() // el vidrio nativo se dibujaría encima del diálogo
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         var scale by remember { mutableFloatStateOf(1f) }
         var offset by remember { mutableStateOf(Offset.Zero) }

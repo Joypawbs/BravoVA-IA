@@ -595,7 +595,10 @@ fun BravoVaApp(
                     ) { screenState ->
                         CompositionLocalProvider(
                             LocalProductHeroScopes provides ProductHeroScopes(this@SharedTransitionLayout, this@AnimatedContent),
-                            LocalDataSaver provides dataSaver
+                            LocalDataSaver provides dataSaver,
+                            // La pantalla que sale desvanece ya su vidrio nativo (no se superpone con la que entra)
+                            com.example.ui.components.LocalGlassPresence provides
+                                (this@AnimatedContent.transition.targetState == androidx.compose.animation.EnterExitState.Visible)
                         ) {
                         when (screenState) {
                         AppScreen.HOME -> {
@@ -619,6 +622,7 @@ fun BravoVaApp(
                                 },
                                 label = "store_home_transition"
                             ) { storeModeState ->
+                                com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                                 HomeScreen(
                                     storeMode = storeModeState,
                                     darkMode = darkMode,
@@ -659,6 +663,7 @@ fun BravoVaApp(
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
                                 )
+                                }
                             }
                         }
 
@@ -680,6 +685,7 @@ fun BravoVaApp(
                                 },
                                 label = "store_catalog_transition"
                             ) { storeModeState ->
+                                com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                                 CatalogScreen(
                                     storeMode = storeModeState,
                                     darkMode = darkMode,
@@ -699,6 +705,7 @@ fun BravoVaApp(
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
                                 )
+                                }
                             }
                         }
 
@@ -1108,6 +1115,7 @@ fun BravoVaApp(
                             .navigationBarsPadding()
                             .padding(start = 16.dp, end = 16.dp, bottom = if (PlatformInfo.isAndroid) 88.dp else 84.dp)
                     ) {
+                        com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                         CartSummaryBar(
                             itemCount = cartTotals.count,
                             total = cartTotals.finalPay,
@@ -1115,6 +1123,7 @@ fun BravoVaApp(
                             pulseTrigger = cartPulseTrigger,
                             onOpenCart = { viewModel.navigateTo(AppScreen.CART) }
                         )
+                        }
                     }
 
                     // En iOS 26+ la barra nativa no se esconde al hacer scroll: se encoge (como en las apps de Apple)
@@ -1135,6 +1144,7 @@ fun BravoVaApp(
                             // En Android la NavigationBar pinta su propio fondo bajo la barra de gestos.
                             .then(if (PlatformInfo.isAndroid) Modifier else Modifier.navigationBarsPadding())
                     ) {
+                        com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                         TranslucentBottomDock(
                             currentScreen = currentScreen,
                             isArca = isArca,
@@ -1146,8 +1156,13 @@ fun BravoVaApp(
                                 com.example.ui.components.SearchFocusRequest.request()
                             }
                         )
+                        }
                     }
 
+                    // Se recuerda el último aviso para que pueda desvanecerse al salir (si no, desaparecía de golpe)
+                    val lastToastHolder = remember { arrayOfNulls<com.example.model.ToastNotification>(1) }
+                    if (toast != null) lastToastHolder[0] = toast
+                    val lastToast = toast ?: lastToastHolder[0]
                     AnimatedVisibility(
                         visible = toast != null,
                         enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
@@ -1156,8 +1171,9 @@ fun BravoVaApp(
                             .align(Alignment.TopCenter)
                             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
                     ) {
-                        toast?.let { activeToast ->
+                        lastToast?.let { activeToast ->
                             if (nativeLiquidGlassAvailable() && activeToast.actionLabel == null) {
+                                com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                                 NativeGlassToast(
                                     text = activeToast.message,
                                     symbol = toastSymbol(activeToast.icon),
@@ -1165,6 +1181,7 @@ fun BravoVaApp(
                                     darkMode = darkMode,
                                     modifier = Modifier.fillMaxWidth().height(60.dp).testTag("toast_banner")
                                 )
+                                }
                             } else {
                                 // Android: aviso Material (superficie inversa), como un Snackbar
                                 Surface(
@@ -1232,6 +1249,7 @@ fun BravoVaApp(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         celebrationOrder?.let { confirmedOrder ->
+                            com.example.ui.components.SuppressNativeGlass()
                             OrderSuccessCelebrationOverlay(
                                 orderId = confirmedOrder.id,
                                 totalAmountRd = confirmedOrder.total.toInt(),

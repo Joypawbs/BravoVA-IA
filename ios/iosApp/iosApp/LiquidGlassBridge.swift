@@ -109,10 +109,35 @@ final class GlassHostController<V: View>: UIViewController {
     }
 }
 
+// MARK: - Aparecer y desaparecer con fundido
+// Compose no puede desvanecer vistas nativas: Kotlin dice "visible o no" y SwiftUI hace el
+// fundido (opacidad + leve escala y desenfoque, como el vidrio de iOS al aparecer).
+
+final class GlassPresenceModel: ObservableObject {
+    @Published var visible = false
+}
+
+struct GlassPresenceContainer<Content: View>: View {
+    @ObservedObject var p: GlassPresenceModel
+    let anchor: UnitPoint
+    let travel: CGFloat
+    @ViewBuilder let content: () -> Content
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        content()
+            .opacity(p.visible ? 1 : 0)
+            .scaleEffect(p.visible || reduceMotion ? 1 : 0.94, anchor: anchor)
+            .blur(radius: p.visible || reduceMotion ? 0 : 5)
+            .offset(y: p.visible || reduceMotion ? 0 : travel)
+            .allowsHitTesting(p.visible)
+    }
+}
+
 // MARK: - Barra superior
 
 final class TopBarModel: ObservableObject {
-    struct Action: Identifiable { let id: Int; let symbol: String; let label: String; let text: String; let badge: String; let highlighted: Bool; let tint: Color? }
+    struct Action: Identifiable, Equatable { let id: Int; let symbol: String; let label: String; let text: String; let badge: String; let highlighted: Bool; let tint: Color? }
     @Published var title = ""
     @Published var subtitle = ""
     @Published var subtitleColor = Color.accentColor
@@ -496,6 +521,8 @@ final class SearchFieldModel: ObservableObject {
     @Published var dark = false
     @Published var trailingSymbol = ""
     @Published var focusRequest = 0
+    /// Al ocultar el buscador (cambio de pantalla, hoja abierta) se cierra el teclado
+    @Published var blurRequest = 0
     var onChange: (String) -> Void = { _ in }
     var onSubmit: () -> Void = {}
     var onFocus: (Bool) -> Void = { _ in }
@@ -550,6 +577,7 @@ struct GlassSearchFieldView: View {
         .environment(\.colorScheme, m.dark ? .dark : .light)
         .onChange(of: focused) { _, now in m.onFocus(now) }
         .onChange(of: m.focusRequest) { _, _ in focused = true }
+        .onChange(of: m.blurRequest) { _, _ in focused = false }
     }
 }
 
@@ -557,22 +585,52 @@ struct GlassSearchFieldView: View {
 
 final class GlassHandle: NSObject, IosGlassHandle {
     enum Kind { case topBar, dock, cartBar, toast, search }
-    private let topModel = TopBarModel()
-    private let dockModel = DockModel()
-    private let cartModel = CartBarModel()
-    private let toastModel = ToastModel()
-    private let searchModel = SearchFieldModel()
+    private let topModel: TopBarModel
+    private let dockModel: DockModel
+    private let cartModel: CartBarModel
+    private let toastModel: ToastModel
+    private let searchModel: SearchFieldModel
+    private let presence: GlassPresenceModel
+    private var receivedFirstVisibility = false
     private let controller: UIViewController
 
     init(kind: Kind) {
+        let top = TopBarModel(), dock = DockModel(), cart = CartBarModel()
+        let toast = ToastModel(), search = SearchFieldModel(), p = GlassPresenceModel()
+        topModel = top; dockModel = dock; cartModel = cart
+        toastModel = toast; searchModel = search; presence = p
         switch kind {
-        case .topBar: controller = GlassHostController(root: GlassTopBarView(m: topModel))
-        case .dock: controller = GlassHostController(root: GlassDockView(m: dockModel))
-        case .cartBar: controller = GlassHostController(root: GlassCartBarView(m: cartModel))
-        case .toast: controller = GlassHostController(root: GlassToastView(m: toastModel))
-        case .search: controller = GlassHostController(root: GlassSearchFieldView(m: searchModel))
+        case .topBar:
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .top, travel: -6) )
+        case .dock:
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .bottom, travel: 14) { GlassDockView(m: dock) })
+        case .cartBar:
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .bottom, travel: 12) { GlassCartBarView(m: cart) })
+        case .toast:
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .top, travel: -14) { GlassToastView(m: toast) })
+        case .search:
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .center, travel: 0) { GlassSearchFieldView(m: search) })
         }
         super.init()
+    }
+
+    func setVisible(visible: Bool) {
+        // Oculta: los toques pasan a Compose (lo que hay debajo)
+        controller.view.isUserInteractionEnabled = visible
+        if !receivedFirstVisibility {
+            // Primera vez: se dibuja invisible y en el siguiente ciclo aparece con fundido
+            receivedFirstVisibility = true
+            guard visible else { return }
+            DispatchQueue.main.async { [presence] in
+                withAnimation(.smooth(duration: 0.30)) { presence.visible = true }
+            }
+            return
+        }
+        guard presence.visible != visible else { return }
+        if !visible { searchModel.blurRequest += 1 }
+        withAnimation(visible ? .smooth(duration: 0.30) : .easeOut(duration: 0.16)) {
+            presence.visible = visible
+        }
     }
 
     func viewController() -> UIViewController { controller }
@@ -586,12 +644,15 @@ final class GlassHandle: NSObject, IosGlassHandle {
         m.onAction = { i in onAction(KotlinInt(int: Int32(i))) }
         if m.title != title { m.title = title }
         if m.subtitle != subtitle { m.subtitle = subtitle }
-        m.subtitleColor = Color(argb: subtitleArgb)
+        let subColor = Color(argb: subtitleArgb)
+        if m.subtitleColor != subColor { m.subtitleColor = subColor }
         if m.hasBack != hasBack { m.hasBack = hasBack }
-        m.backLabel = backLabel
-        m.accent = Color(argb: accentArgb)
+        if m.backLabel != backLabel { m.backLabel = backLabel }
+        let accent = Color(argb: accentArgb)
+        if m.accent != accent { m.accent = accent }
         if m.dark != dark { m.dark = dark }
-        m.actions = symbols.indices.map { i in
+        // Solo se publica si algo cambió: cada publicación redibuja la barra
+        let newActions: [TopBarModel.Action] = symbols.indices.map { i in
             let t = tints.indices.contains(i) ? tints[i].int32Value : 0
             return TopBarModel.Action(
                 id: i, symbol: symbols[i],
@@ -601,6 +662,7 @@ final class GlassHandle: NSObject, IosGlassHandle {
                 highlighted: highlighted.indices.contains(i) ? highlighted[i].boolValue : false,
                 tint: t == 0 ? nil : Color(argb: t))
         }
+        if m.actions != newActions { m.actions = newActions }
     }
 
     func updateDock(symbols: [String], labels: [String], selected: Int32, accentArgb: Int32, dark: Bool,
@@ -609,10 +671,11 @@ final class GlassHandle: NSObject, IosGlassHandle {
         m.onSelect = { i in onSelect(KotlinInt(int: Int32(i))) }
         m.onSearch = onSearch
         if m.symbols != symbols { m.symbols = symbols }
-        m.labels = labels
+        if m.labels != labels { m.labels = labels }
         if m.selected != Int(selected) { m.selected = Int(selected) }
         if m.minimized != minimized { m.minimized = minimized }
-        m.accent = Color(argb: accentArgb)
+        let accentColor = Color(argb: accentArgb)
+        if m.accent != accentColor { m.accent = accentColor }
         if m.dark != dark { m.dark = dark }
     }
 
@@ -621,7 +684,8 @@ final class GlassHandle: NSObject, IosGlassHandle {
         m.onTap = onTap
         if m.count != Int(count) { m.count = Int(count) }
         if m.total != total { m.total = total }
-        m.accent = Color(argb: accentArgb)
+        let accentColor = Color(argb: accentArgb)
+        if m.accent != accentColor { m.accent = accentColor }
         if m.dark != dark { m.dark = dark }
     }
 
@@ -637,7 +701,8 @@ final class GlassHandle: NSObject, IosGlassHandle {
         if m.text != text { m.text = text }
         if m.placeholder != placeholder { m.placeholder = placeholder }
         if m.trailingSymbol != trailingSymbol { m.trailingSymbol = trailingSymbol }
-        m.accent = Color(argb: accentArgb)
+        let accentColor = Color(argb: accentArgb)
+        if m.accent != accentColor { m.accent = accentColor }
         if m.dark != dark { m.dark = dark }
     }
 
@@ -647,7 +712,8 @@ final class GlassHandle: NSObject, IosGlassHandle {
         let m = toastModel
         if m.text != text { m.text = text }
         if m.symbol != symbol { m.symbol = symbol }
-        m.accent = Color(argb: accentArgb)
+        let accentColor = Color(argb: accentArgb)
+        if m.accent != accentColor { m.accent = accentColor }
         if m.dark != dark { m.dark = dark }
     }
 }

@@ -118,6 +118,7 @@ fun BarcodeScannerModal(
         SAMPLE_BARCODE_CHIPS.find { it.sku == selectedProduct?.sku }?.ean ?: "7460112299014"
     }
 
+    com.example.ui.components.SuppressNativeGlass() // el vidrio nativo se dibujaría encima del diálogo
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)

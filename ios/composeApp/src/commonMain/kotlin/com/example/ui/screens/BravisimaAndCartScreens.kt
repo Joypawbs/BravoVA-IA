@@ -2785,6 +2785,7 @@ fun BiometricOrderPromptDialog(
         else -> primaryColor
     }
 
+    com.example.ui.components.SuppressNativeGlass() // el vidrio nativo se dibujaría encima del diálogo
     Dialog(
         onDismissRequest = {
             if (scanState != "scanning" && scanState != "verified") {
