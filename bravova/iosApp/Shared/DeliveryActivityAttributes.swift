@@ -9,6 +9,8 @@ struct BravoDeliveryAttributes: ActivityAttributes {
         var stage: String
         var etaMinutes: Int
         var progress: Double
+        /// Hora estimada de llegada (ahora + ETA), para mostrar "Llega 3:42 p. m."
+        var arrival: Date = Date()
     }
     var orderId: String
     var branch: String

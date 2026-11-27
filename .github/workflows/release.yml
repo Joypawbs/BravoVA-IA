@@ -83,7 +83,8 @@ jobs:
           path: dist/*.apk
 
   ios:
-    runs-on: macos-15
+    # Xcode 27 + SDK de iOS 27 (imagen de GitHub con Xcode 27 sobre macOS 27, Apple Silicon)
+    runs-on: xcode-27
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -97,17 +98,18 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
-      - name: Elegir Xcode 26
+      - name: Xcode 27
         run: |
-          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -v -i beta | sort -V | tail -1)
-          sudo xcode-select -s "${X:-/Applications/Xcode_16.4.app}" || true
+          # La imagen xcode-27 trae Xcode 27 como predeterminado
           xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
       - name: Compilar IPA sin firmar
         working-directory: bravova/iosApp
         run: |
           set -o pipefail
           brew install xcodegen
-          xcodegen generate
+          # Commits anteriores a scripts/generar_proyecto.sh generan el proyecto directo
+          if [ -f ../scripts/generar_proyecto.sh ]; then bash ../scripts/generar_proyecto.sh; else xcodegen generate; fi
           V="${TAG#v}"; BASE="${V%%-*}"; IFS=. read -r MA MI PA <<< "$BASE"
           CODE=$((MA*10000 + MI*100 + ${PA:-0}))
           # Beta (v2.0.0-beta1): queda por debajo de la versión final, pero por encima de la anterior

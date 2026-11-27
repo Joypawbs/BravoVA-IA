@@ -240,17 +240,16 @@ def main():
                 swipe_up()
             perf("catálogo: desplazar")
     # Brav IA como invitado: responde en modo local, sin cuenta, con datos del catálogo y el recetario.
-    tap(["Brav IA"], wait=3, fallback=(0.7, 0.955))
-    for consulta, nombre in (("como hago un sancocho", "brav_ia_receta"), ("necesito arroz y habichuelas", "brav_ia_productos"), ("receta de paella valenciana", "brav_ia_receta_no_verificada")):
-        if tap(["Pide una receta"], prefix=True, wait=1.5, fallback=(0.5, 0.9)):
-            adb("shell", "input", "text", consulta.replace(" ", "%s")); time.sleep(1)
-            adb("shell", "input", "keyevent", "66"); time.sleep(5)
-            hide_keyboard()
-            shot(nombre)
-            if nombre == "brav_ia_receta":
-                swipe_down(); shot("brav_ia_receta_ingredientes")
-                swipe_down(); shot("brav_ia_receta_pasos")
-                swipe_up(); swipe_up(); swipe_up()
+    # El enlace bravova://bravia?q=… abre el chat y envía la pregunta (no depende de coordenadas).
+    for consulta, nombre in (("como hago un sancocho", "brav_ia_receta"), ("necesito arroz y habichuelas", "brav_ia_productos"), ("receta de paella valenciana", "brav_ia_receta_no_verificada"), ("mangu para 8 personas", "brav_ia_receta_8_personas")):
+        url = "bravova://bravia?q=" + consulta.replace(" ", "+")
+        adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", f"'{url}'", PACKAGE)
+        time.sleep(6)
+        shot(nombre)
+        if nombre == "brav_ia_receta":
+            swipe_down(); shot("brav_ia_receta_ingredientes")
+            swipe_down(); shot("brav_ia_receta_pasos")
+            swipe_up(); swipe_up(); swipe_up()
     tap(["Cuenta"], wait=3, fallback=(0.9, 0.955))
     if tap(["Tarjeta Bravísima"], wait=3):
         shot("bravisima")

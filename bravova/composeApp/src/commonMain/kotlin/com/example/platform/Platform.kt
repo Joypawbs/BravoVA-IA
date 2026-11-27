@@ -288,6 +288,9 @@ expect object PushPlatform {
 
 data class AuthUser(val uid: String, val displayName: String?, val email: String?)
 
+/** Token de depuración de App Check en instalaciones sin App Attest (Sideloadly), o null. */
+expect fun appCheckDebugTokenOrNull(): String?
+
 expect object AuthPlatform {
     val isSignInAvailable: Boolean
     fun currentUser(): AuthUser?
@@ -352,3 +355,14 @@ expect fun currentDarkModeHint(context: PlatformContext): Boolean
 
 /** Platform-specific database file location (Room KMP). */
 expect fun getDatabaseBuilder(context: PlatformContext): androidx.room.RoomDatabase.Builder<com.example.data.local.BravoDatabase>
+
+
+/** Tipo de biometría del equipo, para usar el nombre e ícono correctos (Face ID, Touch ID o huella). */
+enum class BiometryKind(val displayName: String, val instruction: String, val sensorHint: String) {
+    FACE_ID("Face ID", "Usa Face ID", "Toca para usar Face ID"),
+    TOUCH_ID("Touch ID", "Coloca tu dedo en Touch ID", "Toca para usar Touch ID"),
+    OPTIC_ID("Optic ID", "Usa Optic ID", "Toca para usar Optic ID"),
+    FINGERPRINT("huella", "Coloca tu huella digital", "Toca el sensor de huella para autorizar")
+}
+
+expect fun deviceBiometryKind(): BiometryKind

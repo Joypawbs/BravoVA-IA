@@ -74,6 +74,63 @@ final class BravoVaTourUITests: XCTestCase {
 
     private func pause(_ s: TimeInterval) { _ = XCTWaiter.wait(for: [expectation(description: "pausa")], timeout: s) }
 
+    /// 2.5: vidrio líquido de Brav IA (panel de presupuesto con deslizador) y buscador con botón que se desprende.
+    func testVidrioBravIa() throws {
+        app.launch()
+        pause(6)
+        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        pause(2)
+        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        pause(5); shot("v25_inicio")
+        tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
+        pause(5); shot("v25_bravia_panel")
+        let slider = app.sliders.firstMatch
+        if slider.waitForExistence(timeout: 4) {
+            print("[tour] deslizador encontrado: \(slider.value ?? "")")
+            slider.adjust(toNormalizedSliderPosition: 0.72)
+            pause(2); shot("v25_bravia_deslizador_movido")
+        } else {
+            print("[tour] no se encontró el deslizador")
+        }
+        tap(["Armar"], fallback: CGVector(dx: 0.6, dy: 0.2), wait: 2)
+        pause(6); shot("v25_bravia_armar")
+        tap(["Inicio"], fallback: CGVector(dx: 0.12, dy: 0.935))
+        pause(3)
+        let field = app.textFields.firstMatch
+        if field.waitForExistence(timeout: 4) { field.tap() }
+        pause(2); dismissKeyboardTips(); shot("v25_buscador_enfocado")
+        tap(["Cerrar teclado"], fallback: CGVector(dx: 0.92, dy: 0.17), wait: 2)
+        pause(2); shot("v25_buscador_cerrado")
+    }
+
+    /// Reproduce el cierre de Brav IA al pedir una receta.
+    func testBravIaReceta() throws {
+        app.launch()
+        pause(6)
+        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        pause(2)
+        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        pause(4)
+        tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
+        pause(4); shot("receta_0_bravia")
+        let fields = app.textFields.allElementsBoundByIndex + app.textViews.allElementsBoundByIndex
+        print("[tour] campos de texto: \(fields.count)")
+        let input = fields.last ?? app.textFields.firstMatch
+        if input.waitForExistence(timeout: 4) { input.tap() } else {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.86)).tap()
+        }
+        pause(1); dismissKeyboardTips()
+        app.typeText("cómo hacer sancocho")
+        pause(1); shot("receta_1_escrito")
+        tap(["Enviar", "send", "Send"], fallback: CGVector(dx: 0.9, dy: 0.53), wait: 2)
+        for i in 0..<6 {
+            pause(3)
+            print("[tour] estado app tras \((i + 1) * 3) s: \(app.state.rawValue)")
+            if app.state != .runningForeground { print("[tour] LA APP SE CERRÓ"); break }
+        }
+        shot("receta_2_respuesta")
+    }
+
     func testRecorridoCompleto() throws {
         app.launch()
         pause(3); shot("splash")

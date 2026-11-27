@@ -54,7 +54,7 @@ cd bravova
 
 # iOS: framework para el simulador y proyecto de Xcode
 ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
-cd iosApp && xcodegen generate && open iosApp.xcodeproj
+bash scripts/generar_proyecto.sh && open iosApp/iosApp.xcodeproj
 ```
 
 En Android Studio, abre la carpeta **`bravova/`** (no la raíz del repositorio).

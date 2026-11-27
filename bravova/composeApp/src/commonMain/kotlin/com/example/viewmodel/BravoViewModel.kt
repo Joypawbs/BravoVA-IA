@@ -30,6 +30,7 @@ import com.example.platform.URLEncoder
 import com.example.platform.content
 import com.example.platform.createGenerativeModel
 import com.example.platform.AiModelConfig
+import com.example.platform.appCheckDebugTokenOrNull
 import com.example.platform.AiContent
 import com.example.ai.BravIaEngine
 import com.example.ai.BravIaText
@@ -56,6 +57,7 @@ import com.example.model.AppScreen
 import com.example.model.BranchGeoCoordinate
 import com.example.model.BravisimaCard
 import com.example.model.BravisimaMovement
+import com.example.model.BRAV_IA_RECIPES
 import com.example.model.CartItem
 import com.example.model.CartTotals
 import com.example.model.CatalogSection
@@ -88,6 +90,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import com.example.delivery.DeliveryRouteStore
+import com.example.delivery.RoadRoute
+import com.example.delivery.RoadRoutingClient
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -175,8 +182,12 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     private val bravIaChatModel by lazy { createGenerativeModel("gemini-3.8-flash", bravIaChatConfig) }
     private val bravIaChatFallbackModel by lazy { createGenerativeModel("gemini-3.5-flash-lite", bravIaChatConfig) }
 
-    private fun isFirebaseUserAuthenticatedForAi(): Boolean =
-        runCatching { AuthPlatform.currentUser() != null }.getOrDefault(false)
+    /**
+     * Brav IA usa Firebase AI Logic, que no necesita un usuario con sesión (la protege App Check).
+     * Antes se exigía sesión y en iPhone —donde no había inicio de sesión— Brav IA nunca hablaba
+     * con el modelo. Ahora siempre se intenta el modelo; si falla, la respuesta local dice el motivo.
+     */
+    private fun isFirebaseUserAuthenticatedForAi(): Boolean = true
 
     private val _pendingChatImageUri = MutableStateFlow<String?>(null)
     val pendingChatImageUri: StateFlow<String?> = _pendingChatImageUri.asStateFlow()
@@ -604,9 +615,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         listOf(
             ChatMessage(
                 sender = "ai",
-                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu chef y asistente personal de compras.\n\n**¿En qué puedo ayudarte hoy?:**\n• **Recetas e instrucciones paso a paso:** Pídeme cualquier plato y te daré todos los ingredientes exactos con sus precios en RD$ y pasos numerados.\n• **Catálogo oficial completo:** Consulto al instante los **750 productos** de Supermercados Bravo y El Arca Petshop.\n• **Pedidos asistidos en el chat:** Puedo armar y pedir tu compra directamente con tu confirmación manual.",
-                skus = listOf("BRV-001", "BRV-009", "BRV-053", "BRV-075", "BRV-301", "BRV-412"),
-                modelLabel = "Brav IA • 750 Productos & Pedido Asistido"
+                text = "**¡Hola, qué alegría tenerte por aquí!**\nSoy **Brav IA**, tu asistente de compras.\n\n• **Recetas verificadas:** ${BRAV_IA_RECIPES.size} platos dominicanos e internacionales con sus ingredientes del catálogo y pasos numerados. Prueba: «¿Cómo hago un sancocho?».\n• **Productos con su precio real:** te recomiendo lo que hay en Supermercados Bravo y El Arca, y la app suma el total.\n• **Pedidos con tu confirmación:** armo la compra y tú decides si se pide.",
+                modelLabel = "Brav IA"
             )
         )
     )
@@ -616,6 +626,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         BravoPushNotificationCenter.initialize(application)
         setupConnectivityObserver(application)
         startLiveDeliveryTelemetryTicker()
+        observeDeliveryRoute()
         viewModelScope.launch {
             localRepo.ensureCatalogCached(
                 bravoProducts = BravoCatalogData.BRAVO_PRODUCTS,
@@ -918,16 +929,17 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 Triple(
                     18.4692 + latOffset,
                     -69.9415 + lngOffset,
-                    "GPS Dispositivo sincronizado (${String.format(Locale.US, "%.4f", 18.4692 + latOffset)}, ${String.format(Locale.US, "%.4f", -69.9415 + lngOffset)})"
+                    "Estás fuera de la zona de entrega • Ruta de muestra en Santo Domingo"
                 )
             }
             applyLocation(effectiveLat, effectiveLng, true, sourceDesc)
         } else {
+            // Aún no hay posición: se muestra una referencia y se corrige cuando llegue el GPS
             applyLocation(
-                18.4704,
-                -69.9408,
-                true,
-                "GPS Activo • Polígono Central Santo Domingo"
+                _realLocationMetrics.value.userLat,
+                _realLocationMetrics.value.userLng,
+                false,
+                "Buscando tu ubicación…"
             )
         }
 
@@ -935,11 +947,11 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         runCatching {
             LocationProvider.requestSingleUpdate(context) { location ->
                 val (lat, lng, desc) = if (location.latitude in 17.5..20.2 && location.longitude in -72.0..-68.0) {
-                    Triple(location.latitude, location.longitude, "GPS en vivo (${String.format(Locale.US, "%.4f", location.latitude)}, ${String.format(Locale.US, "%.4f", location.longitude)})")
+                    Triple(location.latitude, location.longitude, "Tu ubicación real (precisión ±${location.accuracyMeters.roundToInt()} m)")
                 } else {
                     val latOff = ((location.latitude * 1000).toInt() % 35) * 0.0008
                     val lngOff = ((location.longitude * 1000).toInt() % 35) * 0.0008
-                    Triple(18.4692 + latOff, -69.9415 + lngOff, "GPS en vivo sincronizado")
+                    Triple(18.4692 + latOff, -69.9415 + lngOff, "Estás fuera de la zona de entrega • Ruta de muestra en Santo Domingo")
                 }
                 applyLocation(lat, lng, true, desc)
             }
@@ -961,7 +973,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             topic = BravoPushNotificationCenter.TOPIC_ORDERS_REALTIME,
             targetOrderId = orderId,
             progressPct = stage.progressPct,
-            postSystemNotification = true
+            postSystemNotification = false
         )
         showToast("pin", "Push GPS: ${metrics.roadDistanceKm} km • ETA ~${metrics.stageAdjustedEtaMinutes} min")
     }
@@ -1311,7 +1323,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         }
         _orders.value = updatedList
         // Pedido en vivo: Dynamic Island / pantalla de bloqueo (iOS) o notificación de progreso (Android)
-        PlatformExtras.updateDeliveryActivity(stage.shortLabel, stage.etaMinutes, stage.progressPct / 100.0)
+        val liveEta = if (stage == OrderDeliveryStage.DELIVERED) 0 else _driverTelemetry.value.dynamicEtaMinutes.takeIf { it > 0 } ?: stage.etaMinutes
+        PlatformExtras.updateDeliveryActivity(stage.shortLabel, liveEta, maxOf(stage.progressPct / 100.0, _driverTelemetry.value.routeProgressFraction.toDouble()))
 
         val uid = getVerifiedActiveUid()
         viewModelScope.launch {
@@ -2283,33 +2296,14 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             BravoPushNotificationCenter.dispatchPushNotification(
                 context = app,
                 category = PushNotificationCategory.ORDER_STATUS,
-                title = "Pedido #$orderId Confirmado en $branch",
-                body = "Ruta calculada por GPS (${updatedMetrics.roadDistanceKm} km • ${updatedMetrics.trafficLabel}). Total RD$${t.finalPay.toInt()}.00 (+RD$${t.bravisimaGenerated} en Bravísima). ETA: ~${updatedMetrics.stageAdjustedEtaMinutes} min.",
+                title = "Pedido confirmado • $branch",
+                body = "Llega en unos ${updatedMetrics.stageAdjustedEtaMinutes} min. Total RD$${t.finalPay.toInt()}.00. Sigue el repartidor en la app.",
                 topic = BravoPushNotificationCenter.TOPIC_ORDERS_REALTIME,
                 targetOrderId = orderId,
                 progressPct = OrderDeliveryStage.PREPARED.progressPct,
                 postSystemNotification = true
             )
-            viewModelScope.launch {
-                delay(4500L)
-                updateTrackedOrderStatusInFirestore(
-                    stage = OrderDeliveryStage.IN_TRANSIT,
-                    showFeedbackToast = false
-                )
-                val transitMetrics = _realLocationMetrics.value
-                if (_pushNotifications.value) {
-                    BravoPushNotificationCenter.dispatchPushNotification(
-                        context = app,
-                        category = PushNotificationCategory.ORDER_STATUS,
-                        title = "Repartidor en camino • #$orderId (${transitMetrics.roadDistanceKm} km)",
-                        body = "Carlos Rodríguez salió de $branch hacia tus coordenadas GPS. Llegada estimada: ~${transitMetrics.stageAdjustedEtaMinutes} min.",
-                        topic = BravoPushNotificationCenter.TOPIC_ORDERS_REALTIME,
-                        targetOrderId = orderId,
-                        progressPct = OrderDeliveryStage.IN_TRANSIT.progressPct,
-                        postSystemNotification = true
-                    )
-                }
-            }
+            // Es la única notificación del sistema del pedido; el avance se ve en la Live Activity.
         }
     }
 
@@ -2453,7 +2447,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             topic = BravoPushNotificationCenter.TOPIC_ORDERS_REALTIME,
             targetOrderId = orderId,
             progressPct = targetStage.progressPct,
-            postSystemNotification = true
+            postSystemNotification = false
         )
         showToast(targetStage.emoji, title)
     }
@@ -2952,6 +2946,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         // Presupuesto: el que la persona escribe en el mensaje, o el que fijó a mano con el control.
         val budget = BravIaEngine.budgetFromQuery(query) ?: _targetBudgetInChat.value.takeIf { _budgetSetByUser.value }
         val matchedRecipe = if (isArca) null else BravIaEngine.matchRecipe(query)
+        val people = BravIaEngine.peopleFromQuery(query)
 
         _isAiGenerating.value = true
         val loadingMsgId = System.nanoTime() + 1L
@@ -2970,6 +2965,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     quantities = reply.items.associate { it.sku to it.qty },
                     recipeId = reply.recipe?.id,
                     budgetExceededBy = reply.budgetExceededBy,
+                    recipeMultiplier = reply.recipeMultiplier,
                     isLoading = false,
                     modelLabel = if (suggestion != null) "Brav IA • Sugerencia registrada" else label,
                     durationMs = durationMs,
@@ -3051,24 +3047,47 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 if (parsed == null) {
                     publish(localAnswer(), "Brav IA • Modo sin conexión", elapsed())
                 } else {
-                    val reply = BravIaEngine.ground(parsed, lookup, storePrefix, matchedRecipe, budget)
+                    val reply = BravIaEngine.ground(parsed, lookup, storePrefix, matchedRecipe, budget, people)
                     publish(reply, if (reply.recipe != null) "Brav IA • Receta verificada" else "Brav IA", elapsed())
                 }
             } catch (e: CancellationException) {
                 if (e is TimeoutCancellationException) {
                     val partial = BravIaEngine.parseReply(accumulated.toString())
-                    val reply = partial?.let { BravIaEngine.ground(it, lookup, storePrefix, matchedRecipe, budget) } ?: localAnswer()
+                    val reply = partial?.let { BravIaEngine.ground(it, lookup, storePrefix, matchedRecipe, budget, people) } ?: localAnswer()
                     publish(reply, "Brav IA • Respuesta parcial", elapsed())
                 } else {
                     throw e
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
+                // Throwable (no solo Exception): un error inesperado en el modelo o al armar la
+                // respuesta muestra la respuesta local en vez de cerrar la app
                 Log.d(TAG, "Brav IA usa la respuesta local: ${e.message}")
-                publish(localAnswer(), "Brav IA • Modo sin conexión", elapsed())
+                // El motivo visible ayuda a saber si es la red, la clave de Firebase o el modelo.
+                val reason = aiFailureReason(e)
+                var local = runCatching { localAnswer() }.getOrElse {
+                    GroundedReply(text = "No pude preparar la respuesta esta vez. Intenta de nuevo en un momento.", items = emptyList(), recipe = null, suggestion = null, total = 0, budgetExceededBy = null)
+                }
+                val token = if (reason == "acceso de la app no verificado") runCatching { appCheckDebugTokenOrNull() }.getOrNull() else null
+                if (token != null) {
+                    local = local.copy(text = local.text + "\n\nPara activar la IA en esta instalación, registra este token en Firebase → App Check → app de iOS → Administrar tokens de depuración:\n" + token)
+                }
+                publish(local, "Brav IA • Sin conexión con la IA ($reason)", elapsed())
             } finally {
                 _isAiGenerating.value = false
                 activeAiChatJob = null
             }
+        }
+    }
+
+    private fun aiFailureReason(e: Throwable): String {
+        val m = (e.message ?: e::class.simpleName ?: "").lowercase()
+        return when {
+            "app check" in m || "appcheck" in m || "403" in m || "permission" in m -> "acceso de la app no verificado"
+            "quota" in m || "429" in m || "resource exhausted" in m -> "límite de uso alcanzado"
+            "network" in m || "internet" in m || "offline" in m || "timed out" in m || "unreachable" in m -> "sin internet"
+            "not found" in m || "404" in m -> "modelo no disponible"
+            "api key" in m || "invalid" in m -> "configuración de Firebase"
+            else -> (e.message ?: "error").take(60)
         }
     }
 
@@ -3120,10 +3139,47 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         StreetRouteSegment(8, 1.00f, "En la puerta de tu dirección / Lobby principal", 0, "¡El repartidor ha llegado a tu puerta!", "FLUIDO", 0)
     )
 
+    /** Factor de tráfico por hora del día (hora pico más lenta). */
+    private fun trafficFactorNow(): Pair<Double, String> {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        return when (hour) {
+            in 7..9, in 17..19 -> 1.35 to "DENSO"
+            in 12..14 -> 1.18 to "MODERADO"
+            else -> 1.0 to "FLUIDO"
+        }
+    }
+
+    /**
+     * Cada vez que cambian la sucursal o la ubicación del cliente, pide la ruta por calles
+     * y corrige la distancia y el tiempo con los datos reales de esa ruta.
+     */
+    private fun observeDeliveryRoute() {
+        viewModelScope.launch {
+            _realLocationMetrics
+                .map { listOf(it.branchLat, it.branchLng, it.userLat, it.userLng) }
+                .distinctUntilChanged()
+                .collect { (bLat, bLng, uLat, uLng) ->
+                    val route = RoadRoutingClient.route(bLat, bLng, uLat, uLng)
+                    DeliveryRouteStore.route.value = route
+                    val (factor, _) = trafficFactorNow()
+                    val roadKm = (route.totalKm * 10.0).roundToInt() / 10.0
+                    val travelMin = route.remainingMinutes(0.0, factor)
+                    val baseEta = (travelMin + 5.0).roundToInt().coerceIn(4, 90)
+                    val m = _realLocationMetrics.value
+                    _realLocationMetrics.value = m.copy(
+                        roadDistanceKm = roadKm,
+                        baseEtaMinutes = baseEta,
+                        deliveryFeeRd = (65 + (roadKm * 14.0).roundToInt()).coerceIn(75, 240)
+                    )
+                }
+        }
+    }
+
     private fun startLiveDeliveryTelemetryTicker() {
         liveTelemetryJob?.cancel()
         liveTelemetryJob = viewModelScope.launch {
-            val tickMs = 250L
+            // 1 s por paso: movimiento fluido sin recomponer la pantalla 4 veces por segundo
+            val tickMs = 1000L
             var tickCounter = 0L
             while (true) {
                 delay(tickMs)
@@ -3134,7 +3190,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 val activeOrd = _trackedOrder.value ?: _orders.value.firstOrNull()
                 val stage = OrderDeliveryStage.fromStatusString(activeOrd?.status)
                 val metrics = _realLocationMetrics.value
-                val totalRoadKm = metrics.roadDistanceKm.coerceAtLeast(0.85)
+                val route = DeliveryRouteStore.route.value
+                val totalRoadKm = route?.totalKm?.takeIf { it > 0.2 } ?: metrics.roadDistanceKm.coerceAtLeast(0.85)
 
                 if (stage == OrderDeliveryStage.DELIVERED || currentTelemetry.routeProgressFraction >= 0.999f) {
                     if (currentTelemetry.currentSpeedKmh != 0 || currentTelemetry.routeProgressFraction < 1.0f) {
@@ -3161,10 +3218,14 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     ?: santoDomingoRouteSegments.last()
                 val segIndex = seg.index
 
-                // Natural speed micro-variation around the street segment's real speed (km/h)
-                val baseSpeed = if (seg.baseSpeedKmh > 0) seg.baseSpeedKmh else 26
-                val wave = sin(tickCounter * 0.08).toInt() * 2
-                val liveSpeed = (baseSpeed + wave).coerceIn(14, 48)
+                // Velocidad de la calle actual (distancia ÷ duración del enrutador) con tráfico
+                val (trafficFactor, trafficLevelNow) = trafficFactorNow()
+                val currentKm = currentFrac * totalRoadKm
+                val leg = route?.legAt(currentKm)
+                val legSpeed = leg?.speedKmh ?: (if (seg.baseSpeedKmh > 0) seg.baseSpeedKmh.toDouble() else 26.0)
+                // Variación suave (semáforos, curvas): ±3 km/h
+                val wave = (sin(tickCounter * 0.2) * 3.0).roundToInt()
+                val liveSpeed = ((legSpeed / trafficFactor).roundToInt() + wave).coerceIn(8, 60)
 
                 // True 1:1 physical real-time progression:
                 // distance traveled in 250ms (0.25s) at liveSpeed (km/h) = (liveSpeed / 3600.0) * 0.25 km
@@ -3172,16 +3233,25 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 val fractionDelta = (distanceTraveledKm / totalRoadKm).toFloat()
                 val nextFrac = (currentFrac + fractionDelta).coerceIn(0.05f, 1.0f)
 
-                val liveLat = metrics.branchLat + (metrics.userLat - metrics.branchLat) * nextFrac
-                val liveLng = metrics.branchLng + (metrics.userLng - metrics.branchLng) * nextFrac
+                val nextKm = nextFrac * totalRoadKm
+                val (liveLat, liveLng) = route?.pointAt(nextKm)
+                    ?: ((metrics.branchLat + (metrics.userLat - metrics.branchLat) * nextFrac) to
+                        (metrics.branchLng + (metrics.userLng - metrics.branchLng) * nextFrac))
                 val remKm = ((totalRoadKm * (1f - nextFrac) * 100.0).roundToInt() / 100.0).coerceAtLeast(0.0)
 
-                val speedForEta = max(liveSpeed, 22).toDouble()
+                // ETA = suma, calle por calle, de distancia restante ÷ velocidad (con tráfico)
                 val rawEta = if (nextFrac >= 0.995f) {
                     0
                 } else {
-                    val travelMin = ((remKm / speedForEta) * 60.0).roundToInt()
-                    (travelMin + seg.delayDeltaMin).coerceAtLeast(1)
+                    val travelMin = route?.remainingMinutes(nextKm, trafficFactor)
+                        ?: (remKm / max(liveSpeed, 18).toDouble() * 60.0)
+                    kotlin.math.ceil(travelMin).toInt().coerceAtLeast(1)
+                }
+                val streetLabel = if (route?.isStreetRouted == true && leg != null) leg.street else seg.streetLabel
+                val trafficText = when (trafficLevelNow) {
+                    "DENSO" -> "Hora pico: tráfico lento"
+                    "MODERADO" -> "Tráfico moderado del mediodía"
+                    else -> "Tráfico fluido"
                 }
 
                 val timeFmt = SimpleDateFormat("h:mm:ss a", Locale.US).format(Date())
@@ -3191,18 +3261,23 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     driverLat = liveLat,
                     driverLng = liveLng,
                     currentSpeedKmh = if (nextFrac >= 0.999f) 0 else liveSpeed,
-                    avgSpeedKmh = if (tickCounter % 16L == 0L) (currentTelemetry.avgSpeedKmh * 3 + liveSpeed) / 4 else currentTelemetry.avgSpeedKmh,
+                    avgSpeedKmh = if (tickCounter % 4L == 0L) (currentTelemetry.avgSpeedKmh * 3 + liveSpeed) / 4 else currentTelemetry.avgSpeedKmh,
                     peakSpeedKmh = max(currentTelemetry.peakSpeedKmh, liveSpeed),
-                    currentStreet = seg.streetLabel,
-                    trafficCondition = seg.trafficCondition,
-                    trafficLevel = seg.trafficLevel,
-                    trafficDelayDeltaMin = seg.delayDeltaMin,
+                    currentStreet = streetLabel,
+                    trafficCondition = trafficText,
+                    trafficLevel = trafficLevelNow,
+                    trafficDelayDeltaMin = 0,
                     dynamicEtaMinutes = rawEta,
                     remainingDistanceKm = remKm,
                     routeProgressFraction = nextFrac,
                     waypointIndex = segIndex,
-                    lastUpdatedLabel = "GPS 1:1 en tiempo real • $timeFmt"
+                    lastUpdatedLabel = (if (route?.isStreetRouted == true) "Ruta por calles" else "Ruta estimada") + " • $timeFmt"
                 )
+
+                // Live Activity (pantalla de bloqueo / Dynamic Island): se actualiza cuando cambia el ETA
+                if (rawEta != currentTelemetry.dynamicEtaMinutes) {
+                    PlatformExtras.updateDeliveryActivity(stage.shortLabel, rawEta, nextFrac.toDouble())
+                }
 
                 // Trigger live notifications only when crossing into a new physical waypoint along the route
                 if (segIndex != prevWaypointIdx) {
@@ -3213,7 +3288,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                         7 -> OrderDeliveryStage.ARRIVING
                         else -> OrderDeliveryStage.DELIVERED
                     }
-                    if (impliedStage != stage) {
+                    val stageChanged = impliedStage != stage
+                    if (stageChanged) {
                         updateTrackedOrderStatusInFirestore(impliedStage, showFeedbackToast = false)
                     }
                     val iconKey = when (impliedStage) {
@@ -3223,28 +3299,29 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                         OrderDeliveryStage.ARRIVING -> "pin"
                         OrderDeliveryStage.DELIVERED -> "check"
                     }
-                    _liveDeliveryBanner.value = LiveDeliveryBannerNotification(
+                    // El aviso dentro de la app solo aparece cuando cambia la etapa, no en cada calle
+                    if (stageChanged) _liveDeliveryBanner.value = LiveDeliveryBannerNotification(
                         iconKey = iconKey,
                         title = "${impliedStage.statusText} • ${if (liveSpeed > 0) "$liveSpeed km/h" else "En punto"}",
-                        subtitle = "${seg.streetLabel} • ${seg.trafficCondition}",
+                        subtitle = "$streetLabel • $trafficText",
                         speedKmh = liveSpeed,
                         etaMinutes = rawEta,
                         progressPct = (nextFrac * 100).roundToInt(),
-                        trafficBadge = seg.trafficLevel,
+                        trafficBadge = trafficLevelNow,
                         timestampLabel = "Ahora"
                     )
                     if (segIndex == 4 || segIndex == 7 || segIndex == 8) {
                         val autoNote = when (segIndex) {
-                            4 -> "Voy cruzando por ${seg.streetLabel} a $liveSpeed km/h. El tráfico está ${seg.trafficLevel.lowercase()}, llego en unos $rawEta min."
+                            4 -> "Voy por $streetLabel a $liveSpeed km/h. Llego en unos $rawEta min."
                             7 -> "¡Ya estoy entrando a tu cuadra a menos de 150 metros! Ve preparándote para recibir el pedido."
-                            else -> "¡Acabo de llegar a la entrada principal con tu pedido Bravo! Cadena de frío 100% intacta."
+                            else -> "¡Acabo de llegar a la entrada principal con tu pedido Bravo!"
                         }
                         _driverChatMessages.value = _driverChatMessages.value + DriverChatMessage(
                             sender = "driver",
                             text = autoNote,
                             timestampLabel = SimpleDateFormat("h:mm a", Locale.US).format(Date()),
                             speedKmhAtSend = liveSpeed,
-                            streetAtSend = seg.streetLabel
+                            streetAtSend = streetLabel
                         )
                     }
                 }
@@ -3257,17 +3334,26 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         val seg = santoDomingoRouteSegments[wpIdx]
         val metrics = _realLocationMetrics.value
         val frac = seg.fraction
-        val liveLat = metrics.branchLat + (metrics.userLat - metrics.branchLat) * frac
-        val liveLng = metrics.branchLng + (metrics.userLng - metrics.branchLng) * frac
-        val remKm = ((metrics.roadDistanceKm * (1f - frac) * 100.0).roundToInt() / 100.0).coerceAtLeast(0.0)
-        val eta = if (stage == OrderDeliveryStage.DELIVERED) 0 else max(1, stage.etaMinutes + seg.delayDeltaMin)
+        val route = DeliveryRouteStore.route.value
+        val totalKm = route?.totalKm?.takeIf { it > 0.2 } ?: metrics.roadDistanceKm
+        val (liveLat, liveLng) = route?.pointAt(frac * totalKm)
+            ?: ((metrics.branchLat + (metrics.userLat - metrics.branchLat) * frac) to
+                (metrics.branchLng + (metrics.userLng - metrics.branchLng) * frac))
+        val remKm = ((totalKm * (1f - frac) * 100.0).roundToInt() / 100.0).coerceAtLeast(0.0)
+        val (trafficFactor, _) = trafficFactorNow()
+        val eta = when {
+            stage == OrderDeliveryStage.DELIVERED -> 0
+            route != null -> kotlin.math.ceil(route.remainingMinutes(frac * totalKm, trafficFactor)).toInt().coerceAtLeast(1)
+            else -> max(1, stage.etaMinutes + seg.delayDeltaMin)
+        }
+        val streetLabel = route?.takeIf { it.isStreetRouted }?.legAt(frac * totalKm)?.street ?: seg.streetLabel
         val timeFmt = SimpleDateFormat("h:mm:ss a", Locale.US).format(Date())
 
         _driverTelemetry.value = _driverTelemetry.value.copy(
             driverLat = liveLat,
             driverLng = liveLng,
             currentSpeedKmh = seg.baseSpeedKmh,
-            currentStreet = seg.streetLabel,
+            currentStreet = streetLabel,
             trafficCondition = seg.trafficCondition,
             trafficLevel = seg.trafficLevel,
             trafficDelayDeltaMin = seg.delayDeltaMin,
@@ -3282,25 +3368,14 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             _liveDeliveryBanner.value = LiveDeliveryBannerNotification(
                 iconKey = stage.emoji,
                 title = "${stage.statusText} • ${if (seg.baseSpeedKmh > 0) "${seg.baseSpeedKmh} km/h" else "0 km/h"}",
-                subtitle = "${seg.streetLabel} • ${seg.trafficCondition}",
+                subtitle = streetLabel,
                 speedKmh = seg.baseSpeedKmh,
                 etaMinutes = eta,
                 progressPct = stage.progressPct,
                 trafficBadge = seg.trafficLevel,
                 timestampLabel = "En vivo"
             )
-            if (_pushNotifications.value) {
-                BravoPushNotificationCenter.dispatchPushNotification(
-                    context = application,
-                    category = PushNotificationCategory.ORDER_STATUS,
-                    title = "${stage.statusText} (${seg.baseSpeedKmh} km/h) • ETA ~$eta min",
-                    body = "Carlos Rodríguez reporta: ${seg.streetLabel} (${seg.trafficCondition}). Restan $remKm km.",
-                    topic = BravoPushNotificationCenter.TOPIC_ORDERS_REALTIME,
-                    targetOrderId = _trackedOrder.value?.id ?: "ORD-88412",
-                    progressPct = stage.progressPct,
-                    postSystemNotification = true
-                )
-            }
+            // Sin notificación del sistema aquí: solo se envía una, al confirmar el pedido.
         }
     }
 

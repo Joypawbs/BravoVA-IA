@@ -87,7 +87,9 @@ data class GroundedReply(
     val recipe: Recipe?,
     val suggestion: SuggestionDraft?,
     val total: Int,
-    val budgetExceededBy: Int?
+    val budgetExceededBy: Int?,
+    /** Veces que se multiplica la receta para las personas pedidas (1 = porciones base). */
+    val recipeMultiplier: Int = 1
 )
 
 data class ChatTurn(val fromUser: Boolean, val text: String)
@@ -342,12 +344,14 @@ object BravIaEngine {
         lookup: (String) -> Product?,
         storePrefix: String,
         matchedRecipe: Recipe?,
-        budget: Int?
+        budget: Int?,
+        people: Int? = null
     ): GroundedReply {
         val recipe = matchedRecipe ?: findRecipeById(reply.recipeId)
+        val multiplier = if (recipe != null && people != null) multiplierFor(recipe, people) else 1
         val modelItems = mergeItems(reply.products.filter { it.sku.startsWith("$storePrefix-") && lookup(it.sku) != null })
         val items = if (recipe != null && storePrefix == "BRV") {
-            val fromRecipe = recipeCartItems(recipe, lookup)
+            val fromRecipe = recipeCartItems(recipe, lookup, multiplier)
             // Lo que el modelo agregó aparte de la receta (por ejemplo, una bebida) se respeta.
             mergeItems(fromRecipe + modelItems.filter { m -> fromRecipe.none { it.sku == m.sku } })
         } else {
@@ -365,9 +369,20 @@ object BravIaEngine {
             recipe = recipe,
             suggestion = reply.suggestion,
             total = total,
-            budgetExceededBy = budget?.let { b -> (total - b).takeIf { it > 0 } }
+            budgetExceededBy = budget?.let { b -> (total - b).takeIf { it > 0 } },
+            recipeMultiplier = multiplier
         )
     }
+
+    /** Cuántas veces hay que hacer la receta para [people] personas (redondeando hacia arriba, máx. 5). */
+    fun multiplierFor(recipe: Recipe, people: Int): Int =
+        ((people + recipe.servings - 1) / recipe.servings).coerceIn(1, 5)
+
+    private val peopleRegex = Regex("""\b(?:para|somos|seremos|de)\s+(\d{1,2})\s*(?:personas|persona|gente|comensales|invitados|porciones)\b""")
+
+    /** "para 8 personas" → 8. */
+    fun peopleFromQuery(query: String): Int? =
+        peopleRegex.find(BravIaText.normalize(query))?.groupValues?.get(1)?.toIntOrNull()?.takeIf { it in 1..60 }
 
     fun mergeItems(items: List<GroundedItem>): List<GroundedItem> {
         val bySku = LinkedHashMap<String, GroundedItem>()
@@ -380,14 +395,25 @@ object BravIaEngine {
     }
 
     /** Productos a comprar para una receta: ingredientes principales, sin básicos de despensa. */
-    fun recipeCartItems(recipe: Recipe, lookup: (String) -> Product?): List<GroundedItem> = mergeItems(
+    fun recipeCartItems(recipe: Recipe, lookup: (String) -> Product?, multiplier: Int = 1): List<GroundedItem> = mergeItems(
         recipe.ingredients
             .filter { !it.pantry && !it.optional }
             .mapNotNull { ing ->
                 val sku = ing.skus.firstOrNull { lookup(it) != null } ?: return@mapNotNull null
-                GroundedItem(sku, ing.unitsToBuy, ing.name)
+                GroundedItem(sku, unitsFor(ing, multiplier), ing.name)
             }
     )
+
+    /**
+     * Unidades a comprar de un ingrediente cuando la receta se multiplica. Solo crece lo que se
+     * compra por unidad (4 plátanos → 8) o por libra (carnes, víveres). Un paquete que ya alcanza
+     * (12 huevos, 400 g de mantequilla para 3 cucharadas) se queda en 1.
+     */
+    fun unitsFor(ing: com.example.model.RecipeIngredient, multiplier: Int): Int {
+        if (multiplier <= 1) return ing.unitsToBuy
+        val byWeight = Regex("""\b(lb|libra|libras)\b""").containsMatchIn(BravIaText.normalize(ing.amount))
+        return if (ing.unitsToBuy > 1 || byWeight) ing.unitsToBuy * multiplier else ing.unitsToBuy
+    }
 
     fun totalOf(items: List<GroundedItem>, lookup: (String) -> Product?): Int =
         items.sumOf { (lookup(it.sku)?.price ?: 0) * it.qty }
@@ -410,7 +436,27 @@ object BravIaEngine {
             .map { it.first }
     }
 
-    fun matchRecipe(query: String): Recipe? = findRecipeForQuery(BravIaText.normalize(query))
+    /**
+     * Alias que también son nombres de productos ("arroz", "pollo"): solo abren la receta si la
+     * persona quiere cocinar. "Necesito arroz" es una compra, no una receta.
+     */
+    private val ingredientLikeAliases = setOf(
+        "arroz", "pollo", "habichuelas", "habichuelas rojas", "frijoles", "avena", "chinola", "maracuya",
+        "salmon", "camarones", "ensalada", "sopa", "espaguetis", "espagueti", "spaghetti", "bacalao", "chivo",
+        "maduros", "pizza", "hamburguesa", "hamburguesas", "burger", "burgers", "tacos", "taco", "quesadillas", "burritos"
+    )
+    private val cookingIntent = Regex(
+        """\b(receta|recetas|como (hago|hacer|se hace|preparo|preparar|cocino|cocinar)|preparar|preparo|cocinar|cocino|pasos|paso a paso|ingredientes para|que necesito para|hacer un|hacer una|hacer unos|hacer unas)\b"""
+    )
+
+    fun matchRecipe(query: String): Recipe? {
+        val n = BravIaText.normalize(query)
+        val recipe = findRecipeForQuery(n) ?: return null
+        val matchedAlias = recipe.aliases
+            .filter { Regex("(^|\\W)${Regex.escape(it)}(\\W|$)").containsMatchIn(n) }
+            .maxByOrNull { it.length } ?: return recipe
+        return if (matchedAlias in ingredientLikeAliases && !cookingIntent.containsMatchIn(n)) null else recipe
+    }
 
     /* -------------------------------------------------------------- */
     /*  6. Presupuesto escrito en el mensaje                            */
@@ -449,7 +495,7 @@ object BravIaEngine {
         val n = BravIaText.normalize(query)
         val recipe = if (storePrefix == "BRV") matchRecipe(query) else null
         if (recipe != null) {
-            return ground(RawAiReply("Aquí tienes la receta verificada de **${recipe.name}**.", emptyList(), recipe.id, null, null), lookup, storePrefix, recipe, budget)
+            return ground(RawAiReply("Aquí tienes la receta verificada de **${recipe.name}**.", emptyList(), recipe.id, null, null), lookup, storePrefix, recipe, budget, peopleFromQuery(query))
         }
         val factText = when {
             hasImage -> "Ahora mismo no puedo analizar imágenes porque Brav IA está sin conexión. Inténtalo de nuevo en un momento; tu foto no se ha enviado."
@@ -465,7 +511,9 @@ object BravIaEngine {
         val matches = if (keywords.isEmpty()) emptyList() else selectCandidates(query, storeProducts, null, limit = 6)
             .filter { p -> val h = BravIaText.normalize(p.name + " " + p.category); keywords.any { k -> h.contains(if (k.length > 4) k.dropLast(1) else k) } }
         val similar = if (storePrefix == "BRV") similarRecipes(query) else emptyList()
+        val wantsRecipe = cookingIntent.containsMatchIn(n)
         val text = buildString {
+            if (wantsRecipe && storePrefix == "BRV") append("Esa receta no está en mi recetario verificado, así que no te doy medidas ni pasos inventados. ")
             if (matches.isNotEmpty()) append("Esto encontré en el catálogo para «${query.trim().take(60)}».")
             else append("No encontré productos que coincidan con «${query.trim().take(60)}». Prueba con otro nombre o revisa el catálogo.")
             if (similar.isNotEmpty()) append("\n\nRecetas verificadas que te pueden servir: ").append(similar.joinToString(", ") { "**${it.name}**" }).append(".")

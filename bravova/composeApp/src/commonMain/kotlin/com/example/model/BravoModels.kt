@@ -397,7 +397,9 @@ data class ChatMessage(
     /** Unidades sugeridas por SKU (por ejemplo 4 plátanos). Si falta un SKU, se asume 1. */
     val quantities: Map<String, Int> = emptyMap(),
     /** Cuánto pasa el total del presupuesto del cliente; null si cabe o no hay presupuesto. */
-    val budgetExceededBy: Int? = null
+    val budgetExceededBy: Int? = null,
+    /** Veces que se multiplicó la receta para las personas pedidas. */
+    val recipeMultiplier: Int = 1
 )
 
 data class ToastNotification(

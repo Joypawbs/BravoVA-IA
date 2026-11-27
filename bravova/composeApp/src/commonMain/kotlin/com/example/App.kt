@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.pointer.pointerInput
+import com.example.ui.components.dismissKeyboardOnOutsideTouch
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -148,7 +149,18 @@ fun BravoRoot(
 ) {
     setSingletonImageLoaderFactory { ctx ->
         ImageLoader.Builder(ctx)
-            .components { add(KtorNetworkFetcherFactory()) }
+            // Wikimedia (fotos de frescos y genéricos) exige un User-Agent que identifique la app
+            .components {
+                add(
+                    KtorNetworkFetcherFactory(httpClient = {
+                        io.ktor.client.HttpClient {
+                            install(io.ktor.client.plugins.UserAgent) {
+                                agent = "BravoVa/2.3 (https://github.com/Joypawbs/BravoVA-IA)"
+                            }
+                        }
+                    })
+                )
+            }
             .build()
     }
     val instantPrefs = remember { sharedPrefs("bravova_instant_prefs") }
@@ -252,7 +264,8 @@ fun BravoRoot(
             // Atajos del ícono, widgets y enlaces bravova:// (ver platform/ExternalLinks.kt)
             val externalTarget = com.example.platform.ExternalLinks.pending
             LaunchedEffect(externalTarget) {
-                when (com.example.platform.ExternalLinks.consume()) {
+                val link = com.example.platform.ExternalLinks.consume() ?: return@LaunchedEffect
+                when (com.example.platform.ExternalLinks.targetOf(link)) {
                     "buscar" -> {
                         viewModel.navigateTo(AppScreen.HOME)
                         com.example.ui.components.SearchFocusRequest.request()
@@ -264,6 +277,11 @@ fun BravoRoot(
                     "bravisima" -> viewModel.navigateTo(AppScreen.BRAVISIMA)
                     "ofertas" -> viewModel.navigateTo(AppScreen.CATALOG)
                     "pedido" -> viewModel.navigateTo(AppScreen.DELIVERY)
+                    "bravia" -> {
+                        // bravova://bravia?q=… abre Brav IA y envía la pregunta
+                        viewModel.navigateTo(AppScreen.BRAVIA)
+                        com.example.platform.ExternalLinks.param(link, "q")?.let { viewModel.sendCustomChatMsg(it) }
+                    }
                     else -> Unit
                 }
             }
@@ -459,14 +477,13 @@ fun BravoVaApp(
                         .fillMaxSize()
                         .padding(top = innerPadding.calculateTopPadding())
                         .nestedScroll(menuScrollConnection)
+                        .dismissKeyboardOnOutsideTouch()
                 ) {
-                    val isAiAmbientActive = currentScreen == AppScreen.BRAVIA || isAiGenerating
+                    // Brav IA usa el mismo fondo que el resto de la app; el tono rosado solo aparece
+                    // como un brillo breve mientras la IA está pensando (antes teñía toda la pantalla).
+                    val isAiAmbientActive = isAiGenerating
                     val aiAmbientAlpha by animateFloatAsState(
-                        targetValue = when {
-                            isAiGenerating -> if (darkMode) 0.14f else 0.24f
-                            currentScreen == AppScreen.BRAVIA -> if (darkMode) 0.08f else 0.08f
-                            else -> 0f
-                        },
+                        targetValue = if (isAiGenerating) (if (darkMode) 0.10f else 0.16f) else 0f,
                         animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
                         label = "global_ai_ambient_alpha"
                     )
@@ -475,6 +492,11 @@ fun BravoVaApp(
                     // que el vidrio esmerilado (que desenfoca este fondo) se recalcule en cada cuadro.
                     val orbDriftPhaseState = remember { mutableFloatStateOf(0f) }
                     LaunchedEffect(Unit) {
+                        // Con Liquid Glass nativo (iOS 26+) el vidrio vuelve a muestrear lo que tiene
+                        // detrás en cada cambio: un fondo que se mueve 15 veces por segundo obligaba a
+                        // redibujar todas las barras de vidrio y causaba tirones al desplazarse.
+                        if (com.example.ui.components.nativeLiquidGlassAvailable() ||
+                            com.example.platform.systemPrefersReducedMotion()) return@LaunchedEffect
                         val stepMs = if (com.example.platform.DevicePerformance.isLowEnd) 125L else 66L
                         val start = kotlin.time.TimeSource.Monotonic.markNow()
                         while (true) {
@@ -520,45 +542,8 @@ fun BravoVaApp(
                             .fillMaxSize()
                             .translucentBackdropSource(hazeState, zIndex = 0f)
                     ) {
+                        // Fondo sólido fijo (sin halos ambientales): el Liquid Glass destaca limpio
                         drawRect(color = rootBgColor)
-                        val topGlowAlpha = if (darkMode) 0.07f else 0.05f
-                        val midGlowAlpha = if (darkMode) 0.05f else 0.03f
-                        val bottomGlowAlpha = if (darkMode) 0.06f else 0.04f
-                        val driftX1 = cos(orbDriftPhase) * size.width * 0.06f
-                        val driftY1 = sin(orbDriftPhase) * size.height * 0.04f
-                        val driftX2 = sin(orbDriftPhase * 0.85f) * size.width * 0.07f
-                        val driftY2 = cos(orbDriftPhase * 0.85f) * size.height * 0.05f
-                        val topCenter = Offset(size.width * 0.82f + driftX1, size.height * 0.10f + driftY1)
-                        val midCenter = Offset(size.width * 0.16f + driftX2, size.height * 0.44f + driftY2)
-                        val bottomCenter = Offset(size.width * 0.78f - driftX1, size.height * 0.82f - driftY2)
-                        val scalePulse = 1f + sin(orbDriftPhase) * 0.06f
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(topGlowColor.copy(alpha = topGlowAlpha + aiAmbientAlpha * 0.45f), Color.Transparent),
-                                center = topCenter,
-                                radius = size.width * 0.74f * scalePulse
-                            ),
-                            radius = size.width * 0.74f * scalePulse,
-                            center = topCenter
-                        )
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(midGlowColor.copy(alpha = midGlowAlpha + aiAmbientAlpha * 0.40f), Color.Transparent),
-                                center = midCenter,
-                                radius = size.width * 0.64f
-                            ),
-                            radius = size.width * 0.64f,
-                            center = midCenter
-                        )
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(bottomGlowColor.copy(alpha = bottomGlowAlpha + aiAmbientAlpha * 0.45f), Color.Transparent),
-                                center = bottomCenter,
-                                radius = size.width * 0.68f * scalePulse
-                            ),
-                            radius = size.width * 0.68f * scalePulse,
-                            center = bottomCenter
-                        )
                     }
 
                     SharedTransitionLayout {
@@ -584,7 +569,10 @@ fun BravoVaApp(
                     ) { screenState ->
                         CompositionLocalProvider(
                             LocalProductHeroScopes provides ProductHeroScopes(this@SharedTransitionLayout, this@AnimatedContent),
-                            LocalDataSaver provides dataSaver
+                            LocalDataSaver provides dataSaver,
+                            // La pantalla que sale desvanece ya su vidrio nativo (no se superpone con la que entra)
+                            com.example.ui.components.LocalGlassPresence provides
+                                (this@AnimatedContent.transition.targetState == androidx.compose.animation.EnterExitState.Visible)
                         ) {
                         when (screenState) {
                         AppScreen.HOME -> {
@@ -608,6 +596,7 @@ fun BravoVaApp(
                                 },
                                 label = "store_home_transition"
                             ) { storeModeState ->
+                                com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                                 HomeScreen(
                                     storeMode = storeModeState,
                                     darkMode = darkMode,
@@ -648,6 +637,7 @@ fun BravoVaApp(
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
                                 )
+                                }
                             }
                         }
 
@@ -669,6 +659,7 @@ fun BravoVaApp(
                                 },
                                 label = "store_catalog_transition"
                             ) { storeModeState ->
+                                com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                                 CatalogScreen(
                                     storeMode = storeModeState,
                                     darkMode = darkMode,
@@ -688,6 +679,7 @@ fun BravoVaApp(
                                     onOpenProduct = { sku -> viewModel.openProductDetail(sku) },
                                     onChangeQty = { sku, delta -> viewModel.changeProductQty(sku, delta) }
                                 )
+                                }
                             }
                         }
 
@@ -1097,6 +1089,7 @@ fun BravoVaApp(
                             .navigationBarsPadding()
                             .padding(start = 16.dp, end = 16.dp, bottom = if (PlatformInfo.isAndroid) 88.dp else 84.dp)
                     ) {
+                        com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                         CartSummaryBar(
                             itemCount = cartTotals.count,
                             total = cartTotals.finalPay,
@@ -1104,11 +1097,12 @@ fun BravoVaApp(
                             pulseTrigger = cartPulseTrigger,
                             onOpenCart = { viewModel.navigateTo(AppScreen.CART) }
                         )
+                        }
                     }
 
                     // En iOS 26+ la barra nativa no se esconde al hacer scroll: se encoge (como en las apps de Apple)
-                    // En Brav IA la barra de escribir ocupa ese espacio, así que ahí la barra se esconde como antes
-                    val nativeDock = nativeLiquidGlassAvailable() && currentScreen != AppScreen.BRAVIA
+                    // También en Brav IA: el campo de escribir flota encima de la barra (misma barra en toda la app)
+                    val nativeDock = nativeLiquidGlassAvailable()
                     AnimatedVisibility(
                         visible = areMenusVisible || nativeDock,
                         enter = slideInVertically(
@@ -1124,6 +1118,7 @@ fun BravoVaApp(
                             // En Android la NavigationBar pinta su propio fondo bajo la barra de gestos.
                             .then(if (PlatformInfo.isAndroid) Modifier else Modifier.navigationBarsPadding())
                     ) {
+                        com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                         TranslucentBottomDock(
                             currentScreen = currentScreen,
                             isArca = isArca,
@@ -1135,18 +1130,33 @@ fun BravoVaApp(
                                 com.example.ui.components.SearchFocusRequest.request()
                             }
                         )
+                        }
                     }
 
+                    // Se recuerda el último aviso para que pueda desvanecerse al salir (si no, desaparecía de golpe)
+                    val lastToastHolder = remember { arrayOfNulls<com.example.model.ToastNotification>(1) }
+                    if (toast != null) lastToastHolder[0] = toast
+                    val lastToast = toast ?: lastToastHolder[0]
                     AnimatedVisibility(
                         visible = toast != null,
                         enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
                         exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = 10.dp, start = 20.dp, end = 20.dp)
+                            // Los avisos van DEBAJO de la barra superior (nunca detrás de sus cápsulas de vidrio):
+                            // Inicio y Catálogo tienen logo + buscador; las demás pantallas, la barra de 60 dp
+                            .padding(
+                                top = when (currentScreen) {
+                                    AppScreen.HOME, AppScreen.CATALOG -> 124.dp
+                                    else -> 72.dp
+                                },
+                                start = 20.dp,
+                                end = 20.dp
+                            )
                     ) {
-                        toast?.let { activeToast ->
+                        lastToast?.let { activeToast ->
                             if (nativeLiquidGlassAvailable() && activeToast.actionLabel == null) {
+                                com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                                 NativeGlassToast(
                                     text = activeToast.message,
                                     symbol = toastSymbol(activeToast.icon),
@@ -1154,6 +1164,7 @@ fun BravoVaApp(
                                     darkMode = darkMode,
                                     modifier = Modifier.fillMaxWidth().height(60.dp).testTag("toast_banner")
                                 )
+                                }
                             } else {
                                 // Android: aviso Material (superficie inversa), como un Snackbar
                                 Surface(
@@ -1221,6 +1232,7 @@ fun BravoVaApp(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         celebrationOrder?.let { confirmedOrder ->
+                            com.example.ui.components.SuppressNativeGlass()
                             OrderSuccessCelebrationOverlay(
                                 orderId = confirmedOrder.id,
                                 totalAmountRd = confirmedOrder.total.toInt(),

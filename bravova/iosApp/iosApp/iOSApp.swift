@@ -17,7 +17,11 @@ struct iOSApp: App {
             ContentView()
                 .ignoresSafeArea(.all)
                 // Widgets, Live Activity y enlaces bravova://
-                .onOpenURL { url in ExternalLinks.shared.request(target: url.absoluteString) }
+                .onOpenURL { url in
+                    // Primero la vuelta del inicio de sesión de Google; si no, es un enlace bravova://
+                    if FirebaseSetup.isConfigured && FirebaseAuthBridge.handle(url: url) { return }
+                    ExternalLinks.shared.request(target: url.absoluteString)
+                }
         }
     }
 }
@@ -62,7 +66,14 @@ enum FirebaseSetup {
         // Prints a debug token in the Xcode console; register it in Firebase Console > App Check.
         AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
         #else
-        AppCheck.setAppCheckProviderFactory(BravoAppCheckProviderFactory())
+        // Instalada con Sideloadly o AltStore (cuenta gratuita de Apple) no hay App Attest: se usa el
+        // proveedor de depuración y su token se ve en Cuenta → Diagnóstico de Brav IA, para registrarlo
+        // en Firebase → App Check si el proyecto lo exige.
+        if AppCheckSupport.isSideloadedWithoutAppAttest {
+            AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
+        } else {
+            AppCheck.setAppCheckProviderFactory(BravoAppCheckProviderFactory())
+        }
         #endif
         FirebaseApp.configure()
         isConfigured = true
@@ -76,4 +87,20 @@ final class BravoAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
         }
         return DeviceCheckProvider(app: app)
     }
+}
+
+enum AppCheckSupport {
+    /// True si la app trae un perfil de aprovisionamiento sin el permiso de App Attest
+    /// (lo normal al instalar con Sideloadly/AltStore). Las apps de la App Store no traen perfil.
+    static let isSideloadedWithoutAppAttest: Bool = {
+        guard let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
+              let data = try? Data(contentsOf: url),
+              let text = String(data: data, encoding: .isoLatin1),
+              let start = text.range(of: "<?xml"),
+              let end = text.range(of: "</plist>") else { return false }
+        let xml = String(text[start.lowerBound..<end.upperBound])
+        guard let plist = try? PropertyListSerialization.propertyList(from: Data(xml.utf8), format: nil) as? [String: Any],
+              let entitlements = plist["Entitlements"] as? [String: Any] else { return true }
+        return entitlements["com.apple.developer.devicecheck.appattest-environment"] == nil
+    }()
 }

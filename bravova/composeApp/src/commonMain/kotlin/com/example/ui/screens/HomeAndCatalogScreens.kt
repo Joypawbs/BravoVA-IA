@@ -373,6 +373,8 @@ fun HomeScreen(
                     testTag = "home_search_input",
                     onFocusChanged = { isSearchFocused = it },
                     focusRequester = homeSearchFocus,
+                    nativeTrailingSymbol = "barcode.viewfinder",
+                    onNativeTrailing = { onOpenScanner() },
                     modifier = Modifier.bravoAiAura(
                         cornerRadius = 999.dp,
                         enabled = localSearchInput.isNotBlank(),
@@ -1135,7 +1137,7 @@ fun CatalogScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(headerBg, headerBg.copy(alpha = 0.94f), headerBg.copy(alpha = 0f))))
+                    .background(headerBg)
             ) {
                 val catalogTitle = if (isArca) "Catálogo El Arca" else "Catálogo"
                 // Título grande arriba; al hacer scroll se convierte en la barra compacta
@@ -1148,7 +1150,7 @@ fun CatalogScreen(
                     label = "catalog_title"
                 ) { scrolled ->
                     if (scrolled) {
-                        GlassTopBar(darkMode = darkMode, accent = primaryColor, title = catalogTitle)
+                        com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) { GlassTopBar(darkMode = darkMode, accent = primaryColor, title = catalogTitle) }
                     } else {
                         LargeTitle(title = catalogTitle, accent = primaryColor)
                     }
@@ -1310,7 +1312,7 @@ fun CategoryGridScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(headerBg, headerBg.copy(alpha = 0.94f), headerBg.copy(alpha = 0f))))
+                    .background(headerBg)
             ) {
                 GlassTopBar(
                     darkMode = darkMode,
@@ -2161,11 +2163,19 @@ private fun DailyRotatingOffersCarouselSection(
                 }
             }
         }
+        // Margen final = ancho visible − tarjeta − margen inicial: así hasta la última tarjeta puede
+        // quedar alineada a la izquierda. Sin esto, al llegar al final la fila no podía desplazarse
+        // más y dejaba la tarjeta anterior cortada en el borde.
+        var offersRowWidthPx by remember { mutableIntStateOf(0) }
+        // El margen izquierdo va fuera de la fila (padding), no dentro (contentPadding): así la tarjeta
+        // anterior no asoma por ese margen al desplazarse.
+        val offersEndPadding = with(LocalDensity.current) { (offersRowWidthPx.toDp() - 220.dp).coerceAtLeast(14.dp) }
         LazyRow(
             state = offersRowState,
             flingBehavior = rememberSnapFlingBehavior(offersRowState),
-            contentPadding = PaddingValues(horizontal = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = PaddingValues(end = offersEndPadding),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 14.dp).onSizeChanged { offersRowWidthPx = it.width }
         ) {
             items(
                 items = dailyRotatingOffers,

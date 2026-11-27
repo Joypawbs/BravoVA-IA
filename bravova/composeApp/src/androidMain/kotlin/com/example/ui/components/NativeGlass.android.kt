@@ -41,6 +41,36 @@ actual fun NativeGlassCartBar(count: Int, total: String, accent: Color, darkMode
 @Composable
 actual fun NativeGlassToast(text: String, symbol: String, accent: Color, darkMode: Boolean, modifier: Modifier) {}
 
+@Composable
+actual fun NativeGlassSearchField(
+    text: String,
+    placeholder: String,
+    accent: Color,
+    darkMode: Boolean,
+    trailingSymbol: String,
+    focusSignal: Int,
+    onChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onFocus: (Boolean) -> Unit,
+    onTrailing: () -> Unit,
+    modifier: Modifier
+) {}
+
+@Composable
+actual fun NativeGlassBudgetPanel(
+    value: Int,
+    min: Int,
+    max: Int,
+    step: Int,
+    chips: List<String>,
+    accent: Color,
+    darkMode: Boolean,
+    busy: Boolean,
+    onChange: (Int) -> Unit,
+    onAction: (Int) -> Unit,
+    modifier: Modifier
+) {}
+
 /** Android: el pedido en curso se muestra como notificación de progreso en vivo (Live Update en Android 16). */
 actual object PlatformExtras {
     private const val CHANNEL = "bravova_pedido_en_vivo"
@@ -105,3 +135,12 @@ actual object PlatformExtras {
         runCatching { NotificationManagerCompat.from(context).notify(ID, builder.build()) }
     }
 }
+
+@Composable
+actual fun NativeGlassProgressCapsule(
+    progress: Float,
+    text: String,
+    accent: Color,
+    darkMode: Boolean,
+    modifier: Modifier
+) {}

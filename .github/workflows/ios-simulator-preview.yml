@@ -5,15 +5,18 @@ on:
   workflow_dispatch:
     inputs:
       runner:
-        description: "Imagen de macOS (macos-latest o macos-15)"
-        default: macos-latest
+        description: "Imagen de macOS (xcode-27, macos-latest o macos-15)"
+        default: xcode-27
+      solo:
+        description: "Solo esta prueba (por ejemplo iosAppUITests/BravoVaTourUITests/testVidrioBravIa); vacío = todas"
+        default: ""
 
 permissions:
   contents: write
 
 jobs:
   simulator:
-    runs-on: ${{ inputs.runner || 'macos-latest' }}
+    runs-on: ${{ inputs.runner || 'xcode-27' }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -24,9 +27,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Select Xcode
         run: |
-          # Xcode 26 (SDK de iOS 26) para el vidrio líquido nativo; si no está, Xcode 16.4
-          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -v -i beta | sort -V | tail -1)
-          sudo xcode-select -s "${X:-/Applications/Xcode_16.4.app}" || true
+          # En la imagen xcode-27 se usa su Xcode 27; en otras, el Xcode 26 más nuevo
+          if ! xcodebuild -version | grep -q "Xcode 27"; then
+            X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -v -i beta | sort -V | tail -1)
+            [ -n "$X" ] && sudo xcode-select -s "$X"
+          fi
           xcodebuild -version
       - name: Build Kotlin framework (simulator)
         working-directory: bravova
@@ -35,10 +40,10 @@ jobs:
         run: brew install xcodegen
       - name: Generate Xcode project
         working-directory: bravova/iosApp
-        run: xcodegen generate
+        run: bash ../scripts/generar_proyecto.sh
       - name: Boot iPhone
         run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];c=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone 16 Pro') and 'Max' not in x['name']] or [x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone')];print(c[0]['udid'])")
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];c=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith(('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro')) and 'Max' not in x['name']] or [x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone')];print(c[0]['udid'])")
           echo "UDID=$UDID" >> $GITHUB_ENV
           xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
           xcrun simctl ui "$UDID" appearance light
@@ -52,9 +57,23 @@ jobs:
           TEST_RUNNER_SHOTS_DIR="$GITHUB_WORKSPACE/sim-out" xcodebuild test -project iosApp.xcodeproj -scheme iosApp \
             -destination "id=$UDID" -derivedDataPath build/test \
             -resultBundlePath "$GITHUB_WORKSPACE/sim-out/resultado.xcresult" \
+            ${{ inputs.solo && format('-only-testing:{0}', inputs.solo) || '' }} \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO ARCHS=arm64 2>&1 | grep -E "\[tour\]|error:|Test Case|passed|failed|\*\* TEST" | tail -n 80 || true
           kill -INT $(cat /tmp/rec.pid) || true; sleep 3
           ls -la "$GITHUB_WORKSPACE/sim-out"
+      - name: Registro del sistema y reportes de cierre
+        if: always()
+        run: |
+          mkdir -p sim-out
+          xcrun simctl spawn booted log show --last 60m --style compact \
+            --predicate 'eventMessage CONTAINS "BRAVO_CRASH" OR (process == "iosApp" AND messageType == error)' \
+            > sim-out/registro_app.txt 2>&1 || true
+          tail -c 200000 sim-out/registro_app.txt > sim-out/registro_app.log || true
+          grep -A60 "BRAVO_CRASH" sim-out/registro_app.txt | head -200 > sim-out/crash_kotlin.txt || true
+          for f in ~/Library/Logs/DiagnosticReports/iosApp*.ips ~/Library/Logs/DiagnosticReports/*/iosApp*.ips; do
+            [ -f "$f" ] && head -c 60000 "$f" > "sim-out/reporte_$(basename "$f" .ips).txt"
+          done
+          ls -la sim-out | tail -20
       - name: Exportar capturas del resultado
         if: always()
         run: |

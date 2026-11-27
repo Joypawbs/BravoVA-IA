@@ -148,6 +148,12 @@ import com.example.model.ChatMessage
 import com.example.model.Recipe
 import com.example.model.BRAV_IA_RECIPES
 import com.example.ai.StoreFacts
+import com.example.ui.components.nativeLiquidGlassAvailable
+import com.example.ui.components.NativeGlassBudgetPanel
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import com.example.ai.BravIaEngine
 import com.example.model.findRecipeById
 import com.example.model.FcmTopicSubscription
 import com.example.model.FrequentProductStat
@@ -953,7 +959,8 @@ fun BravIaChatScreen(
     val dynamicInputBottomPadding by animateDpAsState(
         targetValue = when {
             isImeVisible -> 4.dp
-            areMenusVisible -> if (PlatformInfo.isIos) 78.dp else 66.dp
+            // Con el vidrio nativo de iOS la barra inferior no se esconde: el campo siempre va encima.
+            areMenusVisible || nativeLiquidGlassAvailable() -> if (PlatformInfo.isIos) 78.dp else 66.dp
             else -> 6.dp
         },
         animationSpec = tween(durationMillis = 180),
@@ -978,67 +985,13 @@ fun BravIaChatScreen(
             .imePadding()
             .testTag("bravia_chat_screen")
     ) {
-        // Capa de luz rojiza suave sobre la pantalla
-        Canvas(
+        // Fondo sólido fijo (sin auras): mismo color que el resto de la app
+        Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .translucentBackdropSource(hazeState, zIndex = 0f)
-        ) {
-            val ambientSoftPrimary = sampleSoftAiRedColor(uiColorPhase)
-            val ambientSoftSecondary = sampleSoftAiRedColor(uiColorPhase + 0.35f)
-            val w = size.width
-            val h = size.height
-            val baseIntensity = if (darkMode) {
-                if (isGenerating) 0.08f else 0.04f
-            } else {
-                if (isGenerating) 0.22f else 0.13f
-            }
-            val sweepX = w * (0.5f + 0.34f * cos(uiOrbitAngle))
-            val sweepY = h * (0.46f + 0.28f * sin(uiOrbitAngle))
-
-            // Aura principal que se mueve detrás del chat
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        ambientSoftPrimary.copy(alpha = baseIntensity),
-                        ambientSoftSecondary.copy(alpha = baseIntensity * 0.55f),
-                        Color.Transparent
-                    ),
-                    center = Offset(sweepX, sweepY),
-                    radius = w * 0.88f
-                ),
-                radius = w * 0.88f,
-                center = Offset(sweepX, sweepY)
-            )
-
-            // Reflejo en la cabecera y la tarjeta de presupuesto
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        ambientSoftSecondary.copy(alpha = baseIntensity * 0.85f),
-                        Color.Transparent
-                    ),
-                    center = Offset(w * (0.5f - 0.28f * sin(uiOrbitAngle)), h * 0.12f),
-                    radius = w * 0.72f
-                ),
-                radius = w * 0.72f,
-                center = Offset(w * (0.5f - 0.28f * sin(uiOrbitAngle)), h * 0.12f)
-            )
-
-            // Reflejo en la barra de escritura
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        ambientSoftPrimary.copy(alpha = baseIntensity * 0.90f),
-                        Color.Transparent
-                    ),
-                    center = Offset(w * (0.5f + 0.25f * cos(uiOrbitAngle)), h * 0.88f),
-                    radius = w * 0.76f
-                ),
-                radius = w * 0.76f,
-                center = Offset(w * (0.5f + 0.25f * cos(uiOrbitAngle)), h * 0.88f)
-            )
-        }
+        )
 
         Box(
             modifier = Modifier.fillMaxSize()
@@ -1056,7 +1009,9 @@ fun BravIaChatScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                item(key = "budget_planner_card", contentType = "budget_header") {
+                // En iOS 26+ el panel de presupuesto va fijo bajo la barra superior (ver más abajo),
+                // así nunca pasa por detrás de las cápsulas de vidrio
+                if (!nativeLiquidGlassAvailable()) item(key = "budget_planner_card", contentType = "budget_header") {
                     TranslucentCard(
                     darkMode = darkMode,
                     isArca = isArca,
@@ -1430,6 +1385,7 @@ fun BravIaChatScreen(
                                 if (!isUser && verifiedRecipe != null) {
                                     VerifiedRecipeCard(
                                         recipe = verifiedRecipe,
+                                        multiplier = msg.recipeMultiplier,
                                         productLookup = productLookup,
                                         primaryColor = primaryColor,
                                         onOpenProduct = onOpenProduct
@@ -1880,6 +1836,8 @@ fun BravIaChatScreen(
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .onSizeChanged { topOverlayHeightPx = it.height }
+                // Banda sólida: lo que se desplaza por debajo no se ve a través del encabezado
+                .background(MaterialTheme.colorScheme.background)
         ) {
             GlassTopBar(
                 darkMode = darkMode,
@@ -1928,6 +1886,38 @@ fun BravIaChatScreen(
                     )
                 )
             )
+
+            if (nativeLiquidGlassAvailable()) {
+                // Panel de presupuesto fijo bajo la barra: monto, Listas / Armar / Ajustar,
+                // deslizador de vidrio y sugerencias (desplazables con márgenes, sin cortes contra el borde)
+                NativeGlassBudgetPanel(
+                    value = budgetAmount,
+                    min = 400,
+                    max = 3500,
+                    step = 50,
+                    chips = quickChips.map { it.first },
+                    accent = primaryColor,
+                    darkMode = darkMode,
+                    busy = isGenerating,
+                    onChange = { onBudgetChange(it) },
+                    onAction = { action ->
+                        when (action) {
+                            0 -> onOpenMyLists()
+                            1 -> onBuildCartForBudget()
+                            2 -> onAdjustCartToBudget()
+                            3 -> if (!isGenerating) photoPickerLauncher.launch()
+                            else -> quickChips.getOrNull(action - 10)?.let { (_, prompt) ->
+                                if (!isGenerating) onSendPrompt(prompt)
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 6.dp, bottom = 8.dp)
+                        .height(132.dp)
+                        .testTag("budget_glass_panel")
+                )
+            }
 
             AnimatedVisibility(
                 visible = isLiveVoiceModeActive,
@@ -1985,13 +1975,14 @@ fun BravIaChatScreen(
             }
         }
 
-        val dockedInputBgColor = if (darkMode) Color(0xFF0A0F1D) else MaterialTheme.colorScheme.background
+        // Fondo sólido detrás del campo de chat: los mensajes no se transparentan bajo la cápsula
+        val dockedInputFade = MaterialTheme.colorScheme.background
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(dockedInputBgColor)
+                .background(dockedInputFade)
                 .then(if (isImeVisible) Modifier else Modifier.navigationBarsPadding())
                 .padding(
                     start = 14.dp,
@@ -2088,14 +2079,9 @@ fun BravIaChatScreen(
                     )
                     .clip(RoundedCornerShape(999.dp))
                     .translucentBackdropEffect(darkMode = darkMode)
+                    // Vidrio: tinte translúcido sobre el desenfoque del fondo (antes era un color opaco).
                     .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                if (darkMode) Color(0xFF111827) else MaterialTheme.colorScheme.surface,
-                                if (darkMode) Color(0xFF172033) else MaterialTheme.colorScheme.surface,
-                                if (darkMode) Color(0xFF111827) else MaterialTheme.colorScheme.surface
-                            )
-                        )
+                        if (darkMode) Color(0xFF1B2333).copy(alpha = 0.42f) else Color.White.copy(alpha = 0.55f)
                     )
                     // Borde con el color animado, leído al dibujar (no reconstruye la barra en cada cuadro)
                     .drawWithContent {
@@ -2291,6 +2277,7 @@ fun BravIaChatScreen(
 @Composable
 private fun VerifiedRecipeCard(
     recipe: Recipe,
+    multiplier: Int,
     productLookup: (String) -> Product?,
     primaryColor: Color,
     onOpenProduct: (String) -> Unit
@@ -2308,12 +2295,22 @@ private fun VerifiedRecipeCard(
             }
             Text(recipe.name, fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
             DiagonalMetadataStrip(
-                items = listOf(recipe.kind, "${recipe.servings} porciones", "≈ ${recipe.totalMinutes} min"),
+                items = listOf(recipe.kind, "${recipe.servings * multiplier} porciones", "≈ ${recipe.totalMinutes} min"),
                 slashColor = primaryColor,
                 fontSizeSp = 12f,
                 maxLines = 2
             )
 
+            if (multiplier > 1) {
+                // Las medidas de abajo son de la receta base; las unidades del carrito ya están multiplicadas.
+                Text(
+                    "Receta base para ${recipe.servings}. Para ${recipe.servings * multiplier} porciones, multiplica las cantidades × $multiplier (las unidades del carrito ya están ajustadas).",
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    color = primaryColor
+                )
+            }
             Text("Ingredientes", fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)
             recipe.ingredients.forEach { ing ->
                 val product = ing.skus.firstNotNullOfOrNull(productLookup)
@@ -2336,7 +2333,7 @@ private fun VerifiedRecipeCard(
                     val tag = when {
                         product == null -> "No disponible en BravoVa"
                         ing.pantry -> "Despensa · RD$${formatPesos(product.price)}"
-                        else -> (if (ing.unitsToBuy > 1) "${ing.unitsToBuy} × " else "") + "RD$${formatPesos(product.price)}"
+                        else -> BravIaEngine.unitsFor(ing, multiplier).let { u -> if (u > 1) "$u × " else "" } + "RD$${formatPesos(product.price)}"
                     }
                     Text(
                         text = tag,

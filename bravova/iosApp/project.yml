@@ -6,20 +6,29 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    MARKETING_VERSION: "3.0"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "2.5.0"
+    CURRENT_PROJECT_VERSION: "20500"
     SWIFT_VERSION: "5.9"
     ENABLE_USER_SCRIPT_SANDBOXING: NO
 packages:
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
     from: "12.0.0"
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: "9.0.0"
 targets:
   iosApp:
     type: application
     platform: iOS
     sources:
       - path: iosApp
+        # El ícono por capas (Icon Composer) va como un solo archivo, no como carpeta
+        excludes:
+          - "AppIcon.icon/**"
+      - path: iosApp/AppIcon.icon
+        type: file
+        buildPhase: resources
       - path: Shared
     info:
       path: iosApp/Info.plist
@@ -43,6 +52,10 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.aistudio.bravova.rdshop
             CFBundleURLSchemes: [bravova]
+          # Vuelta del inicio de sesión web de Firebase (GOOGLE_APP_ID codificado)
+          - CFBundleURLName: firebase-auth
+            CFBundleURLSchemes: [app-1-723529928496-ios-f5b4f6c4ac9eba9ce4c2f5]
+          # REVERSED_CLIENT_ID de Google Sign-In: lo agrega scripts/generar_proyecto.sh si el plist lo trae
         # Atajos al mantener presionado el ícono (el "type" es el destino de ExternalLinks.kt)
         UIApplicationShortcutItems:
           - UIApplicationShortcutItemType: buscar
@@ -74,6 +87,10 @@ targets:
         product: FirebaseAI
       - package: Firebase
         product: FirebaseAppCheck
+      - package: Firebase
+        product: FirebaseAuth
+      - package: GoogleSignIn
+        product: GoogleSignIn
     preBuildScripts:
       - name: Compile Kotlin Framework
         basedOnDependencyAnalysis: false

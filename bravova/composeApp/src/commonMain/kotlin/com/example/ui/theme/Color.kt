@@ -27,7 +27,7 @@ val LightBorder = Color(0xFFE6E8EC)
 val LightTextPrimary = Color(0xFF1A1B1F)
 val LightTextSecondary = Color(0xFF6B6F78)
 
-val DarkBackground = Color(0xFF0C0C0E)
+val DarkBackground = Color(0xFF0E0F12) // fondo sólido fijo: el vidrio refracta limpio sobre él
 val DarkSurface = Color(0xFF17181B)
 val DarkCardSurface = Color(0xFF1F2024)
 val DarkInputSurface = Color(0xFF26272C)

@@ -123,11 +123,6 @@ object RdPrefs {
 private fun RdPaymentOption.icon(): ImageVector = when (this) {
     RdPaymentOption.WALLET -> Icons.Outlined.AccountBalanceWallet
     RdPaymentOption.CARD -> Icons.Outlined.CreditCard
-    RdPaymentOption.CASH_ON_DELIVERY -> Icons.Outlined.Payments
-    RdPaymentOption.POS_ON_DELIVERY -> Icons.Outlined.PointOfSale
-    RdPaymentOption.TRANSFER -> Icons.Outlined.AccountBalance
-    RdPaymentOption.TPAGO -> Icons.Outlined.PhoneIphone
-    RdPaymentOption.AZUL -> Icons.Outlined.CreditCard
 }
 
 /** Propina: redondea el total a la siguiente cifra de RD$50. */
@@ -178,34 +173,6 @@ fun RdCheckoutOptionsCard(
                         Box(Modifier.fillMaxWidth().height(0.5.dp).background(MaterialTheme.colorScheme.outlineVariant))
                     }
                 }
-            }
-
-            AnimatedVisibility(
-                visible = extras.payment == RdPaymentOption.TRANSFER,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ChoiceChips(RD_BANKS, extras.transferBank, accent) { onChange(extras.copy(transferBank = it)) }
-                    Text(
-                        "Cuenta corriente Bravo S.A. • ${extras.transferBank ?: "elige tu banco"} (demo)",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    PillButton(
-                        text = if (extras.transferProofAttached) "Comprobante adjuntado" else "Adjuntar comprobante",
-                        icon = if (extras.transferProofAttached) Icons.Outlined.CheckCircle else Icons.Outlined.AttachFile,
-                        accent = accent,
-                        filled = extras.transferProofAttached
-                    ) { onChange(extras.copy(transferProofAttached = !extras.transferProofAttached)) }
-                }
-            }
-            AnimatedVisibility(visible = extras.payment == RdPaymentOption.TPAGO) {
-                Text(
-                    "Al confirmar te llegará la solicitud de pago en tPago para aprobarla (simulado).",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
 
             if (isDelivery) {

@@ -26,5 +26,9 @@ expect fun NativeDeliveryMap(
     driver: DeliveryMapPin,
     routeColor: Color,
     darkMode: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Ruta ya recorrida (sucursal → repartidor) por calles; vacía = línea directa. */
+    travelledPath: List<DeliveryMapPin> = emptyList(),
+    /** Ruta que falta (repartidor → casa) por calles; vacía = línea directa. */
+    remainingPath: List<DeliveryMapPin> = emptyList()
 )

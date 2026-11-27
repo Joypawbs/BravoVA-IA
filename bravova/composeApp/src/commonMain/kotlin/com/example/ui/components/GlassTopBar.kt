@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import androidx.compose.ui.draw.drawBehind
+
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -158,6 +160,7 @@ fun GlassTopBar(
         darkMode = darkMode
     )
     if (nativeLiquidGlassAvailable()) {
+        val solidBarBackground = MaterialTheme.colorScheme.background
         NativeGlassTopBar(
             spec = spec,
             onBack = { onBack?.invoke() },
@@ -165,14 +168,16 @@ fun GlassTopBar(
             // Desvanecido detrás de la barra (como el "scroll edge effect" de iOS 26)
             modifier = modifier
                 .fillMaxWidth()
-                .background(
-                    // Más opaco arriba para que el contenido que pasa por detrás no compita con el título
-                    Brush.verticalGradient(
-                        0f to MaterialTheme.colorScheme.background.copy(alpha = 0.97f),
-                        0.55f to MaterialTheme.colorScheme.background.copy(alpha = 0.86f),
-                        1f to MaterialTheme.colorScheme.background.copy(alpha = 0f)
+                // Banda sólida detrás de la barra (y de la barra de estado, por encima): nada del
+                // contenido se cuela bajo las cápsulas de vidrio
+                .drawBehind {
+                    val extra = 300f
+                    drawRect(
+                        color = solidBarBackground,
+                        topLeft = androidx.compose.ui.geometry.Offset(0f, -extra),
+                        size = androidx.compose.ui.geometry.Size(size.width, size.height + extra)
                     )
-                )
+                }
                 .padding(top = 4.dp)
                 .height(60.dp)
         )
@@ -374,3 +379,53 @@ fun LargeTitle(
         )
     }
 }
+
+/**
+ * Buscador de vidrio líquido nativo (iOS 26+): el campo de texto es de SwiftUI para que el vidrio
+ * refracte de verdad lo que hay detrás. [focusSignal] abre el teclado cada vez que cambia.
+ */
+@Composable
+expect fun NativeGlassSearchField(
+    text: String,
+    placeholder: String,
+    accent: Color,
+    darkMode: Boolean,
+    trailingSymbol: String,
+    focusSignal: Int,
+    onChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onFocus: (Boolean) -> Unit,
+    onTrailing: () -> Unit,
+    modifier: Modifier
+)
+
+
+/**
+ * Panel de presupuesto de Brav IA con vidrio líquido nativo (iOS 26+): monto, botones
+ * Listas / Armar / Ajustar, deslizador del sistema (lente de vidrio al arrastrar) y sugerencias.
+ * [onAction]: 0 = Mis listas, 1 = Armar, 2 = Ajustar, 3 = Foto / NCF, 10 + i = sugerencia i.
+ */
+@Composable
+expect fun NativeGlassBudgetPanel(
+    value: Int,
+    min: Int,
+    max: Int,
+    step: Int,
+    chips: List<String>,
+    accent: Color,
+    darkMode: Boolean,
+    busy: Boolean,
+    onChange: (Int) -> Unit,
+    onAction: (Int) -> Unit,
+    modifier: Modifier
+)
+
+/** Cápsula de carga de Liquid Glass nativa (iOS 26+): barra de progreso del sistema y texto centrado. */
+@Composable
+expect fun NativeGlassProgressCapsule(
+    progress: Float,
+    text: String,
+    accent: Color,
+    darkMode: Boolean,
+    modifier: Modifier
+)

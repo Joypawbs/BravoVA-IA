@@ -55,12 +55,16 @@ actual fun NativeDeliveryMap(
     driver: DeliveryMapPin,
     routeColor: Color,
     darkMode: Boolean,
-    modifier: Modifier
+    modifier: Modifier,
+    travelledPath: List<DeliveryMapPin>,
+    remainingPath: List<DeliveryMapPin>
 ) {
+    val done = travelledPath.takeIf { it.size >= 2 } ?: listOf(branch, driver)
+    val left = remainingPath.takeIf { it.size >= 2 } ?: listOf(driver, home)
     if (hasGoogleKey) {
-        GoogleDeliveryMap(branch, home, driver, routeColor, darkMode, modifier)
+        GoogleDeliveryMap(branch, home, driver, routeColor, darkMode, modifier, done, left)
     } else {
-        LibreDeliveryMap(branch, home, driver, routeColor, darkMode, modifier)
+        LibreDeliveryMap(branch, home, driver, routeColor, darkMode, modifier, done, left)
     }
 }
 
@@ -71,12 +75,12 @@ private const val OFM_DARK = "https://tiles.openfreemap.org/styles/dark"
 private const val SRC_ROUTE = "bravova-route"
 private const val SRC_PINS = "bravova-pins"
 
-private fun routeCollection(branch: DeliveryMapPin, home: DeliveryMapPin, driver: DeliveryMapPin): FeatureCollection {
+private fun routeCollection(donePath: List<DeliveryMapPin>, leftPath: List<DeliveryMapPin>): FeatureCollection {
     val done = Feature.fromGeometry(
-        LineString.fromLngLats(listOf(Point.fromLngLat(branch.lng, branch.lat), Point.fromLngLat(driver.lng, driver.lat)))
+        LineString.fromLngLats(donePath.map { Point.fromLngLat(it.lng, it.lat) })
     ).apply { addStringProperty("part", "done") }
     val left = Feature.fromGeometry(
-        LineString.fromLngLats(listOf(Point.fromLngLat(driver.lng, driver.lat), Point.fromLngLat(home.lng, home.lat)))
+        LineString.fromLngLats(leftPath.map { Point.fromLngLat(it.lng, it.lat) })
     ).apply { addStringProperty("part", "left") }
     return FeatureCollection.fromFeatures(listOf(done, left))
 }
@@ -97,7 +101,9 @@ private fun LibreDeliveryMap(
     driver: DeliveryMapPin,
     routeColor: Color,
     darkMode: Boolean,
-    modifier: Modifier
+    modifier: Modifier,
+    donePath: List<DeliveryMapPin>,
+    leftPath: List<DeliveryMapPin>
 ) {
     val context = LocalContext.current
     val mapView = remember {
@@ -147,7 +153,7 @@ private fun LibreDeliveryMap(
         style = null
         m.setStyle(Style.Builder().fromUri(if (darkMode) OFM_DARK else OFM_LIGHT)) { loaded ->
             val route = routeColor.toArgb()
-            loaded.addSource(GeoJsonSource(SRC_ROUTE, routeCollection(branch, home, driver)))
+            loaded.addSource(GeoJsonSource(SRC_ROUTE, routeCollection(donePath, leftPath)))
             loaded.addSource(GeoJsonSource(SRC_PINS, pinsCollection(branch, home, driver)))
             loaded.addLayer(
                 LineLayer("bravova-route-line", SRC_ROUTE).withProperties(
@@ -198,9 +204,9 @@ private fun LibreDeliveryMap(
     }
 
     // El repartidor se mueve: actualiza ruta y pines sin recargar el estilo
-    LaunchedEffect(style, driver.lat, driver.lng) {
+    LaunchedEffect(style, driver.lat, driver.lng, leftPath.size) {
         val s = style ?: return@LaunchedEffect
-        (s.getSource(SRC_ROUTE) as? GeoJsonSource)?.setGeoJson(routeCollection(branch, home, driver))
+        (s.getSource(SRC_ROUTE) as? GeoJsonSource)?.setGeoJson(routeCollection(donePath, leftPath))
         (s.getSource(SRC_PINS) as? GeoJsonSource)?.setGeoJson(pinsCollection(branch, home, driver))
     }
 
@@ -226,7 +232,9 @@ private fun GoogleDeliveryMap(
     driver: DeliveryMapPin,
     routeColor: Color,
     darkMode: Boolean,
-    modifier: Modifier
+    modifier: Modifier,
+    donePath: List<DeliveryMapPin>,
+    leftPath: List<DeliveryMapPin>
 ) {
     val b = LatLng(branch.lat, branch.lng)
     val h = LatLng(home.lat, home.lng)
@@ -252,8 +260,8 @@ private fun GoogleDeliveryMap(
             myLocationButtonEnabled = false
         )
     ) {
-        Polyline(points = listOf(b, d), color = routeColor.copy(alpha = 0.45f), width = 12f)
-        Polyline(points = listOf(d, h), color = routeColor, width = 14f)
+        Polyline(points = donePath.map { LatLng(it.lat, it.lng) }, color = routeColor.copy(alpha = 0.45f), width = 12f)
+        Polyline(points = leftPath.map { LatLng(it.lat, it.lng) }, color = routeColor, width = 14f)
         Marker(
             state = remember(b) { MarkerState(b) },
             title = branch.title,

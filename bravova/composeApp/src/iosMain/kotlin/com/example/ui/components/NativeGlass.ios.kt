@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,6 +48,33 @@ interface IosGlassHandle {
     )
     fun updateCartBar(count: Int, total: String, accentArgb: Int, dark: Boolean, onTap: () -> Unit)
     fun updateToast(text: String, symbol: String, accentArgb: Int, dark: Boolean)
+    fun updateSearchField(
+        text: String,
+        placeholder: String,
+        accentArgb: Int,
+        dark: Boolean,
+        trailingSymbol: String,
+        onChange: (String) -> Unit,
+        onSubmit: () -> Unit,
+        onFocus: (Boolean) -> Unit,
+        onTrailing: () -> Unit
+    )
+    fun focusSearchField()
+    /** Muestra u oculta la barra con un fundido nativo (SwiftUI); oculta no recibe toques. */
+    fun setVisible(visible: Boolean)
+    fun updateProgressCapsule(progress: Double, text: String, accentArgb: Int, dark: Boolean)
+    fun updateBudgetPanel(
+        value: Int,
+        min: Int,
+        max: Int,
+        step: Int,
+        chips: List<String>,
+        accentArgb: Int,
+        dark: Boolean,
+        busy: Boolean,
+        onChange: (Int) -> Unit,
+        onAction: (Int) -> Unit
+    )
 }
 
 interface IosGlassBridge {
@@ -55,6 +83,9 @@ interface IosGlassBridge {
     fun makeDock(): IosGlassHandle
     fun makeCartBar(): IosGlassHandle
     fun makeToast(): IosGlassHandle
+    fun makeSearchField(): IosGlassHandle
+    fun makeBudgetPanel(): IosGlassHandle
+    fun makeProgressCapsule(): IosGlassHandle
     fun presentQuickView(
         title: String,
         subtitle: String,
@@ -84,6 +115,8 @@ private val overlayProps = UIKitInteropProperties(
 actual fun NativeGlassTopBar(spec: GlassTopBarSpec, onBack: () -> Unit, onAction: (Int) -> Unit, modifier: Modifier) {
     val bridge = IosBridges.glass ?: return
     val handle = remember { bridge.makeTopBar() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
     val back by rememberUpdatedState(onBack)
     val action by rememberUpdatedState(onAction)
     UIKitViewController(
@@ -127,6 +160,8 @@ actual fun NativeGlassDock(
 ) {
     val bridge = IosBridges.glass ?: return
     val handle = remember { bridge.makeDock() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
     val select by rememberUpdatedState(onSelect)
     val search by rememberUpdatedState(onSearch)
     UIKitViewController(
@@ -144,6 +179,8 @@ actual fun NativeGlassDock(
 actual fun NativeGlassCartBar(count: Int, total: String, accent: Color, darkMode: Boolean, onTap: () -> Unit, modifier: Modifier) {
     val bridge = IosBridges.glass ?: return
     val handle = remember { bridge.makeCartBar() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
     val tap by rememberUpdatedState(onTap)
     UIKitViewController(
         factory = { handle.viewController() },
@@ -158,10 +195,104 @@ actual fun NativeGlassCartBar(count: Int, total: String, accent: Color, darkMode
 actual fun NativeGlassToast(text: String, symbol: String, accent: Color, darkMode: Boolean, modifier: Modifier) {
     val bridge = IosBridges.glass ?: return
     val handle = remember { bridge.makeToast() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
     UIKitViewController(
         factory = { handle.viewController() },
         modifier = modifier,
         update = { handle.updateToast(text, symbol, accent.argbInt(), darkMode) },
+        properties = overlayProps
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassSearchField(
+    text: String,
+    placeholder: String,
+    accent: Color,
+    darkMode: Boolean,
+    trailingSymbol: String,
+    focusSignal: Int,
+    onChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onFocus: (Boolean) -> Unit,
+    onTrailing: () -> Unit,
+    modifier: Modifier
+) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeSearchField() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
+    val change by rememberUpdatedState(onChange)
+    val submit by rememberUpdatedState(onSubmit)
+    val focus by rememberUpdatedState(onFocus)
+    val trailing by rememberUpdatedState(onTrailing)
+    androidx.compose.runtime.LaunchedEffect(focusSignal) { if (focusSignal > 0) handle.focusSearchField() }
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = {
+            handle.updateSearchField(
+                text, placeholder, accent.argbInt(), darkMode, trailingSymbol,
+                { change(it) }, { submit() }, { focus(it) }, { trailing() }
+            )
+        },
+        properties = overlayProps
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassBudgetPanel(
+    value: Int,
+    min: Int,
+    max: Int,
+    step: Int,
+    chips: List<String>,
+    accent: Color,
+    darkMode: Boolean,
+    busy: Boolean,
+    onChange: (Int) -> Unit,
+    onAction: (Int) -> Unit,
+    modifier: Modifier
+) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeBudgetPanel() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
+    val change by rememberUpdatedState(onChange)
+    val action by rememberUpdatedState(onAction)
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = {
+            handle.updateBudgetPanel(
+                value, min, max, step, chips, accent.argbInt(), darkMode, busy,
+                { change(it) }, { action(it) }
+            )
+        },
+        properties = overlayProps
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassProgressCapsule(
+    progress: Float,
+    text: String,
+    accent: Color,
+    darkMode: Boolean,
+    modifier: Modifier
+) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeProgressCapsule() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = { handle.updateProgressCapsule(progress.toDouble(), text, accent.argbInt(), darkMode) },
         properties = overlayProps
     )
 }

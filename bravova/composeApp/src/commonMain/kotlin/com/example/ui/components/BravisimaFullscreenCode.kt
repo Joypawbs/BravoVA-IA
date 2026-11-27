@@ -47,6 +47,7 @@ import com.example.platform.KeepScreenAtFullBrightness
 @Composable
 fun BravisimaFullscreenCode(cardNumber: String, memberName: String, onDismiss: () -> Unit) {
     val modules = remember(cardNumber) { Code128.modules(cardNumber) }
+    com.example.ui.components.SuppressNativeGlass() // el vidrio nativo se dibujaría encima del diálogo
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)

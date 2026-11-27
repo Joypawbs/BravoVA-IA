@@ -61,7 +61,11 @@ object RecentSearches {
     fun add(query: String) {
         val q = query.trim()
         if (q.length < 2) return
-        items.removeAll { normalizeForSearch(it) == normalizeForSearch(q) }
+        val nq = normalizeForSearch(q)
+        // Si la persona hizo una pausa a mitad de palabra, "como" y "como hag" no deben quedar como
+        // búsquedas propias: la búsqueda más larga reemplaza a sus prefijos.
+        if (items.any { val ni = normalizeForSearch(it); ni != nq && ni.startsWith(nq) }) return
+        items.removeAll { nq.startsWith(normalizeForSearch(it)) }
         items.add(0, q)
         while (items.size > 6) items.removeAt(items.lastIndex)
     }
