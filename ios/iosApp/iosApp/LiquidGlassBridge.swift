@@ -601,7 +601,7 @@ final class GlassHandle: NSObject, IosGlassHandle {
         toastModel = toast; searchModel = search; presence = p
         switch kind {
         case .topBar:
-            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .top, travel: -6) )
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .top, travel: -6) { GlassTopBarView(m: top) })
         case .dock:
             controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .bottom, travel: 14) { GlassDockView(m: dock) })
         case .cartBar:

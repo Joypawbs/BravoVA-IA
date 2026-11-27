@@ -149,7 +149,18 @@ fun BravoRoot(
 ) {
     setSingletonImageLoaderFactory { ctx ->
         ImageLoader.Builder(ctx)
-            .components { add(KtorNetworkFetcherFactory()) }
+            // Wikimedia (fotos de frescos y genéricos) exige un User-Agent que identifique la app
+            .components {
+                add(
+                    KtorNetworkFetcherFactory(httpClient = {
+                        io.ktor.client.HttpClient {
+                            install(io.ktor.client.plugins.UserAgent) {
+                                agent = "BravoVa/2.3 (https://github.com/Joypawbs/BravoVA-IA)"
+                            }
+                        }
+                    })
+                )
+            }
             .build()
     }
     val instantPrefs = remember { sharedPrefs("bravova_instant_prefs") }
