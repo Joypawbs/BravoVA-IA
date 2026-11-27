@@ -65,13 +65,15 @@ jobs:
         if: always()
         run: |
           mkdir -p sim-out
-          xcrun simctl spawn booted log show --last 60m --style compact \
-            --predicate 'eventMessage CONTAINS "BRAVO_CRASH" OR (process == "iosApp" AND messageType == error)' \
+          # La app se llama BravoVa (PRODUCT_NAME): errores, fallos y excepciones de Kotlin
+          xcrun simctl spawn booted log show --last 90m --style compact \
+            --predicate '(process == "BravoVa" AND (messageType == error OR messageType == fault)) OR eventMessage CONTAINS "BRAVO_CRASH" OR eventMessage CONTAINS "Terminating app"' \
             > sim-out/registro_app.txt 2>&1 || true
-          tail -c 200000 sim-out/registro_app.txt > sim-out/registro_app.log || true
-          grep -A60 "BRAVO_CRASH" sim-out/registro_app.txt | head -200 > sim-out/crash_kotlin.txt || true
-          for f in ~/Library/Logs/DiagnosticReports/iosApp*.ips ~/Library/Logs/DiagnosticReports/*/iosApp*.ips; do
-            [ -f "$f" ] && head -c 60000 "$f" > "sim-out/reporte_$(basename "$f" .ips).txt"
+          tail -c 300000 sim-out/registro_app.txt > sim-out/registro_app.log || true
+          grep -B2 -A80 "BRAVO_CRASH\|Terminating app\|uncaught\|Fatal error" sim-out/registro_app.txt | head -400 > sim-out/crash_kotlin.txt || true
+          # Reportes de cierre (.ips) recientes del Mac anfitrión del simulador
+          find ~/Library/Logs/DiagnosticReports -name "*.ips" -mmin -120 2>/dev/null | while read f; do
+            echo "== $f"; head -c 120000 "$f" > "sim-out/reporte_$(basename "$f" .ips).txt"
           done
           ls -la sim-out | tail -20
       - name: Exportar capturas del resultado
