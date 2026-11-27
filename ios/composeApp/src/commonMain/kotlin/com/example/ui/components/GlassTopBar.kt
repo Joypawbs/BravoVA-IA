@@ -393,3 +393,24 @@ expect fun NativeGlassSearchField(
     onTrailing: () -> Unit,
     modifier: Modifier
 )
+
+
+/**
+ * Panel de presupuesto de Brav IA con vidrio líquido nativo (iOS 26+): monto, botones
+ * Listas / Armar / Ajustar, deslizador del sistema (lente de vidrio al arrastrar) y sugerencias.
+ * [onAction]: 0 = Mis listas, 1 = Armar, 2 = Ajustar, 3 = Foto / NCF, 10 + i = sugerencia i.
+ */
+@Composable
+expect fun NativeGlassBudgetPanel(
+    value: Int,
+    min: Int,
+    max: Int,
+    step: Int,
+    chips: List<String>,
+    accent: Color,
+    darkMode: Boolean,
+    busy: Boolean,
+    onChange: (Int) -> Unit,
+    onAction: (Int) -> Unit,
+    modifier: Modifier
+)

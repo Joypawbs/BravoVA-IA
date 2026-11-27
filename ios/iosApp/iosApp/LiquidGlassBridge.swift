@@ -61,6 +61,38 @@ struct BravoGlassGroup<Content: View>: View {
     }
 }
 
+extension View {
+    /// Botón de vidrio del sistema (iOS 26+): .glass para acciones secundarias y
+    /// .glassProminent (vidrio teñido) para la acción principal. Antes de iOS 26, estilo con borde.
+    @ViewBuilder
+    func bravoGlassButton(prominent: Bool) -> some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            if prominent { self.buttonStyle(.glassProminent) } else { self.buttonStyle(.glass) }
+        } else {
+            if prominent { self.buttonStyle(.borderedProminent) } else { self.buttonStyle(.bordered) }
+        }
+        #else
+        if prominent { self.buttonStyle(.borderedProminent) } else { self.buttonStyle(.bordered) }
+        #endif
+    }
+
+    /// Identidad de vidrio para que las piezas se fundan y se separen (morphing) al aparecer o
+    /// desaparecer dentro de un mismo grupo (GlassEffectContainer).
+    @ViewBuilder
+    func bravoGlassID(_ id: String, in ns: Namespace.ID) -> some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            self.glassEffectID(id, in: ns)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+}
+
 private extension Color {
     init(argb: Int32) {
         let v = UInt32(bitPattern: argb)
@@ -152,6 +184,7 @@ final class TopBarModel: ObservableObject {
 
 struct GlassTopBarView: View {
     @ObservedObject var m: TopBarModel
+    @Namespace private var ns
     var body: some View {
         BravoGlassGroup(spacing: 10) {
             HStack(spacing: 8) {
@@ -165,6 +198,7 @@ struct GlassTopBarView: View {
                     }
                     .buttonStyle(.plain)
                     .bravoGlass(Circle())
+                    .bravoGlassID("back", in: ns)
                     .accessibilityLabel(m.backLabel)
                 }
                 if m.title.isEmpty {
@@ -187,6 +221,8 @@ struct GlassTopBarView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
                     .bravoGlass(Capsule(), interactive: false)
+                    // Al hacer scroll, la píldora del título nace del grupo de vidrio (se funde con sus vecinas)
+                    .bravoGlassID("title", in: ns)
                     .accessibilityElement(children: .combine)
                     .transition(.opacity.combined(with: .scale(scale: 0.92)))
                 }
@@ -206,6 +242,7 @@ struct GlassTopBarView: View {
                                 .overlay(alignment: .topTrailing) {
                                     if !a.badge.isEmpty {
                                         Text(a.badge)
+                                            .contentTransition(.numericText())
                                             .font(.system(size: 9, weight: .heavy))
                                             .foregroundStyle(.white)
                                             .frame(minWidth: 16, minHeight: 16)
@@ -222,6 +259,7 @@ struct GlassTopBarView: View {
                     .padding(.horizontal, m.actions.count == 1 && m.actions[0].text.isEmpty ? 4 : 4)
                     .frame(minWidth: 48, minHeight: 48)
                     .bravoGlass(Capsule())
+                    .bravoGlassID("actions", in: ns)
                 }
             }
             .padding(.horizontal, 12)
@@ -262,6 +300,7 @@ struct GlassDockView: View {
                     .frame(width: m.minimized ? 58 : nil)
                     .frame(maxWidth: m.minimized ? 58 : .infinity, maxHeight: .infinity)
                     .bravoGlass(Capsule())
+                    .bravoGlassID("tabs", in: ns)
 
                 if m.minimized { Spacer(minLength: 0) }
 
@@ -274,6 +313,7 @@ struct GlassDockView: View {
                 }
                 .buttonStyle(.plain)
                 .bravoGlass(Circle())
+                .bravoGlassID("search", in: ns)
                 .accessibilityLabel("Buscar")
             }
         }
@@ -350,6 +390,7 @@ struct GlassDockView: View {
                 .symbolRenderingMode(.hierarchical)
                 .font(.system(size: 19, weight: isActive ? .semibold : .regular))
                 .scaleEffect(dragX != nil && hovered == i ? 1.15 : 1)
+                .symbolEffect(.bounce.down, value: m.selected == i)
             if !m.minimized, m.labels.indices.contains(i) {
                 Text(m.labels[i]).font(.system(size: 10, weight: .semibold)).lineLimit(1)
             }
@@ -391,6 +432,7 @@ struct GlassCartBarView: View {
             HStack(spacing: 14) {
                 Image(systemName: "cart.fill")
                     .font(.system(size: 18, weight: .semibold))
+                    .symbolEffect(.bounce, value: m.count)
                     .overlay(alignment: .topTrailing) {
                         Text("\(m.count)")
                             .font(.system(size: 10, weight: .heavy))
@@ -440,10 +482,11 @@ struct GlassToastView: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: m.symbol).foregroundStyle(m.accent).font(.system(size: 17, weight: .semibold))
+                .symbolEffect(.bounce, value: m.text)
             Text(m.text).font(.system(size: 14, weight: .semibold)).lineLimit(2)
         }
         .padding(.horizontal, 18).padding(.vertical, 12)
-        .bravoGlass(Capsule(), interactive: false)
+        .bravoGlass(Capsule(), tint: m.accent.opacity(0.10), interactive: false)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .environment(\.colorScheme, m.dark ? .dark : .light)
         .accessibilityElement(children: .combine)
@@ -532,7 +575,12 @@ final class SearchFieldModel: ObservableObject {
 struct GlassSearchFieldView: View {
     @ObservedObject var m: SearchFieldModel
     @FocusState private var focused: Bool
+    @Namespace private var ns
     var body: some View {
+        // Al enfocar, un botón circular de vidrio "se desprende" del buscador (morphing) para cerrar el teclado,
+        // como la búsqueda del sistema en iOS 26.
+        BravoGlassGroup(spacing: 8) {
+        HStack(spacing: 8) {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .semibold))
@@ -573,6 +621,24 @@ struct GlassSearchFieldView: View {
         .contentShape(Capsule())
         .onTapGesture { focused = true }
         .bravoGlass(Capsule())
+        .bravoGlassID("field", in: ns)
+
+        if focused {
+            Button { focused = false } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.primary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .bravoGlass(Circle())
+            .bravoGlassID("dismiss", in: ns)
+            .accessibilityLabel("Cerrar teclado")
+        }
+        }
+        }
+        .animation(.spring(response: 0.38, dampingFraction: 0.78), value: focused)
         .padding(.horizontal, 1).padding(.vertical, 2)
         .environment(\.colorScheme, m.dark ? .dark : .light)
         .onChange(of: focused) { _, now in m.onFocus(now) }
@@ -581,15 +647,150 @@ struct GlassSearchFieldView: View {
     }
 }
 
+// MARK: - Panel de presupuesto de Brav IA (deslizador de vidrio)
+// El deslizador es el del sistema: en iOS 26+ el control se vuelve una lente de Liquid Glass
+// mientras se arrastra (la guía de Apple pide justo eso para controles dentro del contenido).
+// Los botones usan los estilos de vidrio del sistema y la acción principal ("Armar") va teñida.
+
+final class BudgetPanelModel: ObservableObject {
+    @Published var value: Double = 1200
+    @Published var minV: Double = 400
+    @Published var maxV: Double = 3500
+    @Published var step: Double = 50
+    @Published var chips: [String] = []
+    @Published var accent = Color.red
+    @Published var dark = true
+    @Published var busy = false
+    /// Mientras el dedo está en el deslizador no se acepta el valor que llega de Kotlin
+    var editing = false
+    var onChange: (Int) -> Void = { _ in }
+    /// 0 = Mis listas, 1 = Armar, 2 = Ajustar, 3 = Foto / NCF, 10 + i = sugerencia i
+    var onAction: (Int) -> Void = { _ in }
+}
+
+private let pesosFormatter: NumberFormatter = {
+    let f = NumberFormatter()
+    f.numberStyle = .decimal
+    f.locale = Locale(identifier: "en_US")
+    f.maximumFractionDigits = 0
+    return f
+}()
+
+struct GlassBudgetPanelView: View {
+    @ObservedObject var m: BudgetPanelModel
+    @Namespace private var ns
+    @State private var editing = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var binding: Binding<Double> {
+        Binding(get: { m.value }, set: { v in
+            let stepped = (v / m.step).rounded() * m.step
+            if stepped != m.value {
+                m.value = stepped
+                m.onChange(Int(stepped))
+            }
+        })
+    }
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(alignment: .center, spacing: 8) {
+                Text("RD$" + (pesosFormatter.string(from: NSNumber(value: m.value)) ?? "\(Int(m.value))"))
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(m.accent)
+                    .contentTransition(.numericText(value: m.value))
+                    .scaleEffect(editing && !reduceMotion ? 1.08 : 1, anchor: .leading)
+                    .animation(.snappy(duration: 0.22), value: m.value)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: editing)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityLabel("Presupuesto: \(Int(m.value)) pesos")
+                Spacer(minLength: 4)
+                BravoGlassGroup(spacing: 6) {
+                    HStack(spacing: 6) {
+                        pill("Listas", id: 0, prominent: false)
+                        pill("Armar", id: 1, prominent: true)
+                        pill("Ajustar", id: 2, prominent: false)
+                    }
+                }
+                .disabled(m.busy)
+            }
+
+            Slider(value: binding, in: m.minV...m.maxV, step: m.step) { e in
+                editing = e
+                m.editing = e
+            } minimumValueLabel: {
+                Image(systemName: "banknote").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+            } maximumValueLabel: {
+                Image(systemName: "banknote.fill").font(.system(size: 15, weight: .semibold)).foregroundStyle(m.accent)
+            }
+            .tint(m.accent)
+            .bravoFeedback(.selection, trigger: Int(m.value))
+            .accessibilityLabel("Presupuesto meta")
+            .accessibilityValue("\(Int(m.value)) pesos")
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                BravoGlassGroup(spacing: 8) {
+                    HStack(spacing: 8) {
+                        chip(symbol: "camera.fill", text: "Foto / NCF", id: 3, tinted: true)
+                        ForEach(Array(m.chips.enumerated()), id: \.offset) { i, label in
+                            chip(symbol: nil, text: label, id: 10 + i, tinted: false)
+                        }
+                    }
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 2)
+                }
+            }
+            .scrollClipDisabled()
+            .disabled(m.busy)
+        }
+        .padding(.horizontal, 2)
+        .tint(m.accent)
+        .environment(\.colorScheme, m.dark ? .dark : .light)
+        .opacity(m.busy ? 0.75 : 1)
+        .animation(.easeInOut(duration: 0.25), value: m.busy)
+    }
+
+    private func pill(_ title: String, id: Int, prominent: Bool) -> some View {
+        Button { m.onAction(id) } label: {
+            Text(title)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .lineLimit(1)
+                .padding(.horizontal, 2)
+        }
+        .controlSize(.small)
+        .bravoGlassButton(prominent: prominent)
+        .bravoGlassID("pill\(id)", in: ns)
+    }
+
+    private func chip(symbol: String?, text: String, id: Int, tinted: Bool) -> some View {
+        Button { m.onAction(id) } label: {
+            HStack(spacing: 5) {
+                if let symbol { Image(systemName: symbol).font(.system(size: 12, weight: .semibold)) }
+                Text(text).font(.system(size: 13, weight: .semibold, design: .rounded)).lineLimit(1)
+            }
+            .foregroundStyle(tinted ? m.accent : Color.primary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .bravoGlass(Capsule(), tint: tinted ? m.accent.opacity(0.22) : nil)
+        .bravoGlassID("chip\(id)", in: ns)
+    }
+}
+
 // MARK: - Puente con Kotlin
 
 final class GlassHandle: NSObject, IosGlassHandle {
-    enum Kind { case topBar, dock, cartBar, toast, search }
+    enum Kind { case topBar, dock, cartBar, toast, search, budget }
     private let topModel: TopBarModel
     private let dockModel: DockModel
     private let cartModel: CartBarModel
     private let toastModel: ToastModel
     private let searchModel: SearchFieldModel
+    private let budgetModel: BudgetPanelModel
     private let presence: GlassPresenceModel
     private var receivedFirstVisibility = false
     private let controller: UIViewController
@@ -599,6 +800,8 @@ final class GlassHandle: NSObject, IosGlassHandle {
         let toast = ToastModel(), search = SearchFieldModel(), p = GlassPresenceModel()
         topModel = top; dockModel = dock; cartModel = cart
         toastModel = toast; searchModel = search; presence = p
+        let budget = BudgetPanelModel()
+        budgetModel = budget
         switch kind {
         case .topBar:
             controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .top, travel: -6) { GlassTopBarView(m: top) })
@@ -610,6 +813,8 @@ final class GlassHandle: NSObject, IosGlassHandle {
             controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .top, travel: -14) { GlassToastView(m: toast) })
         case .search:
             controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .center, travel: 0) { GlassSearchFieldView(m: search) })
+        case .budget:
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .center, travel: 0) { GlassBudgetPanelView(m: budget) })
         }
         super.init()
     }
@@ -708,6 +913,23 @@ final class GlassHandle: NSObject, IosGlassHandle {
 
     func focusSearchField() { searchModel.focusRequest += 1 }
 
+    func updateBudgetPanel(value: Int32, min: Int32, max: Int32, step: Int32, chips: [String],
+                           accentArgb: Int32, dark: Bool, busy: Bool,
+                           onChange: @escaping (KotlinInt) -> Void, onAction: @escaping (KotlinInt) -> Void) {
+        let m = budgetModel
+        m.onChange = { v in onChange(KotlinInt(int: Int32(v))) }
+        m.onAction = { i in onAction(KotlinInt(int: Int32(i))) }
+        if !m.editing, m.value != Double(value) { m.value = Double(value) }
+        if m.minV != Double(min) { m.minV = Double(min) }
+        if m.maxV != Double(max) { m.maxV = Double(max) }
+        if m.step != Double(step) { m.step = Double(step) }
+        if m.chips != chips { m.chips = chips }
+        let accentColor = Color(argb: accentArgb)
+        if m.accent != accentColor { m.accent = accentColor }
+        if m.dark != dark { m.dark = dark }
+        if m.busy != busy { m.busy = busy }
+    }
+
     func updateToast(text: String, symbol: String, accentArgb: Int32, dark: Bool) {
         let m = toastModel
         if m.text != text { m.text = text }
@@ -730,6 +952,7 @@ final class LiquidGlassBridge: NSObject, IosGlassBridge {
     func makeCartBar() -> IosGlassHandle { GlassHandle(kind: .cartBar) }
     func makeToast() -> IosGlassHandle { GlassHandle(kind: .toast) }
     func makeSearchField() -> IosGlassHandle { GlassHandle(kind: .search) }
+    func makeBudgetPanel() -> IosGlassHandle { GlassHandle(kind: .budget) }
 
     func presentQuickView(title: String, subtitle: String, price: String, imageUrl: String, isFavorite: Bool,
                           accentArgb: Int32, onAdd: @escaping () -> Void, onFavorite: @escaping () -> Void,

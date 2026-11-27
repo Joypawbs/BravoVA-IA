@@ -56,6 +56,21 @@ actual fun NativeGlassSearchField(
     modifier: Modifier
 ) {}
 
+@Composable
+actual fun NativeGlassBudgetPanel(
+    value: Int,
+    min: Int,
+    max: Int,
+    step: Int,
+    chips: List<String>,
+    accent: Color,
+    darkMode: Boolean,
+    busy: Boolean,
+    onChange: (Int) -> Unit,
+    onAction: (Int) -> Unit,
+    modifier: Modifier
+) {}
+
 /** Android: el pedido en curso se muestra como notificación de progreso en vivo (Live Update en Android 16). */
 actual object PlatformExtras {
     private const val CHANNEL = "bravova_pedido_en_vivo"

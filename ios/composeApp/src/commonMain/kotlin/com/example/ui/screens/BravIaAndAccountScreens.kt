@@ -149,6 +149,7 @@ import com.example.model.Recipe
 import com.example.model.BRAV_IA_RECIPES
 import com.example.ai.StoreFacts
 import com.example.ui.components.nativeLiquidGlassAvailable
+import com.example.ui.components.NativeGlassBudgetPanel
 import com.example.ai.BravIaEngine
 import com.example.model.findRecipeById
 import com.example.model.FcmTopicSubscription
@@ -1083,147 +1084,177 @@ fun BravIaChatScreen(
                             )
                             BravoUnderline(isArca = isArca)
                         }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp)) {
-                                Text(
-                                    text = "RD$${formatPesos(budgetAmount)}",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 20.sp,
-                                    color = primaryColor
-                                )
-                            }
-
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                OutlinedButton(
-                                    onClick = {
-                                        HapticFeedbackManager.onNavigationClick(view)
-                                        onOpenMyLists()
-                                    },
-                                    border = BorderStroke(1.2.dp, primaryColor.copy(alpha = 0.55f)),
-                                    shape = RoundedCornerShape(999.dp),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                    modifier = Modifier
-                                        .height(34.dp)
-                                        .testTag("bravia_open_lists_pill")
-                                ) {
-                                    Text("Mis Listas", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
-                                }
-
-                                OutlinedButton(
-                                    onClick = {
-                                        performCrispHaptic(view, HapticStyle.CONFIRM)
-                                        onBuildCartForBudget()
-                                    },
-                                    enabled = !isGenerating,
-                                    border = BorderStroke(1.5.dp, primaryColor),
-                                    shape = RoundedCornerShape(999.dp),
-                                    contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
-                                    modifier = Modifier
-                                        .height(34.dp)
-                                        .testTag("budget_build_button")
-                                ) {
-                                    Text("Armar", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
-                                }
-
-                                OutlinedButton(
-                                    onClick = {
-                                        performCrispHaptic(view, HapticStyle.CONFIRM)
-                                        onAdjustCartToBudget()
-                                    },
-                                    enabled = !isGenerating,
-                                    shape = RoundedCornerShape(999.dp),
-                                    contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
-                                    modifier = Modifier
-                                        .height(34.dp)
-                                        .testTag("budget_adjust_button")
-                                ) {
-                                    Text("Ajustar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = primaryColor)
-                                }
-                            }
-                        }
-
-                        Slider(
-                            value = budgetAmount.toFloat(),
-                            onValueChange = {
-                                val stepped = ((it / 50f).roundToInt() * 50).coerceIn(400, 3500)
-                                onBudgetChange(stepped)
-                            },
-                            valueRange = 400f..3500f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = primaryColor,
-                                activeTrackColor = primaryColor
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(28.dp)
-                                .testTag("budget_slider")
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                onClick = {
-                                    if (!isGenerating) {
-                                        HapticFeedbackManager.onAssistantTrigger(view)
-                                        photoPickerLauncher.launch()
+                        if (nativeLiquidGlassAvailable()) {
+                            // iOS 26+: panel nativo de Liquid Glass (deslizador del sistema, botones y sugerencias de vidrio)
+                            NativeGlassBudgetPanel(
+                                value = budgetAmount,
+                                min = 400,
+                                max = 3500,
+                                step = 50,
+                                chips = quickChips.map { it.first },
+                                accent = primaryColor,
+                                darkMode = darkMode,
+                                busy = isGenerating,
+                                onChange = { onBudgetChange(it) },
+                                onAction = { action ->
+                                    when (action) {
+                                        0 -> onOpenMyLists()
+                                        1 -> onBuildCartForBudget()
+                                        2 -> onAdjustCartToBudget()
+                                        3 -> if (!isGenerating) photoPickerLauncher.launch()
+                                        else -> quickChips.getOrNull(action - 10)?.let { (_, prompt) ->
+                                            if (!isGenerating) onSendPrompt(prompt)
+                                        }
                                     }
                                 },
-                                shape = RoundedCornerShape(999.dp),
-                                color = primaryColor.copy(alpha = 0.16f),
-                                border = BorderStroke(1.2.dp, primaryColor)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(132.dp)
+                                    .testTag("budget_glass_panel")
+                            )
+                        } else {
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.PhotoCamera,
-                                        contentDescription = null,
-                                        tint = primaryColor,
-                                        modifier = Modifier.size(13.dp)
-                                    )
+                                Column(modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp)) {
                                     Text(
-                                        text = "Soporte Visual (Foto / NCF)",
+                                        text = "RD$${formatPesos(budgetAmount)}",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.sp,
+                                        fontSize = 20.sp,
                                         color = primaryColor
                                     )
                                 }
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            HapticFeedbackManager.onNavigationClick(view)
+                                            onOpenMyLists()
+                                        },
+                                        border = BorderStroke(1.2.dp, primaryColor.copy(alpha = 0.55f)),
+                                        shape = RoundedCornerShape(999.dp),
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                        modifier = Modifier
+                                            .height(34.dp)
+                                            .testTag("bravia_open_lists_pill")
+                                    ) {
+                                        Text("Mis Listas", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            performCrispHaptic(view, HapticStyle.CONFIRM)
+                                            onBuildCartForBudget()
+                                        },
+                                        enabled = !isGenerating,
+                                        border = BorderStroke(1.5.dp, primaryColor),
+                                        shape = RoundedCornerShape(999.dp),
+                                        contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
+                                        modifier = Modifier
+                                            .height(34.dp)
+                                            .testTag("budget_build_button")
+                                    ) {
+                                        Text("Armar", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            performCrispHaptic(view, HapticStyle.CONFIRM)
+                                            onAdjustCartToBudget()
+                                        },
+                                        enabled = !isGenerating,
+                                        shape = RoundedCornerShape(999.dp),
+                                        contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
+                                        modifier = Modifier
+                                            .height(34.dp)
+                                            .testTag("budget_adjust_button")
+                                    ) {
+                                        Text("Ajustar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = primaryColor)
+                                    }
+                                }
                             }
 
-                            quickChips.forEach { (label, prompt) ->
+                            Slider(
+                                value = budgetAmount.toFloat(),
+                                onValueChange = {
+                                    val stepped = ((it / 50f).roundToInt() * 50).coerceIn(400, 3500)
+                                    onBudgetChange(stepped)
+                                },
+                                valueRange = 400f..3500f,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = primaryColor,
+                                    activeTrackColor = primaryColor
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(28.dp)
+                                    .testTag("budget_slider")
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Surface(
                                     onClick = {
                                         if (!isGenerating) {
                                             HapticFeedbackManager.onAssistantTrigger(view)
-                                            onSendPrompt(prompt)
+                                            photoPickerLauncher.launch()
                                         }
                                     },
                                     shape = RoundedCornerShape(999.dp),
-                                    color = primaryColor.copy(alpha = 0.10f),
-                                    border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.28f))
+                                    color = primaryColor.copy(alpha = 0.16f),
+                                    border = BorderStroke(1.2.dp, primaryColor)
                                 ) {
-                                    Text(
-                                        text = label,
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.sp,
-                                        color = primaryColor,
-                                        modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp)
-                                    )
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PhotoCamera,
+                                            contentDescription = null,
+                                            tint = primaryColor,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Text(
+                                            text = "Soporte Visual (Foto / NCF)",
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 12.sp,
+                                            color = primaryColor
+                                        )
+                                    }
+                                }
+
+                                quickChips.forEach { (label, prompt) ->
+                                    Surface(
+                                        onClick = {
+                                            if (!isGenerating) {
+                                                HapticFeedbackManager.onAssistantTrigger(view)
+                                                onSendPrompt(prompt)
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(999.dp),
+                                        color = primaryColor.copy(alpha = 0.10f),
+                                        border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.28f))
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 12.sp,
+                                            color = primaryColor,
+                                            modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

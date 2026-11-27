@@ -62,6 +62,18 @@ interface IosGlassHandle {
     fun focusSearchField()
     /** Muestra u oculta la barra con un fundido nativo (SwiftUI); oculta no recibe toques. */
     fun setVisible(visible: Boolean)
+    fun updateBudgetPanel(
+        value: Int,
+        min: Int,
+        max: Int,
+        step: Int,
+        chips: List<String>,
+        accentArgb: Int,
+        dark: Boolean,
+        busy: Boolean,
+        onChange: (Int) -> Unit,
+        onAction: (Int) -> Unit
+    )
 }
 
 interface IosGlassBridge {
@@ -71,6 +83,7 @@ interface IosGlassBridge {
     fun makeCartBar(): IosGlassHandle
     fun makeToast(): IosGlassHandle
     fun makeSearchField(): IosGlassHandle
+    fun makeBudgetPanel(): IosGlassHandle
     fun presentQuickView(
         title: String,
         subtitle: String,
@@ -221,6 +234,40 @@ actual fun NativeGlassSearchField(
             handle.updateSearchField(
                 text, placeholder, accent.argbInt(), darkMode, trailingSymbol,
                 { change(it) }, { submit() }, { focus(it) }, { trailing() }
+            )
+        },
+        properties = overlayProps
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassBudgetPanel(
+    value: Int,
+    min: Int,
+    max: Int,
+    step: Int,
+    chips: List<String>,
+    accent: Color,
+    darkMode: Boolean,
+    busy: Boolean,
+    onChange: (Int) -> Unit,
+    onAction: (Int) -> Unit,
+    modifier: Modifier
+) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeBudgetPanel() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
+    val change by rememberUpdatedState(onChange)
+    val action by rememberUpdatedState(onAction)
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = {
+            handle.updateBudgetPanel(
+                value, min, max, step, chips, accent.argbInt(), darkMode, busy,
+                { change(it) }, { action(it) }
             )
         },
         properties = overlayProps

@@ -11,6 +11,7 @@ import platform.UIKit.UIViewController
  * Entry point called from Swift (ContentView.swift):
  *   MainViewControllerKt.MainViewController(aiBridge: FirebaseAiBridge())
  */
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
 fun MainViewController(
     aiBridge: IosAiBridge?,
     glassBridge: com.example.ui.components.IosGlassBridge?,
@@ -20,5 +21,8 @@ fun MainViewController(
     IosBridges.ai = aiBridge
     IosBridges.auth = authBridge
     IosBridges.glass = glassBridge
-    return ComposeUIViewController { BravoRoot() }
+    // Rendimiento en iPhone:
+    // - parallelRendering: Compose prepara los comandos de Metal en un hilo aparte, así el hilo
+    //   principal queda libre para gestos y animaciones (clave a 120 Hz con ProMotion).
+    return ComposeUIViewController(configure = { parallelRendering = true }) { BravoRoot() }
 }
