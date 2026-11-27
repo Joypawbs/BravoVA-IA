@@ -717,14 +717,22 @@ struct GlassBudgetPanelView: View {
                 .disabled(m.busy)
             }
 
-            Slider(value: binding, in: m.minV...m.maxV, step: m.step) { e in
-                editing = e
-                m.editing = e
-            } minimumValueLabel: {
-                Image(systemName: "banknote").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
-            } maximumValueLabel: {
-                Image(systemName: "banknote.fill").font(.system(size: 15, weight: .semibold)).foregroundStyle(m.accent)
-            }
+            Slider(
+                value: binding,
+                in: m.minV...m.maxV,
+                step: m.step,
+                label: { Text("Presupuesto meta") },
+                minimumValueLabel: {
+                    Image(systemName: "banknote").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                },
+                maximumValueLabel: {
+                    Image(systemName: "banknote.fill").font(.system(size: 15, weight: .semibold)).foregroundStyle(m.accent)
+                },
+                onEditingChanged: { e in
+                    editing = e
+                    m.editing = e
+                }
+            )
             .tint(m.accent)
             .bravoFeedback(.selection, trigger: Int(m.value))
             .accessibilityLabel("Presupuesto meta")
