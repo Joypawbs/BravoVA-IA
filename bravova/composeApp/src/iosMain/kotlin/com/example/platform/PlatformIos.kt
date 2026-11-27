@@ -44,7 +44,10 @@ actual fun currentPlatformView(): PlatformView = remember { PlatformView() }
 
 actual object Log {
     private fun log(level: String, tag: String, msg: String, tr: Throwable? = null): Int {
-        NSLog("%@", "[$level/$tag] $msg${tr?.let { " :: ${it.message}" } ?: ""}")
+        // Sin argumentos variables: Kotlin/Native pasa un String a una función variádica de C como
+        // char*, y "%@" lo leería como objeto (EXC_BAD_ACCESS). El texto va como formato, con % escapado.
+        val line = "[$level/$tag] $msg${tr?.let { " :: ${it.message}" } ?: ""}"
+        NSLog(line.replace("%", "%%"))
         return 0
     }
 

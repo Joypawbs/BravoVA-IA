@@ -38,7 +38,7 @@ private fun installCrashReporter() {
     val previous = setUnhandledExceptionHook(null)
     setUnhandledExceptionHook { t ->
         val report = t.stackTraceToString().take(6000)
-        platform.Foundation.NSLog("BRAVO_CRASH %@", report)
+        platform.Foundation.NSLog(("BRAVO_CRASH " + report).replace("%", "%%"))
         platform.Foundation.NSUserDefaults.standardUserDefaults.setObject(report, forKey = "bravo_last_crash")
         platform.Foundation.NSUserDefaults.standardUserDefaults.synchronize()
         previous?.invoke(t)
