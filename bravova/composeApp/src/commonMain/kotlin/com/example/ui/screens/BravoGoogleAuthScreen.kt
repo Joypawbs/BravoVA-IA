@@ -492,7 +492,7 @@ fun BravoGoogleAuthScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Continuar como Invitado",
+                                    text = "Continuar como invitado",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 13.sp,

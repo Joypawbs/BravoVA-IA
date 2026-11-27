@@ -230,9 +230,9 @@ fun BravIaHistoryAutoListHeroCard(
             }
 
             val presets = listOf(
-                Triple("ai_preset_habitual", "Mi Compra Habitual", "Productos más comprados en todo mi historial de órdenes más básicos de despensa"),
-                Triple("ai_preset_desayuno", "Desayunos y Cena", "Mis productos habituales de desayuno y cena dominicana según mi historial"),
-                Triple("ai_preset_hogar", "Reposición Hogar", "Productos de limpieza y hogar basados en mis compras pasadas"),
+                Triple("ai_preset_habitual", "Mi compra habitual", "Productos más comprados en todo mi historial de órdenes más básicos de despensa"),
+                Triple("ai_preset_desayuno", "Desayunos y cenas", "Mis productos habituales de desayuno y cena dominicana según mi historial"),
+                Triple("ai_preset_hogar", "Reposición del hogar", "Productos de limpieza y hogar basados en mis compras pasadas"),
                 Triple("ai_preset_mascota", "Mascota El Arca", "Alimentos, snacks y cuidado de mascotas según mi historial")
             )
 
@@ -397,7 +397,7 @@ fun CreateShoppingListFormCard(
                 primaryColor = primaryColor,
                 onClick = {
                     val finalName = newListName.trim().ifEmpty {
-                        if (autoPopulateWithAi) "Compra Sugerida por Historial" else "Mi Lista Personalizada"
+                        if (autoPopulateWithAi) "Compra sugerida por historial" else "Mi lista personalizada"
                     }
                     HapticFeedbackManager.onConfirmAction(view)
                     onCreateList(finalName, autoPopulateWithAi)

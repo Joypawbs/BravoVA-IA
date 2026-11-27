@@ -903,10 +903,10 @@ fun BravIaChatScreen(
         if (isArca) {
             listOf(
                 "Pedir por mí (Confirmación)" to "Pide por mí un combo esencial para mi mascota en El Arca Petshop con confirmación manual en el chat.",
-                "Dieta Perro Adulto" to "Recomiéndame el mejor alimento y snacks para un perro adulto de 15 kg bajo mi presupuesto.",
-                "Combo Gatos" to "Arma un combo mensual para mi gato con alimento de salmón, arena sanitaria y paté bajo mi presupuesto.",
-                "Salud y Parásitos" to "¿Qué productos de farmacia veterinaria me recomiendas para prevención de pulgas, garrapatas e higiene dental?",
-                "Enviar Sugerencia" to "Sugiero agregar más variedad de juguetes interactivos hipoalergénicos para cachorros en El Arca."
+                "Dieta perro adulto" to "Recomiéndame el mejor alimento y snacks para un perro adulto de 15 kg bajo mi presupuesto.",
+                "Combo gatos" to "Arma un combo mensual para mi gato con alimento de salmón, arena sanitaria y paté bajo mi presupuesto.",
+                "Salud y parásitos" to "¿Qué productos de farmacia veterinaria me recomiendas para prevención de pulgas, garrapatas e higiene dental?",
+                "Enviar sugerencia" to "Sugiero agregar más variedad de juguetes interactivos hipoalergénicos para cachorros en El Arca."
             )
         } else {
             listOf(
@@ -917,7 +917,7 @@ fun BravIaChatScreen(
                 "Alta en proteína" to "Recomiéndame productos altos en proteína para mis comidas de la semana",
                 "Pedir por mí (Confirmación)" to "Hazme el pedido de mi compra habitual del supermercado con confirmación manual aquí en el chat.",
                 "Facturación NCF y Horarios" to "Explícame cómo funcionan los comprobantes B01 y B02, los horarios de tienda y el retorno del 1% de la Tarjeta Bravísima.",
-                "Enviar Sugerencia" to "Sugiero agregar más opciones de postres artesanales sin azúcar marca Bravo en la sucursal."
+                "Enviar sugerencia" to "Sugiero agregar más opciones de postres artesanales sin azúcar marca Bravo en la sucursal."
             )
         }
     }
@@ -1064,7 +1064,7 @@ fun BravIaChatScreen(
                                         .height(34.dp)
                                         .testTag("bravia_open_lists_pill")
                                 ) {
-                                    Text("Mis Listas", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
+                                    Text("Mis listas", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
                                 }
 
                                 OutlinedButton(
@@ -2460,7 +2460,7 @@ private fun RecipeStepsVisualCard(
                             modifier = Modifier.size(13.dp)
                         )
                         Text(
-                            text = "Narrar Pasos",
+                            text = "Narrar pasos",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp,
@@ -2862,14 +2862,14 @@ fun AccountGridScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CloudDone,
-                                contentDescription = "Cuenta de Google Sincronizada",
+                                contentDescription = "Cuenta de Google sincronizada",
                                 tint = primaryColor,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = if (isGuestMode) "Modo Invitado • Sesión en Dispositivo" else userProfile.email,
+                                text = if (isGuestMode) "Modo invitado • Sesión en este dispositivo" else userProfile.email,
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 13.5.sp,
@@ -2903,13 +2903,13 @@ fun AccountGridScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = if (isGuestMode) "Conectar Google" else "Cerrar sesión",
+                            contentDescription = if (isGuestMode) "Conectar con Google" else "Cerrar sesión",
                             tint = primaryColor,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (isGuestMode) "Conectar Google" else "Salir",
+                            text = if (isGuestMode) "Conectar con Google" else "Salir",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp,
@@ -3055,7 +3055,7 @@ fun AccountSubScreenView(
                                 modifier = Modifier.size(18.dp)
                             )
                             DiagonalMetadataStrip(
-                                items = listOf("Cuenta Google", firestoreSyncStatus),
+                                items = listOf("Cuenta de Google", firestoreSyncStatus),
                                 slashColor = primaryColor,
                                 fontSizeSp = 12f
                             )
@@ -3342,7 +3342,7 @@ fun AccountSubScreenView(
                                 modifier = Modifier.fillMaxWidth()
                             )
                             AnimatedPurchaseButton(
-                                text = "Guardar Cambios",
+                                text = "Guardar cambios",
                                 icon = null,
                                 primaryColor = primaryColor,
                                 onClick = { onSaveProfile(name, phone, rncNit, ncfType) },
@@ -3368,7 +3368,7 @@ fun AccountSubScreenView(
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = if (isGuestMode) {
-                                        "Iniciar sesión con Google (Salir de Modo Invitado)"
+                                        "Iniciar sesión con Google (salir del modo invitado)"
                                     } else {
                                         "Cerrar sesión de Google (${userProfile.email})"
                                     },
@@ -3833,7 +3833,7 @@ fun AccountSubScreenView(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Sucursal Preferida",
+                                    text = "Sucursal preferida",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 16.sp
@@ -4017,7 +4017,7 @@ fun AccountSubScreenView(
 
                             val categories = listOf(
                                 "SUGERENCIA_PRODUCTO" to "Producto",
-                                "MEJORA_UI_UX" to "Mejora App",
+                                "MEJORA_UI_UX" to "Mejora de la app",
                                 "REPORTE_SOPORTE" to "Soporte",
                                 "FELICITACION" to "Felicitación"
                             )
@@ -4241,7 +4241,7 @@ fun AccountSubScreenView(
                 HapticFeedbackManager.onNavigationClick(view)
                 onBack()
             },
-            backLabel = "Volver a Mi Cuenta",
+            backLabel = "Volver a mi cuenta",
             backTestTag = "account_sub_back_button"
         )
     }

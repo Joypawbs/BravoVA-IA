@@ -76,7 +76,7 @@ fun BravoVaTheme(
         backgroundLight = animatedBg,
         surfaceLight = animatedSurface,
         accent = colorScheme.secondary,
-        hexPreview = listOf("M3 Auto", "Dinámico", "Alto Contraste")
+        hexPreview = listOf("M3 Auto", "Dinámico", "Alto contraste")
     )
 
     CompositionLocalProvider(LocalActivePalette provides activeDynamicPalette) {

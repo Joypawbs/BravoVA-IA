@@ -67,7 +67,7 @@ final class BravoVaTourUITests: XCTestCase {
         app.terminate()
         app.launch()
         pause(6)
-        let guest = app.buttons["Continuar como Invitado"]
+        let guest = app.buttons["Continuar como invitado"]
         if guest.waitForExistence(timeout: 3) { guest.tap() }
         pause(4)
     }
@@ -80,7 +80,7 @@ final class BravoVaTourUITests: XCTestCase {
         pause(6)
         tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
-        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        tap(["Continuar como invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(5); shot("v25_inicio")
         tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
         pause(5); shot("v25_bravia_panel")
@@ -109,7 +109,7 @@ final class BravoVaTourUITests: XCTestCase {
         pause(6)
         tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
-        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        tap(["Continuar como invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4)
         tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
         pause(4); shot("receta_0_bravia")
@@ -148,7 +148,7 @@ final class BravoVaTourUITests: XCTestCase {
         }
         pause(3); shot("inicio_sesion")
 
-        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        tap(["Continuar como invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
 
         // El huevo de pascua (5 toques al logo) va al FINAL del recorrido: en la corrida anterior

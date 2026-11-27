@@ -1043,7 +1043,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         _redeemBravisimaInCart.value = false
         _profile.value = _profile.value.copy(
             name = "Invitado BravoVa",
-            email = "Sesión de Invitado",
+            email = "Sesión de invitado",
             bravisimaNumber = guestCardNumber
         )
         _bravisimaCard.value = BravisimaCard(
@@ -1056,7 +1056,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             autoRedeemInCart = false
         )
         _bravisimaMovements.value = defaultBravisimaMovements
-        _firestoreSyncStatus.value = "Modo Invitado Activo"
+        _firestoreSyncStatus.value = "Modo invitado activo"
         viewModelScope.launch {
             localRepo.saveGuestMode(true)
             val loadedOrders = localRepo.loadOrders(defaultOrders)
