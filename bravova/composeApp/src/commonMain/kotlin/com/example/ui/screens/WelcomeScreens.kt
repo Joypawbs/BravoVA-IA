@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -131,8 +132,11 @@ fun WelcomeFlow(onFinish: (store: String, branch: String?) -> Unit) {
             )
         }
 
+        // "Saltar" (arriba) es la única salida sin sucursal; antes este botón decía "Elegir después"
+        // y hacía lo mismo, con dos salidas iguales en pantalla. Ahora se activa al elegir una.
         Button(
             onClick = { onFinish(store, branch) },
+            enabled = branch != null,
             colors = ButtonDefaults.buttonColors(containerColor = accent),
             shape = RoundedCornerShape(999.dp),
             modifier = Modifier
@@ -141,7 +145,7 @@ fun WelcomeFlow(onFinish: (store: String, branch: String?) -> Unit) {
                 .testTag("welcome_next")
         ) {
             Text(
-                text = if (branch == null) "Elegir después" else "Continuar",
+                text = "Continuar",
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp
@@ -183,9 +187,13 @@ private fun BranchRow(name: String, selected: Boolean, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Sin elegir: aro con borde (el relleno gris al 25 % casi no se veía sobre la tarjeta blanca)
             Box(
                 Modifier.size(22.dp).clip(CircleShape)
-                    .background(if (selected) accent else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                    .then(
+                        if (selected) Modifier.background(accent)
+                        else Modifier.border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (selected) Box(Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onPrimary))

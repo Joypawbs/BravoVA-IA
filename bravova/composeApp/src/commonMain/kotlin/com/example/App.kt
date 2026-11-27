@@ -40,6 +40,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -1103,6 +1104,26 @@ fun BravoVaApp(
                     // En iOS 26+ la barra nativa no se esconde al hacer scroll: se encoge (como en las apps de Apple)
                     // También en Brav IA: el campo de escribir flota encima de la barra (misma barra en toda la app)
                     val nativeDock = nativeLiquidGlassAvailable()
+                    // iOS: degradado detrás de la barra flotante, como el borde de scroll de las apps de Apple.
+                    // Sin él, el contenido asomaba nítido por debajo de la barra (p. ej. "Combos de temporada"
+                    // cortado entre la barra y el borde de la pantalla).
+                    if (!PlatformInfo.isAndroid && (areMenusVisible || nativeDock)) {
+                        val scrimColor = MaterialTheme.colorScheme.background
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .background(
+                                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        0f to scrimColor.copy(alpha = 0f),
+                                        0.45f to scrimColor.copy(alpha = 0.85f),
+                                        1f to scrimColor
+                                    )
+                                )
+                                .navigationBarsPadding()
+                                .height(92.dp)
+                        )
+                    }
                     AnimatedVisibility(
                         visible = areMenusVisible || nativeDock,
                         enter = slideInVertically(

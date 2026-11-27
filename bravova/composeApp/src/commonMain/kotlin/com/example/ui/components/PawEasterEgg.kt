@@ -10,6 +10,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,7 +30,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -68,10 +74,19 @@ fun PawEasterEggOverlay() {
     LaunchedEffect(Unit) {
         walk.animateTo(1f, infiniteRepeatable(tween(5200, easing = LinearEasing), RepeatMode.Restart))
     }
+    // El contenedor de App empieza debajo de la barra de estado; el velo se pinta también hacia
+    // arriba para cubrirla (antes quedaba una franja clara sin oscurecer encima de la app).
+    val statusBarTop = WindowInsets.statusBars.getTop(LocalDensity.current).toFloat()
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.12f))
+            .drawBehind {
+                drawRect(
+                    color = Color.Black.copy(alpha = 0.12f),
+                    topLeft = Offset(0f, -statusBarTop),
+                    size = Size(size.width, size.height + statusBarTop)
+                )
+            }
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { PawEasterEgg.dismiss() }
     ) {
         val steps = 9

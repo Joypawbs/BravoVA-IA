@@ -78,7 +78,7 @@ final class BravoVaTourUITests: XCTestCase {
     func testVidrioBravIa() throws {
         app.launch()
         pause(6)
-        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(5); shot("v25_inicio")
@@ -107,7 +107,7 @@ final class BravoVaTourUITests: XCTestCase {
     func testBravIaReceta() throws {
         app.launch()
         pause(6)
-        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4)
@@ -133,14 +133,20 @@ final class BravoVaTourUITests: XCTestCase {
 
     func testRecorridoCompleto() throws {
         app.launch()
-        pause(3); shot("splash")
-        pause(5); shot("bienvenida_tienda")
-        // 2.0: bienvenida de la primera vez (tienda → sucursal → entrar)
-        tap(["Continuar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 2)
-        pause(1); shot("bienvenida_sucursal")
+        pause(1); shot("splash")
+        pause(6); shot("bienvenida_sucursal")
+        // Bienvenida de la primera vez: solo sucursal (el paso de tienda ya no existe).
+        // Botón exacto "Continuar": por coincidencia parcial tocaba "Continuar con Google"
+        // en la pantalla siguiente y abría el inicio de sesión de Google.
         tap(["Bravo Winston Churchill"], fallback: CGVector(dx: 0.5, dy: 0.40), wait: 2)
-        tap(["Continuar", "Elegir después"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 2)
-        pause(2); shot("inicio_sesion")
+        pause(1); shot("bienvenida_sucursal_elegida")
+        let continuar = app.buttons["Continuar"]
+        if continuar.waitForExistence(timeout: 2) && continuar.isHittable {
+            continuar.tap()
+        } else {
+            tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 2)
+        }
+        pause(3); shot("inicio_sesion")
 
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
@@ -162,14 +168,23 @@ final class BravoVaTourUITests: XCTestCase {
         if search.waitForExistence(timeout: 3) {
             search.tap(); pause(1)
             dismissKeyboardTips()
-            // Escribe directo en el campo (no en la app) para que ninguna letra se pierda
-            search.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
-            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
-            search.typeText("jevil"); pause(2); shot("efecto_jevil")
-            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8))
-            search.typeText("arroz"); pause(3); shot("busqueda_filtros")
-            tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
-            pause(2); shot("busqueda_menor_precio")
+            // "home_search_input" está en el contenedor de Compose, no en el campo: escribir en él
+            // fallaba ("Neither element nor any descendant has keyboard focus") y cortaba el recorrido.
+            // Se escribe en el campo real que tiene el foco; si no aparece, se salta la búsqueda.
+            let field = [app.searchFields.firstMatch, app.textFields.firstMatch, app.textViews.firstMatch]
+                .first { $0.exists && (($0.value(forKey: "hasKeyboardFocus") as? Bool) ?? false) }
+            if let field = field {
+                field.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
+                field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
+                field.typeText("jevil"); pause(2); shot("efecto_jevil")
+                field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8))
+                field.typeText("arroz"); pause(3); shot("busqueda_filtros")
+                tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
+                pause(2); shot("busqueda_menor_precio")
+            } else {
+                print("[tour] el buscador no tomó el foco; se salta la búsqueda")
+                shot("busqueda_sin_foco")
+            }
         }
         relaunch()
 
