@@ -151,17 +151,9 @@ final class BravoVaTourUITests: XCTestCase {
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
 
-        // Huevo de pascua: 5 toques al logo
-        // Toques individuales con su hora, para ver cuánto tarda cada uno en el simulador
-        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.16, dy: 0.097))
-        var t0 = Date()
-        for i in 0..<5 {
-            logo.press(forDuration: 0.05)
-            print("[tour] logo toque \(i + 1): \(String(format: "%.2f", Date().timeIntervalSince(t0))) s")
-            t0 = Date()
-        }
-        pause(2); shot("huellitas")
-        relaunch()
+        // El huevo de pascua (5 toques al logo) va al FINAL del recorrido: en la corrida anterior
+        // el segundo toque fallaba con "Failed to get matching snapshot", el test perdía 318 s y
+        // todas las pantallas siguientes quedaban sin capturar.
 
         // Búsqueda: huevo de pascua con efecto y filtros nuevos
         let search = app.descendants(matching: .any).matching(identifier: "home_search_input").firstMatch
@@ -265,5 +257,17 @@ final class BravoVaTourUITests: XCTestCase {
         if let dir = shotsDir {
             try? app.debugDescription.write(to: dir.appendingPathComponent("a11y.txt"), atomically: true, encoding: .utf8)
         }
+
+        // Huevo de pascua, al final: si falla, ya están todas las demás capturas.
+        // Un solo toque con duración repetido, sin esperar a que la app quede "inactiva".
+        relaunch()
+        tap(["Inicio"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 2)
+        pause(2)
+        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.16, dy: 0.097))
+        for i in 0..<5 {
+            logo.press(forDuration: 0.05)
+            print("[tour] logo toque \(i + 1)")
+        }
+        pause(2); shot("huellitas")
     }
 }

@@ -1070,6 +1070,27 @@ fun BravoVaApp(
                         )
                     }
 
+                    // iOS: degradado detrás de la barra flotante, como el borde de scroll de las apps de Apple.
+                    // Va ANTES de la barra del carrito y del dock para quedar debajo de ambos; sin él, el
+                    // contenido asomaba nítido bajo la barra (p. ej. "Combos de temporada" cortado).
+                    if (!PlatformInfo.isAndroid && (areMenusVisible || nativeLiquidGlassAvailable())) {
+                        val scrimColor = MaterialTheme.colorScheme.background
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .background(
+                                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        0f to scrimColor.copy(alpha = 0f),
+                                        0.30f to scrimColor.copy(alpha = 0.80f),
+                                        0.55f to scrimColor.copy(alpha = 0.97f),
+                                        1f to scrimColor
+                                    )
+                                )
+                        )
+                    }
+
                     val showCartBar = cartTotals.count > 0 && currentScreen in listOf(
                         AppScreen.HOME,
                         AppScreen.CATALOG,
@@ -1104,26 +1125,6 @@ fun BravoVaApp(
                     // En iOS 26+ la barra nativa no se esconde al hacer scroll: se encoge (como en las apps de Apple)
                     // También en Brav IA: el campo de escribir flota encima de la barra (misma barra en toda la app)
                     val nativeDock = nativeLiquidGlassAvailable()
-                    // iOS: degradado detrás de la barra flotante, como el borde de scroll de las apps de Apple.
-                    // Sin él, el contenido asomaba nítido por debajo de la barra (p. ej. "Combos de temporada"
-                    // cortado entre la barra y el borde de la pantalla).
-                    if (!PlatformInfo.isAndroid && (areMenusVisible || nativeDock)) {
-                        val scrimColor = MaterialTheme.colorScheme.background
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .background(
-                                    androidx.compose.ui.graphics.Brush.verticalGradient(
-                                        0f to scrimColor.copy(alpha = 0f),
-                                        0.45f to scrimColor.copy(alpha = 0.85f),
-                                        1f to scrimColor
-                                    )
-                                )
-                                .navigationBarsPadding()
-                                .height(92.dp)
-                        )
-                    }
                     AnimatedVisibility(
                         visible = areMenusVisible || nativeDock,
                         enter = slideInVertically(
