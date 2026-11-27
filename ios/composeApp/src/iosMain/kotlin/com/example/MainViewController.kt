@@ -18,6 +18,7 @@ fun MainViewController(
     authBridge: com.example.platform.IosAuthBridge?
 ): UIViewController {
     AppContext.init(IosPlatformContext)
+    installCrashReporter()
     IosBridges.ai = aiBridge
     IosBridges.auth = authBridge
     IosBridges.glass = glassBridge
@@ -25,4 +26,21 @@ fun MainViewController(
     // - parallelRendering: Compose prepara los comandos de Metal en un hilo aparte, así el hilo
     //   principal queda libre para gestos y animaciones (clave a 120 Hz con ProMotion).
     return ComposeUIViewController(configure = { parallelRendering = true }) { BravoRoot() }
+}
+
+/**
+ * Diagnóstico: si una excepción de Kotlin llega sin capturar, se escribe completa (tipo, mensaje y
+ * pila) en el registro del sistema con la etiqueta BRAVO_CRASH y se guarda para mostrarla en el
+ * siguiente arranque. Así un cierre inesperado deja rastro en lugar de solo volver a la pantalla de inicio.
+ */
+@OptIn(kotlin.experimental.ExperimentalNativeApi::class)
+private fun installCrashReporter() {
+    val previous = setUnhandledExceptionHook(null)
+    setUnhandledExceptionHook { t ->
+        val report = t.stackTraceToString().take(6000)
+        platform.Foundation.NSLog("BRAVO_CRASH %@", report)
+        platform.Foundation.NSUserDefaults.standardUserDefaults.setObject(report, forKey = "bravo_last_crash")
+        platform.Foundation.NSUserDefaults.standardUserDefaults.synchronize()
+        previous?.invoke(t)
+    }
 }

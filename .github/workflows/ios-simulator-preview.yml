@@ -61,6 +61,19 @@ jobs:
             CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO ARCHS=arm64 2>&1 | grep -E "\[tour\]|error:|Test Case|passed|failed|\*\* TEST" | tail -n 80 || true
           kill -INT $(cat /tmp/rec.pid) || true; sleep 3
           ls -la "$GITHUB_WORKSPACE/sim-out"
+      - name: Registro del sistema y reportes de cierre
+        if: always()
+        run: |
+          mkdir -p sim-out
+          xcrun simctl spawn booted log show --last 60m --style compact \
+            --predicate 'eventMessage CONTAINS "BRAVO_CRASH" OR (process == "iosApp" AND messageType == error)' \
+            > sim-out/registro_app.txt 2>&1 || true
+          tail -c 200000 sim-out/registro_app.txt > sim-out/registro_app.log || true
+          grep -A60 "BRAVO_CRASH" sim-out/registro_app.txt | head -200 > sim-out/crash_kotlin.txt || true
+          for f in ~/Library/Logs/DiagnosticReports/iosApp*.ips ~/Library/Logs/DiagnosticReports/*/iosApp*.ips; do
+            [ -f "$f" ] && head -c 60000 "$f" > "sim-out/reporte_$(basename "$f" .ips).txt"
+          done
+          ls -la sim-out | tail -20
       - name: Exportar capturas del resultado
         if: always()
         run: |

@@ -103,6 +103,34 @@ final class BravoVaTourUITests: XCTestCase {
         pause(2); shot("v25_buscador_cerrado")
     }
 
+    /// Reproduce el cierre de Brav IA al pedir una receta.
+    func testBravIaReceta() throws {
+        app.launch()
+        pause(6)
+        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        pause(2)
+        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        pause(4)
+        tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
+        pause(4); shot("receta_0_bravia")
+        let fields = app.textFields.allElementsBoundByIndex + app.textViews.allElementsBoundByIndex
+        print("[tour] campos de texto: \(fields.count)")
+        let input = fields.last ?? app.textFields.firstMatch
+        if input.waitForExistence(timeout: 4) { input.tap() } else {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.86)).tap()
+        }
+        pause(1); dismissKeyboardTips()
+        app.typeText("cómo hacer sancocho")
+        pause(1); shot("receta_1_escrito")
+        tap(["Enviar", "send", "Send"], fallback: CGVector(dx: 0.9, dy: 0.53), wait: 2)
+        for i in 0..<6 {
+            pause(3)
+            print("[tour] estado app tras \((i + 1) * 3) s: \(app.state.rawValue)")
+            if app.state != .runningForeground { print("[tour] LA APP SE CERRÓ"); break }
+        }
+        shot("receta_2_respuesta")
+    }
+
     func testRecorridoCompleto() throws {
         app.launch()
         pause(3); shot("splash")
