@@ -105,7 +105,7 @@ object ArcaCatalogData {
         p("ARC-061", "Greenies Snacks Dentales Perros Medianos 4u", 265, "Alimentos Húmedos y Snacks", "4 Und", false, "pet_snack", "#15803D", "GREENIES", "https://images.openpetfoodfacts.org/images/products/501/039/498/4584/front_hr.41.400.jpg"),
         p("ARC-062", "SmartBones Huesitos de Pollo sin Cuero 4u", 185, "Alimentos Húmedos y Snacks", "4 Und", false, "pet_snack", "#EAB308", "SIN CUERO", "https://images.openpetfoodfacts.org/images/products/599/874/912/7322/front_bg.3.400.jpg"),
         p("ARC-063", "Felix Paté de Atún en Lata para Gatos 156g", 85, "Alimentos Húmedos y Snacks", "156 Gr", false, "pet_wet", "#0284C7", "ATÚN", null),
-        p("ARC-064", "Sheba Filetes de Pollo en Caldo Suave 85g", 95, "Alimentos Húmedos y Snacks", "85 Gr", false, "pet_wet", "#B45309", "SHEBA", null),
+        p("ARC-064", "Sheba Filetes de Pollo en Caldo Suave 85g", 95, "Alimentos Húmedos y Snacks", "85 Gr", false, "pet_wet", "#B45309", "SHEBA", "https://images.openfoodfacts.org/images/products/400/842/913/4753/front_en.10.400.jpg"),
         p("ARC-065", "Catit Nibbly Grills Golosinas Pollo 30g", 135, "Alimentos Húmedos y Snacks", "30 Gr", false, "pet_snack", "#0D9488", "CATIT", null),
         p("ARC-066", "Catit Creamy Atún y Mariscos Tubo x4", 190, "Alimentos Húmedos y Snacks", "4 Tubos", false, "pet_snack", "#0284C7", "MARISCOS", "https://images.openpetfoodfacts.org/images/products/002/251/744/4955/front_en.9.400.jpg"),
         p("ARC-067", "Snack de Salmón Liofilizado para Gatos 40g", 220, "Alimentos Húmedos y Snacks", "40 Gr", false, "pet_snack", "#F97316", "LIOFILIZADO", null),
