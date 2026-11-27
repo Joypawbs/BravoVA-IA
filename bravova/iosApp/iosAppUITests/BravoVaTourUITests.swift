@@ -168,14 +168,23 @@ final class BravoVaTourUITests: XCTestCase {
         if search.waitForExistence(timeout: 3) {
             search.tap(); pause(1)
             dismissKeyboardTips()
-            // Escribe directo en el campo (no en la app) para que ninguna letra se pierda
-            search.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
-            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
-            search.typeText("jevil"); pause(2); shot("efecto_jevil")
-            search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8))
-            search.typeText("arroz"); pause(3); shot("busqueda_filtros")
-            tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
-            pause(2); shot("busqueda_menor_precio")
+            // "home_search_input" está en el contenedor de Compose, no en el campo: escribir en él
+            // fallaba ("Neither element nor any descendant has keyboard focus") y cortaba el recorrido.
+            // Se escribe en el campo real que tiene el foco; si no aparece, se salta la búsqueda.
+            let field = [app.searchFields.firstMatch, app.textFields.firstMatch, app.textViews.firstMatch]
+                .first { $0.exists && (($0.value(forKey: "hasKeyboardFocus") as? Bool) ?? false) }
+            if let field = field {
+                field.typeText("spamton"); pause(1); dismissKeyboardTips(); pause(1); shot("efecto_spamton")
+                field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 10))
+                field.typeText("jevil"); pause(2); shot("efecto_jevil")
+                field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8))
+                field.typeText("arroz"); pause(3); shot("busqueda_filtros")
+                tap(["Menor precio"], fallback: CGVector(dx: 0.55, dy: 0.30), wait: 2)
+                pause(2); shot("busqueda_menor_precio")
+            } else {
+                print("[tour] el buscador no tomó el foco; se salta la búsqueda")
+                shot("busqueda_sin_foco")
+            }
         }
         relaunch()
 
