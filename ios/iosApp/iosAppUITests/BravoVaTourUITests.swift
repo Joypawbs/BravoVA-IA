@@ -74,6 +74,35 @@ final class BravoVaTourUITests: XCTestCase {
 
     private func pause(_ s: TimeInterval) { _ = XCTWaiter.wait(for: [expectation(description: "pausa")], timeout: s) }
 
+    /// 2.5: vidrio líquido de Brav IA (panel de presupuesto con deslizador) y buscador con botón que se desprende.
+    func testVidrioBravIa() throws {
+        app.launch()
+        pause(6)
+        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        pause(2)
+        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        pause(5); shot("v25_inicio")
+        tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
+        pause(5); shot("v25_bravia_panel")
+        let slider = app.sliders.firstMatch
+        if slider.waitForExistence(timeout: 4) {
+            print("[tour] deslizador encontrado: \(slider.value ?? "")")
+            slider.adjust(toNormalizedSliderPosition: 0.72)
+            pause(2); shot("v25_bravia_deslizador_movido")
+        } else {
+            print("[tour] no se encontró el deslizador")
+        }
+        tap(["Armar"], fallback: CGVector(dx: 0.6, dy: 0.2), wait: 2)
+        pause(6); shot("v25_bravia_armar")
+        tap(["Inicio"], fallback: CGVector(dx: 0.12, dy: 0.935))
+        pause(3)
+        let field = app.textFields.firstMatch
+        if field.waitForExistence(timeout: 4) { field.tap() }
+        pause(2); dismissKeyboardTips(); shot("v25_buscador_enfocado")
+        tap(["Cerrar teclado"], fallback: CGVector(dx: 0.92, dy: 0.17), wait: 2)
+        pause(2); shot("v25_buscador_cerrado")
+    }
+
     func testRecorridoCompleto() throws {
         app.launch()
         pause(3); shot("splash")

@@ -7,6 +7,9 @@ on:
       runner:
         description: "Imagen de macOS (xcode-27, macos-latest o macos-15)"
         default: xcode-27
+      solo:
+        description: "Solo esta prueba (por ejemplo iosAppUITests/BravoVaTourUITests/testVidrioBravIa); vacío = todas"
+        default: ""
 
 permissions:
   contents: write
@@ -54,6 +57,7 @@ jobs:
           TEST_RUNNER_SHOTS_DIR="$GITHUB_WORKSPACE/sim-out" xcodebuild test -project iosApp.xcodeproj -scheme iosApp \
             -destination "id=$UDID" -derivedDataPath build/test \
             -resultBundlePath "$GITHUB_WORKSPACE/sim-out/resultado.xcresult" \
+            ${{ inputs.solo && format('-only-testing:{0}', inputs.solo) || '' }} \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO ARCHS=arm64 2>&1 | grep -E "\[tour\]|error:|Test Case|passed|failed|\*\* TEST" | tail -n 80 || true
           kill -INT $(cat /tmp/rec.pid) || true; sleep 3
           ls -la "$GITHUB_WORKSPACE/sim-out"
