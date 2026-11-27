@@ -28,7 +28,7 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
       - name: Compilar B (ahora, con R8)
-        working-directory: ios
+        working-directory: bravova
         run: |
           ./gradlew --no-daemon -Pminify=true :composeApp:assembleProfile
           cp "$(ls composeApp/build/outputs/apk/profile/*.apk | head -1)" /tmp/B.apk
@@ -36,7 +36,8 @@ jobs:
         run: |
           cp .github/scripts/android_perf.py /tmp/android_perf.py
           git checkout -q "${{ github.event.inputs.antes }}"
-          cd ios
+          # Antes del cambio de nombre la carpeta se llamaba ios/
+          if [ -f ios/settings.gradle.kts ]; then cd ios; else cd bravova; fi
           ./gradlew --no-daemon -Pminify=false :composeApp:assembleProfile
           cp "$(ls composeApp/build/outputs/apk/profile/*.apk | head -1)" /tmp/A.apk
           ls -la /tmp/A.apk /tmp/B.apk

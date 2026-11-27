@@ -4,12 +4,12 @@ App de compras para **Supermercados Bravo** y **El Arca Petshop** (República Do
 
 Un solo código en Kotlin Multiplatform + Compose Multiplatform genera **la app de Android y la de iPhone**.
 
-> **Ojo con el nombre de la carpeta:** `ios/` contiene el proyecto completo de las **dos** plataformas, no solo iPhone. El nombre se quedó así por historia; todos los workflows apuntan ahí.
+> La carpeta `bravova/` contiene el proyecto completo de las **dos** plataformas. Hasta noviembre de 2026 se llamaba `ios/`; los workflows que compilan commits viejos lo detectan solos.
 
 ## Estructura
 
 ```
-ios/                         Proyecto Gradle (Android + iOS)
+bravova/                     Proyecto Gradle (Android + iOS)
 ├── composeApp/src/
 │   ├── commonMain/          Código compartido: pantallas, ViewModel, catálogo, Brav IA
 │   ├── commonTest/          Banco de pruebas de Brav IA
@@ -44,7 +44,7 @@ No hace falta ninguna clave de Gemini en el código: la IA pasa por Firebase AI 
 Requisitos: **JDK 21** y Android Studio (para Android). Para iOS, además, una Mac con Xcode y [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```bash
-cd ios
+cd bravova
 
 # Android: APK de depuración (queda en composeApp/build/outputs/apk/debug/)
 ./gradlew :composeApp:assembleDebug
@@ -57,11 +57,11 @@ cd ios
 cd iosApp && xcodegen generate && open iosApp.xcodeproj
 ```
 
-En Android Studio, abre la carpeta **`ios/`** (no la raíz del repositorio).
+En Android Studio, abre la carpeta **`bravova/`** (no la raíz del repositorio).
 
 ### Clave de Google Maps (opcional)
 
-Sin clave, el seguimiento del pedido usa el mapa libre. Para usar Google Maps, ponla en `ios/local.properties`:
+Sin clave, el seguimiento del pedido usa el mapa libre. Para usar Google Maps, ponla en `bravova/local.properties`:
 
 ```
 MAPS_API_KEY=tu_clave
@@ -70,7 +70,7 @@ MAPS_API_KEY=tu_clave
 ### Pruebas de las reglas de Firestore
 
 ```bash
-cd ios
+cd bravova
 npm i -D @firebase/rules-unit-testing
 npx firebase emulators:exec --only firestore "node --test firestore.test.js"
 ```
@@ -98,7 +98,7 @@ Secretos de GitHub que usa:
 
 | Workflow | Cuándo | Qué hace |
 |---|---|---|
-| BravoVa KMP (Android + iOS) | Push a `main` que toque `ios/`, o manual | Compila Android e iOS y corre las pruebas de Brav IA |
+| BravoVa KMP (Android + iOS) | Push a `main` que toque `bravova/`, o manual | Compila Android e iOS y corre las pruebas de Brav IA |
 | Publicar versión | Etiqueta `v*` | APK firmada + IPA y release |
 | APK de lanzamiento sin firmar / Subir APK firmada | Manual | Firmar fuera de GitHub y subir el resultado |
 | Vista en emulador Android / simulador iOS | Manual | Recorrido automático con capturas |
