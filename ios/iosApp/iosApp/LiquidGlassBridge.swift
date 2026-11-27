@@ -716,6 +716,7 @@ struct GlassBudgetPanelView: View {
                 }
                 .disabled(m.busy)
             }
+            .padding(.horizontal, 16)
 
             Slider(
                 value: binding,
@@ -737,6 +738,7 @@ struct GlassBudgetPanelView: View {
             .bravoFeedback(.selection, trigger: Int(m.value))
             .accessibilityLabel("Presupuesto meta")
             .accessibilityValue("\(Int(m.value)) pesos")
+            .padding(.horizontal, 16)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 BravoGlassGroup(spacing: 8) {
@@ -747,13 +749,13 @@ struct GlassBudgetPanelView: View {
                         }
                     }
                     .padding(.vertical, 3)
-                    .padding(.horizontal, 2)
                 }
             }
-            .scrollClipDisabled()
+            // Los chips se desplazan hasta el borde de la pantalla, pero empiezan y terminan
+            // alineados a 16 pt: ningún texto queda cortado contra un borde fijo
+            .contentMargins(.horizontal, 16, for: .scrollContent)
             .disabled(m.busy)
         }
-        .padding(.horizontal, 2)
         .tint(m.accent)
         .environment(\.colorScheme, m.dark ? .dark : .light)
         .opacity(m.busy ? 0.75 : 1)
@@ -789,16 +791,53 @@ struct GlassBudgetPanelView: View {
     }
 }
 
+// MARK: - Cápsula de carga (pantalla de inicio)
+
+final class ProgressCapsuleModel: ObservableObject {
+    @Published var progress: Double = 0
+    @Published var text = ""
+    @Published var accent = Color.red
+    @Published var dark = true
+}
+
+struct GlassProgressCapsuleView: View {
+    @ObservedObject var m: ProgressCapsuleModel
+    var body: some View {
+        VStack(spacing: 10) {
+            ProgressView(value: m.progress)
+                .progressViewStyle(.linear)
+                .tint(m.accent)
+                // El padding de la cápsula mantiene la barra lejos del borde redondeado
+                .animation(.linear(duration: 0.2), value: m.progress)
+            Text(m.text)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+        }
+        .padding(.horizontal, 26)
+        .padding(.vertical, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .bravoGlass(Capsule(), interactive: false)
+        .environment(\.colorScheme, m.dark ? .dark : .light)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(m.text)
+        .accessibilityValue("\(Int(m.progress * 100)) por ciento")
+    }
+}
+
 // MARK: - Puente con Kotlin
 
 final class GlassHandle: NSObject, IosGlassHandle {
-    enum Kind { case topBar, dock, cartBar, toast, search, budget }
+    enum Kind { case topBar, dock, cartBar, toast, search, budget, progress }
     private let topModel: TopBarModel
     private let dockModel: DockModel
     private let cartModel: CartBarModel
     private let toastModel: ToastModel
     private let searchModel: SearchFieldModel
     private let budgetModel: BudgetPanelModel
+    private let progressModel: ProgressCapsuleModel
     private let presence: GlassPresenceModel
     private var receivedFirstVisibility = false
     private let controller: UIViewController
@@ -810,6 +849,8 @@ final class GlassHandle: NSObject, IosGlassHandle {
         toastModel = toast; searchModel = search; presence = p
         let budget = BudgetPanelModel()
         budgetModel = budget
+        let progressM = ProgressCapsuleModel()
+        progressModel = progressM
         switch kind {
         case .topBar:
             controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .top, travel: -6) { GlassTopBarView(m: top) })
@@ -823,6 +864,8 @@ final class GlassHandle: NSObject, IosGlassHandle {
             controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .center, travel: 0) { GlassSearchFieldView(m: search) })
         case .budget:
             controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .center, travel: 0) { GlassBudgetPanelView(m: budget) })
+        case .progress:
+            controller = GlassHostController(root: GlassPresenceContainer(p: p, anchor: .center, travel: 8) { GlassProgressCapsuleView(m: progressM) })
         }
         super.init()
     }
@@ -921,6 +964,15 @@ final class GlassHandle: NSObject, IosGlassHandle {
 
     func focusSearchField() { searchModel.focusRequest += 1 }
 
+    func updateProgressCapsule(progress: Double, text: String, accentArgb: Int32, dark: Bool) {
+        let m = progressModel
+        if m.progress != progress { m.progress = progress }
+        if m.text != text { m.text = text }
+        let accentColor = Color(argb: accentArgb)
+        if m.accent != accentColor { m.accent = accentColor }
+        if m.dark != dark { m.dark = dark }
+    }
+
     func updateBudgetPanel(value: Int32, min: Int32, max: Int32, step: Int32, chips: [String],
                            accentArgb: Int32, dark: Bool, busy: Bool,
                            onChange: @escaping (KotlinInt) -> Void, onAction: @escaping (KotlinInt) -> Void) {
@@ -961,6 +1013,7 @@ final class LiquidGlassBridge: NSObject, IosGlassBridge {
     func makeToast() -> IosGlassHandle { GlassHandle(kind: .toast) }
     func makeSearchField() -> IosGlassHandle { GlassHandle(kind: .search) }
     func makeBudgetPanel() -> IosGlassHandle { GlassHandle(kind: .budget) }
+    func makeProgressCapsule() -> IosGlassHandle { GlassHandle(kind: .progress) }
 
     func presentQuickView(title: String, subtitle: String, price: String, imageUrl: String, isFavorite: Bool,
                           accentArgb: Int32, onAdd: @escaping () -> Void, onFavorite: @escaping () -> Void,

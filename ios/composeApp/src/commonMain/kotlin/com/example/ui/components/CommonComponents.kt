@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.draw.drawBehind
 import com.example.ui.theme.BravoCtaGradient
 import com.example.ui.theme.formatRd
 import androidx.compose.material.icons.outlined.ShoppingCart
@@ -544,25 +545,9 @@ fun ShimmerSkeletonBox(
     )
 }
 
-private data class SparkleStarSpec(
-    val xFraction: Float,
-    val yFraction: Float,
-    val baseRadiusDp: Float,
-    val phaseOffset: Float,
-    val isWarmGold: Boolean
-)
 
 // Posiciones de las estrellas alrededor del emblema de 138.dp (lienzo de 240.dp)
 // (Emblem occupies 0.21..0.79; sparkles sit cleanly in the outer perimeter ring 0.09..0.91 without overlapping)
-private val STARTUP_SPARKLE_STARS = listOf(
-    SparkleStarSpec(0.20f, 0.14f, 10.5f, 0.00f, true),
-    SparkleStarSpec(0.50f, 0.08f, 8.5f, 0.14f, false),
-    SparkleStarSpec(0.80f, 0.15f, 11.0f, 0.28f, true),
-    SparkleStarSpec(0.90f, 0.44f, 9.0f, 0.42f, false),
-    SparkleStarSpec(0.82f, 0.79f, 10.0f, 0.56f, true),
-    SparkleStarSpec(0.50f, 0.91f, 8.0f, 0.70f, false),
-    SparkleStarSpec(0.18f, 0.80f, 10.5f, 0.84f, true),
-    SparkleStarSpec(0.10f, 0.46f, 9.0f, 0.92f, true)
 )
 
 @Composable
@@ -571,311 +556,111 @@ fun AppStartupSkeletonScreen(
     isArca: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "startup_sparkle_transition")
-    val masterPhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = (2f * PI).toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "masterPhase"
-    )
-    val emblemScale by infiniteTransition.animateFloat(
-        initialValue = 0.985f,
-        targetValue = 1.02f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "emblemScale"
-    )
-    val haloScale by infiniteTransition.animateFloat(
-        initialValue = 0.94f,
-        targetValue = 1.08f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "haloScale"
-    )
-    val emblemSheenOffset by infiniteTransition.animateFloat(
-        initialValue = -1.2f,
-        targetValue = 2.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "emblemSheenOffset"
-    )
-    val progressSweep by infiniteTransition.animateFloat(
-        initialValue = 0.18f,
-        targetValue = 0.96f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "progressSweep"
-    )
+    // Pantalla de carga: fondo sólido fijo (sin degradados ni halos) para que el vidrio destaque limpio.
+    val brandColor = if (isArca) ArcaTeal else Color(0xFFE30613)
+    val background = MaterialTheme.colorScheme.background
+    val primaryTextColor = MaterialTheme.colorScheme.onBackground
+    val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    val brandColor = if (isArca) ArcaTeal else Color(0xFFFE0116)
-    val bgTop = if (darkMode) Color(0xFF060911) else Color(0xFFFFF5F5)
-    val bgBottom = if (darkMode) Color(0xFF0E1626) else Color(0xFFFFFBEB)
-    val primaryTextColor = if (darkMode) Color(0xFFF8FAFC) else Color(0xFF1E293B)
-    val secondaryTextColor = if (darkMode) Tone.muted else Color(0xFF64748B)
-    val emblemSurfaceColor = if (darkMode) Color(0xFF151F32) else Color(0xFFFE0116)
-    val starPath = remember { Path() }
+    // Progreso continuo y sin saltos: avanza rápido al principio y frena cerca del final
+    // (nunca retrocede); la pantalla se cierra sola cuando el catálogo termina de cargar.
+    val progress = remember { androidx.compose.animation.core.Animatable(0f) }
+    LaunchedEffect(Unit) {
+        progress.animateTo(0.92f, tween(durationMillis = 2800, easing = FastOutSlowInEasing))
+        progress.animateTo(0.98f, tween(durationMillis = 6000, easing = LinearEasing))
+    }
+    // Aparición suave del emblema
+    val appear = remember { androidx.compose.animation.core.Animatable(0f) }
+    LaunchedEffect(Unit) { appear.animateTo(1f, tween(durationMillis = 520, easing = FastOutSlowInEasing)) }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(bgTop, bgBottom)))
+            .background(background)
             .testTag("startup_skeleton_screen"),
         contentAlignment = Alignment.Center
     ) {
-        // Brillo de fondo suave (sin RenderEffect para evitar bordes reflejados)
-        Canvas(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        brandColor.copy(alpha = if (darkMode) 0.22f else 0.16f),
-                        brandColor.copy(alpha = if (darkMode) 0.08f else 0.05f),
-                        Color.Transparent
-                    ),
-                    center = Offset(size.width * 0.5f, size.height * 0.40f),
-                    radius = size.minDimension * 0.64f
-                ),
-                radius = size.minDimension * 0.64f,
-                center = Offset(size.width * 0.5f, size.height * 0.40f)
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        BravoAmber.copy(alpha = if (darkMode) 0.14f else 0.12f),
-                        Color.Transparent
-                    ),
-                    center = Offset(size.width * 0.38f, size.height * 0.35f),
-                    radius = size.minDimension * 0.46f
-                ),
-                radius = size.minDimension * 0.46f,
-                center = Offset(size.width * 0.38f, size.height * 0.35f)
-            )
-        }
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 28.dp)
+                .padding(horizontal = 32.dp)
+                .graphicsLayer {
+                    alpha = appear.value
+                    val s = 0.94f + 0.06f * appear.value
+                    scaleX = s
+                    scaleY = s
+                }
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(240.dp)
-            ) {
-                // Halo suave y destellos alrededor del emblema
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    val w = size.width
-                    val h = size.height
-                    val center = Offset(w * 0.5f, h * 0.5f)
-                    val haloRadius = (w * 0.44f) * haloScale
+            Image(
+                painter = painterResource(Res.drawable.ic_launcher_art),
+                contentDescription = "Icono oficial de Bravo",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(124.dp)
+                    .clip(RoundedCornerShape(30.dp))
+            )
 
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colorStops = arrayOf(
-                                0.0f to brandColor.copy(alpha = if (darkMode) 0.38f else 0.32f),
-                                0.52f to BravoAmber.copy(alpha = if (darkMode) 0.18f else 0.16f),
-                                0.82f to brandColor.copy(alpha = if (darkMode) 0.05f else 0.04f),
-                                1.0f to Color.Transparent
-                            ),
-                            center = center,
-                            radius = haloRadius
-                        ),
-                        radius = haloRadius,
-                        center = center
-                    )
-
-                    STARTUP_SPARKLE_STARS.forEach { star ->
-                        val angle = masterPhase + star.phaseOffset * (2f * PI).toFloat()
-                        val rawWave = ((sin(angle) + 1f) * 0.5f).coerceIn(0f, 1f)
-                        // Suavizado smoothstep para que el movimiento acelere y frene natural
-                        val twinkle = rawWave * rawWave * (3f - 2f * rawWave)
-                        val scaleFactor = 0.52f + 0.48f * twinkle
-
-                        // Pequeño vaivén (1.5dp) para que no se vea rígido
-                        val driftPx = 1.5.dp.toPx()
-                        val cx = w * star.xFraction + cos(angle) * driftPx
-                        val cy = h * star.yFraction + sin(angle) * driftPx
-                        val r = star.baseRadiusDp.dp.toPx() * scaleFactor
-                        val waist = r * 0.26f
-
-                        val fillAlpha = (0.38f + 0.62f * twinkle).coerceIn(0f, 1f)
-                        val starColor = if (star.isWarmGold) {
-                            Color(0xFFFFB800).copy(alpha = fillAlpha)
-                        } else {
-                            if (darkMode) {
-                                Color(0xFFFFF7D6).copy(alpha = fillAlpha)
-                            } else {
-                                Color(0xFFFF9800).copy(alpha = fillAlpha)
-                            }
-                        }
-                        val rimColor = if (darkMode) {
-                            Color.White.copy(alpha = (0.45f + 0.50f * twinkle).coerceIn(0f, 1f))
-                        } else {
-                            Tone.warning.copy(alpha = (0.35f + 0.45f * twinkle).coerceIn(0f, 1f))
-                        }
-
-                        // Halo pequeño alrededor de cada estrella
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colorStops = arrayOf(
-                                    0.0f to starColor.copy(alpha = 0.36f * twinkle),
-                                    0.65f to starColor.copy(alpha = 0.10f * twinkle),
-                                    1.0f to Color.Transparent
-                                ),
-                                center = Offset(cx, cy),
-                                radius = r * 1.15f
-                            ),
-                            radius = r * 1.15f,
-                            center = Offset(cx, cy)
-                        )
-
-                        // Estrella de cuatro puntas
-                        starPath.reset()
-                        starPath.moveTo(cx, cy - r)
-                        starPath.quadraticTo(cx + waist, cy - waist, cx + r, cy)
-                        starPath.quadraticTo(cx + waist, cy + waist, cx, cy + r)
-                        starPath.quadraticTo(cx - waist, cy + waist, cx - r, cy)
-                        starPath.quadraticTo(cx - waist, cy - waist, cx, cy - r)
-                        starPath.close()
-
-                        drawPath(path = starPath, color = starColor)
-                        drawPath(
-                            path = starPath,
-                            color = rimColor,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                width = 1.dp.toPx(),
-                                join = androidx.compose.ui.graphics.StrokeJoin.Round
-                            )
-                        )
-
-                        // Centro brillante
-                        drawCircle(
-                            color = Color.White.copy(alpha = (0.75f + 0.25f * twinkle).coerceIn(0f, 1f)),
-                            radius = max(1.4f, r * 0.20f),
-                            center = Offset(cx, cy)
-                        )
-                    }
-                }
-
-                // Emblema central con un brillo que lo recorre
-                Box(
-                    modifier = Modifier
-                        .size(138.dp)
-                        .graphicsLayer {
-                            scaleX = emblemScale
-                            scaleY = emblemScale
-                        }
-                        .shadow(
-                            elevation = 20.dp,
-                            shape = RoundedCornerShape(38.dp),
-                            spotColor = brandColor.copy(alpha = 0.45f)
-                        )
-                        .clip(RoundedCornerShape(38.dp))
-                        .background(emblemSurfaceColor)
-                        .border(
-                            width = 2.5.dp,
-                            brush = Brush.linearGradient(
-                                colors = if (darkMode) {
-                                    listOf(
-                                        brandColor.copy(alpha = 0.90f),
-                                        BravoAmber.copy(alpha = 0.72f),
-                                        Color.White.copy(alpha = 0.32f)
-                                    )
-                                } else {
-                                    listOf(
-                                        Color.White.copy(alpha = 0.92f),
-                                        BravoAmber.copy(alpha = 0.78f),
-                                        Color.White.copy(alpha = 0.42f)
-                                    )
-                                }
-                            ),
-                            shape = RoundedCornerShape(38.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.ic_launcher_art),
-                        contentDescription = "Icono Oficial BravoVa",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-
-                    // Brillo diagonal que recorre el emblema
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val w = size.width
-                        val h = size.height
-                        val startX = w * emblemSheenOffset
-                        drawRect(
-                            brush = Brush.linearGradient(
-                                colorStops = arrayOf(
-                                    0.0f to Color.Transparent,
-                                    0.45f to Color.White.copy(alpha = 0.18f),
-                                    0.55f to Color.White.copy(alpha = 0.06f),
-                                    1.0f to Color.Transparent
-                                ),
-                                start = Offset(startX, 0f),
-                                end = Offset(startX + w * 0.55f, h)
-                            )
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             BravoOfficialLogoBadge(scale = 1.28f)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = "Los expertos en vender barato",
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = 13.5.sp,
-                letterSpacing = 0.3.sp,
+                fontSize = 14.sp,
+                letterSpacing = 0.2.sp,
+                textAlign = TextAlign.Center,
                 color = primaryTextColor
             )
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
-            TranslucentCard(
-                darkMode = darkMode,
-                isArca = isArca,
-                cornerRadius = 999.dp,
-                modifier = Modifier.width(256.dp)
-            ) {
+            val text = "Cargando catálogo, precios e imágenes…"
+            if (nativeLiquidGlassAvailable()) {
+                // iOS 26+: cápsula de Liquid Glass nativa con la barra de progreso del sistema
+                NativeGlassProgressCapsule(
+                    progress = progress.value,
+                    text = text,
+                    accent = brandColor,
+                    darkMode = darkMode,
+                    modifier = Modifier
+                        .width(280.dp)
+                        .height(74.dp)
+                )
+            } else {
                 Column(
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                    modifier = Modifier
+                        .width(280.dp)
+                        .clip(RoundedCornerShape(37.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(37.dp))
+                        // El padding interno mantiene la barra lejos del borde redondeado
+                        .padding(horizontal = 26.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     LinearProgressIndicator(
-                        progress = { progressSweep },
+                        progress = { progress.value },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(5.dp)
                             .clip(CircleShape),
                         color = brandColor,
-                        trackColor = brandColor.copy(alpha = if (darkMode) 0.24f else 0.16f)
+                        trackColor = brandColor.copy(alpha = if (darkMode) 0.22f else 0.14f),
+                        drawStopIndicator = {}
                     )
                     Text(
-                        text = "Cargando catálogo, precios e imágenes...",
+                        text = text,
                         fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.5.sp,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
                         color = secondaryTextColor
                     )
                 }
@@ -2451,6 +2236,12 @@ fun OrderSuccessCelebrationOverlay(
         ),
         label = "ringScale"
     )
+    // Fondo oscuro fijo con acento esmeralda (antes: verde plano chillón)
+    val emerald = Color(0xFF10B981)
+    val emeraldButton = Color(0xFF047857) // texto blanco encima: contraste 5.5:1 (WCAG AA)
+    val screenBg = MaterialTheme.colorScheme.background
+    val onBg = MaterialTheme.colorScheme.onBackground
+    val onBgMuted = MaterialTheme.colorScheme.onSurfaceVariant
     val confettiSeeds = remember(orderId) {
         val colors = listOf(BravoRed, BravoAmber, Tone.successBright, Color.White)
         List(24) { idx ->
@@ -2492,15 +2283,15 @@ fun OrderSuccessCelebrationOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Tone.success,
-                        Tone.successBright,
-                        Tone.successStrong
-                    )
+            // Pinta también detrás de la barra de estado: sin franja negra arriba
+            .drawBehind {
+                val extra = 400f
+                drawRect(
+                    color = screenBg,
+                    topLeft = Offset(0f, -extra),
+                    size = Size(size.width, size.height + extra * 2)
                 )
-            )
+            }
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
@@ -2532,7 +2323,7 @@ fun OrderSuccessCelebrationOverlay(
                 }
             }
             if (flashAlpha.value > 0.01f) {
-                drawRect(color = Color.White.copy(alpha = flashAlpha.value))
+                drawRect(color = emerald.copy(alpha = flashAlpha.value * 0.35f))
             }
         }
 
@@ -2543,10 +2334,10 @@ fun OrderSuccessCelebrationOverlay(
                 .graphicsLayer {
                     scaleX = ringScale
                     scaleY = ringScale
-                    alpha = 0.16f
+                    alpha = 0.10f
                 }
                 .clip(CircleShape)
-                .background(Color.White)
+                .background(emerald)
         )
         Box(
             modifier = Modifier
@@ -2554,10 +2345,10 @@ fun OrderSuccessCelebrationOverlay(
                 .graphicsLayer {
                     scaleX = (ringScale * 0.92f)
                     scaleY = (ringScale * 0.92f)
-                    alpha = 0.22f
+                    alpha = 0.14f
                 }
                 .clip(CircleShape)
-                .background(Color.White)
+                .background(emerald)
         )
 
         Column(
@@ -2574,10 +2365,9 @@ fun OrderSuccessCelebrationOverlay(
                         scaleX = circleScale.value
                         scaleY = circleScale.value
                     }
-                    .shadow(24.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.25f))
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.22f))
-                    .border(3.5.dp, Color.White, CircleShape),
+                    .background(emerald.copy(alpha = 0.16f))
+                    .border(3.5.dp, emerald, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(modifier = Modifier.size(68.dp)) {
@@ -2606,7 +2396,7 @@ fun OrderSuccessCelebrationOverlay(
 
                     drawPath(
                         path = path,
-                        color = Color.White,
+                        color = emerald,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(
                             width = 9.dp.toPx(),
                             cap = androidx.compose.ui.graphics.StrokeCap.Round,
@@ -2627,7 +2417,8 @@ fun OrderSuccessCelebrationOverlay(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
-                    color = Color.White
+                    textAlign = TextAlign.Center,
+                    color = onBg
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
@@ -2635,13 +2426,13 @@ fun OrderSuccessCelebrationOverlay(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    color = Color.White.copy(alpha = 0.94f)
+                    color = onBgMuted
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Surface(
                     shape = RoundedCornerShape(18.dp),
-                    color = Color.White.copy(alpha = 0.18f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.42f))
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    border = BorderStroke(1.dp, emerald.copy(alpha = 0.45f))
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
@@ -2651,7 +2442,7 @@ fun OrderSuccessCelebrationOverlay(
                         Icon(
                             imageVector = Icons.Filled.LocationOn,
                             contentDescription = "Ubicación real",
-                            tint = Color.White,
+                            tint = emerald,
                             modifier = Modifier.size(20.dp)
                         )
                         Column {
@@ -2660,14 +2451,14 @@ fun OrderSuccessCelebrationOverlay(
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
-                                color = Color.White
+                                color = onBg
                             )
                             Text(
                                 text = "Llegada estimada por GPS: ~$etaMinutes min",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 12.sp,
-                                color = Color.White.copy(alpha = 0.9f)
+                                color = onBgMuted
                             )
                         }
                     }
@@ -2679,8 +2470,7 @@ fun OrderSuccessCelebrationOverlay(
                         onContinueToTracking()
                     },
                     shape = CircleShape,
-                    color = Color.White,
-                    shadowElevation = 8.dp,
+                    color = emeraldButton,
                     modifier = Modifier.testTag("celebration_continue_button")
                 ) {
                     Row(
@@ -2691,15 +2481,16 @@ fun OrderSuccessCelebrationOverlay(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
                             contentDescription = null,
-                            tint = Tone.successStrong,
+                            tint = Color.White,
                             modifier = Modifier.size(19.dp)
                         )
                         Text(
                             text = "Ver Mapa y Rastreo en Vivo",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.5.sp,
-                            color = Tone.successStrong
+                            fontSize = 14.sp,
+                            maxLines = 1,
+                            color = Color.White
                         )
                     }
                 }

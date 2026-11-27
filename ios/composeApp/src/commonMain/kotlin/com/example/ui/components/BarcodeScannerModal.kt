@@ -135,7 +135,7 @@ fun BarcodeScannerModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(28.dp))
-                    .background(Tone.ink.copy(alpha = 0.82f))
+                    .background(ScannerPanel)
                     .border(
                         width = 1.2.dp,
                         brush = Brush.verticalGradient(
@@ -382,7 +382,8 @@ fun BarcodeScannerModal(
                 if (selectedProduct != null) {
                     Surface(
                         shape = RoundedCornerShape(20.dp),
-                        color = Color.White,
+                        color = ScannerCard,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -398,7 +399,7 @@ fun BarcodeScannerModal(
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(Tone.surfaceSubtle)
+                                        .background(ScannerThumb)
                                         .padding(4.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -411,21 +412,21 @@ fun BarcodeScannerModal(
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 15.sp,
-                                        color = Tone.ink,
-                                        maxLines = 1,
+                                        color = ScannerText,
+                                        maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = "${selectedProduct.unit} • SKU ${selectedProduct.sku}",
                                         fontSize = 12.sp,
-                                        color = Color(0xFF64748B)
+                                        color = ScannerTextMuted
                                     )
                                     Text(
                                         text = "RD$${selectedProduct.price}.00",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 18.sp,
-                                        color = BravoRed
+                                        color = ScannerPrice
                                     )
                                 }
                             }
@@ -440,6 +441,7 @@ fun BarcodeScannerModal(
                                         onViewDetails(selectedProduct)
                                     },
                                     shape = RoundedCornerShape(999.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.40f)),
                                     modifier = Modifier
                                         .weight(1f)
                                         .testTag("scanner_details_button")
@@ -447,14 +449,14 @@ fun BarcodeScannerModal(
                                     Icon(
                                         imageVector = Icons.Default.Info,
                                         contentDescription = null,
-                                        tint = Tone.ink,
+                                        tint = ScannerText,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "Detalles",
                                         fontWeight = FontWeight.Bold,
-                                        color = Tone.ink
+                                        color = ScannerText
                                     )
                                 }
 
@@ -496,3 +498,12 @@ fun BarcodeScannerModal(
         }
     }
 }
+
+
+// Paleta fija del escáner (siempre oscura, sin depender del tema): contraste WCAG AA en todo el texto.
+private val ScannerPanel = Color(0xFF15171C)      // panel
+private val ScannerCard = Color(0xFF22252C)       // tarjeta del producto
+private val ScannerThumb = Color(0xFF2C3038)      // fondo de la miniatura
+private val ScannerText = Color(0xFFF5F6F8)       // títulos: 14.2:1 sobre la tarjeta
+private val ScannerTextMuted = Color(0xFFB4BAC6)  // datos secundarios: 7.9:1
+private val ScannerPrice = Color(0xFFFF5A52)      // precio rojo Bravo aclarado para fondo oscuro: 5.0:1

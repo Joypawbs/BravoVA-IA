@@ -3058,11 +3058,15 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 } else {
                     throw e
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
+                // Throwable (no solo Exception): un error inesperado en el modelo o al armar la
+                // respuesta muestra la respuesta local en vez de cerrar la app
                 Log.d(TAG, "Brav IA usa la respuesta local: ${e.message}")
                 // El motivo visible ayuda a saber si es la red, la clave de Firebase o el modelo.
                 val reason = aiFailureReason(e)
-                var local = localAnswer()
+                var local = runCatching { localAnswer() }.getOrElse {
+                    GroundedReply(text = "No pude preparar la respuesta esta vez. Intenta de nuevo en un momento.", items = emptyList(), recipe = null, suggestion = null, total = 0, budgetExceededBy = null)
+                }
                 val token = if (reason == "acceso de la app no verificado") runCatching { appCheckDebugTokenOrNull() }.getOrNull() else null
                 if (token != null) {
                     local = local.copy(text = local.text + "\n\nPara activar la IA en esta instalación, registra este token en Firebase → App Check → app de iOS → Administrar tokens de depuración:\n" + token)

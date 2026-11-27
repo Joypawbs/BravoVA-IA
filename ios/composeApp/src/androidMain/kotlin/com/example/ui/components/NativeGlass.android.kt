@@ -135,3 +135,12 @@ actual object PlatformExtras {
         runCatching { NotificationManagerCompat.from(context).notify(ID, builder.build()) }
     }
 }
+
+@Composable
+actual fun NativeGlassProgressCapsule(
+    progress: Float,
+    text: String,
+    accent: Color,
+    darkMode: Boolean,
+    modifier: Modifier
+) {}

@@ -19,3 +19,8 @@ else
   echo "GoogleService-Info.plist sin REVERSED_CLIENT_ID: se usará el inicio de sesión web de Firebase."
 fi
 xcodegen generate
+# Xcode reconoce el ícono por capas (Icon Composer) por su tipo de archivo; XcodeGen aún no lo
+# asigna, así que se marca aquí para que actool lo compile (claro, oscuro y transparente)
+PBX=iosApp.xcodeproj/project.pbxproj
+perl -0pi -e 's/(isa = PBXFileReference;)[^}]*?(path = AppIcon\.icon;)/$1 lastKnownFileType = folder.iconcomposer.icon; $2/g' "$PBX"
+grep -n "AppIcon.icon" "$PBX" | head -5

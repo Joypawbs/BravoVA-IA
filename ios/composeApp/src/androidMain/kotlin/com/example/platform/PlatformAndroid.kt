@@ -710,3 +710,6 @@ actual fun createGenerativeModel(modelName: String, config: AiModelConfig): Gene
             systemInstruction = config.systemInstruction?.let { rules -> com.google.firebase.ai.type.content { text(rules) } }
         )
     )
+
+
+actual fun deviceBiometryKind(): BiometryKind = BiometryKind.FINGERPRINT

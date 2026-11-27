@@ -542,45 +542,8 @@ fun BravoVaApp(
                             .fillMaxSize()
                             .translucentBackdropSource(hazeState, zIndex = 0f)
                     ) {
+                        // Fondo sólido fijo (sin halos ambientales): el Liquid Glass destaca limpio
                         drawRect(color = rootBgColor)
-                        val topGlowAlpha = if (darkMode) 0.07f else 0.05f
-                        val midGlowAlpha = if (darkMode) 0.05f else 0.03f
-                        val bottomGlowAlpha = if (darkMode) 0.06f else 0.04f
-                        val driftX1 = cos(orbDriftPhase) * size.width * 0.06f
-                        val driftY1 = sin(orbDriftPhase) * size.height * 0.04f
-                        val driftX2 = sin(orbDriftPhase * 0.85f) * size.width * 0.07f
-                        val driftY2 = cos(orbDriftPhase * 0.85f) * size.height * 0.05f
-                        val topCenter = Offset(size.width * 0.82f + driftX1, size.height * 0.10f + driftY1)
-                        val midCenter = Offset(size.width * 0.16f + driftX2, size.height * 0.44f + driftY2)
-                        val bottomCenter = Offset(size.width * 0.78f - driftX1, size.height * 0.82f - driftY2)
-                        val scalePulse = 1f + sin(orbDriftPhase) * 0.06f
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(topGlowColor.copy(alpha = topGlowAlpha + aiAmbientAlpha * 0.45f), Color.Transparent),
-                                center = topCenter,
-                                radius = size.width * 0.74f * scalePulse
-                            ),
-                            radius = size.width * 0.74f * scalePulse,
-                            center = topCenter
-                        )
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(midGlowColor.copy(alpha = midGlowAlpha + aiAmbientAlpha * 0.40f), Color.Transparent),
-                                center = midCenter,
-                                radius = size.width * 0.64f
-                            ),
-                            radius = size.width * 0.64f,
-                            center = midCenter
-                        )
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                colors = listOf(bottomGlowColor.copy(alpha = bottomGlowAlpha + aiAmbientAlpha * 0.45f), Color.Transparent),
-                                center = bottomCenter,
-                                radius = size.width * 0.68f * scalePulse
-                            ),
-                            radius = size.width * 0.68f * scalePulse,
-                            center = bottomCenter
-                        )
                     }
 
                     SharedTransitionLayout {
@@ -1180,7 +1143,16 @@ fun BravoVaApp(
                         exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = 10.dp, start = 20.dp, end = 20.dp)
+                            // Los avisos van DEBAJO de la barra superior (nunca detrás de sus cápsulas de vidrio):
+                            // Inicio y Catálogo tienen logo + buscador; las demás pantallas, la barra de 60 dp
+                            .padding(
+                                top = when (currentScreen) {
+                                    AppScreen.HOME, AppScreen.CATALOG -> 124.dp
+                                    else -> 72.dp
+                                },
+                                start = 20.dp,
+                                end = 20.dp
+                            )
                     ) {
                         lastToast?.let { activeToast ->
                             if (nativeLiquidGlassAvailable() && activeToast.actionLabel == null) {

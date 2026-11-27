@@ -62,6 +62,7 @@ interface IosGlassHandle {
     fun focusSearchField()
     /** Muestra u oculta la barra con un fundido nativo (SwiftUI); oculta no recibe toques. */
     fun setVisible(visible: Boolean)
+    fun updateProgressCapsule(progress: Double, text: String, accentArgb: Int, dark: Boolean)
     fun updateBudgetPanel(
         value: Int,
         min: Int,
@@ -84,6 +85,7 @@ interface IosGlassBridge {
     fun makeToast(): IosGlassHandle
     fun makeSearchField(): IosGlassHandle
     fun makeBudgetPanel(): IosGlassHandle
+    fun makeProgressCapsule(): IosGlassHandle
     fun presentQuickView(
         title: String,
         subtitle: String,
@@ -270,6 +272,27 @@ actual fun NativeGlassBudgetPanel(
                 { change(it) }, { action(it) }
             )
         },
+        properties = overlayProps
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+actual fun NativeGlassProgressCapsule(
+    progress: Float,
+    text: String,
+    accent: Color,
+    darkMode: Boolean,
+    modifier: Modifier
+) {
+    val bridge = IosBridges.glass ?: return
+    val handle = remember { bridge.makeProgressCapsule() }
+    val glassVisible = rememberNativeGlassVisible()
+    SideEffect { handle.setVisible(glassVisible) }
+    UIKitViewController(
+        factory = { handle.viewController() },
+        modifier = modifier,
+        update = { handle.updateProgressCapsule(progress.toDouble(), text, accent.argbInt(), darkMode) },
         properties = overlayProps
     )
 }

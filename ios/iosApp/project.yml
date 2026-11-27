@@ -23,6 +23,12 @@ targets:
     platform: iOS
     sources:
       - path: iosApp
+        # El ícono por capas (Icon Composer) va como un solo archivo, no como carpeta
+        excludes:
+          - "AppIcon.icon/**"
+      - path: iosApp/AppIcon.icon
+        type: file
+        buildPhase: resources
       - path: Shared
     info:
       path: iosApp/Info.plist

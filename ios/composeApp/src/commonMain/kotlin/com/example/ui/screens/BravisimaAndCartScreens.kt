@@ -77,6 +77,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
@@ -2703,8 +2704,14 @@ fun BiometricOrderPromptDialog(
     val primaryColor = if (isArca) ArcaTeal else MaterialTheme.colorScheme.primary
 
     var scanState by remember(request) { mutableStateOf("idle") } // "idle", "scanning", "verified", "error"
+    // Face ID / Touch ID / huella según el equipo (LAContext.biometryType en iOS)
+    val biometry = remember { com.example.platform.deviceBiometryKind() }
+    val usesFace = biometry == com.example.platform.BiometryKind.FACE_ID || biometry == com.example.platform.BiometryKind.OPTIC_ID
+    val biometryIcon = if (usesFace) Icons.Default.Face else Icons.Default.Fingerprint
+    // Los datos del cargo van en filas aparte; aquí solo la instrucción, corta y sin cortes
+    val baseInstruction = "${biometry.instruction} para autorizar el pago y despachar tu pedido."
     var statusMessage by remember(request) {
-        mutableStateOf(request.description)
+        mutableStateOf(baseInstruction)
     }
     var verifiedTokenPreview by remember(request) { mutableStateOf<String?>(null) }
 
@@ -2764,7 +2771,7 @@ fun BiometricOrderPromptDialog(
             },
             onHardwareFailed = {
                 scanState = "error"
-                statusMessage = "Huella no reconocida. Intenta nuevamente o usa el sensor en pantalla."
+                statusMessage = "No se reconoció ${biometry.displayName}. Intenta de nuevo."
             },
             onFallbackRequested = {
                 // Sensor en pantalla (si el usuario lo eligió o el equipo no tiene huella)
@@ -2870,29 +2877,19 @@ fun BiometricOrderPromptDialog(
                                 .padding(horizontal = 14.dp, vertical = 10.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
+                            // Resumen en filas de dos columnas: etiqueta a la izquierda, dato a la derecha
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = request.subtitle,
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = "RD$${formatMoney(request.amountRd)}.00",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 17.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
+                                Text(
+                                    text = "RD$${formatMoney(request.amountRd)}.00",
+                                    fontFamily = PlusJakartaSans,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 20.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                                 if (request.cashbackRd > 0) {
                                     Surface(
                                         shape = RoundedCornerShape(999.dp),
@@ -2903,23 +2900,46 @@ fun BiometricOrderPromptDialog(
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
+                                            maxLines = 1,
                                             color = Tone.successBright,
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                                         )
                                     }
                                 }
                             }
-
-                            if (request.paymentMethodLabel.isNotBlank() || request.deliveryOrBranchLabel.isNotBlank()) {
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                DiagonalMetadataStrip(
-                                    items = listOfNotNull(
-                                        request.paymentMethodLabel.takeIf { it.isNotBlank() },
-                                        request.deliveryOrBranchLabel.takeIf { it.isNotBlank() }
-                                    ),
-                                    slashColor = primaryColor,
-                                    fontSizeSp = 12f
-                                )
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            val summaryRows = listOfNotNull(
+                                request.paymentMethodLabel.takeIf { it.isNotBlank() }?.let { "Pago" to it },
+                                request.deliveryOrBranchLabel.takeIf { it.isNotBlank() }?.let { "Entrega" to it },
+                                if (request.itemCount > 0) "Artículos" to "${request.itemCount}" else null
+                            )
+                            summaryRows.forEach { (label, value) ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.Top,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(
+                                        text = label,
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 12.5.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        modifier = Modifier.width(72.dp)
+                                    )
+                                    Text(
+                                        text = value,
+                                        fontFamily = PlusJakartaSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.5.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = TextAlign.End,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
                             }
                         }
                     }
@@ -2966,8 +2986,8 @@ fun BiometricOrderPromptDialog(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = if (scanState == "verified") Icons.Default.CheckCircle else Icons.Default.Fingerprint,
-                                contentDescription = "Sensor de Huella Digital",
+                                imageVector = if (scanState == "verified") Icons.Default.CheckCircle else biometryIcon,
+                                contentDescription = biometry.displayName,
                                 tint = sensorAccent,
                                 modifier = Modifier.size(48.dp)
                             )
@@ -2989,7 +3009,7 @@ fun BiometricOrderPromptDialog(
 
                     Text(
                         text = verifiedTokenPreview?.let { "Criptograma verificado: $it" }
-                            ?: if (scanState == "verified") "Identidad confirmada" else "Toca el sensor de huella para autorizar",
+                            ?: if (scanState == "verified") "Identidad confirmada" else biometry.sensorHint,
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
@@ -3026,16 +3046,19 @@ fun BiometricOrderPromptDialog(
                                 .testTag("biometric_verify_now_button")
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Fingerprint,
+                                imageVector = biometryIcon,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(17.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
+                            // Una sola línea siempre: "Usar Face ID" / "Usar Touch ID" / "Usar huella"
                             Text(
-                                text = "Verificar Huella",
+                                text = "Usar ${biometry.displayName}",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.sp
+                                fontSize = 13.sp,
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }
@@ -3679,7 +3702,7 @@ fun DeliveryTrackingScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Text(
-                                    text = "Seguimiento en Tiempo Real • #${orderIdDisplay}",
+                                    text = "En vivo • #${orderIdDisplay}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 12.sp,
@@ -3773,21 +3796,14 @@ fun DeliveryTrackingScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // Sin porcentaje aquí: el anillo de arriba ya lo muestra (antes se comprimía en vertical)
                                 DiagonalMetadataStrip(
                                     items = listOf(
-                                        "Progreso de entrega",
                                         "Etapa ${deliveryStage.stepNumber} de ${OrderDeliveryStage.entries.size}",
                                         effectiveBranch
                                     ),
                                     slashColor = primaryColor,
                                     fontSizeSp = 12f
-                                )
-                                Text(
-                                    text = "${(animatedProgress * 100).roundToInt()}%",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 12.sp,
-                                    color = primaryColor
                                 )
                             }
 
@@ -3861,18 +3877,27 @@ fun DeliveryTrackingScreen(
                                         }
                                     }
                                     Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
+                                    // Cinco columnas iguales: el texto se ajusta solo (12 → 9 sp) para no cortarse
+                                    androidx.compose.foundation.text.BasicText(
                                         text = stage.shortLabel,
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = if (isCurrent) FontWeight.ExtraBold else FontWeight.SemiBold,
-                                        fontSize = 12.sp,
-                                        color = when {
-                                            isCurrent -> primaryColor
-                                            isReached -> MaterialTheme.colorScheme.onSurface
-                                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                                        },
+                                        style = androidx.compose.ui.text.TextStyle(
+                                            fontFamily = PlusJakartaSans,
+                                            fontWeight = if (isCurrent) FontWeight.ExtraBold else FontWeight.SemiBold,
+                                            textAlign = TextAlign.Center,
+                                            color = when {
+                                                isCurrent -> primaryColor
+                                                isReached -> MaterialTheme.colorScheme.onSurface
+                                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                            }
+                                        ),
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        softWrap = false,
+                                        autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(
+                                            minFontSize = 9.sp,
+                                            maxFontSize = 12.sp,
+                                            stepSize = 0.5.sp
+                                        ),
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 1.dp)
                                     )
                                 }
                             }

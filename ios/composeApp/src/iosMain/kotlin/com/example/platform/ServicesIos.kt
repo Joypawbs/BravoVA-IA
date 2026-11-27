@@ -156,6 +156,14 @@ actual class SpeechRecognizerEngine actual constructor(context: PlatformContext)
         req.shouldReportPartialResults = true
         val input = engine.inputNode
         val format = input.outputFormatForBus(0u)
+        // Sin micrófono disponible (o con la sesión de audio ocupada) el formato llega vacío, y
+        // installTap lanza una excepción de Objective-C que Kotlin no puede atrapar: cerraría la app.
+        // Se avisa el error y la interfaz muestra el estado en lugar de cerrarse.
+        if (format.sampleRate <= 0.0 || format.channelCount == 0u) {
+            runCatching { session.setActive(false, withOptions = AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation, error = null) }
+            l?.onError(3)
+            return
+        }
         input.installTapOnBus(0u, bufferSize = 1024u, format = format) { buffer, _ ->
             if (buffer != null) req.appendAudioPCMBuffer(buffer)
         }
@@ -526,3 +534,17 @@ private class BridgedGenerativeModel(private val modelName: String, private val 
 }
 
 actual fun createGenerativeModel(modelName: String, config: AiModelConfig): GenerativeModelCompat = BridgedGenerativeModel(modelName, config)
+
+
+/** Lee LAContext.biometryType: en iPhone moderno es Face ID; en iPhone SE o con botón, Touch ID. */
+actual fun deviceBiometryKind(): BiometryKind {
+    val ctx = LAContext()
+    ctx.canEvaluatePolicy(LAPolicyDeviceOwnerAuthenticationWithBiometrics, error = null)
+    return when (ctx.biometryType) {
+        platform.LocalAuthentication.LABiometryTypeFaceID -> BiometryKind.FACE_ID
+        platform.LocalAuthentication.LABiometryTypeTouchID -> BiometryKind.TOUCH_ID
+        platform.LocalAuthentication.LABiometryTypeOpticID -> BiometryKind.OPTIC_ID
+        // Sin biometría registrada (o simulador): en iPhone actual lo más probable es Face ID
+        else -> BiometryKind.FACE_ID
+    }
+}

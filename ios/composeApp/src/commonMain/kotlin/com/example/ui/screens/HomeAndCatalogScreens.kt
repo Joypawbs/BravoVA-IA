@@ -1137,7 +1137,7 @@ fun CatalogScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(headerBg, headerBg.copy(alpha = 0.94f), headerBg.copy(alpha = 0f))))
+                    .background(headerBg)
             ) {
                 val catalogTitle = if (isArca) "Catálogo El Arca" else "Catálogo"
                 // Título grande arriba; al hacer scroll se convierte en la barra compacta
@@ -1312,7 +1312,7 @@ fun CategoryGridScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(headerBg, headerBg.copy(alpha = 0.94f), headerBg.copy(alpha = 0f))))
+                    .background(headerBg)
             ) {
                 GlassTopBar(
                     darkMode = darkMode,
