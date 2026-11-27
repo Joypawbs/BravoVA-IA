@@ -723,7 +723,7 @@ struct GlassBudgetPanelView: View {
                 step: m.step,
                 label: { Text("Presupuesto meta") },
                 minimumValueLabel: {
-                    Image(systemName: "banknote").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                    Image(systemName: "banknote").font(.system(size: 12, weight: .semibold)).foregroundStyle(Color.secondary)
                 },
                 maximumValueLabel: {
                     Image(systemName: "banknote.fill").font(.system(size: 15, weight: .semibold)).foregroundStyle(m.accent)
