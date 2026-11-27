@@ -2926,10 +2926,7 @@ fun AccountGridScreen(
             accent = primaryColor,
             title = if (showLargeTitle) "" else "Mi cuenta",
             modifier = Modifier.align(Alignment.TopCenter),
-            onBack = {
-                HapticFeedbackManager.onNavigationClick(view)
-                onBack()
-            },
+            // Sin "atrás": Mi cuenta es una pestaña raíz del dock (como Inicio y Catálogo)
             actions = listOf(
                 GlassBarAction(
                     symbol = "cart", icon = Icons.Default.ShoppingCart, label = "Carrito",

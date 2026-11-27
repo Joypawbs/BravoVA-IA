@@ -278,6 +278,7 @@ fun BravoRoot(
                     "bravisima" -> viewModel.navigateTo(AppScreen.BRAVISIMA)
                     "ofertas" -> viewModel.navigateTo(AppScreen.CATALOG)
                     "pedido" -> viewModel.navigateTo(AppScreen.DELIVERY)
+                    "carrito" -> viewModel.navigateTo(AppScreen.CART)
                     "bravia" -> {
                         // bravova://bravia?q=… abre Brav IA y envía la pregunta
                         viewModel.navigateTo(AppScreen.BRAVIA)
@@ -753,6 +754,10 @@ fun BravoVaApp(
                                 isGuestMode = isGuestMode,
                                 isSavingBravisima = isSavingBravisima,
                                 darkMode = darkMode,
+                                onBack = {
+                                    HapticFeedbackManager.onNavigationClick(view)
+                                    viewModel.navigateBack()
+                                },
                                 onRedeemInCart = {
                                     viewModel.setRedeemBravisimaInCart(true)
                                     viewModel.navigateTo(AppScreen.CART)

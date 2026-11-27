@@ -221,6 +221,8 @@ fun BravisimaScreen(
     isGuestMode: Boolean,
     isSavingBravisima: Boolean,
     darkMode: Boolean,
+    /** Bravísima se abre desde Mi cuenta: lleva "atrás" como toda pantalla hija. */
+    onBack: (() -> Unit)? = null,
     onRedeemInCart: () -> Unit,
     onOpenScanner: () -> Unit,
     onToggleCardLock: () -> Unit,
@@ -414,12 +416,14 @@ fun BravisimaScreen(
                                     items = listOf(
                                         "NIVEL ${bravisimaCard.tier.label.uppercase()}",
                                         if (bravisimaCard.isLocked) "BLOQUEADA" else "ACTIVA",
-                                        "1% Cashback"
+                                        // En mayúsculas como las otras dos etiquetas y en una sola línea
+                                        // (antes "1% Cashback" bajaba a una segunda línea)
+                                        "1% CASHBACK"
                                     ),
                                     slashColor = Color.White,
                                     textColor = Color.White,
-                                    fontSizeSp = 12f,
-                                    maxLines = 2
+                                    fontSizeSp = 11f,
+                                    maxLines = 1
                                 )
 
                                 Spacer(modifier = Modifier.height(6.dp))
@@ -671,7 +675,7 @@ fun BravisimaScreen(
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Vincula tu cuenta Google",
+                                        text = "Vincula tu cuenta de Google",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 14.5.sp,
@@ -750,13 +754,7 @@ fun BravisimaScreen(
                                         color = Color.White
                                     )
                                 } else {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = BravoAmber,
-                                        modifier = Modifier.size(17.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    // Sin el icono de destellos: igual que el botón de Google del inicio de sesión
                                     Text(
                                         text = "Iniciar sesión con Google",
                                         fontFamily = PlusJakartaSans,
@@ -1488,6 +1486,7 @@ fun BravisimaScreen(
             accent = primaryColor,
             title = "Bravísima",
             modifier = Modifier.align(Alignment.TopCenter),
+            onBack = onBack,
             actions = listOf(
                 GlassBarAction(symbol = "creditcard", icon = null, label = "Nivel ${bravisimaCard.tier.label}", text = bravisimaCard.tier.label, highlighted = true)
             )

@@ -181,7 +181,8 @@ final class BravoVaTourUITests: XCTestCase {
         relaunch()
 
         // Detalle de producto y vuelta al inicio
-        tap(["Café Soluble"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
+        // "product_card_" / "add_" son los testTag de las tarjetas: sirven si el producto cambia de lugar
+        tap(["Café Soluble", "product_card_"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
         pause(3); shot("detalle_producto")
         // Desliza desde abajo para no abrir el visor de la foto
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
@@ -189,7 +190,7 @@ final class BravoVaTourUITests: XCTestCase {
         pause(2); shot("detalle_precio_por_unidad")
         tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
         pause(2)
-        tap(["Agregar Café"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)
+        tap(["Agregar Café", "add_"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)
         pause(2); shot("home_con_carrito")
         app.swipeUp(); pause(2); shot("home_ofertas")
         // Mantener presionado un producto abre la vista rápida (hoja nativa)
@@ -233,9 +234,13 @@ final class BravoVaTourUITests: XCTestCase {
         tap(["Seguimiento en vivo", "Seguir pedido", "Rastrear"], fallback: CGVector(dx: 0.5, dy: 0.35), wait: 3)
         pause(5); shot("seguimiento_mapa")
 
-        tap(["Inicio"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 3)
-        pause(2)
-        tap(["Carrito", "carrito"], fallback: CGVector(dx: 0.88, dy: 0.86), wait: 2)
+        // El carrito se abre con su enlace: buscar el botón en la home fallaba con
+        // "Failed to get matching snapshots" (árbol de accesibilidad de la home muy pesado).
+        if #available(iOS 16.4, *) {
+            app.open(URL(string: "bravova://carrito")!)
+        } else {
+            tap(["Carrito", "carrito"], fallback: CGVector(dx: 0.88, dy: 0.86), wait: 2)
+        }
         pause(3); shot("carrito")
         for _ in 0..<4 { app.swipeUp() }
         pause(2); shot("carrito_pago_y_entrega")

@@ -1052,22 +1052,17 @@ fun CatalogScreen(
             }
 
             item(key = "catalog_pasillos_header", contentType = "header") {
-                Column(
+                // Mismo estilo que "Ofertas del día": título de sección a la izquierda, sin subrayado
+                // (el subrayado de marca queda solo en el título grande de la pantalla)
+                Text(
+                    text = if (isArca) "Departamentos" else "Pasillos",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = if (isArca) "Departamentos" else "Pasillos",
-                        fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
-                    )
-                    BravoUnderline(isArca = isArca)
-                }
+                        .padding(horizontal = 14.dp, vertical = 4.dp)
+                )
             }
 
             items(
