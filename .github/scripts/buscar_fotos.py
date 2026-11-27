@@ -21,16 +21,24 @@ def norm(s):
     s = "".join(c for c in s if not unicodedata.combining(c))
     return [w for w in re.findall(r"[a-z]+", s) if w not in STOP and len(w) > 2]
 
-def get_json(url, tries=4):
-    """GET con reintentos: los servicios abiertos responden 429/503 cuando se les pide rápido."""
+FAILS = {}  # servicio -> fallos seguidos; tras 6 se deja de usar (no frena todo el lote)
+
+def get_json(url, tries=2):
+    """GET con un reintento corto: los servicios abiertos responden 429/503 si se les pide rápido."""
+    svc = urllib.parse.urlparse(url).netloc
+    if FAILS.get(svc, 0) >= 6:
+        raise RuntimeError(svc + " desactivado por fallos seguidos")
     for k in range(tries):
         try:
             req = urllib.request.Request(url, headers=UA)
-            with urllib.request.urlopen(req, timeout=30) as r:
-                return json.loads(r.read().decode("utf-8", "replace"))
-        except urllib.error.HTTPError as e:
-            if e.code in (429, 502, 503, 504) and k < tries - 1:
-                time.sleep(4 * (k + 1)); continue
+            with urllib.request.urlopen(req, timeout=12) as r:
+                data = json.loads(r.read().decode("utf-8", "replace"))
+            FAILS[svc] = 0
+            return data
+        except Exception as e:
+            if k < tries - 1 and getattr(e, "code", 503) in (429, 502, 503, 504):
+                time.sleep(3); continue
+            FAILS[svc] = FAILS.get(svc, 0) + 1
             raise
 
 def off(name):
@@ -93,7 +101,7 @@ def wikipedia(name):
 def thumb(url):
     try:
         req = urllib.request.Request(url, headers=UA)
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with urllib.request.urlopen(req, timeout=12) as r:
             im = Image.open(io.BytesIO(r.read())).convert("RGB")
         im.thumbnail((150, 150)); return im
     except Exception as e:
@@ -111,9 +119,9 @@ for i, (sku, name, cat) in enumerate(items):
     c = off(name)
     if len(c) < 2: c += wikipedia(name)
     if len(c) < 3: c += commons(name)
-    time.sleep(1.2)
+    time.sleep(0.6)
     cands[sku] = {"name": name, "cat": cat, "c": [{"url": u, "src": l} for u, l in c[:4]]}
-    if i % 20 == 0: print(i, sku, name, len(c))
+    print(i, sku, name, len(c), flush=True)
 (OUT / "candidatas.json").write_text(json.dumps(cands, ensure_ascii=False, indent=1), encoding="utf-8")
 
 # Hojas: 12 productos por hoja; columna de nombre + 4 candidatas numeradas 1..4

@@ -5,14 +5,14 @@ permissions:
 jobs:
   buscar:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - run: pip install pillow
       - name: Buscar candidatas y armar hojas
         run: |
           D=ios/composeApp/src/commonMain/kotlin/com/example/data
-          python3 .github/scripts/buscar_fotos.py out $D/BravoCatalogData.kt $D/ArcaCatalogData.kt
+          python3 -u .github/scripts/buscar_fotos.py out $D/BravoCatalogData.kt $D/ArcaCatalogData.kt
       - name: Publicar en la rama fotos-candidatas
         run: |
           cd out && git init -q -b fotos-candidatas
