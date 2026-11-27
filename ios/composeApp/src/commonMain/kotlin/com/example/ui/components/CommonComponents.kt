@@ -546,10 +546,6 @@ fun ShimmerSkeletonBox(
 }
 
 
-// Posiciones de las estrellas alrededor del emblema de 138.dp (lienzo de 240.dp)
-// (Emblem occupies 0.21..0.79; sparkles sit cleanly in the outer perimeter ring 0.09..0.91 without overlapping)
-)
-
 @Composable
 fun AppStartupSkeletonScreen(
     darkMode: Boolean,
