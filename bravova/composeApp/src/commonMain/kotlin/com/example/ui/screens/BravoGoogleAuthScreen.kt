@@ -30,11 +30,12 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.History
@@ -223,53 +224,55 @@ fun BravoGoogleAuthScreen(
                     }
                 }
 
-                // Top-right Dark/Light mode toggle button
-                Surface(
-                    onClick = {
-                        HapticFeedbackManager.onNavigationClick(view)
-                        onToggleDarkMode()
-                    },
-                    shape = RoundedCornerShape(999.dp),
-                    color = if (darkMode) Color(0xFF151E2E) else Color.White.copy(alpha = 0.88f),
-                    border = BorderStroke(
-                        1.dp,
-                        if (darkMode) Color.White.copy(alpha = 0.14f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)
-                    ),
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 12.dp, end = 18.dp)
-                        .testTag("auth_toggle_dark_mode_button")
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (darkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = "Cambiar tema",
-                            tint = if (darkMode) BravoAmber else primaryColor,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = if (darkMode) "Modo Oscuro" else "Modo Claro",
-                            fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-
+                // El botón de tema va dentro de la columna (no flotando encima): antes se montaba
+                // sobre el borde de la tarjeta. La columna se desplaza en pantallas bajas.
                 Column(
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .widthIn(max = 460.dp)
-                        .padding(horizontal = 20.dp),
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
+                    // Muestra la acción, no el estado: luna + "Modo oscuro" cambia a oscuro.
+                    Surface(
+                        onClick = {
+                            HapticFeedbackManager.onNavigationClick(view)
+                            onToggleDarkMode()
+                        },
+                        shape = RoundedCornerShape(999.dp),
+                        color = if (darkMode) Color(0xFF151E2E) else Color.White.copy(alpha = 0.88f),
+                        border = BorderStroke(
+                            1.dp,
+                            if (darkMode) Color.White.copy(alpha = 0.14f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)
+                        ),
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .testTag("auth_toggle_dark_mode_button")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (darkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                contentDescription = null,
+                                tint = if (darkMode) BravoAmber else primaryColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = if (darkMode) "Modo claro" else "Modo oscuro",
+                                fontFamily = PlusJakartaSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
                     TranslucentCard(
                         darkMode = darkMode,
                         cornerRadius = 30.dp,
@@ -353,7 +356,7 @@ fun BravoGoogleAuthScreen(
 
                                 highlights.forEach { (icon, title, subtitle) ->
                                     Row(
-                                        verticalAlignment = Alignment.CenterVertically,
+                                        verticalAlignment = Alignment.Top,
                                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
                                         Box(
@@ -376,6 +379,8 @@ fun BravoGoogleAuthScreen(
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
                                                 fontSize = 12.sp,
+                                                // Sin lineHeight propio heredaba el del tema (24 sp) y las líneas quedaban separadísimas
+                                                lineHeight = 16.sp,
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
@@ -383,6 +388,7 @@ fun BravoGoogleAuthScreen(
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.Medium,
                                                 fontSize = 12.sp,
+                                                lineHeight = 16.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
@@ -454,13 +460,7 @@ fun BravoGoogleAuthScreen(
                                         color = Color.White
                                     )
                                 } else {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = BravoAmber,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    // Sin los destellos de Brav IA: este botón es de Google, no de la IA
                                     Text(
                                         text = "Continuar con Google",
                                         fontFamily = PlusJakartaSans,
@@ -511,10 +511,11 @@ fun BravoGoogleAuthScreen(
                                     modifier = Modifier.size(13.dp)
                                 )
                                 Text(
-                                    text = "Inicio de sesión seguro con Google • Datos protegidos",
+                                    text = "Inicio de sesión seguro con Google",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 12.sp,
+                                    lineHeight = 16.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }

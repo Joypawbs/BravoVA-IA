@@ -78,7 +78,7 @@ final class BravoVaTourUITests: XCTestCase {
     func testVidrioBravIa() throws {
         app.launch()
         pause(6)
-        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(5); shot("v25_inicio")
@@ -107,7 +107,7 @@ final class BravoVaTourUITests: XCTestCase {
     func testBravIaReceta() throws {
         app.launch()
         pause(6)
-        tap(["Elegir después", "Saltar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 3)
+        tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4)
@@ -133,14 +133,20 @@ final class BravoVaTourUITests: XCTestCase {
 
     func testRecorridoCompleto() throws {
         app.launch()
-        pause(3); shot("splash")
-        pause(5); shot("bienvenida_tienda")
-        // 2.0: bienvenida de la primera vez (tienda → sucursal → entrar)
-        tap(["Continuar"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 2)
-        pause(1); shot("bienvenida_sucursal")
+        pause(1); shot("splash")
+        pause(6); shot("bienvenida_sucursal")
+        // Bienvenida de la primera vez: solo sucursal (el paso de tienda ya no existe).
+        // Botón exacto "Continuar": por coincidencia parcial tocaba "Continuar con Google"
+        // en la pantalla siguiente y abría el inicio de sesión de Google.
         tap(["Bravo Winston Churchill"], fallback: CGVector(dx: 0.5, dy: 0.40), wait: 2)
-        tap(["Continuar", "Elegir después"], fallback: CGVector(dx: 0.5, dy: 0.93), wait: 2)
-        pause(2); shot("inicio_sesion")
+        pause(1); shot("bienvenida_sucursal_elegida")
+        let continuar = app.buttons["Continuar"]
+        if continuar.waitForExistence(timeout: 2) && continuar.isHittable {
+            continuar.tap()
+        } else {
+            tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 2)
+        }
+        pause(3); shot("inicio_sesion")
 
         tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
