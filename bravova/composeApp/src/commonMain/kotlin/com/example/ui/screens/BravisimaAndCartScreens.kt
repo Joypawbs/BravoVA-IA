@@ -2372,12 +2372,17 @@ fun CartCheckoutScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Cargo con $activeCardSummary ($ncfType)", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                            DiagonalMetadataStrip(
-                                items = listOf("GRATIS", "+RD$${cartTotals.bravisimaGenerated} Bravísima"),
-                                slashColor = Tone.success,
-                                fontSizeSp = 12f
+                            // Antes: "Cargo con Visa •••• 4821 (B02)GRATIS / +RD$2 Braví…" pegado y cortado.
+                            // El NCF ya se elige arriba y lo ganado en Bravísima sale en la franja verde.
+                            Text(
+                                "Comisión con $activeCardSummary",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 12.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp)
                             )
+                            Text("Gratis", color = Tone.success, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
 
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
@@ -2476,8 +2481,8 @@ fun CartCheckoutScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = lastVerificationResult?.let {
-                                        "Sello Biométrico Activo • ${it.transactionToken}"
-                                    } ?: "Confirmación con BiometricPrompt",
+                                        "Pago verificado • ${it.transactionToken}"
+                                    } ?: "Confirmación con ${com.example.platform.biometryLabel()}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 12.sp,
@@ -2678,7 +2683,7 @@ fun BiometricOrderPromptDialog(
             amountRd = totalAmountRd,
             itemCount = itemCount,
             cashbackRd = cashbackRd,
-            paymentMethodLabel = "Pago Protegido 3DS + BiometricPrompt",
+            paymentMethodLabel = "Pago protegido 3DS + ${com.example.platform.biometryLabel()}",
             deliveryOrBranchLabel = "Despacho inmediato"
         ),
         isArca = isArca,
