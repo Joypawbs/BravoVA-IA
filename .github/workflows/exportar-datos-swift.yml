@@ -1,0 +1,33 @@
+name: Exportar datos para Swift
+
+# Convierte el catálogo, las recetas y las descripciones de Kotlin a JSON para bravova-ios/.
+on:
+  push:
+    branches: [swift-nativo]
+    paths:
+      - ".github/workflows/exportar-datos-swift.yml"
+      - "bravova/composeApp/src/androidUnitTest/**"
+  workflow_dispatch:
+
+jobs:
+  exportar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: bravova
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Exportar
+        run: |
+          ./gradlew --no-daemon :composeApp:testDebugUnitTest --tests 'com.example.ExportarDatosParaSwift'
+          cat composeApp/build/datos-swift/resumen.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: datos-swift
+          path: bravova/composeApp/build/datos-swift/
