@@ -7,13 +7,8 @@ struct HomeView: View {
     @State private var query = ""
     private let catalog = Catalog.shared
 
-    private var homeSections: [CatalogSection] {
-        let all = catalog.sections(for: app.store)
-        guard app.store == .bravo, !catalog.homeBravoSections.isEmpty else {
-            return all.filter { $0.id != "Productos nuevos" }
-        }
-        return catalog.homeBravoSections.compactMap { name in all.first { $0.name == name } }
-    }
+    /// Todos los pasillos de la tienda, como en la 3.1 (los 750 productos se ven desde Inicio)
+    private var homeSections: [CatalogSection] { catalog.sections(for: app.store) }
 
     private var results: [Product] {
         let q = query.folded
@@ -90,6 +85,10 @@ struct HomeView: View {
                 Text(section.name)
                     .font(.title3.bold())
                     .lineLimit(1)
+                Text("\(items.count)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
                 Spacer()
                 NavigationLink(value: section) {
                     Text("Ver todos")
@@ -99,7 +98,7 @@ struct HomeView: View {
             .padding(.horizontal)
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 12) {
-                    ForEach(items.prefix(12)) { ProductCard(product: $0) }
+                    ForEach(items) { ProductCard(product: $0) }
                 }
                 .scrollTargetLayout()
                 .padding(.horizontal)

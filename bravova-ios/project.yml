@@ -36,6 +36,9 @@ targets:
       path: BravoVa/Info.plist
       properties:
         CFBundleDisplayName: BravoVa
+        # Textos del sistema (botón de Apple, menús) en español
+        CFBundleDevelopmentRegion: es
+        CFBundleLocalizations: [es]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         BravIAGeminiKey: $(GEMINI_API_KEY)
