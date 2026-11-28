@@ -1,0 +1,255 @@
+{"app_name":"intelligencetasksd","timestamp":"2026-11-28 05:37:35.00 +0000","app_version":"","slice_uuid":"9bfaac4c-b6b4-3dab-ba53-a1226c0f52f0","build_version":"","platform":7,"share_with_app_devs":0,"is_first_party":1,"bug_type":"309","os_version":"macOS 27.0.1 (26A434)","roots_installed":0,"incident_id":"4CF204D2-93FD-435C-A0F7-5F546DB65B03","name":"intelligencetasksd"}
+{
+  "uptime" : 1500,
+  "procRole" : "Unspecified",
+  "version" : 2,
+  "userID" : 501,
+  "deployVersion" : 210,
+  "modelCode" : "VirtualMac2,1",
+  "coalitionID" : 1948,
+  "osVersion" : {
+    "train" : "macOS 27.0.1",
+    "build" : "26A434",
+    "releaseType" : "User"
+  },
+  "captureTime" : "2026-11-28 05:37:33.2284 +0000",
+  "codeSigningMonitor" : 0,
+  "incident" : "4CF204D2-93FD-435C-A0F7-5F546DB65B03",
+  "pid" : 42172,
+  "translated" : false,
+  "cpuType" : "ARM-64",
+  "procLaunch" : "2026-11-28 05:37:30.4681 +0000",
+  "procStartAbsTime" : 37206230767,
+  "procExitAbsTime" : 37237165384,
+  "procName" : "intelligencetasksd",
+  "procPath" : "\/Volumes\/VOLUME\/*\/IntelligenceTasksEngine.framework\/Support\/intelligencetasksd",
+  "parentProc" : "launchd_sim",
+  "parentPid" : 19382,
+  "coalitionName" : "com.apple.CoreSimulator.SimDevice.E9A4AE21-D50D-471B-A586-FA9961A8E36C",
+  "crashReporterKey" : "37186078-EE7C-8E74-64A1-BF0D7E969307",
+  "developerMode" : 1,
+  "responsiblePid" : 19050,
+  "responsibleProc" : "SimulatorTrampoline",
+  "codeSigningID" : "com.apple.intelligencetasksd",
+  "codeSigningTeamID" : "",
+  "codeSigningFlags" : 570442241,
+  "codeSigningValidationCategory" : 1,
+  "codeSigningTrustLevel" : 4294967295,
+  "codeSigningAuxiliaryInfo" : 0,
+  "instructionByteStream" : {"beforePC":"IAAg1IEF+LfpAwC54gMDquMDBKrkAwWq5QMGquYDB6rnAwiquwIAlA==","atPC":"IAAg1P8TALmIEoBS6AcA+UgAgFLoAwA5ABYA8ACQI5EDFgDwY0AwkQ=="},
+  "bootSessionUUID" : "0DFD4DE6-8E62-45AA-B891-2C8140BC88AA",
+  "sip" : "disabled",
+  "exception" : {"codes":"0x0000000000000001, 0x00000001c1694914","rawCodes":[1,7539869972],"type":"EXC_BREAKPOINT","signal":"SIGTRAP"},
+  "termination" : {"flags":0,"code":5,"namespace":"SIGNAL","indicator":"Trace\/BPT trap: 5","byProc":"exc handler","byPid":42172},
+  "os_fault" : {"process":"intelligencetasksd"},
+  "extMods" : {"caller":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"system":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"targeted":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"warnings":0},
+  "faultingThread" : 1,
+  "threads" : [{"id":112901,"threadState":{"x":[{"value":8388693088,"symbolLocation":0,"symbol":"_OBJC_$_CATEGORY_INSTANCE_METHODS_NSXPCConnection_$_Rapport"},{"value":6100079792},{"value":1},{"value":0},{"value":18446726482597246976},{"value":1024},{"value":5829632},{"value":5831680},{"value":0},{"value":9360850952},{"value":9534441401},{"value":168},{"value":0},{"value":0},{"value":4382244864},{"value":5831680},{"value":4383047680},{"value":1},{"value":0},{"value":9363314760,"symbolLocation":0,"symbol":"OBJC_CLASS_$_NSXPCConnection"},{"value":6100079792},{"value":1},{"value":0},{"value":1},{"value":3},{"value":6100079800},{"value":8},{"value":9618203432},{"value":6}],"flavor":"ARM_THREAD_STATE64","lr":{"value":7516585084},"cpsr":{"value":1610616832},"fp":{"value":6100079696},"sp":{"value":6100079568},"esr":{"value":2449473543,"description":"(Data Abort) byte read Translation fault"},"pc":{"value":7516644756},"far":{"value":8388693088}},"queue":"com.apple.main-thread","frames":[{"imageOffset":91540,"symbol":"prepareMethodLists(objc_class*, method_list_t**, int, bool, bool, char const*)","symbolLocation":76,"imageIndex":8},{"imageOffset":31868,"symbol":"realizeClassWithoutSwift(objc_class*, objc_class*)","symbolLocation":1880,"imageIndex":8},{"imageOffset":104560,"symbol":"realizeClassMaybeSwiftMaybeRelock(objc_class*, locker_mixin<lockdebug::lock_mixin<objc_lock_base_t>>&, bool)","symbolLocation":56,"imageIndex":8},{"imageOffset":28616,"symbol":"initializeAndMaybeRelock(objc_class*, objc_object*, locker_mixin<lockdebug::lock_mixin<objc_lock_base_t>>&, bool)","symbolLocation":144,"imageIndex":8},{"imageOffset":71788,"symbol":"objc_lookUpImpOrForward","symbolLocation":124,"imageIndex":8},{"imageOffset":2848,"symbol":"_objc_msgSend_uncached","symbolLocation":64,"imageIndex":9},{"imageOffset":142720,"symbol":"-[_DASScheduler setupXPCConnectionWithEndpoint:]","symbolLocation":84,"imageIndex":10},{"imageOffset":147924,"symbol":"-[_DASScheduler initWithListenerEndpoint:]","symbolLocation":348,"imageIndex":10},{"imageOffset":148720,"symbol":"+[_DASScheduler schedulerWithClientName:]","symbolLocation":44,"imageIndex":10},{"imageOffset":6316,"symbol":"-[BGSystemTaskScheduler init]","symbolLocation":164,"imageIndex":11},{"imageOffset":6132,"symbol":"__40+[BGSystemTaskScheduler sharedScheduler]_block_invoke","symbolLocation":20,"imageIndex":11},{"imageOffset":114616,"symbol":"_dispatch_client_callout","symbolLocation":12,"imageIndex":12},{"imageOffset":16288,"symbol":"_dispatch_once_callout","symbolLocation":28,"imageIndex":12},{"imageOffset":6104,"symbol":"+[BGSystemTaskScheduler sharedScheduler]","symbolLocation":40,"imageIndex":11},{"imageOffset":67588,"imageIndex":3},{"imageOffset":98484,"imageIndex":3},{"imageOffset":3680,"imageIndex":0},{"imageOffset":3844,"imageIndex":0},{"imageOffset":66516,"symbol":"start_sim","symbolLocation":20,"imageIndex":1},{"imageOffset":204416,"symbol":"start","symbolLocation":6688,"imageIndex":7}]},{"triggered":true,"id":112922,"threadState":{"x":[{"value":4378126408},{"value":8589934595},{"value":3331},{"value":16},{"value":4378137472},{"value":19},{"value":32},{"value":52776562458624},{"value":18446744065119617024},{"value":4378137344},{"value":4378034272},{"value":6448},{"value":6},{"value":2414},{"value":4378034976},{"value":88099447128193},{"value":8589934595},{"value":3},{"value":0},{"value":13},{"value":6100643136},{"value":2},{"value":160},{"value":7820493616},{"value":0},{"value":1},{"value":0},{"value":2293760},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":7539869972},"cpsr":{"value":1610616832},"fp":{"value":6100643104},"sp":{"value":6100643072},"esr":{"value":4060086273,"description":"(Breakpoint) brk 1"},"pc":{"value":7539869972,"matchesCrashFrame":1},"far":{"value":0}},"queue":"com.apple.root.default-qos.cooperative","frames":[{"imageOffset":1054996,"symbol":"_assertionFailure(_:_:file:line:flags:)","symbolLocation":208,"imageIndex":15},{"imageOffset":195100,"symbol":"__XPC_INTERNAL_CRASH__(_:file:line:)","symbolLocation":96,"imageIndex":16},{"imageOffset":195004,"symbol":"__XPC_API_MISUSE__(_:file:line:)","symbolLocation":44,"imageIndex":16},{"imageOffset":160600,"symbol":"static XPCPeerRequirement.hasEntitlement(_:)","symbolLocation":100,"imageIndex":16},{"imageOffset":112372,"imageIndex":3},{"imageOffset":56521,"imageIndex":3},{"imageOffset":118577,"imageIndex":3},{"imageOffset":61533,"imageIndex":3},{"imageOffset":45289,"symbol":"completeTaskWithClosure(swift::AsyncContext*, swift::SwiftError*)","symbolLocation":1,"imageIndex":17}]},{"id":112923,"frames":[],"threadState":{"x":[{"value":6101217280},{"value":4867},{"value":6100680704},{"value":0},{"value":409604},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6101217280},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":4369324660},"far":{"value":0}}}],
+  "usedImages" : [
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4366794752,
+    "size" : 16384,
+    "uuid" : "9bfaac4c-b6b4-3dab-ba53-a1226c0f52f0",
+    "path" : "\/Volumes\/VOLUME\/*\/IntelligenceTasksEngine.framework\/Support\/intelligencetasksd",
+    "name" : "intelligencetasksd"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4369694720,
+    "size" : 376832,
+    "uuid" : "d753cba8-f4ed-3813-b91c-c6f04918fcf4",
+    "path" : "\/Volumes\/VOLUME\/*\/dyld_sim",
+    "name" : "dyld_sim"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4367024128,
+    "CFBundleShortVersionString" : "1.0",
+    "CFBundleIdentifier" : "com.apple.IntelligenceTasks",
+    "size" : 49152,
+    "uuid" : "a8297cd5-3c86-3679-8e30-f38122ba5f88",
+    "path" : "\/Volumes\/VOLUME\/*\/IntelligenceTasks.framework\/IntelligenceTasks",
+    "name" : "IntelligenceTasks",
+    "CFBundleVersion" : "259"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4368990208,
+    "CFBundleShortVersionString" : "1.0",
+    "CFBundleIdentifier" : "com.apple.IntelligenceTasksEngine",
+    "size" : 163840,
+    "uuid" : "cc425b62-880e-3529-9781-4abb8e2224b0",
+    "path" : "\/Volumes\/VOLUME\/*\/IntelligenceTasksEngine.framework\/IntelligenceTasksEngine",
+    "name" : "IntelligenceTasksEngine",
+    "CFBundleVersion" : "259"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4367171584,
+    "size" : 49152,
+    "uuid" : "284a4cd2-a934-3ba7-9277-47f5ef53d245",
+    "path" : "\/usr\/lib\/system\/libsystem_platform.dylib",
+    "name" : "libsystem_platform.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4372398080,
+    "size" : 262144,
+    "uuid" : "b07862d0-c2de-3aed-898c-88190e38064e",
+    "path" : "\/usr\/lib\/system\/libsystem_kernel.dylib",
+    "name" : "libsystem_kernel.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4369317888,
+    "size" : 65536,
+    "uuid" : "08833bec-e49c-31b7-85fd-6ef2bac2b425",
+    "path" : "\/usr\/lib\/system\/libsystem_pthread.dylib",
+    "name" : "libsystem_pthread.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 4367499264,
+    "size" : 786432,
+    "uuid" : "d341ddcb-7969-3a9c-8e03-0cf4751398a9",
+    "path" : "\/usr\/lib\/dyld",
+    "name" : "dyld"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 7516553216,
+    "size" : 240396,
+    "uuid" : "b8db9d86-244d-36ed-99ae-2b2c28326c2d",
+    "path" : "\/Volumes\/VOLUME\/*\/libobjc.A.dylib",
+    "name" : "libobjc.A.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 7516794880,
+    "size" : 3696,
+    "uuid" : "25029b75-841b-3e01-905c-3d7846ba4e1c",
+    "path" : "\/Volumes\/VOLUME\/*\/libobjcMsgSend.dylib",
+    "name" : "libobjcMsgSend.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 8323182592,
+    "size" : 333284,
+    "uuid" : "8563933a-9b7c-316e-8ad6-6e2aeaac59b3",
+    "path" : "\/Volumes\/VOLUME\/*\/DuetActivityScheduler.framework\/DuetActivityScheduler",
+    "name" : "DuetActivityScheduler"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 8148426752,
+    "size" : 99812,
+    "uuid" : "c77ad99b-ef89-32c9-97a0-549eab2305a4",
+    "path" : "\/Volumes\/VOLUME\/*\/BackgroundSystemTasks.framework\/BackgroundSystemTasks",
+    "name" : "BackgroundSystemTasks"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 8161214464,
+    "size" : 281720,
+    "uuid" : "d159819f-c0e6-3f2d-831b-596a68ac54c0",
+    "path" : "\/Volumes\/VOLUME\/*\/libdispatch.dylib",
+    "name" : "libdispatch.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 8387878912,
+    "size" : 1051624,
+    "uuid" : "c1b715dc-0484-337c-b5d5-6e3f62f2c2fd",
+    "path" : "\/Volumes\/VOLUME\/*\/Rapport.framework\/Rapport",
+    "name" : "Rapport"
+  },
+  {
+    "size" : 0,
+    "source" : "A",
+    "base" : 0,
+    "uuid" : "00000000-0000-0000-0000-000000000000"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 7538814976,
+    "size" : 4964529,
+    "uuid" : "bdbe9ca8-79e7-31d0-a51a-108717ec6254",
+    "path" : "\/Volumes\/VOLUME\/*\/libswiftCore.dylib",
+    "name" : "libswiftCore.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 7820259328,
+    "size" : 256780,
+    "uuid" : "9cd6770f-6aca-3786-bded-901bb8dc6aef",
+    "path" : "\/Volumes\/VOLUME\/*\/libswiftXPC.dylib",
+    "name" : "libswiftXPC.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 7538384896,
+    "size" : 427944,
+    "uuid" : "1a3980b7-77ce-3860-bf8f-39180b98d1bf",
+    "path" : "\/Volumes\/VOLUME\/*\/libswift_Concurrency.dylib",
+    "name" : "libswift_Concurrency.dylib"
+  }
+],
+  "sharedCache" : {
+  "base" : 7516192768,
+  "size" : 3890626560,
+  "uuid" : "c54ad6fa-9ff2-3edb-9c8a-53a82682d342"
+},
+  "vmSummary" : "ReadOnly portion of Libraries: Total=1.4G resident=0K(0%) swapped_out_or_unallocated=1.4G(100%)\nWritable regions: Total=27.0M written=1413K(5%) resident=1413K(5%) swapped_out=0K(0%) unallocated=25.7M(95%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nActivity Tracing                   256K        1 \nDispatch Continuations            3072K        1 \nDyld Private Memory               53.5G        9 \nGuard                            385.0G        1 \nMalloc                            13.1M        7 \nMalloc Guard Page                 4048K        4 \nOS Alloc Once                       32K        1 \nStack                             9264K        3 \nStack Guard                       56.0M        3 \n__AUTH_CONST                        32K        1 \n__DATA                            17.2M      415 \n__DATA_CONST                      63.7M      422 \n__DATA_DIRTY                       139K       13 \n__FONT_DATA                        2352        1 \n__LINKEDIT                         1.0G        9 \n__TEXT                           463.1M      443 \n__TPRO_CONST                       184K        5 \npage table in kernel              1413K        1 \n===========                     =======  ======= \nTOTAL                            440.1G     1340 \n",
+  "legacyInfo" : {
+  "threadTriggered" : {
+    "queue" : "com.apple.root.default-qos.cooperative"
+  }
+},
+  "logWritingSignature" : "6355be0c80cf5ca32ded583eb5f7cdac42ede794",
+  "roots_installed" : 0,
+  "bug_type" : "309",
+  "trmStatus" : 2105344,
+  "trialInfo" : {
+  "rollouts" : [
+    {
+      "rolloutId" : "5fb4245a1bbfe8005e33a1e1",
+      "factorPackIds" : [
+
+      ],
+      "deploymentId" : 240000021
+    },
+    {
+      "rolloutId" : "67d07cd6a7affa169ae21f45",
+      "factorPackIds" : [
+
+      ],
+      "deploymentId" : 240000002
+    }
+  ],
+  "experiments" : [
+    {
+      "treatmentId" : "881df3a1-3726-4db9-af56-c04be1d5f088",
+      "experimentId" : "6aeccd60cdfdae0d6fc62e9f",
+      "deploymentId" : 400000001
+    }
+  ]
+}
+}
