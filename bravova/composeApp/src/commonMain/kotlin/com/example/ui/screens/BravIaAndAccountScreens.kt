@@ -1015,7 +1015,9 @@ fun BravIaChatScreen(
                     start = 14.dp,
                     end = 14.dp,
                     top = topOverlayPadding + 6.dp,
-                    bottom = dynamicInputBottomPadding + 148.dp
+                    // Con el teclado abierto solo hace falta dejar sitio al campo de escritura;
+                    // los 148 dp de antes dejaban un hueco vacío y empujaban la respuesta bajo el panel
+                    bottom = dynamicInputBottomPadding + (if (isImeVisible) 76.dp else 148.dp)
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
