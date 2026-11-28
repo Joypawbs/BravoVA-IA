@@ -1,0 +1,88 @@
+name: BravoVa
+# App de iOS 100 % Swift (SwiftUI). Reemplaza a bravova/iosApp (Kotlin Multiplatform), que queda
+# solo para Android. Mismo identificador para que se instale encima de la versión anterior.
+options:
+  bundleIdPrefix: com.aistudio.bravova
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: "3.2.0"
+    CURRENT_PROJECT_VERSION: "30200"
+    # Modo Swift 5: la concurrencia estricta de Swift 6 no aporta nada visible aquí
+    SWIFT_VERSION: "5.0"
+    # La clave de Gemini NO se define aquí: Xcode toma la variable de entorno GEMINI_API_KEY
+    # (secreto del CI) para $(GEMINI_API_KEY) del Info.plist. No se pasa por la línea de
+    # comandos porque xcodebuild la imprimiría en el registro.
+targets:
+  BravoVa:
+    type: application
+    platform: iOS
+    sources:
+      - path: BravoVa
+        excludes:
+          - "AppIcon.icon/**"
+      - path: BravoVa/AppIcon.icon
+        type: file
+        buildPhase: resources
+      - path: Shared
+    info:
+      path: BravoVa/Info.plist
+      properties:
+        CFBundleDisplayName: BravoVa
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        BravIAGeminiKey: $(GEMINI_API_KEY)
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        CADisableMinimumFrameDurationOnPhone: true
+        ITSAppUsesNonExemptEncryption: false
+        NSCameraUsageDescription: "BravoVa usa la cámara para escanear códigos de barras de productos."
+        NSMicrophoneUsageDescription: "Brav IA usa el micrófono para que puedas dictar tus consultas por voz."
+        NSSpeechRecognitionUsageDescription: "Brav IA convierte tu voz en texto para responder tus consultas."
+        NSPhotoLibraryUsageDescription: "Adjunta fotos de productos o facturas para que Brav IA las analice."
+        NSLocationWhenInUseUsageDescription: "BravoVa usa tu ubicación para calcular la distancia y el tiempo de entrega desde la sucursal más cercana."
+        NSFaceIDUsageDescription: "Confirma pagos y canjes de tu Bravísima con Face ID."
+        NSSupportsLiveActivities: true
+        CFBundleURLTypes:
+          - CFBundleURLName: com.aistudio.bravova.rdshop
+            CFBundleURLSchemes: [bravova]
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: buscar
+            UIApplicationShortcutItemTitle: Buscar
+            UIApplicationShortcutItemIconSymbolName: magnifyingglass
+          - UIApplicationShortcutItemType: bravisima
+            UIApplicationShortcutItemTitle: Mi tarjeta Bravísima
+            UIApplicationShortcutItemIconSymbolName: creditcard
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.bravova.rdshop
+        PRODUCT_NAME: BravoVa
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: BravoWidgets
+  BravoWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BravoWidgets
+      - path: Shared
+    info:
+      path: BravoWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: BravoVa
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.bravova.rdshop.widgets
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES

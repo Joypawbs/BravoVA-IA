@@ -1,0 +1,109 @@
+name: iOS Swift (compilar y capturas)
+
+# App de iOS en Swift nativo (bravova-ios/). Compila para el simulador, lista los errores con
+# archivo:línea y saca una captura de cada pestaña (artefacto "capturas-swift").
+
+on:
+  push:
+    branches: [swift-nativo]
+    paths: ["bravova-ios/**", ".github/workflows/ios-swift.yml"]
+  workflow_dispatch:
+    inputs:
+      apariencia:
+        description: "light o dark"
+        default: light
+
+concurrency:
+  group: ios-swift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compilar:
+    runs-on: xcode-27
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: bravova-ios
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Revisar la clave de Gemini (sin mostrarla)
+        run: |
+          K="$GEMINI_API_KEY"
+          echo "largo=${#K}"
+          [[ "$K" == AIza* ]] && echo "empieza con AIza: sí" || echo "empieza con AIza: no"
+          [[ "$K" =~ [[:space:]] ]] && echo "tiene espacios o saltos de línea: sí" || echo "tiene espacios o saltos de línea: no"
+          [[ "$K" == *'"'* || "$K" == *"'"* ]] && echo "tiene comillas: sí" || echo "tiene comillas: no"
+          [[ "$K" == *=* ]] && echo "tiene '=': sí" || echo "tiene '=': no"
+          M=$(printf '%s' "$K" | grep -oE 'AIza[0-9A-Za-z_-]{35}' | head -1)
+          echo "contiene una clave con forma de Gemini: $([ -n "$M" ] && echo sí || echo no)"
+          # Qué dice Google de la clave (solo el estado y el motivo, nunca la clave)
+          T="${M:-$K}"
+          curl -s -o /tmp/r.json -w "HTTP %{http_code}\n" -H "x-goog-api-key: $T" \
+            "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1"
+          python3 -c 'import json;d=json.load(open("/tmp/r.json"));e=d.get("error",{});print("motivo:",e.get("status"),"|",(e.get("message") or "ok")[:200]);[print("detalle:",x.get("reason"),x.get("metadata",{}).get("service","")) for x in e.get("details",[]) if x.get("reason")]' || true
+      - name: Generar el proyecto
+        run: |
+          brew install xcodegen >/dev/null
+          xcodegen generate
+          # XcodeGen aún no marca el ícono por capas (Icon Composer) con su tipo de archivo
+          perl -0pi -e 's/(isa = PBXFileReference;)[^}]*?(path = AppIcon\.icon;)/$1 lastKnownFileType = folder.iconcomposer.icon; $2/g' BravoVa.xcodeproj/project.pbxproj
+      - name: Compilar
+        run: |
+          set +e
+          xcodebuild -project BravoVa.xcodeproj -scheme BravoVa -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO build > build.log 2>&1
+          CODE=$?
+          echo "== Errores =="; grep -E "error:" build.log | sed 's|.*/bravova-ios/||' | sort -u | head -120
+          echo "== Avisos (código propio) =="; grep -E "warning:" build.log | grep -v SourcePackages | sed 's|.*/bravova-ios/||' | sort -u | head -40
+          [ $CODE -eq 0 ] || { tail -n 30 build.log; exit 1; }
+          APP=$(find build/dd/Build/Products/Debug-iphonesimulator -maxdepth 1 -name "*.app" | head -1)
+          echo "APP=$PWD/$APP" >> "$GITHUB_ENV"
+          # Solo el largo de la clave, nunca la clave
+          LEN=$(/usr/libexec/PlistBuddy -c "Print :BravIAGeminiKey" "$APP/Info.plist" 2>/dev/null | tr -d '\n' | wc -c | tr -d ' ')
+          echo "Brav IA: clave de Gemini en la app: $LEN caracteres"
+      - name: Capturas de cada pestaña
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json,sys
+          d=json.load(sys.stdin)["devices"]
+          c=[x for k,v in d.items() if "iOS" in k for x in v if x["name"].startswith("iPhone")]
+          c.sort(key=lambda x: ("Pro" in x["name"], x["name"]))
+          print(c[0]["udid"])')
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl ui "$UDID" appearance "${{ inputs.apariencia || 'light' }}"
+          xcrun simctl install "$UDID" "$APP"
+          mkdir -p ../capturas
+          for TAB in home catalog bravia bravisima account; do
+            xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
+            xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab "$TAB" >/dev/null
+            sleep 6
+            xcrun simctl io "$UDID" screenshot "../capturas/$TAB.png"
+          done
+          for HOJA in producto carrito escaner; do
+            xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
+            xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab home -abrir "$HOJA" >/dev/null
+            sleep 6
+            xcrun simctl io "$UDID" screenshot "../capturas/hoja_$HOJA.png"
+          done
+          # Brav IA de verdad: una consulta y la línea BRAVIA_FUENTE que imprime la app
+          xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
+          xcrun simctl launch --console-pty "$UDID" com.aistudio.bravova.rdshop -tab bravia \
+            -braviaQuery "¿Cómo hago un sancocho para 6 personas?" > ../ia.log 2>&1 &
+          for i in $(seq 1 45); do grep -q BRAVIA_FUENTE ../ia.log && break; sleep 2; done
+          sleep 3
+          xcrun simctl io "$UDID" screenshot ../capturas/bravia_respuesta.png
+          grep -o "BRAVIA_FUENTE=.*" ../ia.log | head -3 || echo "BRAVIA_FUENTE=sin_respuesta"
+          # Cierres inesperados durante las capturas
+          ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i bravova && echo "::warning::La app se cerró (ver .ips)" || echo "Sin cierres"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: capturas-swift
+          # El registro completo no se sube: por prudencia, nada que pueda contener la clave
+          path: capturas/*.png
+          retention-days: 7

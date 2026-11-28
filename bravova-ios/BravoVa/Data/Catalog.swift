@@ -1,0 +1,43 @@
+import Foundation
+
+/// Catálogo de solo lectura cargado una vez desde los JSON exportados de Kotlin.
+/// Si un archivo falta o está dañado, el catálogo queda vacío y la pantalla lo dice
+/// (nunca se inventan productos de relleno).
+final class Catalog {
+    static let shared = Catalog()
+
+    let bravoProducts: [Product]
+    let arcaProducts: [Product]
+    let bravoSections: [CatalogSection]
+    let arcaSections: [CatalogSection]
+    let homeBravoSections: [String]
+    let bravoBranches: [String]
+    let recipes: [Recipe]
+    private let descriptions: [String: ProductDescription]
+    private let bySku: [String: Product]
+
+    private init() {
+        let file: CatalogFile? = Catalog.load("catalogo")
+        bravoProducts = file?.bravoProducts ?? []
+        arcaProducts = file?.arcaProducts ?? []
+        bravoSections = file?.bravoSections ?? []
+        arcaSections = file?.arcaSections ?? []
+        homeBravoSections = file?.homeBravoSections ?? []
+        bravoBranches = file?.bravoBranches ?? []
+        recipes = Catalog.load("recetas") ?? []
+        descriptions = Catalog.load("descripciones") ?? [:]
+        bySku = Dictionary((bravoProducts + arcaProducts).map { ($0.sku, $0) }, uniquingKeysWith: { a, _ in a })
+    }
+
+    func products(for store: StoreMode) -> [Product] { store == .bravo ? bravoProducts : arcaProducts }
+    func sections(for store: StoreMode) -> [CatalogSection] { store == .bravo ? bravoSections : arcaSections }
+    func product(sku: String) -> Product? { bySku[sku] }
+    func description(for sku: String) -> ProductDescription? { descriptions[sku] }
+
+    private static func load<T: Decodable>(_ name: String) -> T? {
+        guard let url = Bundle.main.url(forResource: name, withExtension: "json"),
+              let data = try? Data(contentsOf: url) else { return nil }
+        do { return try JSONDecoder().decode(T.self, from: data) }
+        catch { print("Catálogo: no se pudo leer \(name).json: \(error)"); return nil }
+    }
+}
