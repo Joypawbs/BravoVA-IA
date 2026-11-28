@@ -1,0 +1,737 @@
+getpwuid_r did not find a match for uid 501
+Timestamp               Ty Process[PID:TID]
+2026-11-28 04:30:47.596 E  BravoVa[55758:5a1a0] (C54AD6FA-9FF2-3EDB-9C8A-53A82682D342) <compose failure [shared UUID]>
+2026-11-28 04:30:50.029 E  BravoVa[55758:5a1a0] (C54AD6FA-9FF2-3EDB-9C8A-53A82682D342) <compose failure [shared UUID]>
+2026-11-28 04:30:53.266 E  BravoVa[55758:5a1a0] [com.apple.UIKit:TraitCollection] <compose failure [shared UUID]>
+2026-11-28 04:30:59.184 F  BravoVa[55758:5a40f] [com.apple.Foundation:general] <compose failure [shared UUID]>
+2026-11-28 04:30:59.582 E  BravoVa[55758:5a1a0] [com.apple.Accessibility:AXRuntimeCommon] <compose failure [shared UUID]>
+2026-11-28 04:31:07.757 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:07.762 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:07.762 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:07.807 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:07.807 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:07.807 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:07.840 E  BravoVa[55758:5a1a0] [com.apple.UIKit:SystemGestureGate] <compose failure [shared UUID]>
+2026-11-28 04:31:10.348 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.349 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.349 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.349 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.349 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.454 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.455 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.455 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.455 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.455 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:10.455 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.166 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.166 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.166 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.166 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.261 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.261 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.261 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.261 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.262 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:17.262 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:22.229 E  BravoVa[55758:5ac54] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746078552064, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:22.577 E  BravoVa[55758:5ac54] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746078552064, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:23.844 E  BravoVa[55758:5a414] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746078552064, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:24.272 E  BravoVa[55758:5ac6a] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746078552064, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:24.676 E  BravoVa[55758:5a414] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746078552064, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:25.986 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIFocus] <compose failure [shared UUID]>
+2026-11-28 04:31:26.103 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.106 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.106 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.106 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.106 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.107 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.107 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.107 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.107 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.108 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.108 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.108 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.108 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.108 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.109 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.110 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.110 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.111 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.111 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.112 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.112 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.112 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.112 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.112 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.112 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.112 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.113 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.113 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.113 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.113 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.113 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.114 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.114 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.114 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.114 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.114 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.114 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.114 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.115 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.115 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.115 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.115 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.117 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.117 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.119 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.119 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.119 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.124 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.124 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.124 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.125 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.126 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.127 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.127 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.128 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.128 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.128 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.129 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.130 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.130 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.130 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.130 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.131 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.131 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.157 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.157 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.157 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.158 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.158 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.158 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.161 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.161 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.161 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.161 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.161 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.163 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.163 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.163 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.163 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.163 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.163 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.166 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.166 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.166 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.166 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.166 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.167 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.167 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.168 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.168 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.168 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.168 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.168 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.168 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.169 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.169 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.169 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.169 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.169 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.169 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.169 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.171 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.171 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.171 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.171 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.172 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.172 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.172 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.172 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.172 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.173 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.173 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.173 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.173 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.174 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.175 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.176 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.177 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.177 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.178 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.178 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.178 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.178 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.178 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.179 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.179 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.179 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.179 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.179 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.179 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.179 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.180 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.180 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.180 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.180 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.180 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.181 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.181 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.182 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.182 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.182 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.182 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.182 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.182 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.184 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.184 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.185 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.185 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.185 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.185 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.185 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.186 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.186 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.186 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.187 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.187 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.187 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.187 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.188 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.188 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.188 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.189 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.189 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.189 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.190 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.190 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.190 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.190 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.190 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.191 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.191 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.192 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.192 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.192 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.192 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.193 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.193 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.193 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.193 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.194 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.194 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.194 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.194 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.194 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.195 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.195 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.195 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.195 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.195 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.195 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.195 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.196 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.196 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.196 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.196 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.196 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.196 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.197 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.197 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.198 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.198 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.198 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.198 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.198 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.199 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.199 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.199 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.199 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.199 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.200 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.201 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.201 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.201 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.202 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.202 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.202 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.203 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.203 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.205 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.205 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.205 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.205 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.206 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.206 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.206 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.206 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.206 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.206 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.207 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.208 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.209 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.210 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.210 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.210 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.210 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.210 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.210 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.211 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.212 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.213 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.213 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.213 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.213 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.213 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.215 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.215 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.215 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.215 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.215 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.216 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.218 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.218 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.218 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.219 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.219 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.219 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.220 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.220 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.220 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.220 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.221 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.221 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.221 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.222 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.222 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.222 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.222 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.223 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.223 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.224 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.224 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.224 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.225 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.225 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.225 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.226 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.227 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.228 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.228 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.228 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.228 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.228 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.229 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.229 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.230 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.230 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.230 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.230 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.230 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.231 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.231 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.232 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.234 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.234 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.234 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.240 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.240 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.240 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.240 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.241 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.241 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.241 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.242 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.242 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.242 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.242 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.242 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.243 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.244 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.244 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.244 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.244 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.244 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.244 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.244 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.246 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.246 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.247 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.247 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.247 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.247 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.250 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.251 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.251 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.251 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.252 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.252 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.253 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.253 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.253 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.253 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.253 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.253 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.253 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.255 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.255 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.255 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.255 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.255 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.256 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.257 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.257 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.257 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.257 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.257 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.257 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.257 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.259 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.259 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.259 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.259 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.259 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.259 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.260 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.260 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.260 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.260 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.260 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.260 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.260 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.263 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.264 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.265 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.325 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.325 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.326 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.326 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.326 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.327 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.327 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.338 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.338 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.338 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.339 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.339 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.339 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.364 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.364 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.364 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.364 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.364 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.364 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.364 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.372 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.372 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.372 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.372 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.373 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:26.801 E  BravoVa[55758:5a1a0] [com.apple.UIKit:SystemGestureGate] <compose failure [shared UUID]>
+2026-11-28 04:31:27.132 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.134 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.577 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.816 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.816 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.816 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.816 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.818 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.865 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.881 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.881 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.881 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.882 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.888 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.889 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.894 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.903 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.903 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.903 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.904 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.907 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:27.909 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.912 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.912 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.913 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.914 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.918 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.923 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.924 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.928 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.930 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:27.967 E  BravoVa[55758:5a413] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:27.969 E  BravoVa[55758:5a413] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:28.069 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:28.396 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:28.397 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:28.397 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:28.397 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:28.397 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:28.418 E  BravoVa[55758:5a1a0] [com.apple.BoardServices:XPCErrors] <compose failure [shared UUID]>
+2026-11-28 04:31:28.457 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:28.666 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:28.666 E  BravoVa[55758:5a1a0] [com.apple.coreanimation:API] <compose failure [shared UUID]>
+2026-11-28 04:31:29.118 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.119 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.120 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.120 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.121 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.991 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.992 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.992 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.992 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:29.992 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:31:30.158 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:31.944 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.011 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:32.013 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.119 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:32.121 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.162 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:32.164 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.189 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:32.294 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.296 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:32.327 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.329 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:32.392 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.393 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:32.492 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:32.573 E  BravoVa[55758:5ac6a] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:31:33.125 E  BravoVa[55758:5ac6a] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:31:34.229 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:36.739 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:37.667 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:39.212 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:39.302 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:39.354 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:40.704 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:40.939 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:40.950 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:44.496 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:44.902 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:44.903 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:51.014 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:51.352 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:51.637 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:59.216 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:31:59.406 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:31:59.412 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:02.084 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:02.199 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:02.199 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:05.772 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:06.207 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:06.208 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:07.619 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:07.677 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:07.678 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:11.231 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:11.256 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:11.260 E  BravoVa[55758:5b0a9] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:12.110 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:12.143 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:12.175 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:12.428 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:12.446 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:12.498 E  BravoVa[55758:5a418] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:14.079 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:14.158 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:14.166 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:14.678 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:14.731 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:14.735 E  BravoVa[55758:5a413] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:15.136 E  BravoVa[55758:5ac6a] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:15.217 E  BravoVa[55758:5ac6a] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:15.275 E  BravoVa[55758:5ac6a] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:15.996 E  BravoVa[55758:5ac6a] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:16.029 E  BravoVa[55758:5ac6a] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:16.030 E  BravoVa[55758:5ac6a] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:17.016 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.019 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.039 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.156 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.156 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.156 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.156 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.157 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.159 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.163 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.163 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.164 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.164 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.165 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.165 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.165 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.167 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.167 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.193 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.225 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.226 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.228 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.272 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.273 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.273 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.296 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.296 E  BravoVa[55758:5a1a0] [com.apple.UIKit:UIKBRenderingLog] <compose failure [shared UUID]>
+2026-11-28 04:32:17.297 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.343 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.344 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.345 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.348 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.349 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.349 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.353 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.354 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.498 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.521 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.522 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:17.980 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:17.981 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:18.089 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:18.091 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:18.098 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:18.098 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:18.107 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:18.114 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:18.115 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:18.229 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:18.230 E  BravoVa[55758:5b0cb] [com.apple.corehaptics:hapi] <compose failure [shared UUID]>
+2026-11-28 04:32:18.289 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:18.289 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:18.295 E  BravoVa[55758:5b0cb] [com.apple.UIKit:UIKBFeedbackGenerator] <compose failure [shared UUID]>
+2026-11-28 04:32:29.326 E  BravoVa[55758:5ac54] [com.google.firebase:[FirebaseAI]] 12.19.3 - [FirebaseAI][I-VTX004002] Failed to fetch AppCheck token. Error: Error Domain=com.google.app_check_core Code=0 "The server responded with an error: 
+ - URL: https://firebaseappcheck.googleapis.com/v1/projects/gen-lang-client-0590253686/apps/1:723529928496:ios:f5b4f6c4ac9eba9ce4c2f5:exchangeDebugToken 
+ - HTTP status code: 403 
+ - Response body: {
+  "error": {
+    "code": 403,
+    "message": "App attestation failed.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+" UserInfo={NSLocalizedFailureReason=The server responded with an error: 
+ - URL: https://firebaseappcheck.googleapis.com/v1/projects/gen-lang-client-0590253686/apps/1:723529928496:ios:f5b4f6c4ac9eba9ce4c2f5:exchangeDebugToken 
+ - HTTP status code: 403 
+ - Response body: {
+  "error": {
+    "code": 403,
+    "message": "App attestation failed.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+}
+2026-11-28 04:32:31.273 E  BravoVa[55758:5ac54] [com.google.firebase:[FirebaseAI]] 12.19.3 - [FirebaseAI][I-VTX002003] The server responded with an error: <NSHTTPURLResponse: 0x12b923f40> { URL: https://firebasevertexai.googleapis.com/v1beta/projects/gen-lang-client-0590253686/models/gemini-3.8-flash:streamGenerateContent?alt=sse } { Status Code: 401, Headers {
+    "Alt-Svc" =     (
+        "h3=\134":443\134"; ma=2592000,h3-29=\134":443\134"; ma=2592000"
+    );
+    "Content-Length" =     (
+        125
+    );
+    "Content-Type" =     (
+        "text/event-stream"
+    );
+    Date =     (
+        "Sat, 28 Nov 2026 04:32:19 GMT"
+    );
+    Server =     (
+        ESF
+    );
+    Vary =     (
+        Origin,
+        "X-Origin",
+        Referer
+    );
+    "x-content-type-options" =     (
+        nosniff
+    );
+    "x-frame-options" =     (
+        SAMEORIGIN
+    );
+    "x-xss-protection" =     (
+        0
+    );
+} }
+2026-11-28 04:32:35.167 E  BravoVa[55758:5ac54] [com.google.firebase:[FirebaseAI]] 12.19.3 - [FirebaseAI][I-VTX002004] Response payload: {
+  "error": {
+    "code": 401,
+    "message": "Firebase App Check token is invalid.",
+    "status": "UNAUTHENTICATED"
+  }
+}
+2026-11-28 04:32:35.845 E  BravoVa[55758:5a1a0] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:35.852 E  BravoVa[55758:5a1a0] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:35.889 E  BravoVa[55758:5a1a0] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:32:36.952 E  BravoVa[55758:5a1a0] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:36.995 E  BravoVa[55758:5a1a0] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 9 from class UIAccessibilityElementKBKey:UIAccessibilityElement, traits 8589934641, but AXAutomationType returned 20 which maps to 20
+2026-11-28 04:32:37.100 E  BravoVa[55758:5a1a0] [com.apple.dt.xctest:Default] Automation type mismatch; legacy system derived element type 52 from class AccessibilityElement:UIAccessibilityElement, traits 140746080649216, but AXAutomationType returned 0 which maps to 1
+2026-11-28 04:33:00.921 Df log[59406:0] [com.apple.log:] log run noninteractively, parent: 28336 (launchd_sim), args: 'log' 'show' '--last' '90m' '--style' 'compact' '--predicate' '(process == "BravoVa" AND (messageType == error OR messageType == fault)) OR eventMessage CONTAINS "BRAVO_CRASH" OR eventMessage CO
