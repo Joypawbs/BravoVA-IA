@@ -1,0 +1,197 @@
+{"app_name":"xcodebuild","timestamp":"2026-11-28 05:34:20.00 +0000","app_version":"16.0","slice_uuid":"d0afe1c5-e149-3c79-81dc-c6103f178b4a","build_version":"25107","platform":1,"share_with_app_devs":0,"is_first_party":1,"bug_type":"309","os_version":"macOS 27.0.1 (26A434)","roots_installed":0,"incident_id":"C21D7275-F8B4-4EE4-867B-66DBB96E22F8","name":"xcodebuild"}
+{
+  "uptime" : 230,
+  "procRole" : "Unspecified",
+  "version" : 2,
+  "userID" : 501,
+  "deployVersion" : 210,
+  "modelCode" : "VirtualMac2,1",
+  "coalitionID" : 913,
+  "osVersion" : {
+    "train" : "macOS 27.0.1",
+    "build" : "26A434",
+    "releaseType" : "User"
+  },
+  "captureTime" : "2026-11-28 05:34:18.1897 +0000",
+  "codeSigningMonitor" : 0,
+  "incident" : "C21D7275-F8B4-4EE4-867B-66DBB96E22F8",
+  "pid" : 3054,
+  "translated" : false,
+  "cpuType" : "ARM-64",
+  "procLaunch" : "2026-11-28 05:34:17.2542 +0000",
+  "procStartAbsTime" : 5522198398,
+  "procExitAbsTime" : 5541925379,
+  "procName" : "xcodebuild",
+  "procPath" : "\/Applications\/Xcode_27.1.app\/Contents\/Developer\/usr\/bin\/xcodebuild",
+  "bundleInfo" : {"CFBundleVersion":"25107","CFBundleShortVersionString":"16.0"},
+  "parentProc" : "Exited process",
+  "parentPid" : 3038,
+  "coalitionName" : "runner-provisioner",
+  "crashReporterKey" : "37186078-EE7C-8E74-64A1-BF0D7E969307",
+  "developerMode" : 1,
+  "responsiblePid" : 1036,
+  "responsibleProc" : "hosted-compute-agent",
+  "codeSigningID" : "com.apple.dt.xcodebuild",
+  "codeSigningTeamID" : "",
+  "codeSigningFlags" : 570518017,
+  "codeSigningValidationCategory" : 1,
+  "codeSigningTrustLevel" : 4294967295,
+  "codeSigningAuxiliaryInfo" : 0,
+  "instructionByteStream" : {"beforePC":"fyMD1f17v6n9AwCR69\/\/l78DAJH9e8Go\/w9f1sADX9YQKYDSARAA1A==","atPC":"AwEAVH8jA9X9e7+p\/QMAkeDf\/5e\/AwCR\/XvBqP8PX9bAA1\/WcAqA0g=="},
+  "bootSessionUUID" : "CC4CF6DC-59ED-440D-915B-DAA47A031905",
+  "sip" : "disabled",
+  "exception" : {"codes":"0x0000000000000000, 0x0000000000000000","rawCodes":[0,0],"type":"EXC_CRASH","signal":"SIGABRT"},
+  "termination" : {"flags":0,"code":6,"namespace":"SIGNAL","indicator":"Abort trap: 6","byProc":"xcodebuild","byPid":3054},
+  "asi" : {"libsystem_c.dylib":["abort() called"]},
+  "extMods" : {"caller":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"system":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"targeted":{"thread_create":0,"thread_set_state":0,"task_for_pid":0},"warnings":0},
+  "lastExceptionBacktrace" : [{"imageOffset":989364,"symbol":"__exceptionPreprocess","symbolLocation":164,"imageIndex":10},{"imageOffset":99852,"symbol":"objc_exception_throw","symbolLocation":88,"imageIndex":6},{"imageOffset":1449524,"symbol":"-[NSConcreteFileHandle readDataUpToLength:error:]","symbolLocation":0,"imageIndex":7},{"imageOffset":312980,"symbol":"-[NSConcreteFileHandle writeData:]","symbolLocation":292,"imageIndex":7},{"imageOffset":6428,"symbol":"-[XcodebuildPreIDEHandler handleVersionWithArguments:]","symbolLocation":552,"imageIndex":0},{"imageOffset":5152,"symbol":"-[XcodebuildPreIDEHandler runWithArguments:]","symbolLocation":112,"imageIndex":0},{"imageOffset":4204,"symbol":"main","symbolLocation":476,"imageIndex":0},{"imageOffset":204416,"symbol":"start","symbolLocation":6688,"imageIndex":8}],
+  "faultingThread" : 0,
+  "threads" : [{"triggered":true,"id":12620,"threadState":{"x":[{"value":0},{"value":0},{"value":0},{"value":0},{"value":6739412271},{"value":6099404608},{"value":110},{"value":1024},{"value":15703421740468730409},{"value":15703421736892663209},{"value":2},{"value":4294967293},{"value":0},{"value":0},{"value":0},{"value":0},{"value":328},{"value":8475522328},{"value":0},{"value":6},{"value":259},{"value":8445919328,"symbolLocation":224,"symbol":"_main_thread"},{"value":8412594176,"symbolLocation":0,"symbol":"OBJC_IVAR_$_Object.isa"},{"value":6738689351,"symbolLocation":980,"symbol":"itoa64"},{"value":4368106768},{"value":0},{"value":9310320430591350144},{"value":520644586128},{"value":520644633216}],"flavor":"ARM_THREAD_STATE64","lr":{"value":6739712380},"cpsr":{"value":1073745920},"fp":{"value":6099404464},"sp":{"value":6099404432},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6739465808,"matchesCrashFrame":1},"far":{"value":0}},"queue":"com.apple.main-thread","frames":[{"imageOffset":38480,"symbol":"__pthread_kill","symbolLocation":8,"imageIndex":2},{"imageOffset":27004,"symbol":"pthread_kill","symbolLocation":296,"imageIndex":3},{"imageOffset":504920,"symbol":"abort","symbolLocation":148,"imageIndex":4},{"imageOffset":90884,"symbol":"__abort_message","symbolLocation":132,"imageIndex":5},{"imageOffset":13944,"symbol":"demangling_terminate_handler()","symbolLocation":296,"imageIndex":5},{"imageOffset":139568,"symbol":"_objc_terminate()","symbolLocation":156,"imageIndex":6},{"imageOffset":78512,"symbol":"std::__terminate(void (*)())","symbolLocation":16,"imageIndex":5},{"imageOffset":87996,"symbol":"__cxxabiv1::failed_throw(__cxxabiv1::__cxa_exception*)","symbolLocation":88,"imageIndex":5},{"imageOffset":8588,"symbol":"__cxa_throw","symbolLocation":92,"imageIndex":5},{"imageOffset":100212,"symbol":"objc_exception_throw","symbolLocation":448,"imageIndex":6},{"imageOffset":1449524,"symbol":"_NSFileHandleRaiseOperationExceptionWhileReading","symbolLocation":272,"imageIndex":7},{"imageOffset":312980,"symbol":"-[NSConcreteFileHandle writeData:]","symbolLocation":292,"imageIndex":7},{"imageOffset":6428,"symbol":"-[XcodebuildPreIDEHandler handleVersionWithArguments:]","symbolLocation":552,"imageIndex":0},{"imageOffset":5152,"symbol":"-[XcodebuildPreIDEHandler runWithArguments:]","symbolLocation":112,"imageIndex":0},{"imageOffset":4204,"symbol":"main","symbolLocation":476,"imageIndex":0},{"imageOffset":204416,"symbol":"start","symbolLocation":6688,"imageIndex":8}]},{"id":12645,"frames":[],"threadState":{"x":[{"value":6099972096},{"value":4867},{"value":6099435520},{"value":0},{"value":409603},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6099972096},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6739692760},"far":{"value":0}}},{"id":12646,"frames":[],"threadState":{"x":[{"value":6100545536},{"value":5379},{"value":6100008960},{"value":0},{"value":409604},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6100545536},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6739692760},"far":{"value":0}}},{"id":12647,"frames":[],"threadState":{"x":[{"value":6101118976},{"value":0},{"value":6100582400},{"value":0},{"value":278532},{"value":18446744073709551615},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":0},"cpsr":{"value":4096},"fp":{"value":0},"sp":{"value":6101118976},"esr":{"value":0},"pc":{"value":6739692760},"far":{"value":0}}}],
+  "usedImages" : [
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4367466496,
+    "size" : 32768,
+    "uuid" : "d0afe1c5-e149-3c79-81dc-c6103f178b4a",
+    "path" : "\/Applications\/Xcode_27.1.app\/Contents\/Developer\/usr\/bin\/xcodebuild",
+    "name" : "xcodebuild"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 4367777792,
+    "CFBundleShortVersionString" : "16.0",
+    "CFBundleIdentifier" : "com.apple.dt.DVTSystemPrerequisites",
+    "size" : 65536,
+    "uuid" : "39ccbee6-4876-3e14-9980-3f93484965bc",
+    "path" : "\/Applications\/Xcode_27.1.app\/Contents\/SharedFrameworks\/DVTSystemPrerequisites.framework\/Versions\/A\/DVTSystemPrerequisites",
+    "name" : "DVTSystemPrerequisites",
+    "CFBundleVersion" : "25026"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6739427328,
+    "size" : 256428,
+    "uuid" : "f63bf418-8f75-34a4-aaf1-8caf2b9b6a05",
+    "path" : "\/usr\/lib\/system\/libsystem_kernel.dylib",
+    "name" : "libsystem_kernel.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6739685376,
+    "size" : 51484,
+    "uuid" : "5a1828c3-cbc2-3b85-bd07-c8ed10021a41",
+    "path" : "\/usr\/lib\/system\/libsystem_pthread.dylib",
+    "name" : "libsystem_pthread.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6738169856,
+    "size" : 535716,
+    "uuid" : "fba7b23e-aa60-3a90-9aa4-a7a2e0ad63ee",
+    "path" : "\/usr\/lib\/system\/libsystem_c.dylib",
+    "name" : "libsystem_c.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6739320832,
+    "size" : 106240,
+    "uuid" : "a21743ee-6e1c-3e74-97ea-7af793de4bdf",
+    "path" : "\/usr\/lib\/libc++abi.dylib",
+    "name" : "libc++abi.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6734954496,
+    "size" : 325112,
+    "uuid" : "c0680df6-9900-3c29-a071-95a031686ef8",
+    "path" : "\/usr\/lib\/libobjc.A.dylib",
+    "name" : "libobjc.A.dylib"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6764261376,
+    "CFBundleShortVersionString" : "6.9",
+    "CFBundleIdentifier" : "com.apple.Foundation",
+    "size" : 19649160,
+    "uuid" : "4317f7c6-73d2-3be9-b010-f318f1198a1b",
+    "path" : "\/System\/Library\/Frameworks\/Foundation.framework\/Versions\/C\/Foundation",
+    "name" : "Foundation",
+    "CFBundleVersion" : "5027.0.69"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6735486976,
+    "size" : 784100,
+    "uuid" : "d341ddcb-7969-3a9c-8e03-0cf4751398a9",
+    "path" : "\/usr\/lib\/dyld",
+    "name" : "dyld"
+  },
+  {
+    "size" : 0,
+    "source" : "A",
+    "base" : 0,
+    "uuid" : "00000000-0000-0000-0000-000000000000"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6739972096,
+    "CFBundleShortVersionString" : "6.9",
+    "CFBundleIdentifier" : "com.apple.CoreFoundation",
+    "size" : 4787872,
+    "uuid" : "727e905e-f344-3823-8e13-e7a096388321",
+    "path" : "\/System\/Library\/Frameworks\/CoreFoundation.framework\/Versions\/A\/CoreFoundation",
+    "name" : "CoreFoundation",
+    "CFBundleVersion" : "5027.0.69"
+  }
+],
+  "sharedCache" : {
+  "base" : 6730743808,
+  "size" : 7410368512,
+  "uuid" : "c284a291-b68b-3d0d-a1a0-3f866f87efdc"
+},
+  "vmSummary" : "ReadOnly portion of Libraries: Total=2.0G resident=0K(0%) swapped_out_or_unallocated=2.0G(100%)\nWritable regions: Total=95.4M written=369K(0%) resident=369K(0%) swapped_out=0K(0%) unallocated=95.1M(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nActivity Tracing                   256K        1 \nDeferred Reclaim                  64.0M        1 \nGuard                            385.0G        1 \nMalloc                            21.2M       11 \nMalloc Guard Page                 3888K        4 \nOS Alloc Once                       32K        1 \nStack                             9808K        4 \nStack Guard                       56.1M        4 \n__AUTH                            2537K      257 \n__AUTH_CONST                      40.7M      451 \n__CTF                               824        1 \n__DATA                            10.0M      458 \n__DATA_CONST                      24.7M      452 \n__DATA_DIRTY                      2359K      399 \n__FONT_DATA                        2352        1 \n__LINKEDIT                         1.6G        3 \n__OBJC_RO                        118.0M        1 \n__OBJC_RW                         2735K        1 \n__TEXT                           463.3M      526 \n__TPRO_CONST                       132K        4 \nmapped file                       34.5M        3 \npage table in kernel               369K        1 \nshared memory                       80K        4 \n===========                     =======  ======= \nTOTAL                            387.4G     2589 \n",
+  "legacyInfo" : {
+  "threadTriggered" : {
+    "queue" : "com.apple.main-thread"
+  }
+},
+  "logWritingSignature" : "3d078374304ed533f5782a0db5292c55afa6bf70",
+  "bug_type" : "309",
+  "roots_installed" : 0,
+  "trmStatus" : 2105344,
+  "trialInfo" : {
+  "rollouts" : [
+    {
+      "rolloutId" : "5fb4245a1bbfe8005e33a1e1",
+      "factorPackIds" : [
+
+      ],
+      "deploymentId" : 240000021
+    },
+    {
+      "rolloutId" : "67d07cd6a7affa169ae21f45",
+      "factorPackIds" : [
+
+      ],
+      "deploymentId" : 240000002
+    }
+  ],
+  "experiments" : [
+    {
+      "treatmentId" : "881df3a1-3726-4db9-af56-c04be1d5f088",
+      "experimentId" : "6aeccd60cdfdae0d6fc62e9f",
+      "deploymentId" : 400000001
+    }
+  ]
+}
+}
