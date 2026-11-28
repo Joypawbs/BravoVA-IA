@@ -39,7 +39,6 @@ struct HomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
                 ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
-                    .badge(app.cart.itemCount)
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
         }
@@ -262,7 +261,15 @@ struct CartToolbarButton: View {
 
     var body: some View {
         Button { app.showCart = true } label: {
-            Image(systemName: "cart")
+            HStack(spacing: 4) {
+                Image(systemName: "cart")
+                if app.cart.itemCount > 0 {
+                    Text("\(app.cart.itemCount)")
+                        .font(.subheadline.bold())
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                }
+            }
         }
         .accessibilityLabel("Carrito, \(app.cart.itemCount) artículos")
     }

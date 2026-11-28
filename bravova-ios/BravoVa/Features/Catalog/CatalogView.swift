@@ -37,7 +37,6 @@ struct CatalogView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
                 ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
-                    .badge(app.cart.itemCount)
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
         }
