@@ -36,6 +36,8 @@ jobs:
           xcodebuild -version
       - name: Build Kotlin framework (simulator)
         working-directory: bravova
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: ./gradlew --no-daemon :composeApp:linkDebugFrameworkIosSimulatorArm64
       - name: Install XcodeGen
         run: brew install xcodegen

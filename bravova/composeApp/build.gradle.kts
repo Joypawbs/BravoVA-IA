@@ -12,6 +12,27 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+// Clave de la API de Gemini (Google AI Studio) para Brav IA: -PGEMINI_API_KEY, variable de
+// entorno GEMINI_API_KEY (secreto de GitHub) o local.properties. Se escribe en build/, nunca en
+// el repositorio. Sin clave, Brav IA sigue usando Firebase AI Logic.
+val aiKeysDir = layout.buildDirectory.dir("generated/aikeys/kotlin")
+run {
+    val props = Properties().apply {
+        rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+    }
+    val key = ((project.findProperty("GEMINI_API_KEY") as String?)
+        ?: System.getenv("GEMINI_API_KEY")
+        ?: props.getProperty("GEMINI_API_KEY")
+        ?: "").trim().filter { it.isLetterOrDigit() || it == '-' || it == '_' }
+    val file = aiKeysDir.get().file("com/example/platform/AiKeys.kt").asFile
+    val text = "package com.example.platform\n\n" +
+        "/** Generado por build.gradle.kts. No se guarda en el repositorio. */\n" +
+        "internal object AiKeys {\n    const val GEMINI: String = \"$key\"\n}\n"
+    if (!file.exists() || file.readText() != text) {
+        file.parentFile.mkdirs(); file.writeText(text)
+    }
+}
+
 kotlin {
     androidTarget {
         compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
@@ -98,6 +119,9 @@ kotlin {
         // Banco de pruebas de Brav IA (src/commonTest). Corre en la JVM con testDebugUnitTest.
         commonTest.dependencies {
             implementation(kotlin("test"))
+        }
+        commonMain {
+            kotlin.srcDir(aiKeysDir)
         }
     }
 }

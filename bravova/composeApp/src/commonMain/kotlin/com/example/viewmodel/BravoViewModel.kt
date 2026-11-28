@@ -28,7 +28,8 @@ import com.example.platform.System
 import com.example.platform.TimeZone
 import com.example.platform.URLEncoder
 import com.example.platform.content
-import com.example.platform.createGenerativeModel
+import com.example.platform.createAiModel
+import com.example.platform.isDirectAiEnabled
 import com.example.platform.AiModelConfig
 import com.example.platform.appCheckDebugTokenOrNull
 import com.example.platform.AiContent
@@ -162,11 +163,11 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     val allCachedProducts: StateFlow<List<Product>> = _allCachedProducts.asStateFlow()
 
     private val geminiModel by lazy {
-        createGenerativeModel("gemini-3.8-flash")
+        createAiModel("gemini-3.8-flash")
     }
 
     private val geminiFallbackModel by lazy {
-        createGenerativeModel("gemini-3.5-flash-lite")
+        createAiModel("gemini-3.5-flash-lite")
     }
 
     /*
@@ -179,8 +180,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         jsonOutput = true,
         temperature = 0.3
     )
-    private val bravIaChatModel by lazy { createGenerativeModel("gemini-3.8-flash", bravIaChatConfig) }
-    private val bravIaChatFallbackModel by lazy { createGenerativeModel("gemini-3.5-flash-lite", bravIaChatConfig) }
+    private val bravIaChatModel by lazy { createAiModel("gemini-3.8-flash", bravIaChatConfig) }
+    private val bravIaChatFallbackModel by lazy { createAiModel("gemini-3.5-flash-lite", bravIaChatConfig) }
 
     /**
      * Brav IA usa Firebase AI Logic, que no necesita un usuario con sesión (la protege App Check).
@@ -3067,7 +3068,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 var local = runCatching { localAnswer() }.getOrElse {
                     GroundedReply(text = "No pude preparar la respuesta esta vez. Intenta de nuevo en un momento.", items = emptyList(), recipe = null, suggestion = null, total = 0, budgetExceededBy = null)
                 }
-                val token = if (reason == "acceso de la app no verificado") runCatching { appCheckDebugTokenOrNull() }.getOrNull() else null
+                val token = if (!isDirectAiEnabled && reason == "acceso de la app no verificado") runCatching { appCheckDebugTokenOrNull() }.getOrNull() else null
                 if (token != null) {
                     local = local.copy(text = local.text + "\n\nPara activar la IA en esta instalación, registra este token en Firebase → App Check → app de iOS → Administrar tokens de depuración:\n" + token)
                 }
@@ -3086,7 +3087,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             "quota" in m || "429" in m || "resource exhausted" in m -> "límite de uso alcanzado"
             "network" in m || "internet" in m || "offline" in m || "timed out" in m || "unreachable" in m -> "sin internet"
             "not found" in m || "404" in m -> "modelo no disponible"
-            "api key" in m || "invalid" in m -> "configuración de Firebase"
+            "api key" in m || "invalid" in m -> "configuración de la IA"
             else -> (e.message ?: "error").take(60)
         }
     }
