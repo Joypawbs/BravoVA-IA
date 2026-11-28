@@ -695,6 +695,11 @@ struct GlassBudgetPanelView: View {
     var body: some View {
         VStack(spacing: 10) {
             HStack(alignment: .center, spacing: 8) {
+                // Etiqueta visible: antes solo se veía la cifra y no se sabía qué era
+                VStack(alignment: .leading, spacing: 0) {
+                Text("Presupuesto")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.secondary)
                 Text("RD$" + (pesosFormatter.string(from: NSNumber(value: m.value)) ?? "\(Int(m.value))"))
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .monospacedDigit()
@@ -706,10 +711,11 @@ struct GlassBudgetPanelView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .accessibilityLabel("Presupuesto: \(Int(m.value)) pesos")
+                }
                 Spacer(minLength: 4)
                 BravoGlassGroup(spacing: 6) {
                     HStack(spacing: 6) {
-                        pill("Listas", id: 0, prominent: false)
+                        pill("Mis listas", id: 0, prominent: false)
                         pill("Armar", id: 1, prominent: true)
                         pill("Ajustar", id: 2, prominent: false)
                     }
@@ -724,10 +730,10 @@ struct GlassBudgetPanelView: View {
                 step: m.step,
                 label: { Text("Presupuesto meta") },
                 minimumValueLabel: {
-                    Image(systemName: "banknote").font(.system(size: 12, weight: .semibold)).foregroundStyle(Color.secondary)
+                    Text(money(m.minV)).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color.secondary)
                 },
                 maximumValueLabel: {
-                    Image(systemName: "banknote.fill").font(.system(size: 15, weight: .semibold)).foregroundStyle(m.accent)
+                    Text(money(m.maxV)).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color.secondary)
                 },
                 onEditingChanged: { e in
                     editing = e
@@ -739,6 +745,14 @@ struct GlassBudgetPanelView: View {
             .accessibilityLabel("Presupuesto meta")
             .accessibilityValue("\(Int(m.value)) pesos")
             .padding(.horizontal, 16)
+
+            // Qué hace cada botón, en una línea
+            Text("Armar: una compra con este presupuesto · Ajustar: tu carrito a esta cifra")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Color.secondary)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 BravoGlassGroup(spacing: 8) {
@@ -754,12 +768,24 @@ struct GlassBudgetPanelView: View {
             // Los chips se desplazan hasta el borde de la pantalla, pero empiezan y terminan
             // alineados a 16 pt: ningún texto queda cortado contra un borde fijo
             .contentMargins(.horizontal, 16, for: .scrollContent)
+            // Bordes que se desvanecen: se nota que hay más chips y nada se corta en seco
+            .mask {
+                HStack(spacing: 0) {
+                    LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing).frame(width: 14)
+                    Color.black
+                    LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing).frame(width: 28)
+                }
+            }
             .disabled(m.busy)
         }
         .tint(m.accent)
         .environment(\.colorScheme, m.dark ? .dark : .light)
         .opacity(m.busy ? 0.75 : 1)
         .animation(.easeInOut(duration: 0.25), value: m.busy)
+    }
+
+    private func money(_ v: Double) -> String {
+        "RD$" + (pesosFormatter.string(from: NSNumber(value: v)) ?? "\(Int(v))")
     }
 
     private func pill(_ title: String, id: Int, prominent: Bool) -> some View {

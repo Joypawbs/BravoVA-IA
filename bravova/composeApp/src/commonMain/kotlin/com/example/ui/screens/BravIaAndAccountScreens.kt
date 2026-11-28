@@ -1937,7 +1937,8 @@ fun BravIaChatScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 6.dp, bottom = 8.dp)
-                        .height(132.dp)
+                        // Más alto: ahora lleva la etiqueta "Presupuesto", el mínimo/máximo y una línea de ayuda
+                        .height(176.dp)
                         .testTag("budget_glass_panel")
                 )
             }
@@ -2747,7 +2748,7 @@ fun AccountGridScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "account_large_title") {
@@ -3049,7 +3050,7 @@ fun AccountSubScreenView(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             when (subScreen) {

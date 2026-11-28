@@ -278,7 +278,7 @@ fun BravisimaScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "bravisima_card", contentType = "loyalty_card") {
@@ -1001,7 +1001,7 @@ fun BravisimaScreen(
                                 Icon(
                                     imageVector = if (bravisimaCard.isLocked) Icons.Default.Lock else Icons.Default.LockOpen,
                                     contentDescription = null,
-                                    tint = if (bravisimaCard.isLocked) BravoRed else Tone.successBright,
+                                    tint = if (bravisimaCard.isLocked) Tone.brand else Tone.successBright,
                                     modifier = Modifier.size(21.dp)
                                 )
                                 Column {
@@ -1031,7 +1031,7 @@ fun BravisimaScreen(
                                     performCrispHaptic(view, HapticStyle.TICK)
                                     showCardLockBiometricPrompt = true
                                 },
-                                accent = BravoRed,
+                                accent = Tone.brand,
                                 modifier = Modifier.testTag("bravisima_lock_switch")
                             )
                         }
@@ -1636,7 +1636,7 @@ fun CartCheckoutScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (cartItems.isEmpty()) {
@@ -2287,7 +2287,7 @@ fun CartCheckoutScreen(
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
-                                    color = if (isBravisimaLocked) BravoRed else MaterialTheme.colorScheme.onSurface
+                                    color = if (isBravisimaLocked) Tone.brand else MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
                                     items = if (isBravisimaLocked) {
@@ -2295,15 +2295,15 @@ fun CartCheckoutScreen(
                                     } else {
                                         listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00")
                                     },
-                                    slashColor = if (isBravisimaLocked) BravoRed else primaryColor,
+                                    slashColor = if (isBravisimaLocked) Tone.brand else primaryColor,
                                     fontSizeSp = 12f
                                 )
                             }
                             if (isBravisimaLocked) {
                                 Surface(
                                     shape = RoundedCornerShape(999.dp),
-                                    color = BravoRed.copy(alpha = 0.14f),
-                                    border = BorderStroke(1.dp, BravoRed.copy(alpha = 0.4f)),
+                                    color = Tone.brand.copy(alpha = 0.14f),
+                                    border = BorderStroke(1.dp, Tone.brand.copy(alpha = 0.4f)),
                                     modifier = Modifier.testTag("cart_unlock_bravisima_button")
                                 ) {
                                     Row(
@@ -2314,7 +2314,7 @@ fun CartCheckoutScreen(
                                         Icon(
                                             imageVector = Icons.Default.LockOpen,
                                             contentDescription = "Desbloquear con ${com.example.platform.biometryPhrase()}",
-                                            tint = BravoRed,
+                                            tint = Tone.brand,
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
@@ -2322,7 +2322,7 @@ fun CartCheckoutScreen(
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
-                                            color = BravoRed
+                                            color = Tone.brand
                                         )
                                     }
                                 }
@@ -3212,7 +3212,7 @@ fun DeliveryTrackingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // 1. Aviso en vivo del estado del pedido. Entregado: no se muestra (decía "en ruta",
@@ -3310,7 +3310,8 @@ fun DeliveryTrackingScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 14.dp, vertical = 12.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            // Alineado a la izquierda como el resto de secciones (antes iba centrado en dos líneas)
+                            horizontalAlignment = Alignment.Start
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -3328,19 +3329,15 @@ fun DeliveryTrackingScreen(
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center
+                                    maxLines = 1
                                 )
                             }
-                            BravoUnderline(isArca = false)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "${driverTelemetry.currentStreet} • ${driverTelemetry.lastUpdatedLabel}",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                                maxLines = 1,
+                                maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -3362,9 +3359,9 @@ fun DeliveryTrackingScreen(
                                             )
                                         )
                                     },
+                                    // Colores con significado: neutro = acción, verde = activo, rojo solo para errores
                                     shape = RoundedCornerShape(999.dp),
-                                    color = primaryColor.copy(alpha = 0.12f),
-                                    border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.35f)),
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
                                     modifier = Modifier.testTag("refresh_real_gps_button")
                                 ) {
                                     Row(
@@ -3379,11 +3376,11 @@ fun DeliveryTrackingScreen(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = "Mi GPS",
+                                            text = "Mi ubicación",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
-                                            color = primaryColor
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                 }
@@ -3417,7 +3414,7 @@ fun DeliveryTrackingScreen(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = if (driverTelemetry.isAutoSimulating) "Auto-Tráfico Activo" else "Reanudar ruta",
+                                            text = if (driverTelemetry.isAutoSimulating) "Ruta en vivo" else "Reanudar ruta",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
@@ -4089,12 +4086,15 @@ private fun LiveDeliveryNotificationBannerCard(
     onTriggerSystemNotification: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val activeTitle = banner?.title ?: "${deliveryStage.statusText} • Carlos Rodríguez en ruta"
-    val activeSubtitle = banner?.subtitle ?: "${telemetry.currentStreet} • ${telemetry.trafficCondition}"
-    val activeIconKey = banner?.iconKey ?: deliveryStage.emoji
+    // Una sola fuente de verdad: el estado del pedido. Velocidad y "en ruta" solo mientras
+    // el repartidor se mueve; antes el aviso inicial (72 %, 34 km/h) salía en cualquier estado.
+    val isMoving = deliveryStage == OrderDeliveryStage.IN_TRANSIT || deliveryStage == OrderDeliveryStage.ARRIVING
+    val activeTitle = if (isMoving) banner?.title ?: "Carlos Rodríguez va en camino" else deliveryStage.statusText
+    val activeSubtitle = if (isMoving) banner?.subtitle ?: "${telemetry.currentStreet} • ${telemetry.trafficCondition}" else deliveryStage.description
+    val activeIconKey = if (isMoving) banner?.iconKey ?: deliveryStage.emoji else deliveryStage.emoji
     val speedKmh = banner?.speedKmh ?: telemetry.currentSpeedKmh
     val etaMin = banner?.etaMinutes ?: telemetry.dynamicEtaMinutes
-    val progressFraction = banner?.let { (it.progressPct / 100f).coerceIn(0f, 1f) } ?: deliveryStage.progressFraction
+    val progressFraction = if (isMoving) banner?.let { (it.progressPct / 100f).coerceIn(0f, 1f) } ?: deliveryStage.progressFraction else deliveryStage.progressFraction
 
     TranslucentCard(
         darkMode = darkMode,
@@ -4134,23 +4134,37 @@ private fun LiveDeliveryNotificationBannerCard(
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
+                        // Una sola fila: "En vivo" + número de pedido como insignia (antes se partía en dos líneas)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.NotificationsActive,
-                                contentDescription = "Notificación en vivo",
+                                contentDescription = null,
                                 tint = Tone.success,
-                                modifier = Modifier.size(13.dp)
+                                modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = "NOTIFICACIÓN LIVE • #$orderIdDisplay",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.sp,
-                                color = Tone.success
+                                text = "En vivo",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Tone.success,
+                                maxLines = 1
                             )
+                            Surface(
+                                shape = RoundedCornerShape(999.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant
+                            ) {
+                                Text(
+                                    text = "#$orderIdDisplay",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
                         }
                         Text(
                             text = activeTitle,
@@ -4177,7 +4191,7 @@ private fun LiveDeliveryNotificationBannerCard(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Surface(
+                    if (isMoving) Surface(
                         onClick = onTriggerSystemNotification,
                         shape = RoundedCornerShape(999.dp),
                         color = primaryColor.copy(alpha = 0.12f)
@@ -4234,7 +4248,7 @@ private fun LiveDeliveryNotificationBannerCard(
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        text = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Pedido entregado en tu puerta" else "Llegada estimada en ~$etaMin min • ${telemetry.remainingDistanceKm} km",
+                        text = when { deliveryStage == OrderDeliveryStage.DELIVERED -> "Pedido entregado en tu puerta"; isMoving -> "Llegada en ~$etaMin min • ${telemetry.remainingDistanceKm} km"; else -> "Llegada estimada en ~${deliveryStage.etaMinutes} min" },
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
@@ -4246,7 +4260,8 @@ private fun LiveDeliveryNotificationBannerCard(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 12.sp,
-                    color = primaryColor
+                    // Mismo verde que la barra: el porcentaje es avance, no una alerta
+                    color = Tone.success
                 )
             }
 

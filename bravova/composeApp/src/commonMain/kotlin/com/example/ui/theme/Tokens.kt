@@ -23,6 +23,8 @@ private fun pick(light: Long, dark: Long) = if (ThemeState.dark) Color(dark) els
 
 /** Colores con significado (no de marca): éxito, aviso, peligro, información. */
 object Tone {
+    /** Rojo de marca para texto e íconos: en oscuro, el coral del tema (5,6:1; #E1251B daba 3,8:1). */
+    val brand: Color get() = pick(0xFFE1251B, 0xFFFF5446)
     /** Verde de confirmación: ahorro, entregado, pagado. */
     val success: Color get() = pick(0xFF059669, 0xFF34D399)
     /** Verde para texto sobre fondos claros de éxito. */

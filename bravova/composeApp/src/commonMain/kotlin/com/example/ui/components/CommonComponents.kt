@@ -121,6 +121,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.FiberNew
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Remove
@@ -314,7 +315,7 @@ fun uniformMenuTranslucentBorderBrush(accentColor: Color, darkMode: Boolean): Br
 fun uniformMenuTranslucentSheenBrush(darkMode: Boolean, accentColor: Color): Brush =
     SolidColor(Color.Transparent)
 
-fun parseHexColor(hex: String, fallback: Color = BravoRed): Color {
+fun parseHexColor(hex: String, fallback: Color = Tone.brand): Color {
     return try {
         val clean = hex.removePrefix("#")
         val value = clean.toLong(16)
@@ -671,7 +672,7 @@ fun BravoUnderline(isArca: Boolean, modifier: Modifier = Modifier) {
     val brush = if (isArca) {
         Brush.horizontalGradient(listOf(ArcaEmerald, ArcaTeal))
     } else {
-        Brush.horizontalGradient(listOf(BravoAmber, BravoRed, primary))
+        Brush.horizontalGradient(listOf(BravoAmber, Tone.brand, primary))
     }
     Box(
         modifier = modifier
@@ -805,7 +806,7 @@ fun BravoArcaHeaderSwitcher(
                 expanded = isExpanded,
                 onDismissRequest = { setExpanded(false) },
                 shape = RoundedCornerShape(22.dp),
-                containerColor = uniformMenuTranslucentContainerColor(darkMode),
+                containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp,
                 shadowElevation = 16.dp,
                 border = BorderStroke(1.1.dp, uniformMenuTranslucentBorderBrush(accent, darkMode)),
@@ -976,8 +977,9 @@ fun BravoArcaSelectorMenuOverlay(
     val shape = RoundedCornerShape(22.dp)
     val borderBrush = uniformMenuTranslucentBorderBrush(accent, darkMode)
     val sheenBrush = uniformMenuTranslucentSheenBrush(darkMode, accent)
-    val useRealHaze = expanded && menuHazeState != null && DeviceSupportsGpuBlur
-    val containerCol = if (useRealHaze) Color.Transparent else uniformMenuTranslucentContainerColor(darkMode)
+    // Fondo sólido (antes translúcido): el buscador de vidrio nativo se veía "fantasma" a través
+    val useRealHaze = false
+    val containerCol = MaterialTheme.colorScheme.surface
 
     androidx.compose.animation.AnimatedVisibility(
         visible = expanded,
@@ -994,10 +996,14 @@ fun BravoArcaSelectorMenuOverlay(
         modifier = modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Zona invisible: tocar fuera cierra el menú
+            // Mientras el menú está abierto se ocultan las barras de vidrio nativas (iOS las dibuja
+            // siempre encima de Compose y se mezclaban con el menú)
+            SuppressNativeGlass()
+            // Fondo oscurecido: tocar fuera cierra el menú
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(Color.Black.copy(alpha = if (darkMode) 0.45f else 0.25f))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -1438,7 +1444,7 @@ fun VerticalProductCard(
 
             Spacer(Modifier.height(8.dp))
             Text(
-                text = product.name,
+                text = product.nameWithoutUnit(),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -1570,7 +1576,7 @@ fun VerticalProductCard(
 @Composable
 fun SectionLineIcon(iconType: String, isArca: Boolean) {
     val vectorIcon: ImageVector = when (iconType) {
-        "new_badge" -> Icons.Filled.NewReleases
+        "new_badge" -> Icons.Filled.FiberNew // antes NewReleases: parecía un aviso de alerta
         "oil_bottle" -> Icons.Filled.WaterDrop
         "water_soda" -> Icons.Filled.LocalDrink
         "plate_cutlery" -> Icons.Filled.Restaurant
@@ -2253,7 +2259,7 @@ fun OrderSuccessCelebrationOverlay(
     val onBg = MaterialTheme.colorScheme.onBackground
     val onBgMuted = MaterialTheme.colorScheme.onSurfaceVariant
     val confettiSeeds = remember(orderId) {
-        val colors = listOf(BravoRed, BravoAmber, Tone.successBright, Color.White)
+        val colors = listOf(Tone.brand, BravoAmber, Tone.successBright, Color.White)
         List(24) { idx ->
             val angle = ((idx * 137.5f) % 360f) * (PI.toFloat() / 180f)
             val speed = 0.35f + ((idx * 29) % 100) / 150f
@@ -2772,7 +2778,7 @@ fun CartSummaryBar(
                 performCrispHaptic(view, HapticStyle.CONFIRM)
                 onOpenCart()
             },
-            modifier = modifier.fillMaxWidth().height(60.dp).testTag("cart_summary_bar")
+            modifier = modifier.fillMaxWidth().height(BottomChrome.CartBarHeight).testTag("cart_summary_bar")
         )
         return
     }
@@ -2831,3 +2837,14 @@ fun CartSummaryBar(
 
 /** Modo ahorro de datos: imágenes más livianas y menos animaciones. Lo provee App.kt. */
 val LocalDataSaver = androidx.compose.runtime.compositionLocalOf { false }
+
+/**
+ * Nombre para mostrar sin el peso repetido al final: "Bravo Viga Mediana 875 Gr" con "875 Gr"
+ * debajo se leía dos veces. Solo cambia lo que se ve; el dato del catálogo queda igual.
+ */
+fun Product.nameWithoutUnit(): String {
+    val u = unit.trim()
+    val n = name.trimEnd()
+    if (u.isEmpty() || n.length <= u.length + 3) return name
+    return if (n.lowercase().endsWith(" " + u.lowercase())) n.dropLast(u.length).trimEnd() else name
+}
