@@ -79,6 +79,8 @@ struct BravIaView: View {
     }
 
     private func send(_ text: String) {
+        // Un huevo de pascua no se le pregunta a la IA, como en la 3.1
+        if Easter.shared.check(text) { draft = ""; return }
         model.send(text, store: app.store)
         draft = ""
     }

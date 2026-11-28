@@ -40,6 +40,7 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
+            .onChange(of: query) { _, q in Easter.shared.check(q) }
         }
     }
 
@@ -47,6 +48,8 @@ struct HomeView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
                 allCategories
+                DailyPicksSection()
+                if app.store == .bravo { SeasonalCombosSection() }
                 ForEach(homeSections) { section in
                     let items = catalog.products(for: app.store).filter { $0.category == section.id }
                     if !items.isEmpty { carousel(section, items) }

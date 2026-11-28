@@ -39,6 +39,7 @@ struct CatalogView: View {
                 ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
+            .onChange(of: query) { _, q in Easter.shared.check(q) }
         }
     }
 
@@ -129,13 +130,13 @@ struct ProductThumb: View {
         RoundedRectangle(cornerRadius: 14, style: .continuous)
             .fill(tint.opacity(0.12))
             .overlay {
-                if let s = product.imageUrl, let url = URL(string: s) {
+                if let url = Catalog.shared.photoURL(for: product) {
                     AsyncImage(url: url, transaction: Transaction(animation: .easeOut(duration: 0.2))) { phase in
                         switch phase {
                         case .success(let image): image.resizable().scaledToFit().padding(6)
                         case .failure: fallback(tint)
-                        // Mientras carga: solo el fondo suave, sin ruedas ni brillos
-                        default: Color.clear
+                        // Mientras carga: esqueleto quieto y minimalista (sin brillo animado)
+                        default: SkeletonBlock().padding(10)
                         }
                     }
                 } else {
@@ -149,6 +150,17 @@ struct ProductThumb: View {
         Image(systemName: SectionIcon.symbol(for: product.artType))
             .font(.title2)
             .foregroundStyle(tint)
+    }
+}
+
+/// Bloque de esqueleto: gris del sistema, estático. Se adapta solo al modo oscuro.
+struct SkeletonBlock: View {
+    var cornerRadius: CGFloat = 10
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .fill(.quaternary)
+            .accessibilityHidden(true)
     }
 }
 

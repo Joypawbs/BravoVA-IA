@@ -3,10 +3,19 @@ import SwiftUI
 @main
 struct BravoVaApp: App {
     @State private var app = AppState()
+    @State private var ready = false
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            Group {
+                if ready { RootView() } else { StartupSkeleton() }
+            }
+                .task {
+                    // Primero se pinta el esqueleto; luego se lee el catálogo (750 productos)
+                    await Task.yield()
+                    _ = Catalog.shared
+                    withAnimation(.easeOut(duration: 0.25)) { ready = true }
+                }
                 .environment(app)
                 .onOpenURL { _ = AuthService.handle(url: $0) }
                 .tint(app.store.accent)
@@ -39,6 +48,7 @@ struct RootView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .overlay { EasterOverlay() }
         .sheet(item: $app.selectedProduct) { ProductDetailView(product: $0) }
         .sheet(isPresented: $app.showCart) { CartView() }
         .fullScreenCover(isPresented: $app.showScanner) { ScannerView() }
@@ -54,23 +64,39 @@ struct RootView: View {
             case "escaner": app.showScanner = true
             default: break
             }
+            // Captura del CI: "-huevo spamton" dispara ese huevo de pascua
+            if let egg = UserDefaults.standard.string(forKey: "huevo") { Easter.shared.check(egg) }
         }
     }
 }
 
-/// Pantalla temporal mientras se pasa cada sección a Swift (no se publica así).
-struct PlaceholderScreen: View {
-    let title: String
-    let symbol: String
-
+/// Pantalla de carga al abrir: bloques grises quietos con la forma de Inicio (sin brillo).
+struct StartupSkeleton: View {
     var body: some View {
-        NavigationStack {
-            ContentUnavailableView(title, systemImage: symbol,
-                                   description: Text("Esta sección se está pasando a Swift nativo."))
-                .navigationTitle(title)
-                .toolbar {
-                    StoreLogoToolbarItem()
+        VStack(alignment: .leading, spacing: 18) {
+            HStack {
+                SkeletonBlock(cornerRadius: 6).frame(width: 64, height: 26)
+                Spacer()
+                SkeletonBlock(cornerRadius: 15).frame(width: 30, height: 30)
+            }
+            SkeletonBlock(cornerRadius: 18).frame(height: 44)
+            SkeletonBlock(cornerRadius: 18).frame(height: 60)
+            ForEach(0..<2, id: \.self) { _ in
+                SkeletonBlock(cornerRadius: 6).frame(width: 160, height: 20)
+                HStack(spacing: 12) {
+                    ForEach(0..<3, id: \.self) { _ in
+                        VStack(alignment: .leading, spacing: 8) {
+                            SkeletonBlock(cornerRadius: 14).frame(height: 120)
+                            SkeletonBlock(cornerRadius: 4).frame(height: 12)
+                            SkeletonBlock(cornerRadius: 4).frame(width: 60, height: 12)
+                        }
+                    }
                 }
+            }
+            Spacer()
         }
+        .padding()
+        .accessibilityElement()
+        .accessibilityLabel("Cargando")
     }
 }

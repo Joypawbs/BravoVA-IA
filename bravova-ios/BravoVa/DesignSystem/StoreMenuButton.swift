@@ -36,6 +36,8 @@ struct StoreMenuButton: View {
                 .frame(width: 64, height: 26)
                 .contentTransition(.opacity)
         }
+        // 5 toques seguidos al logo: huevo de pascua de las huellitas
+        .simultaneousGesture(TapGesture().onEnded { Easter.shared.logoTapped() })
         .sensoryFeedback(.selection, trigger: app.store)
         .accessibilityLabel("Tienda actual: \(app.store.title). Cambiar de tienda")
     }
