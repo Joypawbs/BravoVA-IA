@@ -2013,7 +2013,7 @@ fun TranslucentBottomDock(
 ) {
     val view = currentPlatformView()
     val activeTab = when (currentScreen) {
-        AppScreen.BRAVISIMA -> AppScreen.ACCOUNT
+        AppScreen.BRAVISIMA -> AppScreen.BRAVISIMA
         AppScreen.CATALOG, AppScreen.CATEGORY, AppScreen.PRODUCT -> AppScreen.CATALOG
         AppScreen.HOME, AppScreen.CART, AppScreen.DELIVERY -> AppScreen.HOME
         AppScreen.BRAVIA -> AppScreen.BRAVIA
@@ -2026,17 +2026,19 @@ fun TranslucentBottomDock(
     val borderBrush = uniformMenuTranslucentBorderBrush(activeColor, darkMode)
     val sheenBrush = uniformMenuTranslucentSheenBrush(darkMode, activeColor)
 
-    // 2.0: cuatro pestañas (Bravísima pasó a Cuenta) + Búsqueda aparte
+    // 3.2: cinco pestañas con Bravísima de vuelta. El botón de búsqueda se quitó: repetía la
+    // barra de búsqueda que ya está arriba en Inicio y Catálogo.
     val tabCatalog = stringResource(Res.string.tab_catalog)
     val tabHome = stringResource(Res.string.tab_home)
     val tabBravia = stringResource(Res.string.tab_bravia)
+    val tabBravisima = stringResource(Res.string.tab_bravisima)
     val tabAccount = stringResource(Res.string.tab_account)
-    val tabSearch = stringResource(Res.string.tab_search)
-    val navItems = remember(tabCatalog, tabHome, tabBravia, tabAccount) {
+    val navItems = remember(tabCatalog, tabHome, tabBravia, tabBravisima, tabAccount) {
         listOf(
             Triple(AppScreen.HOME, Icons.Outlined.Home, tabHome),
             Triple(AppScreen.CATALOG, Icons.Outlined.GridView, tabCatalog),
             Triple(AppScreen.BRAVIA, Icons.Outlined.AutoAwesome, tabBravia),
+            Triple(AppScreen.BRAVISIMA, Icons.Outlined.CreditCard, tabBravisima),
             Triple(AppScreen.ACCOUNT, Icons.Outlined.PersonOutline, tabAccount)
         )
     }
@@ -2045,7 +2047,7 @@ fun TranslucentBottomDock(
         // iOS 26: barra de pestañas con el vidrio líquido nativo de Apple
         val selectedIndex = navItems.indexOfFirst { it.first == activeTab }.coerceAtLeast(0)
         NativeGlassDock(
-            symbols = listOf("house", "square.grid.2x2", "sparkles", "person.crop.circle"),
+            symbols = listOf("house", "square.grid.2x2", "sparkles", "creditcard", "person.crop.circle"),
             labels = navItems.map { it.third },
             selectedIndex = selectedIndex,
             accent = activeColor,
@@ -2057,11 +2059,7 @@ fun TranslucentBottomDock(
                 onNavigate(screen)
             },
             modifier = modifier.fillMaxWidth().height(74.dp),
-            minimized = minimized,
-            onSearch = {
-                HapticFeedbackManager.onNavigationClick(view)
-                onSearch()
-            }
+            minimized = minimized
         )
         return
     }
@@ -2086,19 +2084,7 @@ fun TranslucentBottomDock(
                     label = { Text(label, maxLines = 1, fontSize = 12.sp) },
                     modifier = Modifier.testTag("nav_${screen.name.lowercase()}")
                 )
-                if (screen == AppScreen.CATALOG) {
-                    // Búsqueda: su propio botón en la barra (como la pestaña de búsqueda de iOS)
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = {
-                            HapticFeedbackManager.onNavigationClick(view)
-                            onSearch()
-                        },
-                        icon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-                        label = { Text(tabSearch, maxLines = 1, fontSize = 12.sp) },
-                        modifier = Modifier.testTag("nav_search")
-                    )
-                }
+
             }
         }
         return

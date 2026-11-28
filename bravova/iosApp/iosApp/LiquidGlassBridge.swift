@@ -302,19 +302,8 @@ struct GlassDockView: View {
                     .bravoGlass(Capsule())
                     .bravoGlassID("tabs", in: ns)
 
+                // Sin botón de búsqueda aparte (3.2): la barra de búsqueda ya está arriba en Inicio y Catálogo
                 if m.minimized { Spacer(minLength: 0) }
-
-                Button(action: m.onSearch) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 19, weight: .semibold))
-                        .foregroundStyle(Color.primary)
-                        .frame(width: 58, height: 58)
-                        .contentShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .bravoGlass(Circle())
-                .bravoGlassID("search", in: ns)
-                .accessibilityLabel("Buscar")
             }
         }
         .animation(.spring(response: 0.42, dampingFraction: 0.78), value: m.minimized)

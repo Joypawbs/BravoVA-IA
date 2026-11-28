@@ -1481,7 +1481,8 @@ fun BravisimaScreen(
             accent = primaryColor,
             title = "Bravísima",
             modifier = Modifier.align(Alignment.TopCenter),
-            onBack = onBack,
+            // Pestaña principal del dock: sin "atrás" (como Inicio, Catálogo y Cuenta)
+            onBack = null,
             actions = listOf(
                 GlassBarAction(symbol = "creditcard", icon = null, label = "Nivel ${bravisimaCard.tier.label}", text = bravisimaCard.tier.label, highlighted = true)
             )

@@ -212,24 +212,22 @@ final class BravoVaTourUITests: XCTestCase {
             pause(1)
         }
 
-        // 2.0: Inicio, Catálogo, Brav IA y Cuenta (+ Búsqueda aparte); Bravísima está en Cuenta
+        // 3.2: Inicio, Catálogo, Brav IA, Bravísima y Cuenta (sin botón de búsqueda aparte)
         let tabs: [(String, CGFloat, String)] = [
             ("Catálogo", 0.30, "catalogo"),
-            ("Brav IA", 0.52, "brav_ia"),
-            ("Cuenta", 0.72, "mi_cuenta"),
+            ("Brav IA", 0.50, "brav_ia"),
+            ("Bravísima", 0.70, "bravisima"),
         ]
         for (label, x, name) in tabs {
             tap([label], fallback: CGVector(dx: x, dy: 0.92), wait: 3)
             pause(3); shot(name)
         }
-        tap(["Tarjeta Bravísima"], fallback: CGVector(dx: 0.5, dy: 0.25), wait: 3)
-        pause(3); shot("bravisima")
         // Código para la caja a pantalla completa (tocar cualquier parte lo cierra)
         tap(["BRV-"], fallback: CGVector(dx: 0.5, dy: 0.33), wait: 2)
         pause(2); shot("bravisima_codigo_caja")
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85)).tap(); pause(1)
-        tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
-        pause(2)
+        tap(["Cuenta"], fallback: CGVector(dx: 0.88, dy: 0.92), wait: 3)
+        pause(3); shot("mi_cuenta")
 
         // Dentro de Mi cuenta: abre Mis pedidos y vuelve.
         tap(["Mis pedidos"], fallback: CGVector(dx: 0.27, dy: 0.25), wait: 3)
