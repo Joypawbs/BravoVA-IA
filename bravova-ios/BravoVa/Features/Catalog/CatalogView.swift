@@ -35,7 +35,7 @@ struct CatalogView: View {
             .navigationTitle("Catálogo")
             .searchable(text: $query, prompt: "Buscar productos")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
+                StoreLogoToolbarItem()
                 ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
@@ -134,7 +134,8 @@ struct ProductThumb: View {
                         switch phase {
                         case .success(let image): image.resizable().scaledToFit().padding(6)
                         case .failure: fallback(tint)
-                        default: ProgressView()
+                        // Mientras carga: solo el fondo suave, sin ruedas ni brillos
+                        default: Color.clear
                         }
                     }
                 } else {

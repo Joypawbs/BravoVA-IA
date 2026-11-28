@@ -29,7 +29,7 @@ struct BravisimaView: View {
             }
             .navigationTitle("Bravísima")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
+                StoreLogoToolbarItem()
                 if !cardNumber.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Editar") { editing = true }

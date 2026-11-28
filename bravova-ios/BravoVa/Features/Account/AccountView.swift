@@ -76,7 +76,7 @@ struct AccountView: View {
             }
             .navigationTitle("Cuenta")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
+                StoreLogoToolbarItem()
                 ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
             }
         }

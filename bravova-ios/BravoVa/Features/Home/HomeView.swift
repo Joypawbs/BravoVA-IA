@@ -37,7 +37,7 @@ struct HomeView: View {
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                         prompt: app.store == .bravo ? "Buscar productos o marcas" : "Buscar productos o mascotas")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
+                StoreLogoToolbarItem()
                 ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
@@ -114,7 +114,7 @@ struct HomeView: View {
                     .font(.title2)
                     .foregroundStyle(app.store.accent)
                     .frame(width: 44, height: 44)
-                    .glassEffect(.regular, in: .circle)
+                    .background(app.store.accent.opacity(0.1), in: .circle)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(app.store == .bravo ? "Compra con Brav IA" : "Asesoría con Brav IA")
                         .font(.headline)
@@ -129,7 +129,7 @@ struct HomeView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(16)
-            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 22, style: .continuous))
+            .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 18, style: .continuous))
         }
         .buttonStyle(.plain)
         .padding(.horizontal)

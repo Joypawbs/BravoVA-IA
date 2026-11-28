@@ -66,7 +66,7 @@ struct PlaceholderScreen: View {
                                    description: Text("Esta sección se está pasando a Swift nativo."))
                 .navigationTitle(title)
                 .toolbar {
-                    ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
+                    StoreLogoToolbarItem()
                 }
         }
     }

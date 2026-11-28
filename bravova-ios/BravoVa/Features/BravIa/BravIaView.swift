@@ -28,7 +28,7 @@ struct BravIaView: View {
             .safeAreaInset(edge: .bottom) { composer }
             .navigationTitle("Brav IA")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarLeading) { StoreMenuButton() } }
+            .toolbar { StoreLogoToolbarItem() }
             .task {
                 // Prueba del CI: "-braviaQuery <texto>" envía una consulta al abrir
                 if model.messages.isEmpty, let q = UserDefaults.standard.string(forKey: "braviaQuery"), !q.isBlank {
@@ -59,7 +59,7 @@ struct BravIaView: View {
                 .submitLabel(.send)
                 .onSubmit { send(draft) }
                 .padding(.horizontal, 16).padding(.vertical, 12)
-                .glassEffect(.regular.interactive(), in: .capsule)
+                .background(Color(.secondarySystemBackground), in: .capsule)
                 .accessibilityIdentifier("bravia_input")
             Button {
                 model.isBusy ? model.stop() : send(draft)
@@ -84,6 +84,31 @@ struct BravIaView: View {
     }
 }
 
+/// "Escribiendo": tres estrellas simples que crecen y se encogen una tras otra.
+/// Con "Reducir movimiento" se quedan quietas.
+struct TypingStars: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        TimelineView(.animation(paused: reduceMotion)) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { i in
+                    let phase = sin((t * 4) - Double(i) * 0.9)
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 12, weight: .semibold))
+                        .scaleEffect(reduceMotion ? 1 : 0.65 + 0.35 * (phase + 1) / 2)
+                        .frame(width: 14, height: 14)
+                }
+            }
+            .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 6)
+        .accessibilityElement()
+        .accessibilityLabel("Brav IA está escribiendo")
+    }
+}
+
 private struct MessageView: View {
     let message: ChatMessage
 
@@ -99,7 +124,7 @@ private struct MessageView: View {
         } else {
             VStack(alignment: .leading, spacing: 10) {
                 if message.text.isEmpty && message.isStreaming {
-                    ProgressView().accessibilityLabel("Brav IA está escribiendo")
+                    TypingStars()
                 } else {
                     Text(LocalizedStringKey(message.text))
                 }

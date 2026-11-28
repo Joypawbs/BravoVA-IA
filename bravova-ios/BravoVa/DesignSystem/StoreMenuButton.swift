@@ -1,5 +1,14 @@
 import SwiftUI
 
+/// El logo de la tienda en la barra superior, sin la burbuja de vidrio que iOS 26 pone
+/// por defecto a los botones de la barra: el logo se ve limpio, como en una app de marca.
+struct StoreLogoToolbarItem: ToolbarContent {
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
+            .sharedBackgroundVisibility(.hidden)
+    }
+}
+
 /// Selector de tienda: un `Menu` del sistema. En iOS 26 se abre desde el botón con la
 /// animación de Liquid Glass propia de Apple (sin fondos oscuros ni vidrio hecho a mano).
 struct StoreMenuButton: View {

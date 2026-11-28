@@ -101,6 +101,7 @@ struct ProductDetailView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
+        .background(.bar)
         .animation(.smooth(duration: 0.2), value: qty)
     }
 }
