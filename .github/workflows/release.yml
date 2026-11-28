@@ -4,6 +4,7 @@ name: Publicar versión
 #   - BravoVa-vX.Y.Z-android-release.apk  (firmada con la clave de lanzamiento)
 #   - BravoVa-vX.Y.Z-android-debug.apk    (versión de prueba)
 #   - BravoVa-vX.Y.Z-ios-sin-firmar.ipa   (para instalar con AltStore o Sideloadly)
+# Desde la 3.2 la app de iOS es Swift nativo (bravova-ios/); Android sigue en Kotlin (bravova/).
 # Las notas salen de .github/release-notes/vX.Y.Z.md
 
 on:
@@ -96,16 +97,49 @@ jobs:
         working-directory: .
         run: if [ -d ios ] && [ ! -d bravova ]; then mv ios bravova; fi
       - uses: actions/setup-java@v4
+        if: hashFiles('bravova-ios/project.yml') == ''
         with:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
+        if: hashFiles('bravova-ios/project.yml') == ''
       - name: Xcode 27
         run: |
           # La imagen xcode-27 trae Xcode 27 como predeterminado
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
-      - name: Compilar IPA sin firmar
+      - name: Brav IA debe funcionar antes de publicar (sin mostrar la clave)
+        if: hashFiles('bravova-ios/project.yml') != ''
+        run: |
+          [ -n "$GEMINI_API_KEY" ] || { echo "::error::Falta el secreto GEMINI_API_KEY"; exit 1; }
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "x-goog-api-key: $GEMINI_API_KEY" \
+            "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1")
+          echo "Gemini respondió HTTP $CODE"
+          [ "$CODE" = "200" ] || { echo "::error::La clave de Gemini no es válida: no se publica"; exit 1; }
+      - name: Compilar IPA sin firmar (Swift nativo)
+        if: hashFiles('bravova-ios/project.yml') != ''
+        working-directory: bravova-ios
+        run: |
+          set -o pipefail
+          brew install xcodegen
+          xcodegen generate
+          perl -0pi -e 's/(isa = PBXFileReference;)[^}]*?(path = AppIcon\.icon;)/$1 lastKnownFileType = folder.iconcomposer.icon; $2/g' BravoVa.xcodeproj/project.pbxproj
+          V="${TAG#v}"; BASE="${V%%-*}"; IFS=. read -r MA MI PA <<< "$BASE"
+          CODE=$((MA*10000 + MI*100 + ${PA:-0}))
+          if [[ "$V" == *-beta* ]]; then N="${V##*beta}"; CODE=$((CODE - 100 + ${N:-1})); fi
+          # La clave llega por la variable de entorno (no en la línea de comandos, que se imprime)
+          xcodebuild -project BravoVa.xcodeproj -scheme BravoVa -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build/device \
+            MARKETING_VERSION="$BASE" CURRENT_PROJECT_VERSION="$CODE" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build > build.log 2>&1 \
+            || { grep -E "error:" build.log | sed 's|.*/bravova-ios/||' | sort -u | head -60; exit 1; }
+          APP=$(find build/device/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
+          LEN=$(/usr/libexec/PlistBuddy -c "Print :BravIAGeminiKey" "$APP/Info.plist" 2>/dev/null | tr -d '\n' | wc -c | tr -d ' ')
+          [ "$LEN" -gt 20 ] || { echo "::error::La app no lleva la clave de Gemini"; exit 1; }
+          mkdir -p Payload && cp -R "$APP" Payload/
+          mkdir -p ../dist && zip -qry "../dist/BravoVa-$TAG-ios-sin-firmar.ipa" Payload
+      - name: Compilar IPA sin firmar (versiones anteriores, Kotlin)
+        if: hashFiles('bravova-ios/project.yml') == ''
         working-directory: bravova/iosApp
         run: |
           set -o pipefail
