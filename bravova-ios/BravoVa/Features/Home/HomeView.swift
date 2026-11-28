@@ -10,23 +10,9 @@ struct HomeView: View {
     /// Todos los pasillos de la tienda, como en la 3.1 (los 750 productos se ven desde Inicio)
     private var homeSections: [CatalogSection] { catalog.sections(for: app.store) }
 
-    private var results: [Product] {
-        let q = query.folded
-        guard !q.isEmpty else { return [] }
-        return catalog.products(for: app.store).filter {
-            $0.name.folded.contains(q) || $0.category.folded.contains(q) || $0.badge.folded.contains(q)
-        }
-    }
-
     var body: some View {
         NavigationStack {
-            Group {
-                if !query.isEmpty {
-                    searchResults
-                } else {
-                    content
-                }
-            }
+            SearchContainer(query: $query) { content }
             .navigationTitle(app.store == .bravo ? "Bravo" : "El Arca")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
@@ -48,6 +34,10 @@ struct HomeView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
                 allCategories
+                RepeatOrderCard()
+                ProductRail(title: "Lo de siempre", subtitle: "Lo que más pides aquí", items: app.usuals())
+                ProductRail(title: "Vistos hace poco", subtitle: "Para retomar donde ibas",
+                            items: Array(app.recentProducts.prefix(10)))
                 DailyPicksSection()
                 if app.store == .bravo { SeasonalCombosSection() }
                 ForEach(homeSections) { section in
@@ -141,14 +131,6 @@ struct HomeView: View {
         .padding(.horizontal)
     }
 
-    @ViewBuilder private var searchResults: some View {
-        if results.isEmpty {
-            ContentUnavailableView.search(text: query)
-        } else {
-            List(results) { TappableProductRow(product: $0) }
-            .listStyle(.plain)
-        }
-    }
 }
 
 /// Cuadrícula de pasillos (igual que el catálogo, en formato de tarjetas).
@@ -195,6 +177,7 @@ struct ProductCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     ProductThumb(product: product)
                         .frame(width: 140, height: 120)
+                        .overlay(alignment: .topTrailing) { FavoriteButton(sku: product.sku).padding(6) }
                     Text(product.name)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(2, reservesSpace: true)
@@ -206,6 +189,7 @@ struct ProductCard: View {
                 }
             }
             .buttonStyle(.plain)
+            .productActions(product)
             HStack {
                 Text(Money.rd(product.price))
                     .font(.subheadline.bold())

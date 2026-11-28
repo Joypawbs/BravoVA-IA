@@ -31,6 +31,13 @@ struct AccountView: View {
                             Label("Mis listas", systemImage: "list.bullet.clipboard")
                         }
                     }
+                    NavigationLink { FavoritesView() } label: {
+                        LabeledContent {
+                            Text("\(app.favorites.skus.count)")
+                        } label: {
+                            Label("Favoritos", systemImage: "heart")
+                        }
+                    }
                     Button {
                         app.showCart = true
                     } label: {
@@ -194,10 +201,36 @@ struct OrderDetailView: View {
                 LabeledContent(order.mode == .pickup ? "Sucursal" : "Dirección",
                                value: order.mode == .pickup ? order.branch : order.address)
                 LabeledContent("Pago", value: order.payment.title)
+                if let x = order.extras {
+                    LabeledContent("Horario", value: x.slot)
+                    if !x.reference.isBlank { LabeledContent("Referencia", value: x.reference) }
+                    LabeledContent("Comprobante", value: x.ncf == "B01" ? "Crédito fiscal · \(x.rnc)" : "Consumidor final")
+                    if !x.recipient.isBlank { LabeledContent("Recibe", value: "\(x.recipient) · \(x.recipientPhone)") }
+                    if let s = SubstitutionPref(rawValue: x.substitution) { LabeledContent("Si algo se agota", value: s.title) }
+                }
+            }
+            Section("Califica tu \(order.mode == .pickup ? "recogida" : "entrega")") {
+                let current = app.orders.orders.first { $0.id == order.id }?.rating ?? 0
+                HStack(spacing: 10) {
+                    ForEach(1...5, id: \.self) { star in
+                        Button { app.orders.rate(order, stars: star) } label: {
+                            Image(systemName: star <= current ? "star.fill" : "star")
+                                .font(.title2)
+                                .foregroundStyle(star <= current ? Color.yellow : Color.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(star) de 5 estrellas")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .sensoryFeedback(.selection, trigger: current)
             }
             Section("Productos") {
                 ForEach(order.lines, id: \.sku) { line in
                     LabeledContent("\(line.qty) × \(line.name)", value: Money.rd(line.unitPrice * line.qty))
+                }
+                if let tip = order.extras?.tip, tip > 0 {
+                    LabeledContent("Propina", value: Money.rd(tip))
                 }
                 LabeledContent {
                     Text(Money.rd(order.total)).bold()

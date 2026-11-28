@@ -7,29 +7,14 @@ struct CatalogView: View {
     @State private var query = ""
     private let catalog = Catalog.shared
 
-    private var results: [Product] {
-        let q = query.folded
-        guard !q.isEmpty else { return [] }
-        return catalog.products(for: app.store).filter {
-            $0.name.folded.contains(q) || $0.category.folded.contains(q) || $0.badge.folded.contains(q)
-        }
-    }
-
     var body: some View {
         NavigationStack {
             Group {
                 if catalog.products(for: app.store).isEmpty {
                     ContentUnavailableView("Catálogo no disponible", systemImage: "exclamationmark.triangle",
                                            description: Text("No se pudieron cargar los productos."))
-                } else if !query.isEmpty {
-                    if results.isEmpty {
-                        ContentUnavailableView.search(text: query)
-                    } else {
-                        List(results) { TappableProductRow(product: $0) }
-                            .listStyle(.plain)
-                    }
                 } else {
-                    sectionsList
+                    SearchContainer(query: $query) { sectionsList }
                 }
             }
             .navigationTitle("Catálogo")
@@ -91,6 +76,7 @@ struct TappableProductRow: View {
         HStack {
             Button { app.selectedProduct = product } label: { ProductRow(product: product) }
                 .buttonStyle(.plain)
+                .productActions(product)
             QuantityControl(sku: product.sku, compact: true)
         }
     }

@@ -93,6 +93,69 @@ struct DailyPicksSection: View {
     }
 }
 
+/// "¿Repetimos tu última compra?" con el último pedido real de esta tienda.
+struct RepeatOrderCard: View {
+    @Environment(AppState.self) private var app
+    @State private var done = false
+
+    var body: some View {
+        if let order = app.lastOrder {
+            HStack(spacing: 14) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(app.store.accent)
+                    .frame(width: 44, height: 44)
+                    .background(app.store.accent.opacity(0.12), in: .circle)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("¿Repetimos tu última compra?").font(.headline)
+                    Text("\(order.itemCount) artículos · \(Money.rd(order.total)) · \(order.date.formatted(.dateTime.day().month()))")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+                Button(done ? "Listo" : "Repetir") {
+                    app.reorder(order)
+                    withAnimation { done = true }
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(done)
+            }
+            .padding(14)
+            .background(.background.secondary, in: .rect(cornerRadius: 18, style: .continuous))
+            .padding(.horizontal)
+            .sensoryFeedback(.success, trigger: done)
+        }
+    }
+}
+
+/// Carrusel simple con título (para "Lo de siempre" y "Vistos hace poco").
+struct ProductRail: View {
+    let title: String
+    let subtitle: String
+    let items: [Product]
+
+    var body: some View {
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.title3.bold())
+                    Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 12) {
+                        ForEach(items) { ProductCard(product: $0) }
+                    }
+                    .scrollTargetLayout()
+                    .padding(.horizontal)
+                }
+                .scrollIndicators(.hidden)
+                .scrollTargetBehavior(.viewAligned)
+            }
+        }
+    }
+}
+
 /// Combos de temporada de la 3.1: se arman buscando palabras en el catálogo real.
 struct SeasonalCombo: Identifiable {
     let id: String

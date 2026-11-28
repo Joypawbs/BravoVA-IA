@@ -55,25 +55,25 @@ La 3.2 dejó fuera funciones de la 3.1. La 3.2.1 las recupera todas. La lista sa
 | 1 | Pantalla de carga al abrir (bloques quietos, sin brillo) | AppStartupSkeletonScreen | Hecho (StartupSkeleton; también al cargar cada foto) |
 | 2 | Bienvenida: elegir tienda y sucursal, entrar con Google o como invitado | BravoGoogleAuthScreen, v2.0b2 | Pendiente |
 | 3 | Inicio con todos los pasillos y productos | HomeScreen | Hecho |
-| 4 | Inicio: "¿Repetimos tu última compra?" / "Tu pedido va en camino" | HomeScreen, v1.4 / v3.1 | Pendiente |
-| 5 | Inicio: "Lo de siempre" y productos recientes | HomeScreen, v1.3 | Pendiente |
+| 4 | Inicio: "¿Repetimos tu última compra?" / "Tu pedido va en camino" | HomeScreen, v1.4 / v3.1 | Parcial: "Â¿Repetimos tu Ãºltima compra?" hecho; "va en camino" llega con el seguimiento (#19) |
+| 5 | Inicio: "Lo de siempre" y productos recientes | HomeScreen, v1.3 | Hecho ("Lo de siempre" del historial real y "Vistos hace poco") |
 | 6 | Inicio: ofertas del día (carrusel automático con indicadores) | DailyRotatingOffers, v1.1 | Hecho como "Lo del día": tema y productos por día, con precio real (sin % ni precio tachado inventados) |
 | 7 | Inicio: combos de temporada | SeasonalCombosRow, v1.2 | Hecho (con "Agregar todo") |
 | 8 | Inicio: pastilla "En ruta" y deslizar para actualizar | HomeScreen, v1.1 | Pendiente |
-| 9 | Búsqueda sin tildes, recientes, populares, filtros (oferta y precio) | SearchFilterRow, SearchSuggestionRow, v1.4 | Pendiente |
-| 10 | Favoritos | VerticalProductCard | Pendiente |
-| 11 | Vista rápida al mantener presionado (agregar, guardar, compartir) | QuickViewBottomSheet, v1.3 | Pendiente |
-| 12 | Ficha: zoom de la foto, precio por libra o litro, opción más barata | ProductDetailScreen, v1.3 / v1.4 | Pendiente |
-| 13 | Ficha: nutrición estimada | ProductDetailScreen, v2.2 | Pendiente |
-| 14 | Ficha: "Avísame cuando baje de precio" | PriceAlertRow, v1.2 | Pendiente |
-| 15 | Carrito: deshacer al quitar, "si algo se agota", ahorro Bravísima | CartCheckoutScreen, v2.0b1 | Pendiente |
-| 16 | Pago: horario de entrega, referencia, propina, NCF y RNC, pago desde el exterior | RdCheckoutOptionsCard, v1.2 | Pendiente |
-| 17 | Pago: opciones de pago de la 3.1 y Face ID | CartCheckoutScreen | Parcial |
-| 18 | Celebración al terminar el pedido | OrderSuccessCelebrationOverlay | Pendiente |
+| 9 | Búsqueda sin tildes, recientes, populares, filtros (oferta y precio) | SearchFilterRow, SearchSuggestionRow, v1.4 | Hecho (recientes, sugerencias, filtro por pasillo y orden por precio; sin filtro de oferta porque no hay ofertas inventadas) |
+| 10 | Favoritos | VerticalProductCard | Hecho (corazÃ³n en tarjetas y ficha; lista en Cuenta) |
+| 11 | Vista rápida al mantener presionado (agregar, guardar, compartir) | QuickViewBottomSheet, v1.3 | Hecho (menÃº nativo al mantener presionado con vista previa) |
+| 12 | Ficha: zoom de la foto, precio por libra o litro, opción más barata | ProductDetailScreen, v1.3 / v1.4 | Hecho (zoom, precio por libra o litro, opciÃ³n mÃ¡s barata del mismo pasillo) |
+| 13 | Ficha: nutrición estimada | ProductDetailScreen, v2.2 | Hecho con datos reales de Open Food Facts (marcado como referencia) |
+| 14 | Ficha: "Avísame cuando baje de precio" | PriceAlertRow, v1.2 | Hecho (avisa si el catÃ¡logo trae un precio menor; el aviso al abrir llega con #24) |
+| 15 | Carrito: deshacer al quitar, "si algo se agota", ahorro Bravísima | CartCheckoutScreen, v2.0b1 | Hecho (deshacer, "si algo se agota", puntos BravÃ­sima estimados) |
+| 16 | Pago: horario de entrega, referencia, propina, NCF y RNC, pago desde el exterior | RdCheckoutOptionsCard, v1.2 | Hecho (horario, referencia, propina, NCF B01/B02 con RNC, pago desde el exterior) |
+| 17 | Pago: opciones de pago de la 3.1 y Face ID | CartCheckoutScreen | Hecho adaptado: Face ID o cÃ³digo para confirmar; se paga al recibir o recoger (no se guardan tarjetas) |
+| 18 | Celebración al terminar el pedido | OrderSuccessCelebrationOverlay | Hecho (una rÃ¡faga de papelitos; respeta Reducir movimiento) |
 | 19 | Seguimiento del pedido con Apple Maps (ruta, etapas, compartir por WhatsApp) | DeliveryTrackingScreen, v1.4 / v2.5 | Pendiente |
 | 20 | Pedido en vivo (Live Activity y Dynamic Island) | BravoWidgets, v1.3 / v2.5 | Pendiente |
 | 21 | Widgets: Ofertas y Bravísima, con datos | BravoWidgets | Revisar |
-| 22 | Mis pedidos: calificar la entrega, repetir | AccountGridScreen, v2.0b1 | Parcial |
+| 22 | Mis pedidos: calificar la entrega, repetir | AccountGridScreen, v2.0b1 | Parcial: calificar y repetir hechos; seguimiento con #19 |
 | 23 | Listas: crear, gestionar, compartir por WhatsApp | ManagedShoppingListCard, v1.2 | Parcial |
 | 24 | Notificaciones (locales) y su pantalla de avisos | FcmPushControlAndFeedCard | Pendiente |
 | 25 | Brav IA: Copiar, Reintentar, valorar | BravIaChatScreen, v3.1 | Pendiente |
