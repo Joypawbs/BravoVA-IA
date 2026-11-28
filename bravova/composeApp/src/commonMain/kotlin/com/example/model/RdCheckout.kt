@@ -6,7 +6,7 @@ package com.example.model
  * Bravo no los ofrece en su compra en línea.
  */
 enum class RdPaymentOption(val label: String, val detail: String, val needsBiometric: Boolean) {
-    WALLET("Pago rápido", "Confirmas con Face ID o huella", true),
+    WALLET("Pago rápido", "Confirmas tu identidad", true),
     CARD("Tarjeta de crédito o débito", "Visa o Mastercard guardada", true)
 }
 

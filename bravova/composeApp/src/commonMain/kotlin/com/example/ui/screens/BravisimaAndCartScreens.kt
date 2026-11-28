@@ -1850,7 +1850,7 @@ fun CartCheckoutScreen(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(
-                                        imageVector = (if (com.example.platform.biometryIsFace()) Icons.Default.Face else Icons.Default.Fingerprint),
+                                        imageVector = (if (com.example.platform.PlatformInfo.isIos) Icons.Default.Lock else Icons.Default.Fingerprint),
                                         contentDescription = null,
                                         tint = Tone.successBright,
                                         modifier = Modifier.size(13.dp)
@@ -2472,7 +2472,7 @@ fun CartCheckoutScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = (if (com.example.platform.biometryIsFace()) Icons.Default.Face else Icons.Default.Fingerprint),
+                                    imageVector = (if (com.example.platform.PlatformInfo.isIos) Icons.Default.Lock else Icons.Default.Fingerprint),
                                     contentDescription = "Autorización con ${com.example.platform.biometryPhrase()}",
                                     tint = if (lastVerificationResult != null) Tone.successBright else primaryColor,
                                     modifier = Modifier.size(19.dp)
@@ -2528,7 +2528,7 @@ fun CartCheckoutScreen(
                             loadingText = "Procesando pago…",
                             text = if (needsBiometric) "Pagar con ${com.example.platform.biometryPhrase()} • RD$${formatMoney(payTotalRd)}"
                             else "Confirmar pedido • RD$${formatMoney(payTotalRd)}",
-                            icon = if (needsBiometric) (if (com.example.platform.biometryIsFace()) Icons.Default.Face else Icons.Default.Fingerprint) else Icons.Default.VerifiedUser,
+                            icon = if (needsBiometric) (if (com.example.platform.PlatformInfo.isIos) Icons.Default.Lock else Icons.Default.Fingerprint) else Icons.Default.VerifiedUser,
                             primaryColor = primaryColor,
                             onClick = {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
@@ -2711,7 +2711,9 @@ fun BiometricOrderPromptDialog(
     // Face ID / Touch ID / huella según el equipo (LAContext.biometryType en iOS)
     val biometry = remember { com.example.platform.deviceBiometryKind() }
     val usesFace = biometry == com.example.platform.BiometryKind.FACE_ID || biometry == com.example.platform.BiometryKind.OPTIC_ID
-    val biometryIcon = if (usesFace) Icons.Default.Face else Icons.Default.Fingerprint
+    // En iPhone, iOS ya muestra su propia animación de Face ID: aquí solo un candado discreto
+    val isIosDevice = com.example.platform.PlatformInfo.isIos
+    val biometryIcon = if (isIosDevice) Icons.Default.Lock else Icons.Default.Fingerprint
     // Los datos del cargo van en filas aparte; aquí solo la instrucción, corta y sin cortes
     val baseInstruction = "${biometry.instruction} para autorizar el pago y despachar tu pedido."
     var statusMessage by remember(request) {
@@ -2742,7 +2744,7 @@ fun BiometricOrderPromptDialog(
     fun completeVerification(hardwareResult: BiometricVerificationResult? = null) {
         if (scanState == "scanning" || scanState == "verified") return
         scanState = "scanning"
-        statusMessage = "Validando firma biométrica y criptograma de seguridad..."
+        statusMessage = "Verificando…"
         performCrispHaptic(view, HapticStyle.TICK)
         scope.launch {
             kotlinx.coroutines.delay(420L)
@@ -2758,7 +2760,7 @@ fun BiometricOrderPromptDialog(
             )
             verifiedTokenPreview = finalResult.transactionToken
             scanState = "verified"
-            statusMessage = "¡Identidad verificada! Token ${finalResult.transactionToken}"
+            statusMessage = "Listo, pago autorizado"
             HapticFeedbackManager.onCheckoutConfirm(view)
             kotlinx.coroutines.delay(320L)
             onAuthenticatedWithResult(finalResult)
@@ -2950,8 +2952,14 @@ fun BiometricOrderPromptDialog(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    // Zona del sensor de huella
-                    Box(
+                    // Zona del sensor de huella (solo Android; en iPhone la animación de Face ID la pone iOS)
+                    if (isIosDevice) {
+                        if (scanState == "scanning") {
+                            CircularProgressIndicator(color = sensorAccent, strokeWidth = 2.5.dp, modifier = Modifier.size(28.dp))
+                        } else if (scanState == "verified") {
+                            Icon(Icons.Default.CheckCircle, contentDescription = "Pago autorizado", tint = sensorAccent, modifier = Modifier.size(32.dp))
+                        }
+                    } else Box(
                         modifier = Modifier
                             .size(110.dp)
                             .clip(CircleShape)
@@ -3011,7 +3019,7 @@ fun BiometricOrderPromptDialog(
                         }
                     }
 
-                    Text(
+                    if (!isIosDevice) Text(
                         text = verifiedTokenPreview?.let { "Criptograma verificado: $it" }
                             ?: if (scanState == "verified") "Identidad confirmada" else biometry.sensorHint,
                         fontFamily = PlusJakartaSans,

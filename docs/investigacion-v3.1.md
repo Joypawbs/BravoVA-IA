@@ -71,6 +71,10 @@ Fuente: [Playing haptics](https://developer.apple.com/design/human-interface-gui
 - No abusar: si todo vibra, la vibración deja de significar algo. El impacto ligero es para objetos pequeños; la notificación de éxito, para tareas terminadas.
 - En la app, la vibración de "confirmar" se usaba en unos 40 toques comunes con un golpe medio a toda fuerza. **Hecho:** ahora es un impacto ligero, y el "éxito" queda para el pago y el pedido.
 
+## 7b. Contraste (WCAG 2.2: 4,5:1 para texto normal, 3:1 para texto grande)
+
+Medido con los colores del tema: gris secundario sobre blanco **5,0:1** y sobre el fondo **4,6:1**; gris del modo oscuro **6,5:1**; rojo Bravo sobre las tarjetas blancas **4,7:1**; blanco sobre botón rojo **4,7:1**. El único caso justo es el rojo sobre el fondo gris (**4,3:1**), donde solo va texto grande (títulos y precios), que pide 3:1. No hizo falta cambiar el color de la marca.
+
 ## 8. Otras apps de supermercado (Instacart, 2026)
 
 Fuente: [notas de versión de Instacart Storefront](https://docs.instacart.com/storefront/releases/2026_04_0_release_notes)
