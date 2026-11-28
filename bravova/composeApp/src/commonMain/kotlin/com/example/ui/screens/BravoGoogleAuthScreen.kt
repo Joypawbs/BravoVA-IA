@@ -320,7 +320,7 @@ fun BravoGoogleAuthScreen(
                                 text = "Inicia sesión con tu cuenta de Google para sincronizar tu Tarjeta Bravísima, tus órdenes y tus listas inteligentes en todos tus dispositivos.",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 lineHeight = 18.5.sp,
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -377,7 +377,7 @@ fun BravoGoogleAuthScreen(
                                             Text(
                                                 text = title,
                                                 fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.ExtraBold,
+                                                fontWeight = FontWeight.Bold,
                                                 fontSize = 12.sp,
                                                 // Sin lineHeight propio heredaba el del tema (24 sp) y las líneas quedaban separadísimas
                                                 lineHeight = 16.sp,
@@ -386,7 +386,7 @@ fun BravoGoogleAuthScreen(
                                             Text(
                                                 text = subtitle,
                                                 fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.Medium,
+                                                fontWeight = FontWeight.Normal,
                                                 fontSize = 12.sp,
                                                 lineHeight = 16.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -455,8 +455,8 @@ fun BravoGoogleAuthScreen(
                                     Text(
                                         text = "Conectando con Google...",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
                                         color = Color.White
                                     )
                                 } else {
@@ -464,8 +464,8 @@ fun BravoGoogleAuthScreen(
                                     Text(
                                         text = "Continuar con Google",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 14.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
                                         color = Color.White
                                     )
                                 }
@@ -494,8 +494,8 @@ fun BravoGoogleAuthScreen(
                                 Text(
                                     text = "Continuar como invitado",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
                                     color = primaryColor
                                 )
                             }

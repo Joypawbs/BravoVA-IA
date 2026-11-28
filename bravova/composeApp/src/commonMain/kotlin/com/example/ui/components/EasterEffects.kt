@@ -146,7 +146,7 @@ private fun SpamtonAds() {
             val text = words[(w + phase) % words.size]
             val layout = measurer.measure(
                 text,
-                TextStyle(color = color, fontSize = 22.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                TextStyle(color = color, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             )
             val pos = Offset(x * (size.width - layout.size.width).coerceAtLeast(1f), 80f + y * (size.height - 260f))
             rotate(if (i % 2 == 0) -8f else 6f, pos) {

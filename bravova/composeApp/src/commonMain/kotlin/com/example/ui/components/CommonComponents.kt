@@ -350,7 +350,7 @@ fun DiagonalMetadataStrip(
                     withStyle(
                         SpanStyle(
                             color = if (idx == 0) slashColor else textColor,
-                            fontWeight = if (idx == 0) FontWeight.ExtraBold else FontWeight.SemiBold
+                            fontWeight = if (idx == 0) FontWeight.Bold else FontWeight.SemiBold
                         )
                     ) {
                         append(part)
@@ -359,7 +359,7 @@ fun DiagonalMetadataStrip(
                         withStyle(
                             SpanStyle(
                                 color = slashColor.copy(alpha = 0.65f),
-                                fontWeight = FontWeight.Black
+                                fontWeight = FontWeight.Bold
                             )
                         ) {
                             append("  /  ")
@@ -384,7 +384,7 @@ fun DiagonalMetadataStrip(
                 Text(
                     text = part,
                     color = if (idx == 0) slashColor else textColor,
-                    fontWeight = if (idx == 0) FontWeight.ExtraBold else FontWeight.SemiBold,
+                    fontWeight = if (idx == 0) FontWeight.Bold else FontWeight.SemiBold,
                     fontSize = fontSizeSp.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -394,7 +394,7 @@ fun DiagonalMetadataStrip(
                     Text(
                         text = "  /  ",
                         color = slashColor.copy(alpha = 0.65f),
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.Bold,
                         fontSize = fontSizeSp.sp
                     )
                 }
@@ -496,8 +496,8 @@ fun AnimatedPurchaseButton(
             Text(
                 text = if (loading) (loadingText ?: text) else text,
                 fontFamily = PlusJakartaSans,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
                 color = contentColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -608,8 +608,8 @@ fun AppStartupSkeletonScreen(
             Text(
                 text = "Los expertos en vender barato",
                 fontFamily = PlusJakartaSans,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
                 letterSpacing = 0.2.sp,
                 textAlign = TextAlign.Center,
                 color = primaryTextColor
@@ -655,7 +655,7 @@ fun AppStartupSkeletonScreen(
                         text = text,
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.5.sp,
+                        fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         color = secondaryTextColor
@@ -836,7 +836,7 @@ private fun BravoArcaSelectorMenuContent(
         Text(
             text = "CAMBIAR DE TIENDA",
             fontFamily = PlusJakartaSans,
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
             letterSpacing = 0.8.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -871,8 +871,8 @@ private fun BravoArcaSelectorMenuContent(
                         Text(
                             text = "Supermercados Bravo",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
@@ -930,8 +930,8 @@ private fun BravoArcaSelectorMenuContent(
                         Text(
                             text = "El Arca Petshop",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
@@ -1301,8 +1301,8 @@ fun ProductVectorIllustration(
                 Text(
                     text = label,
                     color = if (darkMode) Color(0xFFE2E8F0) else Tone.ink,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
                     letterSpacing = 0.4.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1431,7 +1431,7 @@ fun VerticalProductCard(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .offset(x = 6.dp, y = (-6).dp)
-                            .size(40.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
                             .clickable {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
@@ -1446,7 +1446,7 @@ fun VerticalProductCard(
             Text(
                 text = product.nameWithoutUnit(),
                 style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
@@ -1492,7 +1492,7 @@ fun VerticalProductCard(
                     )
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(44.dp)
                             .clip(RoundedCornerShape(percent = addCorner))
                             .background(softAccent)
                             .clickable(interactionSource = addInteraction, indication = LocalIndication.current) {
@@ -1517,14 +1517,14 @@ fun VerticalProductCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp)
+                        .height(44.dp)
                         .clip(RoundedCornerShape(50))
                         .background(accent),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
                             .clickable {
                                 performCrispHaptic(view, HapticStyle.TICK)
@@ -1551,7 +1551,7 @@ fun VerticalProductCard(
                     )
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
                             .clickable {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
@@ -1684,7 +1684,7 @@ private fun buildBoldAnnotatedLine(rawLine: String): androidx.compose.ui.text.An
         val boldParts = cleaned.split("**")
         for (i in boldParts.indices) {
             if (i % 2 == 1) {
-                withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold)) {
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                     append(boldParts[i])
                 }
             } else {
@@ -1792,8 +1792,8 @@ fun FormattedChatText(
                         Text(
                             text = block.title,
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 14.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
                             lineHeight = 19.sp,
                             color = textColor
                         )
@@ -1820,7 +1820,7 @@ fun FormattedChatText(
                             Text(
                                 text = block.badgeNumber.toString(),
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = Color.White
                             )
@@ -1829,9 +1829,9 @@ fun FormattedChatText(
                             text = buildBoldAnnotatedLine(block.content),
                             fontFamily = PlusJakartaSans,
                             // Cuerpo en peso medio: así las **negritas** del texto sí destacan
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Normal,
                             color = textColor,
-                            fontSize = 13.5.sp,
+                            fontSize = 15.sp,
                             lineHeight = 19.5.sp,
                             letterSpacing = 0.1.sp,
                             modifier = Modifier.weight(1f)
@@ -1842,9 +1842,9 @@ fun FormattedChatText(
                     Text(
                         text = buildBoldAnnotatedLine(block.content),
                         fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                         color = textColor,
-                        fontSize = 13.8.sp,
+                        fontSize = 15.sp,
                         lineHeight = 20.sp,
                         letterSpacing = 0.1.sp
                     )
@@ -2441,7 +2441,7 @@ fun OrderSuccessCelebrationOverlay(
                     text = "Pedido $orderId • RD$$totalAmountRd",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     color = onBgMuted
                 )
                 Spacer(modifier = Modifier.height(14.dp))
@@ -2466,13 +2466,13 @@ fun OrderSuccessCelebrationOverlay(
                                 text = "$branchName • $distanceKmLabel",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 color = onBg
                             )
                             Text(
                                 text = "Llegada estimada por GPS: ~$etaMinutes min",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Medium,
+                                fontWeight = FontWeight.Normal,
                                 fontSize = 12.sp,
                                 color = onBgMuted
                             )
@@ -2504,7 +2504,7 @@ fun OrderSuccessCelebrationOverlay(
                             text = "Ver Mapa y Rastreo en Vivo",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
+                            fontSize = 15.sp,
                             maxLines = 1,
                             color = Color.White
                         )
@@ -2631,7 +2631,7 @@ fun PredictiveCatalogSearchBar(
                         Text(
                             text = placeholderText,
                             fontFamily = PlusJakartaSans,
-                            fontSize = 12.5.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.80f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -2653,14 +2653,14 @@ fun PredictiveCatalogSearchBar(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                             alpha = if (darkMode) 0.55f else 0.48f
                                         ),
-                                        fontWeight = FontWeight.Medium
+                                        fontWeight = FontWeight.Normal
                                     )
                                 ) {
                                     append(inlineGhostSuffix)
                                 }
                             },
                             fontFamily = PlusJakartaSans,
-                            fontSize = 12.5.sp,
+                            fontSize = 12.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -2673,7 +2673,7 @@ fun PredictiveCatalogSearchBar(
                         textStyle = TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.5.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         ),
                         cursorBrush = SolidColor(primaryColor),
@@ -2819,14 +2819,14 @@ fun CartSummaryBar(
             text = formatRd(total),
             color = Color.White,
             fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
+            fontSize = 20.sp,
             modifier = Modifier.weight(1f)
         )
         Text(
             text = "Ver carrito",
             color = Color.White,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 13.sp,
+            fontSize = 12.sp,
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
                 .background(Color.White.copy(alpha = 0.22f))

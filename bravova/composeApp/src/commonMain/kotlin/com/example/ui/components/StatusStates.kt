@@ -77,7 +77,7 @@ fun OfflineBanner(visible: Boolean, modifier: Modifier = Modifier) {
                 Text(
                     stringResource(Res.string.offline_banner),
                     color = MaterialTheme.colorScheme.inverseOnSurface,
-                    fontSize = 12.5.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }

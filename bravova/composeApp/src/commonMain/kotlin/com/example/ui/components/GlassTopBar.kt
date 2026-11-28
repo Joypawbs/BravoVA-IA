@@ -207,7 +207,7 @@ fun GlassTopBar(
                 modifier = Modifier.align(Alignment.Center).padding(horizontal = 14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (!subtitle.isNullOrEmpty()) {
                     Text(subtitle, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = subtitleColor ?: accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
@@ -237,14 +237,14 @@ fun GlassTopBar(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 if (a.icon != null) Icon(a.icon, contentDescription = a.label, tint = color, modifier = Modifier.size(20.dp))
-                                if (a.text != null) Text(a.text, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = color, maxLines = 1)
+                                if (a.text != null) Text(a.text, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = color, maxLines = 1)
                             }
                             if (a.badge != null) {
                                 Box(
                                     modifier = Modifier.align(Alignment.TopEnd).offset(x = 2.dp, y = 2.dp)
                                         .size(16.dp).clip(CircleShape).background(accent),
                                     contentAlignment = Alignment.Center
-                                ) { Text(a.badge, color = Color.White, fontSize = 8.5.sp, fontWeight = FontWeight.Black) }
+                                ) { Text(a.badge, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
                             }
                         }
                     }

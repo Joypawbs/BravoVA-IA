@@ -795,7 +795,7 @@ struct GlassBudgetPanelView: View {
                 .lineLimit(1)
                 .padding(.horizontal, 2)
         }
-        .controlSize(.small)
+        .controlSize(.regular) // más alto: objetivo de toque cercano a 44 pt
         .bravoGlassButton(prominent: prominent)
         .bravoGlassID("pill\(id)", in: ns)
     }
@@ -808,7 +808,7 @@ struct GlassBudgetPanelView: View {
             }
             .foregroundStyle(tinted ? m.accent : Color.primary)
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.vertical, 12) // ~41 pt de alto para tocar con comodidad
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)

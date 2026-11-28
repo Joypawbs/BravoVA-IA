@@ -148,8 +148,8 @@ fun FcmPushControlAndFeedCard(
                             Text(
                                 text = "Canales Push: Ofertas y Pedidos",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 15.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -179,7 +179,7 @@ fun FcmPushControlAndFeedCard(
                             Text(
                                 text = if (hasSystemPermission) "Alertas activas" else "Activar permiso",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = if (hasSystemPermission) Tone.successStrong else primaryColor
                             )
@@ -199,7 +199,7 @@ fun FcmPushControlAndFeedCard(
                         Text(
                             text = "CANAL DE NOTIFICACIONES EN VIVO ACTIVO",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             color = primaryColor
                         )
@@ -229,8 +229,8 @@ fun FcmPushControlAndFeedCard(
                             Text(
                                 text = topic.title,
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
@@ -282,7 +282,7 @@ fun FcmPushControlAndFeedCard(
                         Text(
                             text = "Probar oferta push",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             color = primaryColor,
                             maxLines = 1
@@ -327,8 +327,8 @@ fun FcmPushControlAndFeedCard(
                         Text(
                             text = "Bandeja de Alertas Push ($unreadCount nuevas)",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 15.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         DiagonalMetadataStrip(
@@ -361,7 +361,7 @@ fun FcmPushControlAndFeedCard(
                                 Text(
                                     text = "Leídas",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
                                     color = primaryColor
                                 )
@@ -422,7 +422,7 @@ fun FcmPushControlAndFeedCard(
                                     Text(
                                         text = if (isOrder) "PEDIDO EN TIEMPO REAL" else "OFERTA EXCLUSIVA",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
                                         color = accent,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -447,8 +447,8 @@ fun FcmPushControlAndFeedCard(
                                 Text(
                                     text = item.title,
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))

@@ -432,8 +432,8 @@ fun BravisimaScreen(
                                 Text(
                                     text = "Bravísima digital",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 28.sp,
                                     color = Color.White
                                 )
 
@@ -441,7 +441,7 @@ fun BravisimaScreen(
                                     text = bravisimaCard.holderName.uppercase(),
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
+                                    fontSize = 12.sp,
                                     letterSpacing = 1.1.sp,
                                     color = Color.White.copy(alpha = 0.96f),
                                     maxLines = 1,
@@ -497,8 +497,8 @@ fun BravisimaScreen(
                                 Text(
                                     text = displayCardNumber,
                                     fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
                                     letterSpacing = 1.sp,
                                     color = Tone.ink,
                                     maxLines = 1,
@@ -552,13 +552,13 @@ fun BravisimaScreen(
                                     text = if (bravisimaCard.isLocked) "BALANCE PROTEGIDO" else "BALANCE DISPONIBLE",
                                     fontSize = 12.sp,
                                     letterSpacing = 0.7.sp,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     color = Color.White.copy(alpha = 0.94f)
                                 )
                                 Text(
                                     text = "RD$${formatMoney(balance)}.00",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 28.sp,
                                     color = Color.White
                                 )
@@ -598,8 +598,8 @@ fun BravisimaScreen(
                                     Text(
                                         text = "Escanear",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
                                         maxLines = 1,
                                         softWrap = false,
                                         overflow = TextOverflow.Ellipsis
@@ -627,8 +627,8 @@ fun BravisimaScreen(
                                     Text(
                                         text = if (bravisimaCard.isLocked) "Bloqueada" else "Canjear en carrito",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
                                         maxLines = 1,
                                         softWrap = false,
                                         overflow = TextOverflow.Ellipsis
@@ -678,14 +678,14 @@ fun BravisimaScreen(
                                     Text(
                                         text = "Vincula tu cuenta de Google",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 14.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
                                         text = "Inicia sesión con tu cuenta de Google para sincronizar y gestionar tu Tarjeta Bravísima en todos tus dispositivos.",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Medium,
+                                        fontWeight = FontWeight.Normal,
                                         fontSize = 12.sp,
                                         lineHeight = 15.5.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -750,8 +750,8 @@ fun BravisimaScreen(
                                     Text(
                                         text = "Conectando con Google...",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
                                         color = Color.White
                                     )
                                 } else {
@@ -759,8 +759,8 @@ fun BravisimaScreen(
                                     Text(
                                         text = "Iniciar sesión con Google",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
                                         color = Color.White
                                     )
                                 }
@@ -801,8 +801,8 @@ fun BravisimaScreen(
                                         Text(
                                             text = bravisimaCard.holderName,
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 13.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
@@ -849,7 +849,7 @@ fun BravisimaScreen(
                                 Text(
                                     text = "Salir",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
                                     color = primaryColor
                                 )
@@ -888,8 +888,8 @@ fun BravisimaScreen(
                             Text(
                                 text = "Gestionar mi Bravísima",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
                             )
@@ -921,8 +921,8 @@ fun BravisimaScreen(
                                 Text(
                                     text = "Nivel ${tier.label} • RD$${formatMoney(bravisimaCard.lifetimeEarned)}",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Surface(
@@ -932,7 +932,7 @@ fun BravisimaScreen(
                                     Text(
                                         text = if (nextTarget != null) "Meta: RD$$nextTarget" else "Nivel máximo",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
                                         color = if (darkMode) Color.White else BravoRedDark,
                                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
@@ -980,8 +980,8 @@ fun BravisimaScreen(
                             Text(
                                 text = "${tier.benefitSummary} • Meta mensual: RD$${formatMoney(bravisimaCard.balance)} / RD$${formatMoney(bravisimaCard.monthlyGoal)} (${(goalProgress * 100).roundToInt()}%)",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 12.sp,
                                 lineHeight = 18.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.86f)
                             )
@@ -1009,7 +1009,7 @@ fun BravisimaScreen(
                                         text = if (bravisimaCard.isLocked) "Tarjeta bloqueada" else "Seguridad de tarjeta activa",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp,
+                                        fontSize = 15.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
@@ -1019,7 +1019,7 @@ fun BravisimaScreen(
                                             "Toca para bloquear temporalmente tu Bravísima"
                                         },
                                         fontFamily = PlusJakartaSans,
-                                        fontSize = 12.5.sp,
+                                        fontSize = 12.sp,
                                         lineHeight = 17.sp,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f)
                                     )
@@ -1060,13 +1060,13 @@ fun BravisimaScreen(
                                         text = "Canje automático en carrito",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp,
+                                        fontSize = 15.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
                                         text = "Aplica tu balance Bravísima al pagar automáticamente",
                                         fontFamily = PlusJakartaSans,
-                                        fontSize = 12.5.sp,
+                                        fontSize = 12.sp,
                                         lineHeight = 17.sp,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f)
                                     )
@@ -1114,7 +1114,7 @@ fun BravisimaScreen(
                                     text = "Personalizar titular, meta y pasillo favorito",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
+                                    fontSize = 12.sp,
                                     color = primaryColor
                                 )
                             }
@@ -1167,7 +1167,7 @@ fun BravisimaScreen(
                                             Text(
                                                 text = "RD$$goalOption",
                                                 fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.ExtraBold,
+                                                fontWeight = FontWeight.Bold,
                                                 fontSize = 12.sp,
                                                 color = if (selected) Color.White else primaryColor,
                                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -1203,7 +1203,7 @@ fun BravisimaScreen(
                                             Text(
                                                 text = catOption,
                                                 fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.ExtraBold,
+                                                fontWeight = FontWeight.Bold,
                                                 fontSize = 12.sp,
                                                 color = if (selected) Color.White else primaryColor,
                                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -1227,8 +1227,8 @@ fun BravisimaScreen(
                                     Text(
                                         text = if (isGuestMode) "Guardar en mi dispositivo" else "Guardar Cambios en mi Cuenta",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 12.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
                                         color = Color.White
                                     )
                                 }
@@ -1256,8 +1256,8 @@ fun BravisimaScreen(
                             Text(
                                 text = "Activar código promocional",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 15.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
                             )
@@ -1303,8 +1303,8 @@ fun BravisimaScreen(
                                 Text(
                                     text = "Aplicar",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 12.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
                                     color = Color.White
                                 )
                             }
@@ -1339,7 +1339,7 @@ fun BravisimaScreen(
                                     Text(
                                         text = if (alreadyClaimed) "$code ✓ Canjeado" else "$code ($reward)",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
                                         color = if (alreadyClaimed) {
                                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f)
@@ -1373,8 +1373,8 @@ fun BravisimaScreen(
                             Text(
                                 text = "Progreso en tu carrito actual",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
                             )
@@ -1390,7 +1390,7 @@ fun BravisimaScreen(
                         Text(
                             text = "Recibes RD$1.00 de retorno automático por cada RD$100.00 en compras.",
                             fontFamily = PlusJakartaSans,
-                            fontSize = 12.5.sp,
+                            fontSize = 12.sp,
                             lineHeight = 18.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.84f),
                             textAlign = TextAlign.Center,
@@ -1434,8 +1434,8 @@ fun BravisimaScreen(
                             Text(
                                 text = "Movimientos recientes (${movements.size})",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
                             )
@@ -1446,7 +1446,7 @@ fun BravisimaScreen(
                             Text(
                                 text = "Aún no hay movimientos registrados en tu Tarjeta Bravísima.",
                                 fontFamily = PlusJakartaSans,
-                                fontSize = 12.5.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
@@ -1541,7 +1541,7 @@ private fun MovementRow(
                 text = title,
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.5.sp,
+                fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
             DiagonalMetadataStrip(
@@ -1554,8 +1554,8 @@ private fun MovementRow(
         Text(
             text = amountText,
             fontFamily = PlusJakartaSans,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 14.5.sp,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
             color = if (isPositive) {
                 if (darkMode) Color(0xFF34D399) else Tone.successStrong
             } else {
@@ -1662,7 +1662,7 @@ fun CartCheckoutScreen(
                         Text(
                             text = stringResource(Res.string.cart_empty_title),
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -1721,7 +1721,7 @@ fun CartCheckoutScreen(
                                 text = product.name,
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 13.5.sp,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -1735,8 +1735,8 @@ fun CartCheckoutScreen(
                             Text(
                                 text = "RD$${formatMoney(product.price * qty)}.00",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = primaryColor
                             )
                         }
@@ -1773,8 +1773,8 @@ fun CartCheckoutScreen(
                             Text(
                                 text = qty.toString(),
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
 
@@ -1824,8 +1824,8 @@ fun CartCheckoutScreen(
                                 Text(
                                     text = "Pago y entrega",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 15.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
@@ -1853,7 +1853,7 @@ fun CartCheckoutScreen(
                                     Text(
                                         text = "3DS + ${com.example.platform.biometryLabel()}",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
                                         color = Tone.successBright,
                                         maxLines = 1,
@@ -1885,8 +1885,8 @@ fun CartCheckoutScreen(
                                     Text(
                                         text = "Entrega a domicilio",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
@@ -1957,7 +1957,7 @@ fun CartCheckoutScreen(
                                         Text(
                                             text = "Nueva tarjeta",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             color = primaryColor
                                         )
@@ -2030,7 +2030,7 @@ fun CartCheckoutScreen(
                                                 Text(
                                                     text = "${method.brand} •••• ${method.last4}",
                                                     fontFamily = PlusJakartaSans,
-                                                    fontWeight = FontWeight.ExtraBold,
+                                                    fontWeight = FontWeight.Bold,
                                                     fontSize = 12.sp,
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
@@ -2122,7 +2122,7 @@ fun CartCheckoutScreen(
                         Text(
                             text = "Si algo se agota",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -2168,7 +2168,7 @@ fun CartCheckoutScreen(
                                             text = pref.label,
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 14.sp,
+                                            fontSize = 15.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
@@ -2205,8 +2205,8 @@ fun CartCheckoutScreen(
                             Text(
                                 text = "Resumen de compra",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 16.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
                             )
@@ -2286,7 +2286,7 @@ fun CartCheckoutScreen(
                                     },
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
+                                    fontSize = 12.sp,
                                     color = if (isBravisimaLocked) Tone.brand else MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
@@ -2320,7 +2320,7 @@ fun CartCheckoutScreen(
                                         Text(
                                             text = "Desbloquear",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             color = Tone.brand
                                         )
@@ -2357,7 +2357,7 @@ fun CartCheckoutScreen(
                                 Text("Descuento Bravísima (Autorizado)", color = Tone.success)
                                 Text(
                                     "-RD$${formatMoney(cartTotals.redeemed)}.00",
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     color = Tone.success
                                 )
                             }
@@ -2390,15 +2390,15 @@ fun CartCheckoutScreen(
                             Text(
                                 text = if (checkoutExtras.tipRd > 0) "Total con propina" else "Total a pagar",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "RD$${formatMoney(cartTotals.finalPay.roundToInt() + checkoutExtras.tipRd)}.00",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 23.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 28.sp,
                                 color = primaryColor
                             )
                         }
@@ -2479,7 +2479,7 @@ fun CartCheckoutScreen(
                                         "Pago verificado • ${it.transactionToken}"
                                     } ?: "Confirmación con ${com.example.platform.biometryLabel()}",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -2492,7 +2492,7 @@ fun CartCheckoutScreen(
                                         }
                                     } ?: "Al pagar se te pedirá ${com.example.platform.biometryPhrase()}.",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Medium,
+                                    fontWeight = FontWeight.Normal,
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -2598,7 +2598,7 @@ fun CartCheckoutScreen(
                                     text = "¿Deseas ajustar este carrito a un presupuesto menor?",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -2841,7 +2841,7 @@ fun BiometricOrderPromptDialog(
                             Text(
                                 text = request.badgeTitle,
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = sensorAccent
                             )
@@ -2851,8 +2851,8 @@ fun BiometricOrderPromptDialog(
                     Text(
                         text = request.title,
                         fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center
                     )
@@ -2860,7 +2860,7 @@ fun BiometricOrderPromptDialog(
                     Text(
                         text = statusMessage,
                         fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                         fontSize = 12.sp,
                         color = if (scanState == "verified") Tone.successBright else MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -2887,7 +2887,7 @@ fun BiometricOrderPromptDialog(
                                 Text(
                                     text = "RD$${formatMoney(request.amountRd)}.00",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -2899,7 +2899,7 @@ fun BiometricOrderPromptDialog(
                                         Text(
                                             text = "+RD$${request.cashbackRd} Bravísima",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             maxLines = 1,
                                             color = Tone.successBright,
@@ -2924,7 +2924,7 @@ fun BiometricOrderPromptDialog(
                                         text = label,
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.SemiBold,
-                                        fontSize = 12.5.sp,
+                                        fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         modifier = Modifier.width(72.dp)
@@ -2933,7 +2933,7 @@ fun BiometricOrderPromptDialog(
                                         text = value,
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 12.5.sp,
+                                        fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         textAlign = TextAlign.End,
                                         maxLines = 2,
@@ -3062,8 +3062,8 @@ fun BiometricOrderPromptDialog(
                             Text(
                                 text = "Usar ${biometry.displayName}",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
                                 maxLines = 1,
                                 softWrap = false
                             )
@@ -3276,7 +3276,7 @@ fun DeliveryTrackingScreen(
                                     Text(
                                         text = if (ordStage == OrderDeliveryStage.DELIVERED) "#${ord.id}" else "#${ord.id} • ${ordStage.progressPct}%",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
                                         maxLines = 1,
                                         softWrap = false,
@@ -3326,7 +3326,7 @@ fun DeliveryTrackingScreen(
                                 Text(
                                     text = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Recorrido del pedido" else "Mapa en vivo",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1
@@ -3378,7 +3378,7 @@ fun DeliveryTrackingScreen(
                                         Text(
                                             text = "Mi ubicación",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
@@ -3416,7 +3416,7 @@ fun DeliveryTrackingScreen(
                                         Text(
                                             text = if (driverTelemetry.isAutoSimulating) "Ruta en vivo" else "Reanudar ruta",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             color = if (driverTelemetry.isAutoSimulating) Tone.success else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -3446,7 +3446,7 @@ fun DeliveryTrackingScreen(
                                         Text(
                                             text = "Tráfico ahora",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
@@ -3523,8 +3523,8 @@ fun DeliveryTrackingScreen(
                                             Text(
                                                 text = "${driverTelemetry.currentSpeedKmh} km/h",
                                                 fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 13.5.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 15.sp,
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
@@ -3568,8 +3568,8 @@ fun DeliveryTrackingScreen(
                                                     else -> "Tráfico fluido"
                                                 },
                                                 fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 12.5.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.sp,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
@@ -3598,8 +3598,8 @@ fun DeliveryTrackingScreen(
                                         Text(
                                             text = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Entregado" else "~$effectiveEtaMinutes min",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 13.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
                                             color = primaryColor
                                         )
                                         Text(
@@ -3709,7 +3709,7 @@ fun DeliveryTrackingScreen(
                                 Text(
                                     text = "En vivo • #${orderIdDisplay}",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
                                     color = Tone.success,
                                     maxLines = 1,
@@ -3750,8 +3750,8 @@ fun DeliveryTrackingScreen(
                                     Text(
                                         text = deliveryStage.statusText,
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 19.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.testTag("order_delivery_status_label")
                                     )
@@ -3786,8 +3786,8 @@ fun DeliveryTrackingScreen(
                                 Text(
                                     text = "${deliveryStage.progressPct}%",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1,
                                     softWrap = false
@@ -3887,7 +3887,7 @@ fun DeliveryTrackingScreen(
                                         text = stage.shortLabel,
                                         style = androidx.compose.ui.text.TextStyle(
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = if (isCurrent) FontWeight.ExtraBold else FontWeight.SemiBold,
+                                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.SemiBold,
                                             textAlign = TextAlign.Center,
                                             color = when {
                                                 isCurrent -> primaryColor
@@ -3898,7 +3898,7 @@ fun DeliveryTrackingScreen(
                                         maxLines = 1,
                                         softWrap = false,
                                         autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(
-                                            minFontSize = 9.sp,
+                                            minFontSize = 12.sp,
                                             maxFontSize = 12.sp,
                                             stepSize = 0.5.sp
                                         ),
@@ -3916,7 +3916,7 @@ fun DeliveryTrackingScreen(
                             Text(
                                 text = firestoreSyncStatus,
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
+                                fontWeight = FontWeight.Normal,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,
@@ -3947,7 +3947,7 @@ fun DeliveryTrackingScreen(
                                 Text(
                                     text = "Actualizar etapa de entrega",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
                                     color = primaryColor
                                 )
@@ -3976,7 +3976,7 @@ fun DeliveryTrackingScreen(
                                 Text(
                                     text = "Artículos en este envío (${trackedProducts.size})",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     textAlign = TextAlign.Center
@@ -4169,8 +4169,8 @@ private fun LiveDeliveryNotificationBannerCard(
                         Text(
                             text = activeTitle,
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -4178,7 +4178,7 @@ private fun LiveDeliveryNotificationBannerCard(
                         Text(
                             text = activeSubtitle,
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Normal,
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 2,
@@ -4210,7 +4210,7 @@ private fun LiveDeliveryNotificationBannerCard(
                             Text(
                                 text = "$speedKmh km/h",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = primaryColor
                             )
@@ -4258,7 +4258,7 @@ private fun LiveDeliveryNotificationBannerCard(
                 Text(
                     text = "${(progressFraction * 100).roundToInt()}%",
                     fontFamily = PlusJakartaSans,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
                     // Mismo verde que la barra: el porcentaje es avance, no una alerta
                     color = Tone.success
@@ -4694,7 +4694,7 @@ private fun RealInteractiveDeliveryMapView(
                 Text(
                     text = "${telemetry.currentStreet} • Tiempo Real 1:1",
                     fontFamily = PlusJakartaSans,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -4789,7 +4789,7 @@ private fun RealInteractiveDeliveryMapView(
                     Text(
                         text = if (followDriver) "Siguiendo" else "Centrar",
                         fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = if (followDriver) Color.White else MaterialTheme.colorScheme.onSurface
                     )
@@ -4901,7 +4901,7 @@ private fun DriverAiLiveChatCard(
                             Text(
                                 text = "Carlos Rodríguez",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
@@ -4915,7 +4915,7 @@ private fun DriverAiLiveChatCard(
                                 Text(
                                     text = if (telemetry.currentSpeedKmh > 0) "${telemetry.currentSpeedKmh} km/h" else "Detenido",
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
                                     color = Tone.success,
                                     maxLines = 1,
@@ -5035,7 +5035,7 @@ private fun DriverAiLiveChatCard(
                                     Text(
                                         text = if (isUser) "Tú" else "Carlos Rodríguez (repartidor)",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
                                         color = if (isUser) Color.White.copy(alpha = 0.9f) else primaryColor
                                     )
@@ -5051,7 +5051,7 @@ private fun DriverAiLiveChatCard(
                                     text = msg.text,
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.SemiBold,
-                                    fontSize = 12.5.sp,
+                                    fontSize = 12.sp,
                                     lineHeight = 17.5.sp,
                                     color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface
                                 )
@@ -5101,8 +5101,8 @@ private fun DriverAiLiveChatCard(
                         Text(
                             text = "Escribe un mensaje al repartidor Carlos...",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -5115,7 +5115,7 @@ private fun DriverAiLiveChatCard(
                         textStyle = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
+                            fontSize = 12.sp
                         ),
                         cursorBrush = SolidColor(primaryColor),
                         modifier = Modifier

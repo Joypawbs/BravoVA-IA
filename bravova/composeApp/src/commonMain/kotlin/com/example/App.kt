@@ -487,7 +487,7 @@ fun BravoVaApp(
                     val isAiAmbientActive = isAiGenerating
                     val aiAmbientAlpha by animateFloatAsState(
                         targetValue = if (isAiGenerating) (if (darkMode) 0.10f else 0.16f) else 0f,
-                        animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+                        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
                         label = "global_ai_ambient_alpha"
                     )
                     // Rendimiento: el brillo del fondo da una vuelta cada 12 s y se mueve apenas un 6 %.
@@ -526,17 +526,17 @@ fun BravoVaApp(
                     }
                     val topGlowColor by animateColorAsState(
                         targetValue = targetTopGlowColor,
-                        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+                        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
                         label = "ambientTopColor"
                     )
                     val midGlowColor by animateColorAsState(
                         targetValue = targetMidGlowColor,
-                        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+                        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
                         label = "ambientMidColor"
                     )
                     val bottomGlowColor by animateColorAsState(
                         targetValue = targetBottomGlowColor,
-                        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+                        animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
                         label = "ambientBottomColor"
                     )
                     val rootBgColor = MaterialTheme.colorScheme.background
@@ -1226,7 +1226,7 @@ fun BravoVaApp(
                                         Text(
                                             text = activeToast.message,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Medium,
+                                            fontWeight = FontWeight.Normal,
                                             maxLines = 2,
                                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                             modifier = Modifier.weight(1f, fill = false)

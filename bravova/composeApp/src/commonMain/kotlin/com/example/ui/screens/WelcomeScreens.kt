@@ -93,7 +93,7 @@ fun WelcomeFlow(onFinish: (store: String, branch: String?) -> Unit) {
                 text = "Paso 1 de 2",
                 fontFamily = PlusJakartaSans,
                 fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f)
             )
@@ -127,7 +127,7 @@ fun WelcomeFlow(onFinish: (store: String, branch: String?) -> Unit) {
             Spacer(Modifier.height(8.dp))
             Text(
                 "Puedes cambiarla luego en Cuenta > Direcciones.",
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -147,8 +147,8 @@ fun WelcomeFlow(onFinish: (store: String, branch: String?) -> Unit) {
             Text(
                 text = "Continuar",
                 fontFamily = PlusJakartaSans,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 16.sp
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
             )
         }
     }
@@ -159,7 +159,7 @@ private fun WelcomeTitle(title: String, body: String) {
     Text(
         text = title,
         fontFamily = PlusJakartaSans,
-        fontWeight = FontWeight.ExtraBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 34.sp,
         color = MaterialTheme.colorScheme.onSurface,

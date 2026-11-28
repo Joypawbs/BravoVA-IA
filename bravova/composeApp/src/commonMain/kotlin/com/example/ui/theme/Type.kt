@@ -45,67 +45,69 @@ val InterFont: FontFamily
  * tarjetas, avisos). En em se escala solo. Con el tamaño propio de cada estilo, el resultado
  * es el mismo que antes (p. ej. bodyLarge: 15 sp × 1.4667 = 22 sp).
  */
+// Escala única (3.2): 4 tamaños (12 · 15 · 20 · 28 sp) y 3 grosores (Normal · SemiBold · Bold).
+// Los comentarios "// N sp" de interlineado son de la escala anterior; el interlineado va en em y se ajusta solo.
 val Typography: Typography
     @Composable get() = Typography(
     displayLarge = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
+        fontSize = 28.sp,
         lineHeight = 1.25.em,      // 40 sp
         letterSpacing = (-0.2).sp
     ),
     headlineLarge = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 25.sp,
+        fontSize = 28.sp,
         lineHeight = 1.28.em,      // 32 sp
         letterSpacing = (-0.1).sp
     ),
     headlineMedium = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 21.sp,
+        fontSize = 20.sp,
         lineHeight = 1.3333.em,    // 28 sp
         letterSpacing = (-0.05).sp
     ),
     titleLarge = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
+        fontSize = 20.sp,
         lineHeight = 1.3333.em,    // 24 sp
         letterSpacing = 0.05.sp
     ),
     titleMedium = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 15.5.sp,
+        fontSize = 15.sp,
         lineHeight = 1.4194.em,    // 22 sp
         letterSpacing = 0.08.sp
     ),
     titleSmall = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 13.5.sp,
+        fontSize = 15.sp,
         lineHeight = 1.4074.em,    // 19 sp
         letterSpacing = 0.1.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = RoundedBodyFont,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
         fontSize = 15.sp,
         lineHeight = 1.4667.em,    // 22 sp
         letterSpacing = 0.15.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = RoundedBodyFont,
-        fontWeight = FontWeight.Medium,
-        fontSize = 13.5.sp,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
         lineHeight = 1.4444.em,    // 19.5 sp
         letterSpacing = 0.14.sp
     ),
     bodySmall = TextStyle(
         fontFamily = RoundedBodyFont,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 1.4167.em,    // 17 sp
         letterSpacing = 0.15.sp
@@ -113,7 +115,7 @@ val Typography: Typography
     labelLarge = TextStyle(
         fontFamily = RoundedDisplayFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 13.sp,
+        fontSize = 15.sp,
         lineHeight = 1.3846.em,    // 18 sp
         letterSpacing = 0.18.sp
     ),

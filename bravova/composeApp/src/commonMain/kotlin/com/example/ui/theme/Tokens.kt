@@ -50,11 +50,9 @@ object Tone {
 
 /** Escala de texto: nada por debajo de 12 sp para que se lea bien en el súper. */
 object TypeScale {
-    val caption = 12.sp      // etiquetas, insignias, notas
-    val footnote = 13.sp     // texto secundario
-    val body = 15.sp         // texto normal
-    val headline = 17.sp     // títulos de tarjeta
-    val title = 22.sp        // títulos de sección
+    val caption = 12.sp      // etiquetas, insignias, notas y texto secundario
+    val body = 15.sp         // texto normal y títulos de tarjeta
+    val title = 20.sp        // títulos de sección
     val largeTitle = 28.sp   // título grande de pantalla
     /** Mínimo permitido en toda la app. */
     val minimum = 12.sp

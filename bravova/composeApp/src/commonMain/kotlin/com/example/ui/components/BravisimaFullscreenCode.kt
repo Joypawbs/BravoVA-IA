@@ -72,7 +72,7 @@ fun BravisimaFullscreenCode(cardNumber: String, memberName: String, onDismiss: (
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text("Tarjeta Bravísima", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = Color(0xFFE31837))
+                Text("Tarjeta Bravísima", fontWeight = FontWeight.Bold, fontSize = 28.sp, color = Color(0xFFE31837))
                 Text(memberName, fontSize = 15.sp, color = Color(0xFF374151))
                 Spacer(Modifier.height(28.dp))
                 // Zona en blanco a los lados (10 módulos) que los lectores necesitan
@@ -100,7 +100,7 @@ fun BravisimaFullscreenCode(cardNumber: String, memberName: String, onDismiss: (
                 Spacer(Modifier.height(28.dp))
                 Text(
                     "Muéstralo en la caja para acumular y canjear tu balance.\nToca en cualquier lugar para cerrar.",
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     color = Color(0xFF6B7280)
                 )

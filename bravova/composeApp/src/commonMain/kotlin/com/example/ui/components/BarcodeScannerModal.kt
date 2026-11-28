@@ -158,8 +158,8 @@ fun BarcodeScannerModal(
                         Text(
                             text = "Escáner Óptico BravoVa",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
                             color = Color.White
                         )
                         Text(
@@ -340,7 +340,7 @@ fun BarcodeScannerModal(
                     Text(
                         text = "PRUEBA RÁPIDA DE PRODUCTOS:",
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.Bold,
                         letterSpacing = 0.7.sp,
                         color = Color.White.copy(alpha = 0.65f)
                     )
@@ -410,7 +410,7 @@ fun BarcodeScannerModal(
                                     Text(
                                         text = selectedProduct.name,
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
                                         color = ScannerText,
                                         maxLines = 2,
@@ -424,8 +424,8 @@ fun BarcodeScannerModal(
                                     Text(
                                         text = "RD$${selectedProduct.price}.00",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp,
                                         color = ScannerPrice
                                     )
                                 }
@@ -479,7 +479,7 @@ fun BarcodeScannerModal(
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "Agregar",
-                                        fontWeight = FontWeight.ExtraBold
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }

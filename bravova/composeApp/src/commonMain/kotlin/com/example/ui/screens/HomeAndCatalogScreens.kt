@@ -348,7 +348,7 @@ fun HomeScreen(
                             Text(
                                 text = "En ruta",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = Tone.success,
                                 maxLines = 1
@@ -469,8 +469,8 @@ fun HomeScreen(
                             Text(
                                 text = stringResource(Res.string.search_results_for, debouncedQuery),
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             BravoUnderline(isArca = isArca)
@@ -602,8 +602,8 @@ fun HomeScreen(
                                         Text(
                                             text = if (orderInProgress) "Tu pedido va en camino" else stringResource(Res.string.repeat_title),
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 14.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
@@ -627,8 +627,8 @@ fun HomeScreen(
                                             text = if (orderInProgress) "Ver" else stringResource(Res.string.repeat_button),
                                             color = Color.White,
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp,
                                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
                                         )
                                     }
@@ -729,7 +729,7 @@ fun HomeScreen(
                                 text = "TODAS LAS CATEGORÍAS",
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
+                                fontSize = 15.sp,
                                 letterSpacing = 0.5.sp,
                                 modifier = Modifier.weight(1f)
                             )
@@ -866,8 +866,8 @@ fun HomeScreen(
                                                 "Compra con Brav IA"
                                             },
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 16.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         BravoUnderline(isArca = isArca)
@@ -917,7 +917,7 @@ fun HomeScreen(
                                         Text(
                                             text = "Mis listas inteligentes",
                                             fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.ExtraBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             color = primaryColor
                                         )
@@ -1518,8 +1518,8 @@ fun ProductDetailScreen(
                     Text(
                         text = product.name,
                         fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 21.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
                         lineHeight = 26.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -1536,13 +1536,13 @@ fun ProductDetailScreen(
                             Text(
                                 text = "RD$${formatCurrency(product.price)}.00",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 25.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 28.sp,
                                 color = primaryColor
                             )
                             Text(
                                 text = "/ ${product.unit}",
-                                fontSize = 12.5.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(bottom = 3.dp)
@@ -1556,7 +1556,7 @@ fun ProductDetailScreen(
                     if (unitPriceInfo != null) {
                         Text(
                             text = stringResource(Res.string.unit_price_equals, formatUnitPrice(unitPriceInfo.first, unitPriceInfo.second)),
-                            fontSize = 12.5.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.testTag("unit_price_label")
@@ -1692,8 +1692,8 @@ fun ProductDetailScreen(
                         Text(
                             text = "Nutrición e ingredientes (estimado)",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 14.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface,
                             textAlign = TextAlign.Center
                         )
@@ -1702,7 +1702,7 @@ fun ProductDetailScreen(
                         Text(
                             text = "Valores aproximados según el tipo de producto. Si tienes alergias o sigues una dieta médica, revisa la etiqueta del empaque.",
                             fontFamily = PlusJakartaSans,
-                            fontSize = 11.5.sp,
+                            fontSize = 12.sp,
                             lineHeight = 16.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
@@ -1737,7 +1737,7 @@ fun ProductDetailScreen(
                                         nut.caloriesPortionLabel
                                     },
                                     fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp,
                                     color = primaryColor
                                 )
@@ -1761,7 +1761,7 @@ fun ProductDetailScreen(
                         Text(
                             text = "Ingredientes",
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -1865,8 +1865,8 @@ fun ProductDetailScreen(
                             Text(
                                 text = "Total: RD$${formatCurrency(accumulatedPrice)}.00",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 19.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -1900,7 +1900,7 @@ fun ProductDetailScreen(
                             Text(
                                 text = "$effectiveQty",
                                 fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -1959,8 +1959,8 @@ fun ProductDetailScreen(
                                     Text(
                                         text = "Remover",
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
                                         color = if (darkMode) Color(0xFFFDA4AF) else Tone.dangerStrong
                                     )
                                 }
@@ -2028,7 +2028,7 @@ fun ProductDetailScreen(
                                 text = "Pregúntale a Brav IA por recetas o alergias",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 12.5.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -2246,7 +2246,7 @@ private fun DailyRotatingOffersCarouselSection(
                                     Text(
                                         text = categoryBadge,
                                         fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
                                         color = primaryColor,
                                         maxLines = 1,
@@ -2257,7 +2257,7 @@ private fun DailyRotatingOffersCarouselSection(
                                     text = offer.title,
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp,
+                                    fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis
