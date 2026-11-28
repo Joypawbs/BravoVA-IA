@@ -63,6 +63,15 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.platform.Log
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -1479,6 +1488,19 @@ fun BravIaChatScreen(
                                         }
                                     }
                                 }
+
+                                // Guía de IA generativa de Apple: Reintentar y Copiar junto a la
+                                // respuesta, y una valoración voluntaria que no interrumpe el chat.
+                                if (!isUser && !isLatestAiResponding && msg.text.isNotBlank()) {
+                                    AiReplyActions(
+                                        messageId = msg.id,
+                                        text = msg.text,
+                                        accent = primaryColor,
+                                        canRetry = precedingUserQuery.isNotBlank() && !isGenerating,
+                                        onRetry = { onSendPrompt(precedingUserQuery) },
+                                        showDisclaimer = msg.id == messages.lastOrNull()?.id
+                                    )
+                                }
                             }
 
                             if (!isUser && recommendedProducts.isNotEmpty()) {
@@ -1488,7 +1510,7 @@ fun BravIaChatScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = "Artículos del Catálogo (${recommendedProducts.size})",
+                                        text = "Artículos del catálogo (${recommendedProducts.size})",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 13.5.sp,
@@ -3998,7 +4020,7 @@ fun AccountSubScreenView(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Buzón de Sugerencias y Mejora Continua",
+                                    text = "Buzón de sugerencias y mejora continua",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.5.sp,
@@ -4240,6 +4262,84 @@ fun AccountSubScreenView(
             },
             backLabel = "Volver a mi cuenta",
             backTestTag = "account_sub_back_button"
+        )
+    }
+}
+
+/**
+ * Acciones bajo cada respuesta de Brav IA (guía de IA generativa de Apple): Copiar, Reintentar y
+ * una valoración 👍/👎 voluntaria. La valoración solo cambia el icono y queda en el registro: no
+ * interrumpe la conversación ni abre formularios.
+ */
+@Composable
+private fun AiReplyActions(
+    messageId: Long,
+    text: String,
+    accent: Color,
+    canRetry: Boolean,
+    onRetry: () -> Unit,
+    showDisclaimer: Boolean
+) {
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    var copied by remember(messageId) { mutableStateOf(false) }
+    var rating by rememberSaveable(messageId) { mutableStateOf(0) } // 1 = útil, -1 = no útil
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
+    LaunchedEffect(copied) {
+        if (copied) { kotlinx.coroutines.delay(1500); copied = false }
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        @Composable
+        fun action(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, tint: Color, enabled: Boolean = true, onClick: () -> Unit) {
+            IconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(36.dp)) {
+                Icon(icon, contentDescription = label, tint = if (enabled) tint else tint.copy(alpha = 0.35f), modifier = Modifier.size(18.dp))
+            }
+        }
+        action(
+            if (copied) Icons.Default.Check else Icons.Default.ContentCopy,
+            if (copied) "Copiado" else "Copiar respuesta",
+            if (copied) accent else muted
+        ) {
+            clipboard.setText(androidx.compose.ui.text.AnnotatedString(text))
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            copied = true
+        }
+        action(Icons.Default.Refresh, "Reintentar respuesta", muted, enabled = canRetry) {
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            onRetry()
+        }
+        Spacer(Modifier.weight(1f))
+        action(
+            if (rating == 1) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+            "Respuesta útil",
+            if (rating == 1) accent else muted
+        ) {
+            rating = if (rating == 1) 0 else 1
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            Log.d("BravIA", "valoracion mensaje=$messageId util=$rating")
+        }
+        action(
+            if (rating == -1) Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
+            "Respuesta no útil",
+            if (rating == -1) accent else muted
+        ) {
+            rating = if (rating == -1) 0 else -1
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            Log.d("BravIA", "valoracion mensaje=$messageId util=$rating")
+        }
+    }
+    if (showDisclaimer) {
+        Text(
+            text = "Brav IA puede equivocarse. Revisa precios y cantidades antes de pedir.",
+            style = MaterialTheme.typography.labelSmall,
+            color = muted.copy(alpha = 0.8f),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp)
         )
     }
 }
