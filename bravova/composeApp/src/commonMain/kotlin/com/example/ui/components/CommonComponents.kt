@@ -2432,7 +2432,7 @@ fun OrderSuccessCelebrationOverlay(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Orden $orderId • RD$$totalAmountRd",
+                    text = "Pedido $orderId • RD$$totalAmountRd",
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,

@@ -377,7 +377,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         BravisimaMovement(
             id = "mov_seed_1",
             title = "Compra Bravo Churchill",
-            subtitle = "Orden #ORD-88412 • Retorno 1%",
+            subtitle = "Pedido #ORD-88412 • Retorno 1%",
             dateLabel = "Hace 3 días",
             amount = 24,
             movementType = "earn",
@@ -386,7 +386,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         BravisimaMovement(
             id = "mov_seed_2",
             title = "Compra Bravo Enriquillo",
-            subtitle = "Orden #ORD-87905 • Retorno 1%",
+            subtitle = "Pedido #ORD-87905 • Retorno 1%",
             dateLabel = "18 Mar",
             amount = 19,
             movementType = "earn",
@@ -1361,7 +1361,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         if (showFeedbackToast) {
             showToast(
                 stage.emoji,
-                "Orden #${updatedOrder.id}: ${stage.statusText} (${stage.progressPct}%)"
+                "Pedido #${updatedOrder.id}: ${stage.statusText} (${stage.progressPct}%)"
             )
         }
     }
@@ -2224,7 +2224,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     BravisimaMovement(
                         id = "mov_earn_${orderId}_${System.currentTimeMillis()}",
                         title = "Compra $branch",
-                        subtitle = "Orden #$orderId • Retorno 1%",
+                        subtitle = "Pedido #$orderId • Retorno 1%",
                         dateLabel = "Hace un instante",
                         amount = t.bravisimaGenerated,
                         movementType = "earn",
@@ -2237,7 +2237,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     BravisimaMovement(
                         id = "mov_redeem_${orderId}_${System.currentTimeMillis() + 1}",
                         title = "Canje en Carrito",
-                        subtitle = "Orden #$orderId • Descuento aplicado",
+                        subtitle = "Pedido #$orderId • Descuento aplicado",
                         dateLabel = "Hace un instante",
                         amount = -t.redeemed,
                         movementType = "redeem",

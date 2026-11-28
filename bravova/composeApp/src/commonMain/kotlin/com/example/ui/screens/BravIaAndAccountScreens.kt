@@ -3128,7 +3128,11 @@ fun AccountSubScreenView(
                                         )
                                     }
                                     DiagonalMetadataStrip(
-                                        items = listOf(
+                                        // Entregado: sin "Avance 100%" ni "Seguimiento en vivo" (ya no hay nada que seguir)
+                                        items = if (topStage == OrderDeliveryStage.DELIVERED) listOf(
+                                            topOrder?.branch ?: "Av. Winston Churchill",
+                                            topOrder?.date ?: "Hoy"
+                                        ) else listOf(
                                             topOrder?.branch ?: "Av. Winston Churchill",
                                             "Avance ${topStage.progressPct}%",
                                             "Seguimiento en vivo"
@@ -3181,7 +3185,7 @@ fun AccountSubScreenView(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Orden ${order.id}",
+                                    text = "Pedido ${order.id}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
@@ -3211,7 +3215,8 @@ fun AccountSubScreenView(
                                             size = 13.dp
                                         )
                                         Text(
-                                            text = "${orderStage.statusText} • ${orderStage.progressPct}%",
+                                            // Entregado: el 100% y la barra sobran; solo se muestran mientras va en camino
+                                            text = if (orderStage == OrderDeliveryStage.DELIVERED) orderStage.statusText else "${orderStage.statusText} • ${orderStage.progressPct}%",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = badgeTint
@@ -3224,7 +3229,7 @@ fun AccountSubScreenView(
                                 slashColor = primaryColor,
                                 fontSizeSp = 12f
                             )
-                            LinearProgressIndicator(
+                            if (orderStage != OrderDeliveryStage.DELIVERED) LinearProgressIndicator(
                                 progress = { orderStage.progressFraction },
                                 modifier = Modifier
                                     .fillMaxWidth()
