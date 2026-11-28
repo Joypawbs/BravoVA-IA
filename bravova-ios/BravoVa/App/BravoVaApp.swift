@@ -28,7 +28,7 @@ struct RootView: View {
                 CatalogView()
             }
             Tab("Brav IA", systemImage: "sparkles", value: AppTab.bravia) {
-                PlaceholderScreen(title: "Brav IA", symbol: "sparkles")
+                BravIaView()
             }
             Tab("Bravísima", systemImage: "creditcard", value: AppTab.bravisima) {
                 BravisimaView()

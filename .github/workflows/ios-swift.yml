@@ -69,6 +69,14 @@ jobs:
             sleep 6
             xcrun simctl io "$UDID" screenshot "../capturas/$TAB.png"
           done
+          # Brav IA de verdad: una consulta y la línea BRAVIA_FUENTE que imprime la app
+          xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
+          xcrun simctl launch --console-pty "$UDID" com.aistudio.bravova.rdshop -tab bravia \
+            -braviaQuery "¿Cómo hago un sancocho para 6 personas?" > ../ia.log 2>&1 &
+          for i in $(seq 1 45); do grep -q BRAVIA_FUENTE ../ia.log && break; sleep 2; done
+          sleep 3
+          xcrun simctl io "$UDID" screenshot ../capturas/bravia_respuesta.png
+          grep -o "BRAVIA_FUENTE=.*" ../ia.log | head -3 || echo "BRAVIA_FUENTE=sin_respuesta"
           # Cierres inesperados durante las capturas
           ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i bravova && echo "::warning::La app se cerró (ver .ips)" || echo "Sin cierres"
       - uses: actions/upload-artifact@v4
