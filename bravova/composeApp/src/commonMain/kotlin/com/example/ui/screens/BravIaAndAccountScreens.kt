@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.components.BravoSwitch
 import com.example.ui.theme.Tone
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -3601,13 +3602,13 @@ fun AccountSubScreenView(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                Switch(
+                                BravoSwitch(
                                     checked = followsSystemTheme,
                                     onCheckedChange = { follow ->
                                         performCrispHaptic(view, HapticStyle.CONFIRM)
                                         if (follow) onFollowSystemTheme() else onToggleDarkMode()
                                     },
-                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor),
+                                    accent = primaryColor,
                                     modifier = Modifier.testTag("follow_system_theme_switch")
                                 )
                             }
@@ -3655,13 +3656,13 @@ fun AccountSubScreenView(
                                         )
                                     }
                                 }
-                                Switch(
+                                BravoSwitch(
                                     checked = darkMode,
                                     onCheckedChange = {
                                         performCrispHaptic(view, HapticStyle.CONFIRM)
                                         onToggleDarkMode()
                                     },
-                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor),
+                                    accent = primaryColor,
                                     modifier = Modifier.testTag("dark_mode_switch")
                                 )
                             }
@@ -3697,13 +3698,13 @@ fun AccountSubScreenView(
                                         )
                                     }
                                 }
-                                Switch(
+                                BravoSwitch(
                                     checked = notificationsEnabled,
                                     onCheckedChange = {
                                         performCrispHaptic(view, HapticStyle.TICK)
                                         onToggleNotifications()
                                     },
-                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor)
+                                    accent = primaryColor
                                 )
                             }
                             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))

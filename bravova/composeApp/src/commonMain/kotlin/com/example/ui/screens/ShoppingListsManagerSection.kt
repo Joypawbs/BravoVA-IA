@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.components.BravoSwitch
 import com.example.ui.theme.Tone
 
 import androidx.compose.material.icons.outlined.Share
@@ -373,16 +374,13 @@ fun CreateShoppingListFormCard(
                     }
                 }
 
-                Switch(
+                BravoSwitch(
                     checked = autoPopulateWithAi,
                     onCheckedChange = {
                         performCrispHaptic(view, HapticStyle.TICK)
                         autoPopulateWithAi = it
                     },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = primaryColor
-                    ),
+                    accent = primaryColor,
                     modifier = Modifier.testTag("new_list_ai_switch")
                 )
             }

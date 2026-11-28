@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.components.BravoSwitch
 import org.jetbrains.compose.resources.stringResource
 
 import com.example.ui.theme.Tone
@@ -1024,16 +1025,13 @@ fun BravisimaScreen(
                                     )
                                 }
                             }
-                            Switch(
+                            BravoSwitch(
                                 checked = bravisimaCard.isLocked,
                                 onCheckedChange = {
                                     performCrispHaptic(view, HapticStyle.TICK)
                                     showCardLockBiometricPrompt = true
                                 },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = BravoRed
-                                ),
+                                accent = BravoRed,
                                 modifier = Modifier.testTag("bravisima_lock_switch")
                             )
                         }
@@ -1074,17 +1072,14 @@ fun BravisimaScreen(
                                     )
                                 }
                             }
-                            Switch(
+                            BravoSwitch(
                                 checked = bravisimaCard.autoRedeemInCart && !bravisimaCard.isLocked,
                                 onCheckedChange = {
                                     performCrispHaptic(view, HapticStyle.TICK)
                                     onToggleAutoRedeem()
                                 },
                                 enabled = !bravisimaCard.isLocked,
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = primaryColor
-                                ),
+                                accent = primaryColor,
                                 modifier = Modifier.testTag("bravisima_autoredeem_switch")
                             )
                         }
