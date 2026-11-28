@@ -114,7 +114,7 @@ struct HomeView: View {
                     .font(.title2)
                     .foregroundStyle(app.store.accent)
                     .frame(width: 44, height: 44)
-                    .background(app.store.accent.opacity(0.1), in: .circle)
+                    .glassEffect(.regular, in: .circle)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(app.store == .bravo ? "Compra con Brav IA" : "Asesoría con Brav IA")
                         .font(.headline)
@@ -129,7 +129,7 @@ struct HomeView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(16)
-            .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 18, style: .continuous))
+            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 22, style: .continuous))
         }
         .buttonStyle(.plain)
         .padding(.horizontal)

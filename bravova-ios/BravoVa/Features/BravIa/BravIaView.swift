@@ -59,7 +59,7 @@ struct BravIaView: View {
                 .submitLabel(.send)
                 .onSubmit { send(draft) }
                 .padding(.horizontal, 16).padding(.vertical, 12)
-                .background(Color(.secondarySystemBackground), in: .capsule)
+                .glassEffect(.regular.interactive(), in: .capsule)
                 .accessibilityIdentifier("bravia_input")
             Button {
                 model.isBusy ? model.stop() : send(draft)
