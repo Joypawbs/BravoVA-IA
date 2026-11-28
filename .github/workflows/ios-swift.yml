@@ -84,7 +84,7 @@ jobs:
             sleep 6
             xcrun simctl io "$UDID" screenshot "../capturas/$TAB.png"
           done
-          for HOJA in producto carrito; do
+          for HOJA in producto carrito escaner; do
             xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
             xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab home -abrir "$HOJA" >/dev/null
             sleep 6

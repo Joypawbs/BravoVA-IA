@@ -40,6 +40,7 @@ struct RootView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(item: $app.selectedProduct) { ProductDetailView(product: $0) }
         .sheet(isPresented: $app.showCart) { CartView() }
+        .fullScreenCover(isPresented: $app.showScanner) { ScannerView() }
         .onAppear {
             // Capturas del CI: "-abrir carrito" o "-abrir producto"
             switch UserDefaults.standard.string(forKey: "abrir") {
@@ -49,6 +50,7 @@ struct RootView: View {
                 }
                 app.showCart = true
             case "producto": app.selectedProduct = Catalog.shared.products(for: app.store).first
+            case "escaner": app.showScanner = true
             default: break
             }
         }

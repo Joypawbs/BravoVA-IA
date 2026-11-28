@@ -30,6 +30,15 @@ struct AccountView: View {
                             Label("Mis pedidos", systemImage: "bag")
                         }
                     }
+                    NavigationLink {
+                        ListsView()
+                    } label: {
+                        LabeledContent {
+                            Text("\(app.lists.lists.count)")
+                        } label: {
+                            Label("Mis listas", systemImage: "list.bullet.clipboard")
+                        }
+                    }
                     Button {
                         app.showCart = true
                     } label: {

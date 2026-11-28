@@ -57,6 +57,8 @@ struct ProductDetailView: View {
                         }
                     }
 
+                    SaveToListMenu(sku: product.sku)
+
                     Button {
                         dismiss()
                         app.tab = .bravia

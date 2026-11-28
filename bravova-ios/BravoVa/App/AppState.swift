@@ -29,9 +29,11 @@ final class AppState {
 
     let cart = Cart()
     let orders = OrderHistory()
+    let lists = ShoppingLists()
     /// Ficha de producto abierta (hoja), desde cualquier pestaña
     var selectedProduct: Product?
     var showCart = false
+    var showScanner = false
 
     private enum Keys { static let store = "tienda" }
 

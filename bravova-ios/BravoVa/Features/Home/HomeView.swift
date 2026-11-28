@@ -38,7 +38,11 @@ struct HomeView: View {
                         prompt: app.store == .bravo ? "Buscar productos o marcas" : "Buscar productos o mascotas")
             .toolbar {
                 StoreLogoToolbarItem()
-                ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button { app.showScanner = true } label: { Image(systemName: "barcode.viewfinder") }
+                        .accessibilityLabel("Escanear código de barras")
+                    CartToolbarButton()
+                }
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
         }
