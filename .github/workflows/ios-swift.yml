@@ -84,6 +84,12 @@ jobs:
             sleep 6
             xcrun simctl io "$UDID" screenshot "../capturas/$TAB.png"
           done
+          for HOJA in producto carrito; do
+            xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
+            xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab home -abrir "$HOJA" >/dev/null
+            sleep 6
+            xcrun simctl io "$UDID" screenshot "../capturas/hoja_$HOJA.png"
+          done
           # Brav IA de verdad: una consulta y la línea BRAVIA_FUENTE que imprime la app
           xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
           xcrun simctl launch --console-pty "$UDID" com.aistudio.bravova.rdshop -tab bravia \

@@ -25,7 +25,7 @@ struct CatalogView: View {
                     if results.isEmpty {
                         ContentUnavailableView.search(text: query)
                     } else {
-                        List(results) { ProductRow(product: $0) }
+                        List(results) { TappableProductRow(product: $0) }
                             .listStyle(.plain)
                     }
                 } else {
@@ -34,7 +34,11 @@ struct CatalogView: View {
             }
             .navigationTitle("Catálogo")
             .searchable(text: $query, prompt: "Buscar productos")
-            .toolbar { ToolbarItem(placement: .topBarLeading) { StoreMenuButton() } }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { StoreMenuButton() }
+                ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
+                    .badge(app.cart.itemCount)
+            }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
         }
     }
@@ -69,12 +73,26 @@ struct SectionProductsView: View {
                 ContentUnavailableView("Sin productos", systemImage: "tray",
                                        description: Text("Esta sección todavía no tiene productos."))
             } else {
-                List(items) { ProductRow(product: $0) }
+                List(items) { TappableProductRow(product: $0) }
                     .listStyle(.plain)
             }
         }
         .navigationTitle(section.name)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Fila que abre la ficha del producto, con su control de cantidad a la derecha.
+struct TappableProductRow: View {
+    let product: Product
+    @Environment(AppState.self) private var app
+
+    var body: some View {
+        HStack {
+            Button { app.selectedProduct = product } label: { ProductRow(product: product) }
+                .buttonStyle(.plain)
+            QuantityControl(sku: product.sku, compact: true)
+        }
     }
 }
 

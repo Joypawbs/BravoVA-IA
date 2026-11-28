@@ -22,7 +22,7 @@ struct RootView: View {
         @Bindable var app = app
         TabView(selection: $app.tab) {
             Tab("Inicio", systemImage: "house", value: AppTab.home) {
-                PlaceholderScreen(title: "Inicio", symbol: "house")
+                HomeView()
             }
             Tab("Catálogo", systemImage: "square.grid.2x2", value: AppTab.catalog) {
                 CatalogView()
@@ -38,6 +38,20 @@ struct RootView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .sheet(item: $app.selectedProduct) { ProductDetailView(product: $0) }
+        .sheet(isPresented: $app.showCart) { CartView() }
+        .onAppear {
+            // Capturas del CI: "-abrir carrito" o "-abrir producto"
+            switch UserDefaults.standard.string(forKey: "abrir") {
+            case "carrito":
+                if app.cart.itemCount == 0, let p = Catalog.shared.products(for: app.store).first {
+                    app.cart.change(p.sku, by: 2)
+                }
+                app.showCart = true
+            case "producto": app.selectedProduct = Catalog.shared.products(for: app.store).first
+            default: break
+            }
+        }
     }
 }
 

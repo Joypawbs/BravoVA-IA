@@ -27,6 +27,11 @@ final class AppState {
     /// pedidos cuando exista el historial; nunca se siembra un valor de ejemplo.
     var estimatedBravisimaPoints: Int = 0
 
+    let cart = Cart()
+    /// Ficha de producto abierta (hoja), desde cualquier pestaña
+    var selectedProduct: Product?
+    var showCart = false
+
     private enum Keys { static let store = "tienda" }
 
     init() {
