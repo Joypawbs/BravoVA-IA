@@ -3335,7 +3335,7 @@ fun AccountSubScreenView(
                             OutlinedTextField(
                                 value = ncfType,
                                 onValueChange = { ncfType = it },
-                                label = { Text("Tipo de Comprobante Fiscal (NCF)") },
+                                label = { Text("Tipo de comprobante fiscal (NCF)") },
                                 modifier = Modifier.fillMaxWidth()
                             )
                             AnimatedPurchaseButton(

@@ -414,10 +414,10 @@ fun BravisimaScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 DiagonalMetadataStrip(
                                     items = listOf(
-                                        "NIVEL ${bravisimaCard.tier.label.uppercase()}",
+                                        // Sin "NIVEL": así las tres etiquetas caben en una línea
+                                        // (con él, "1% CASHBACK" se cortaba)
+                                        bravisimaCard.tier.label.uppercase(),
                                         if (bravisimaCard.isLocked) "BLOQUEADA" else "ACTIVA",
-                                        // En mayúsculas como las otras dos etiquetas y en una sola línea
-                                        // (antes "1% Cashback" bajaba a una segunda línea)
                                         "1% CASHBACK"
                                     ),
                                     slashColor = Color.White,
@@ -2058,7 +2058,7 @@ fun CartCheckoutScreen(
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = "Comprobante Fiscal (DGII)",
+                                text = "Comprobante fiscal (DGII)",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp,
@@ -2617,7 +2617,7 @@ fun CartCheckoutScreen(
         GlassTopBar(
             darkMode = darkMode,
             accent = primaryColor,
-            title = "Mi Carrito (${cartTotals.count})",
+            title = "Mi carrito (${cartTotals.count})",
             modifier = Modifier.align(Alignment.TopCenter),
             onBack = {
                         performCrispHaptic(view, HapticStyle.TICK)
