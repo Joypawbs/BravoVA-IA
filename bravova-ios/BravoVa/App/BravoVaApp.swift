@@ -25,13 +25,13 @@ struct RootView: View {
                 PlaceholderScreen(title: "Inicio", symbol: "house")
             }
             Tab("Catálogo", systemImage: "square.grid.2x2", value: AppTab.catalog) {
-                PlaceholderScreen(title: "Catálogo", symbol: "square.grid.2x2")
+                CatalogView()
             }
             Tab("Brav IA", systemImage: "sparkles", value: AppTab.bravia) {
                 PlaceholderScreen(title: "Brav IA", symbol: "sparkles")
             }
             Tab("Bravísima", systemImage: "creditcard", value: AppTab.bravisima) {
-                PlaceholderScreen(title: "Bravísima", symbol: "creditcard")
+                BravisimaView()
             }
             Tab("Cuenta", systemImage: "person.crop.circle", value: AppTab.account) {
                 PlaceholderScreen(title: "Cuenta", symbol: "person.crop.circle")

@@ -23,6 +23,10 @@ final class AppState {
         didSet { UserDefaults.standard.set(store.rawValue, forKey: Keys.store) }
     }
 
+    /// Puntos estimados por pedidos hechos en BravoVa (1 por cada RD$100). Se calcula con los
+    /// pedidos cuando exista el historial; nunca se siembra un valor de ejemplo.
+    var estimatedBravisimaPoints: Int = 0
+
     private enum Keys { static let store = "tienda" }
 
     init() {
