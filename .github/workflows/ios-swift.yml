@@ -78,6 +78,8 @@ jobs:
           xcrun simctl ui "$UDID" appearance "${{ inputs.apariencia || 'light' }}"
           xcrun simctl install "$UDID" "$APP"
           mkdir -p ../capturas
+          # Primer arranque tras instalar (más lento): calentar antes de capturar
+          xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab home >/dev/null; sleep 12
           for TAB in home catalog bravia bravisima account; do
             xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
             xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab "$TAB" >/dev/null
@@ -90,6 +92,12 @@ jobs:
             sleep 6
             xcrun simctl io "$UDID" screenshot "../capturas/hoja_$HOJA.png"
           done
+          for HUEVO in spamton toriel; do
+            xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
+            xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab home -huevo "$HUEVO" >/dev/null
+            sleep 8
+            xcrun simctl io "$UDID" screenshot "../capturas/huevo_$HUEVO.png"
+          done
           # Brav IA de verdad: una consulta y la línea BRAVIA_FUENTE que imprime la app
           xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
           xcrun simctl launch --console-pty "$UDID" com.aistudio.bravova.rdshop -tab bravia \
@@ -98,6 +106,10 @@ jobs:
           sleep 3
           xcrun simctl io "$UDID" screenshot ../capturas/bravia_respuesta.png
           grep -o "BRAVIA_FUENTE=.*" ../ia.log | head -3 || echo "BRAVIA_FUENTE=sin_respuesta"
+          # El catálogo completo tiene que cargar en la app (500 de Bravo y 250 de El Arca)
+          CAT=$(grep -o "CATALOGO .*" ../ia.log | head -1); echo "$CAT"
+          B=$(echo "$CAT" | sed -n 's/.*bravo=\([0-9]*\).*/\1/p'); A=$(echo "$CAT" | sed -n 's/.*arca=\([0-9]*\).*/\1/p')
+          [ "${B:-0}" -ge 500 ] && [ "${A:-0}" -ge 250 ] || { echo "::error::El catálogo no cargó completo ($CAT)"; exit 1; }
           # Cierres inesperados durante las capturas
           ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i bravova && echo "::warning::La app se cerró (ver .ips)" || echo "Sin cierres"
       - uses: actions/upload-artifact@v4

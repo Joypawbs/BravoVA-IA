@@ -8,13 +8,18 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    MARKETING_VERSION: "3.2.0"
-    CURRENT_PROJECT_VERSION: "30200"
+    MARKETING_VERSION: "3.2.1"
+    CURRENT_PROJECT_VERSION: "30201"
     # Modo Swift 5: la concurrencia estricta de Swift 6 no aporta nada visible aquí
     SWIFT_VERSION: "5.0"
     # La clave de Gemini NO se define aquí: Xcode toma la variable de entorno GEMINI_API_KEY
     # (secreto del CI) para $(GEMINI_API_KEY) del Info.plist. No se pasa por la línea de
     # comandos porque xcodebuild la imprimiría en el registro.
+packages:
+  # Solo para el inicio de sesión (Google y Apple); Brav IA no usa Firebase
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "12.0.0"
 targets:
   BravoVa:
     type: application
@@ -31,6 +36,9 @@ targets:
       path: BravoVa/Info.plist
       properties:
         CFBundleDisplayName: BravoVa
+        # Textos del sistema (botón de Apple, menús) en español
+        CFBundleDevelopmentRegion: es
+        CFBundleLocalizations: [es]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         BravIAGeminiKey: $(GEMINI_API_KEY)
@@ -45,15 +53,24 @@ targets:
         NSSpeechRecognitionUsageDescription: "Brav IA convierte tu voz en texto para responder tus consultas."
         NSPhotoLibraryUsageDescription: "Adjunta fotos de productos o facturas para que Brav IA las analice."
         NSLocationWhenInUseUsageDescription: "BravoVa usa tu ubicación para calcular la distancia y el tiempo de entrega desde la sucursal más cercana."
+        NSMicrophoneUsageDescription: "BravoVa usa el micrófono solo mientras dictas una pregunta a Brav IA."
+        NSSpeechRecognitionUsageDescription: "BravoVa convierte tu voz en texto para preguntarle a Brav IA."
+        NSPhotoLibraryUsageDescription: "Elige una foto (por ejemplo una factura) para preguntarle a Brav IA."
         NSFaceIDUsageDescription: "Confirma pagos y canjes de tu Bravísima con Face ID."
         NSSupportsLiveActivities: true
         CFBundleURLTypes:
           - CFBundleURLName: com.aistudio.bravova.rdshop
             CFBundleURLSchemes: [bravova]
+          # Vuelta del inicio de sesión web de Firebase (GOOGLE_APP_ID codificado), igual que la 3.1
+          - CFBundleURLName: firebase-auth
+            CFBundleURLSchemes: [app-1-723529928496-ios-f5b4f6c4ac9eba9ce4c2f5]
         UIApplicationShortcutItems:
           - UIApplicationShortcutItemType: buscar
             UIApplicationShortcutItemTitle: Buscar
             UIApplicationShortcutItemIconSymbolName: magnifyingglass
+          - UIApplicationShortcutItemType: repetir
+            UIApplicationShortcutItemTitle: Repetir último pedido
+            UIApplicationShortcutItemIconSymbolName: arrow.clockwise
           - UIApplicationShortcutItemType: bravisima
             UIApplicationShortcutItemTitle: Mi tarjeta Bravísima
             UIApplicationShortcutItemIconSymbolName: creditcard
@@ -64,8 +81,17 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
+        OTHER_LDFLAGS: ["$(inherited)", "-ObjC"]
+    entitlements:
+      path: BravoVa/BravoVa.entitlements
+      properties:
+        com.apple.developer.applesignin: [Default]
     dependencies:
       - target: BravoWidgets
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseAuth
   BravoWidgets:
     type: app-extension
     platform: iOS

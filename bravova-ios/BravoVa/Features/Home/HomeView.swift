@@ -5,37 +5,23 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppState.self) private var app
     @State private var query = ""
+    @FocusState private var searchFocused: Bool
     private let catalog = Catalog.shared
 
-    private var homeSections: [CatalogSection] {
-        let all = catalog.sections(for: app.store)
-        guard app.store == .bravo, !catalog.homeBravoSections.isEmpty else {
-            return all.filter { $0.id != "Productos nuevos" }
-        }
-        return catalog.homeBravoSections.compactMap { name in all.first { $0.name == name } }
-    }
-
-    private var results: [Product] {
-        let q = query.folded
-        guard !q.isEmpty else { return [] }
-        return catalog.products(for: app.store).filter {
-            $0.name.folded.contains(q) || $0.category.folded.contains(q) || $0.badge.folded.contains(q)
-        }
-    }
+    /// Todos los pasillos de la tienda, como en la 3.1 (los 750 productos se ven desde Inicio)
+    private var homeSections: [CatalogSection] { catalog.sections(for: app.store) }
 
     var body: some View {
         NavigationStack {
-            Group {
-                if !query.isEmpty {
-                    searchResults
-                } else {
-                    content
-                }
-            }
+            SearchContainer(query: $query) { content }
             .navigationTitle(app.store == .bravo ? "Bravo" : "El Arca")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                         prompt: app.store == .bravo ? "Buscar productos o marcas" : "Buscar productos o mascotas")
+            .searchFocused($searchFocused)
+            .onChange(of: app.focusSearch, initial: true) { _, want in
+                if want { searchFocused = true; app.focusSearch = false }
+            }
             .toolbar {
                 StoreLogoToolbarItem()
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -45,6 +31,7 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
+            .onChange(of: query) { _, q in Easter.shared.check(q) }
         }
     }
 
@@ -52,6 +39,14 @@ struct HomeView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
                 allCategories
+                ActiveOrderCard()
+                PriceDropCard()
+                RepeatOrderCard()
+                ProductRail(title: "Lo de siempre", subtitle: "Lo que más pides aquí", items: app.usuals())
+                ProductRail(title: "Vistos hace poco", subtitle: "Para retomar donde ibas",
+                            items: Array(app.recentProducts.prefix(10)))
+                DailyPicksSection()
+                if app.store == .bravo { SeasonalCombosSection() }
                 ForEach(homeSections) { section in
                     let items = catalog.products(for: app.store).filter { $0.category == section.id }
                     if !items.isEmpty { carousel(section, items) }
@@ -59,9 +54,17 @@ struct HomeView: View {
                 braviaBanner
             }
             .padding(.vertical, 12)
+            .id(refreshID)
         }
         .scrollIndicators(.hidden)
+        // Deslizar para actualizar: vuelve a descargar las fotos y recalcula avisos y pedidos
+        .refreshable {
+            URLCache.shared.removeAllCachedResponses()
+            refreshID = UUID()
+        }
     }
+
+    @State private var refreshID = UUID()
 
     private var allCategories: some View {
         NavigationLink {
@@ -90,6 +93,10 @@ struct HomeView: View {
                 Text(section.name)
                     .font(.title3.bold())
                     .lineLimit(1)
+                Text("\(items.count)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
                 Spacer()
                 NavigationLink(value: section) {
                     Text("Ver todos")
@@ -99,7 +106,7 @@ struct HomeView: View {
             .padding(.horizontal)
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 12) {
-                    ForEach(items.prefix(12)) { ProductCard(product: $0) }
+                    ForEach(items) { ProductCard(product: $0) }
                 }
                 .scrollTargetLayout()
                 .padding(.horizontal)
@@ -139,14 +146,6 @@ struct HomeView: View {
         .padding(.horizontal)
     }
 
-    @ViewBuilder private var searchResults: some View {
-        if results.isEmpty {
-            ContentUnavailableView.search(text: query)
-        } else {
-            List(results) { TappableProductRow(product: $0) }
-            .listStyle(.plain)
-        }
-    }
 }
 
 /// Cuadrícula de pasillos (igual que el catálogo, en formato de tarjetas).
@@ -193,6 +192,7 @@ struct ProductCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     ProductThumb(product: product)
                         .frame(width: 140, height: 120)
+                        .overlay(alignment: .topTrailing) { FavoriteButton(sku: product.sku).padding(6) }
                     Text(product.name)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(2, reservesSpace: true)
@@ -204,10 +204,14 @@ struct ProductCard: View {
                 }
             }
             .buttonStyle(.plain)
+            .productActions(product)
             HStack {
                 Text(Money.rd(product.price))
                     .font(.subheadline.bold())
                     .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .layoutPriority(1)
                 Spacer(minLength: 4)
                 QuantityControl(sku: product.sku, compact: true)
             }
@@ -255,7 +259,7 @@ struct QuantityControl: View {
             }
         }
         .animation(.smooth(duration: 0.2), value: qty)
-        .sensoryFeedback(.selection, trigger: qty)
+        .haptic(.selection, trigger: qty)
     }
 }
 

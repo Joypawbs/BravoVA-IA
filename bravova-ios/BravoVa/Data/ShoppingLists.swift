@@ -52,6 +52,13 @@ final class ShoppingLists {
 
     func delete(_ listID: UUID) { lists.removeAll { $0.id == listID } }
 
+    func rename(_ listID: UUID, to name: String) {
+        let n = name.trimmingCharacters(in: .whitespaces)
+        guard !n.isEmpty, let i = lists.firstIndex(where: { $0.id == listID }) else { return }
+        lists[i].name = n
+        lists[i].updated = .now
+    }
+
     func list(_ id: UUID) -> ShoppingList? { lists.first { $0.id == id } }
 
     private func save() {

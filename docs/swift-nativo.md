@@ -24,19 +24,70 @@ La app de iOS pasa a ser **100 % Swift (SwiftUI)** en `bravova-ios/`. Android si
 | Pantalla | Origen | Estado |
 |---|---|---|
 | Esqueleto, 5 pestañas, menú de tienda | App.kt, CommonComponents.kt | Hecho |
-| Datos: catálogo, secciones, sucursales | BravoCatalogData.kt, ArcaCatalogData.kt | Exportando |
-| Inicio | HomeAndCatalogScreens.kt | Pendiente |
-| Catálogo y búsqueda | HomeAndCatalogScreens.kt, SearchHelpers.kt | Pendiente |
-| Ficha de producto | QuickViewAndZoom.kt, ProductHero.kt | Pendiente |
-| Carrito y pago (Face ID) | BravisimaAndCartScreens.kt, RdCheckout.kt | Pendiente |
-| Brav IA (Gemini, recetas, presupuesto) | BravIaAndAccountScreens.kt, BravIaEngine.kt, BravIaRecipes.kt | Pendiente |
-| Bravísima | BravisimaAndCartScreens.kt | Pendiente (con el diseño nuevo) |
-| Cuenta, pedidos, seguimiento | BravIaAndAccountScreens.kt, NativeDeliveryMap.kt | Pendiente |
-| Escáner de códigos | BarcodeScannerModal.kt → VisionKit | Pendiente |
-| Listas de compra | ShoppingListsManagerSection.kt | Pendiente |
-| Notificaciones | PushNotificationsSection.kt | Pendiente |
-| Widgets y actividad en vivo | BravoWidgets/ (ya en Swift) | Copiado |
-| Huevos de pascua | EasterEggs.kt, PawEasterEgg.kt | Se decide al final |
+| Datos: catálogo, secciones, sucursales | BravoCatalogData.kt, ArcaCatalogData.kt | Hecho |
+| Inicio | HomeAndCatalogScreens.kt | Hecho (ver la tabla de la 3.2.1) |
+| Catálogo y búsqueda | HomeAndCatalogScreens.kt, SearchHelpers.kt | Hecho (ver la tabla de la 3.2.1) |
+| Ficha de producto | QuickViewAndZoom.kt, ProductHero.kt | Hecho (ver la tabla de la 3.2.1) |
+| Carrito y pago (Face ID) | BravisimaAndCartScreens.kt, RdCheckout.kt | Hecho (ver la tabla de la 3.2.1) |
+| Brav IA (Gemini, recetas, presupuesto) | BravIaAndAccountScreens.kt, BravIaEngine.kt, BravIaRecipes.kt | Hecho (ver la tabla de la 3.2.1) |
+| Bravísima | BravisimaAndCartScreens.kt | Hecho (diseño nuevo, sin datos inventados) |
+| Cuenta, pedidos, seguimiento | BravIaAndAccountScreens.kt, NativeDeliveryMap.kt | Hecho (ver la tabla de la 3.2.1) |
+| Escáner de códigos | BarcodeScannerModal.kt → VisionKit | Hecho (ver la tabla de la 3.2.1) |
+| Listas de compra | ShoppingListsManagerSection.kt | Hecho (ver la tabla de la 3.2.1) |
+| Notificaciones | PushNotificationsSection.kt | Hecho (ver la tabla de la 3.2.1) |
+| Widgets y actividad en vivo | BravoWidgets/ (ya en Swift) | Hecho |
+| Huevos de pascua | EasterEggs.kt, PawEasterEgg.kt | Pasados a Swift en la 3.2.1 |
+
+## 3.2.1 — todo lo de la 3.1, en Swift
+
+La 3.2 dejó fuera funciones de la 3.1. La 3.2.1 las recupera todas. La lista sale de tres fuentes: el código (las pantallas de `ui/`, los archivos de `iosMain` y el Info.plist) y las notas de la v1.1 a la v3.1.
+
+**Solo se quedan fuera estas cosas, porque el usuario las pidió quitar:**
+- los rangos, códigos, saldo y movimientos inventados de Bravísima;
+- el brillo de colores que gira y el difuminado animado;
+- el vidrio detrás del logo;
+- el botón de Buscar en la barra de pestañas.
+
+**Pago:** se mantiene sin cobro dentro de la app. Las formas de pago de la 3.1 (transferencia, tPago, Azul, Apple Pay) se muestran como opciones de pago al recibir o, si la 3.1 las simulaba, se marcan como simuladas.
+
+| # | Función | Origen 3.1 | Estado |
+|---|---|---|---|
+| 1 | Pantalla de carga al abrir (bloques quietos, sin brillo) | AppStartupSkeletonScreen | Hecho (StartupSkeleton; también al cargar cada foto) |
+| 2 | Bienvenida: elegir tienda y sucursal, entrar con Google o como invitado | BravoGoogleAuthScreen, v2.0b2 | Hecho (solo la primera vez: tienda, sucursal, Apple, Google o invitado) |
+| 3 | Inicio con todos los pasillos y productos | HomeScreen | Hecho |
+| 4 | Inicio: "¿Repetimos tu última compra?" / "Tu pedido va en camino" | HomeScreen, v1.4 / v3.1 | Hecho ("¿Repetimos tu última compra?" y "Tu pedido va en camino" con progreso) |
+| 5 | Inicio: "Lo de siempre" y productos recientes | HomeScreen, v1.3 | Hecho ("Lo de siempre" del historial real y "Vistos hace poco") |
+| 6 | Inicio: ofertas del día (carrusel automático con indicadores) | DailyRotatingOffers, v1.1 | Hecho como "Lo del día": tema y productos por día, con precio real (sin % ni precio tachado inventados) |
+| 7 | Inicio: combos de temporada | SeasonalCombosRow, v1.2 | Hecho (con "Agregar todo") |
+| 8 | Inicio: pastilla "En ruta" y deslizar para actualizar | HomeScreen, v1.1 | Hecho (tarjeta de pedido en curso y deslizar para actualizar fotos y avisos) |
+| 9 | Búsqueda sin tildes, recientes, populares, filtros (oferta y precio) | SearchFilterRow, SearchSuggestionRow, v1.4 | Hecho (recientes, sugerencias, filtro por pasillo y orden por precio; sin filtro de oferta porque no hay ofertas inventadas) |
+| 10 | Favoritos | VerticalProductCard | Hecho (corazón en tarjetas y ficha; lista en Cuenta) |
+| 11 | Vista rápida al mantener presionado (agregar, guardar, compartir) | QuickViewBottomSheet, v1.3 | Hecho (menú nativo al mantener presionado con vista previa) |
+| 12 | Ficha: zoom de la foto, precio por libra o litro, opción más barata | ProductDetailScreen, v1.3 / v1.4 | Hecho (zoom, precio por libra o litro, opción más barata del mismo pasillo) |
+| 13 | Ficha: nutrición estimada | ProductDetailScreen, v2.2 | Hecho con datos reales de Open Food Facts (marcado como referencia) |
+| 14 | Ficha: "Avísame cuando baje de precio" | PriceAlertRow, v1.2 | Hecho (avisa en Inicio con "Bajaron de precio" si el catálogo trae un precio menor) |
+| 15 | Carrito: deshacer al quitar, "si algo se agota", ahorro Bravísima | CartCheckoutScreen, v2.0b1 | Hecho (deshacer, "si algo se agota", puntos Bravísima estimados) |
+| 16 | Pago: horario de entrega, referencia, propina, NCF y RNC, pago desde el exterior | RdCheckoutOptionsCard, v1.2 | Hecho (horario, referencia, propina, NCF B01/B02 con RNC, pago desde el exterior) |
+| 17 | Pago: opciones de pago de la 3.1 y Face ID | CartCheckoutScreen | Hecho adaptado: Face ID o código para confirmar; se paga al recibir o recoger (no se guardan tarjetas) |
+| 18 | Celebración al terminar el pedido | OrderSuccessCelebrationOverlay | Hecho (una ráfaga de papelitos; respeta Reducir movimiento) |
+| 19 | Seguimiento del pedido con Apple Maps (ruta, etapas, compartir por WhatsApp) | DeliveryTrackingScreen, v1.4 / v2.5 | Hecho (ruta real de Apple Maps, etapas estimadas por la hora del pedido, compartir por WhatsApp) |
+| 20 | Pedido en vivo (Live Activity y Dynamic Island) | BravoWidgets, v1.3 / v2.5 | Hecho (Live Activity y Dynamic Island; se actualiza mientras la app está abierta) |
+| 21 | Widgets: Ofertas y Bravísima, con datos | BravoWidgets | Hecho ("Lo del día" y Bravísima; sin ofertas inventadas) |
+| 22 | Mis pedidos: calificar la entrega, repetir | AccountGridScreen, v2.0b1 | Hecho (seguimiento, calificar y repetir) |
+| 23 | Listas: crear, gestionar, compartir por WhatsApp | ManagedShoppingListCard, v1.2 | Hecho (crear, renombrar, quitar, pasar al carrito, compartir por WhatsApp) |
+| 24 | Notificaciones (locales) y su pantalla de avisos | FcmPushControlAndFeedCard | Hecho (avisos locales de cada etapa, pantalla de Avisos e interruptor) |
+| 25 | Brav IA: Copiar, Reintentar, valorar | BravIaChatScreen, v3.1 | Hecho (Copiar, Reintentar, útil o no útil) |
+| 26 | Brav IA: panel de presupuesto (deslizador, Armar, Ajustar, Listas) | BravIaChatScreen, v2.5 / v3.1 | Hecho (panel con monto, personas y tipo de compra; arma la pregunta) |
+| 27 | Brav IA: dictado por voz y foto adjunta (factura NCF) | ServicesIos (speech, image picker) | Hecho (dictado es-DO con Speech y foto adjunta enviada a Gemini) |
+| 28 | Brav IA: historial de conversaciones | BravIaHistoryAutoListHeroCard | Hecho (últimas 30 conversaciones en el teléfono; abrir, borrar, nueva) |
+| 29 | Brav IA: "Agregar todo", guardar como lista, "Pedir por mí" | v1.4 / v2.2 | Hecho (Agregar todo, Guardar como lista, Pedir por mí) |
+| 30 | Enlaces bravova://bravia?q=… y bravova://carrito | v2.2 / v3.0 | Hecho (bravova://bravia?q=, carrito, buscar, bravisima, repetir, producto/SKU) |
+| 31 | Atajos del ícono: Buscar, Repetir último pedido, Bravísima | v2.0b1 | Hecho (Buscar, Repetir último pedido, Mi tarjeta Bravísima) |
+| 32 | Huevos de pascua: búsqueda (efectos y sonidos de 8 bits) y huella (5 toques al logo) | EasterEggs, EasterEffects, PawEasterEgg | Hecho (35 huevos, sonido 8 bits, efectos y huellitas) |
+| 33 | Ajustes: modo oscuro, ahorro de datos, vibraciones | AccountGridScreen, v1.2 | Hecho (tema claro/oscuro/automático, ahorro de datos sin fotos, vibraciones) |
+| 34 | Ayuda: horario, comprobantes NCF, contacto | AccountGridScreen, v2.2 | Hecho (horario, NCF, cómo funcionan los pedidos, contacto, créditos de fotos) |
+| 35 | Inicio de sesión con Google (y Apple) | BravoGoogleAuthScreen | Hecho |
+| 36 | Fotos: todo producto con foto del tipo correcto | catálogo | Hecho: los 75 productos que no tenían foto ya la tienen (fotos.json, con créditos en Ayuda); varias son aproximadas o de otra marca y muestran el tipo de producto o su uso |
 
 **Cuándo se publica:**
 - Todas las filas en "Hecho".

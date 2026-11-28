@@ -51,7 +51,7 @@ enum BravIaText {
     static func stem(_ w: String) -> String { w.count > 4 ? String(w.dropLast()) : w }
 }
 
-struct GroundedItem: Hashable {
+struct GroundedItem: Hashable, Codable {
     let sku: String
     var qty: Int
     var reason: String = ""

@@ -97,9 +97,33 @@ struct ListDetailView: View {
             }
             .navigationTitle(list.name)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button { newName = list.name; renaming = true } label: { Image(systemName: "pencil") }
+                        .accessibilityLabel("Renombrar lista")
+                    if !list.products.isEmpty {
+                        // Texto simple para pegar en WhatsApp
+                        ShareLink(item: shareText(list)) { Image(systemName: "square.and.arrow.up") }
+                            .accessibilityLabel("Compartir lista")
+                    }
+                }
+            }
+            .alert("Renombrar lista", isPresented: $renaming) {
+                TextField("Nombre", text: $newName)
+                Button("Guardar") { app.lists.rename(listID, to: newName) }
+                Button("Cancelar", role: .cancel) {}
+            }
         } else {
             ContentUnavailableView("Lista eliminada", systemImage: "trash")
         }
+    }
+
+    @State private var renaming = false
+    @State private var newName = ""
+
+    private func shareText(_ list: ShoppingList) -> String {
+        let lines = list.products.map { "• \($0.qty) × \($0.product.name) – \(Money.rd($0.product.price * $0.qty))" }
+        return (["🛒 \(list.name)"] + lines + ["Total: \(Money.rd(list.total))", "Hecha con BravoVa"]).joined(separator: "\n")
     }
 }
 
@@ -129,6 +153,6 @@ struct SaveToListMenu: View {
         }
         .buttonStyle(.glass)
         .controlSize(.large)
-        .sensoryFeedback(.success, trigger: saved)
+        .haptic(.success, trigger: saved)
     }
 }

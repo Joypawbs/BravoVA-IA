@@ -7,29 +7,14 @@ struct CatalogView: View {
     @State private var query = ""
     private let catalog = Catalog.shared
 
-    private var results: [Product] {
-        let q = query.folded
-        guard !q.isEmpty else { return [] }
-        return catalog.products(for: app.store).filter {
-            $0.name.folded.contains(q) || $0.category.folded.contains(q) || $0.badge.folded.contains(q)
-        }
-    }
-
     var body: some View {
         NavigationStack {
             Group {
                 if catalog.products(for: app.store).isEmpty {
                     ContentUnavailableView("Catálogo no disponible", systemImage: "exclamationmark.triangle",
                                            description: Text("No se pudieron cargar los productos."))
-                } else if !query.isEmpty {
-                    if results.isEmpty {
-                        ContentUnavailableView.search(text: query)
-                    } else {
-                        List(results) { TappableProductRow(product: $0) }
-                            .listStyle(.plain)
-                    }
                 } else {
-                    sectionsList
+                    SearchContainer(query: $query) { sectionsList }
                 }
             }
             .navigationTitle("Catálogo")
@@ -39,6 +24,7 @@ struct CatalogView: View {
                 ToolbarItem(placement: .topBarTrailing) { CartToolbarButton() }
             }
             .navigationDestination(for: CatalogSection.self) { SectionProductsView(section: $0) }
+            .onChange(of: query) { _, q in Easter.shared.check(q) }
         }
     }
 
@@ -90,6 +76,7 @@ struct TappableProductRow: View {
         HStack {
             Button { app.selectedProduct = product } label: { ProductRow(product: product) }
                 .buttonStyle(.plain)
+                .productActions(product)
             QuantityControl(sku: product.sku, compact: true)
         }
     }
@@ -123,19 +110,20 @@ struct ProductRow: View {
 /// Imagen del producto con proporción fija y respaldo de color (sin inventar fotos).
 struct ProductThumb: View {
     let product: Product
+    @AppStorage(Settings.dataSaver) private var dataSaver = false
 
     var body: some View {
         let tint = Color(hexString: product.colorHex) ?? .gray
         RoundedRectangle(cornerRadius: 14, style: .continuous)
             .fill(tint.opacity(0.12))
             .overlay {
-                if let s = product.imageUrl, let url = URL(string: s) {
+                if !dataSaver, let url = Catalog.shared.photoURL(for: product) {
                     AsyncImage(url: url, transaction: Transaction(animation: .easeOut(duration: 0.2))) { phase in
                         switch phase {
                         case .success(let image): image.resizable().scaledToFit().padding(6)
                         case .failure: fallback(tint)
-                        // Mientras carga: solo el fondo suave, sin ruedas ni brillos
-                        default: Color.clear
+                        // Mientras carga: esqueleto quieto y minimalista (sin brillo animado)
+                        default: SkeletonBlock().padding(10)
                         }
                     }
                 } else {
@@ -149,6 +137,17 @@ struct ProductThumb: View {
         Image(systemName: SectionIcon.symbol(for: product.artType))
             .font(.title2)
             .foregroundStyle(tint)
+    }
+}
+
+/// Bloque de esqueleto: gris del sistema, estático. Se adapta solo al modo oscuro.
+struct SkeletonBlock: View {
+    var cornerRadius: CGFloat = 10
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .fill(.quaternary)
+            .accessibilityHidden(true)
     }
 }
 
