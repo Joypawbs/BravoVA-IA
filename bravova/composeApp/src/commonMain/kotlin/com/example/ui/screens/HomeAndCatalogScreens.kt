@@ -1502,10 +1502,12 @@ fun ProductDetailScreen(
                         if (showZoom) ZoomableProductImage(product = product, onDismiss = { showZoom = false })
                     }
 
-                    DiagonalMetadataStrip(
-                        items = listOf(product.category, "ITBIS incluido"),
-                        slashColor = primaryColor,
-                        fontSizeSp = 12f
+                    // La categoría ya sale en la ficha de arriba; aquí no se repite
+                    Text(
+                        text = "ITBIS incluido",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Text(

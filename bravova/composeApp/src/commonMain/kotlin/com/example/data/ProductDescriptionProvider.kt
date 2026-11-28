@@ -256,6 +256,15 @@ object ProductDescriptionProvider {
                 )
             }
 
+            // Papel (higiénico, toallas, servilletas): antes caía en "limpieza profunda y desinfección"
+            p.name.lowercase().let { n -> listOf("papel", "servilleta", "toalla", "pañuelo").any { it in n } } -> {
+                Triple(
+                    "${p.name} ($unit) de $brand: suave y resistente para el uso diario de la casa, con buen rendimiento por rollo o paquete.",
+                    "Suave y resistente",
+                    "Conservación: guárdalo en un lugar seco, lejos de la humedad, para que mantenga su textura."
+                )
+            }
+
             // Hogar y limpieza
             else -> {
                 Triple(
