@@ -42,6 +42,10 @@ final class AppState {
     /// Productos vistos hace poco (más reciente primero), guardados en el teléfono
     private(set) var recentSkus: [String] = UserDefaults.standard.stringArray(forKey: "recientes") ?? []
     var showCart = false
+    /// Pedir el foco en la búsqueda de Inicio (atajo "Buscar")
+    var focusSearch = false
+    /// Pregunta que llega por enlace bravova://bravia?q=… para enviarla a Brav IA
+    var braviaPrompt: String?
     var showScanner = false
 
     private enum Keys { static let store = "tienda" }

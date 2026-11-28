@@ -84,7 +84,7 @@ struct DailyPicksSection: View {
                 .scrollIndicators(.hidden)
                 .scrollTargetBehavior(.viewAligned)
             }
-            .sensoryFeedback(.selection, trigger: offset)
+            .haptic(.selection, trigger: offset)
         }
     }
 
@@ -123,7 +123,7 @@ struct RepeatOrderCard: View {
             .padding(14)
             .background(.background.secondary, in: .rect(cornerRadius: 18, style: .continuous))
             .padding(.horizontal)
-            .sensoryFeedback(.success, trigger: done)
+            .haptic(.success, trigger: done)
         }
     }
 }
@@ -209,7 +209,7 @@ struct SeasonalCombosSection: View {
                 .scrollIndicators(.hidden)
                 .scrollTargetBehavior(.viewAligned)
             }
-            .sensoryFeedback(.success, trigger: added)
+            .haptic(.success, trigger: added)
         }
     }
 

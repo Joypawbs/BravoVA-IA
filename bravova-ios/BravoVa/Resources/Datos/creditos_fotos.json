@@ -1,0 +1,92 @@
+[
+    {
+        "sku":  "ARC-145",
+        "url":  "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/Hundepfeife01.JPG/500px-Hundepfeife01.JPG",
+        "fuente":  "Wikimedia Commons"
+    },
+    {
+        "sku":  "ARC-151",
+        "url":  "https://images.openpetfoodfacts.org/images/products/005/274/226/9801/front_en.4.400.jpg",
+        "fuente":  "Open Pet Food Facts (CC BY-SA)"
+    },
+    {
+        "sku":  "ARC-154",
+        "url":  "https://images.openpetfoodfacts.org/images/products/005/274/204/7393/front_fr.17.400.jpg",
+        "fuente":  "Open Pet Food Facts (CC BY-SA)"
+    },
+    {
+        "sku":  "ARC-155",
+        "url":  "https://images.openpetfoodfacts.org/images/products/005/274/200/8684/front_it.27.400.jpg",
+        "fuente":  "Open Pet Food Facts (CC BY-SA)"
+    },
+    {
+        "sku":  "ARC-241",
+        "url":  "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Dog_in_harness_and_muzzle.jpg/500px-Dog_in_harness_and_muzzle.jpg",
+        "fuente":  "Wikimedia Commons"
+    },
+    {
+        "sku":  "ARC-222",
+        "url":  "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Domestic-rabbit-drinking-water.jpg/500px-Domestic-rabbit-drinking-water.jpg",
+        "fuente":  "Wikimedia Commons"
+    },
+    {
+        "sku":  "BRV-107",
+        "url":  "https://images.openfoodfacts.org/images/products/000/002/019/8114/front_en.123.400.jpg",
+        "fuente":  "Open Food Facts (CC BY-SA)"
+    },
+    {
+        "sku":  "BRV-199",
+        "url":  "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Liat_Portal_for_Foodie_Disorder_-_Fresh_spinach_leaves.jpg/500px-Liat_Portal_for_Foodie_Disorder_-_Fresh_spinach_leaves.jpg",
+        "fuente":  "Wikimedia Commons"
+    },
+    {
+        "sku":  "BRV-359",
+        "url":  "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/Dried_Oregano.JPG/500px-Dried_Oregano.JPG",
+        "fuente":  "Wikimedia Commons"
+    },
+    {
+        "sku":  "BRV-383",
+        "url":  "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/YamsatBrixtonMarket.jpg/500px-YamsatBrixtonMarket.jpg",
+        "fuente":  "Wikimedia Commons"
+    },
+    {
+        "sku":  "BRV-465",
+        "url":  "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Cosmetic_Bag_made_of_PLA-Blend_Bio-Flex.jpg/500px-Cosmetic_Bag_made_of_PLA-Blend_Bio-Flex.jpg",
+        "fuente":  "Wikimedia Commons"
+    },
+    {
+        "sku":  "BRV-489",
+        "url":  "https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.879.400.jpg",
+        "fuente":  "Open Food Facts (CC BY-SA)"
+    },
+    {
+        "sku":  "ARC-028",
+        "url":  "https://live.staticflickr.com/184/441554601_ac6f55bc8d.jpg",
+        "fuente":  "1lenore · CC BY 2.0 · https://www.flickr.com/photos/80522246@N00/441554601"
+    },
+    {
+        "sku":  "ARC-157",
+        "url":  "https://live.staticflickr.com/4081/4801786850_a1bda02179_b.jpg",
+        "fuente":  "jetalone · CC BY 2.0 · https://www.flickr.com/photos/92203585@N00/4801786850"
+    },
+    {
+        "sku":  "ARC-185",
+        "url":  "https://live.staticflickr.com/65535/49062340512_c1a513774f.jpg",
+        "fuente":  "shop8447 · CC CC0 1.0 · https://www.flickr.com/photos/185514373@N06/49062340512"
+    },
+    {
+        "sku":  "ARC-188",
+        "url":  "https://live.staticflickr.com/3668/32977199900_6461bf31ce_b.jpg",
+        "fuente":  "saiberiac · CC BY 2.0 · https://www.flickr.com/photos/22806462@N03/32977199900"
+    },
+    {
+        "sku":  "ARC-235",
+        "url":  "https://live.staticflickr.com/7800/32525592777_5fa32b9896_b.jpg",
+        "fuente":  "DogLab · CC BY 2.0 · https://www.flickr.com/photos/156497139@N02/32525592777"
+    },
+    {
+        "sku":  "BRV-312",
+        "url":  "https://live.staticflickr.com/138/319716082_f3eabe5ae9.jpg",
+        "fuente":  "goodiesfirst · CC BY 2.0 · https://www.flickr.com/photos/49215102@N00/319716082"
+    }
+]

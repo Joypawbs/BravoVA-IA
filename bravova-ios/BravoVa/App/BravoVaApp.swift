@@ -2,13 +2,16 @@ import SwiftUI
 
 @main
 struct BravoVaApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @State private var app = AppState()
     @State private var ready = false
 
     var body: some Scene {
         WindowGroup {
-            Group {
+            ZStack {
                 if ready { RootView() } else { StartupSkeleton() }
+                // Huevos de pascua por encima de todo (pestañas y barra incluidas)
+                EasterOverlay().zIndex(10)
             }
                 .task {
                     // Primero se pinta el esqueleto; luego se lee el catálogo (750 productos)
@@ -17,7 +20,11 @@ struct BravoVaApp: App {
                     withAnimation(.easeOut(duration: 0.25)) { ready = true }
                 }
                 .environment(app)
-                .onOpenURL { _ = AuthService.handle(url: $0) }
+                .appAppearance()
+                .onOpenURL { url in
+                    if let action = RouteAction(url: url) { Router.shared.pending = action }
+                    else { _ = AuthService.handle(url: url) }
+                }
                 .tint(app.store.accent)
         }
     }
@@ -48,10 +55,14 @@ struct RootView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .overlay { EasterOverlay() }
         .sheet(item: $app.selectedProduct) { ProductDetailView(product: $0) }
         .sheet(isPresented: $app.showCart) { CartView() }
         .fullScreenCover(isPresented: $app.showScanner) { ScannerView() }
+        .onChange(of: Router.shared.pending, initial: true) { _, action in
+            guard let action else { return }
+            app.perform(action)
+            Router.shared.pending = nil
+        }
         .onAppear {
             // Capturas del CI: "-abrir carrito" o "-abrir producto"
             switch UserDefaults.standard.string(forKey: "abrir") {

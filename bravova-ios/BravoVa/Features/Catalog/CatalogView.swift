@@ -110,13 +110,14 @@ struct ProductRow: View {
 /// Imagen del producto con proporción fija y respaldo de color (sin inventar fotos).
 struct ProductThumb: View {
     let product: Product
+    @AppStorage(Settings.dataSaver) private var dataSaver = false
 
     var body: some View {
         let tint = Color(hexString: product.colorHex) ?? .gray
         RoundedRectangle(cornerRadius: 14, style: .continuous)
             .fill(tint.opacity(0.12))
             .overlay {
-                if let url = Catalog.shared.photoURL(for: product) {
+                if !dataSaver, let url = Catalog.shared.photoURL(for: product) {
                     AsyncImage(url: url, transaction: Transaction(animation: .easeOut(duration: 0.2))) { phase in
                         switch phase {
                         case .success(let image): image.resizable().scaledToFit().padding(6)

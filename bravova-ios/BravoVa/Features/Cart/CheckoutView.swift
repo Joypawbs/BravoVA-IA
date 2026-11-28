@@ -192,7 +192,7 @@ struct OrderPlacedView: View {
         }
         .padding()
         .overlay { ConfettiBurst().allowsHitTesting(false).ignoresSafeArea() }
-        .sensoryFeedback(.success, trigger: order.id)
+        .haptic(.success, trigger: order.id)
         .navigationBarBackButtonHidden()
     }
 }

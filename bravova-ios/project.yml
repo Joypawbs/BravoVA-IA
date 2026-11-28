@@ -53,6 +53,9 @@ targets:
         NSSpeechRecognitionUsageDescription: "Brav IA convierte tu voz en texto para responder tus consultas."
         NSPhotoLibraryUsageDescription: "Adjunta fotos de productos o facturas para que Brav IA las analice."
         NSLocationWhenInUseUsageDescription: "BravoVa usa tu ubicación para calcular la distancia y el tiempo de entrega desde la sucursal más cercana."
+        NSMicrophoneUsageDescription: "BravoVa usa el micrófono solo mientras dictas una pregunta a Brav IA."
+        NSSpeechRecognitionUsageDescription: "BravoVa convierte tu voz en texto para preguntarle a Brav IA."
+        NSPhotoLibraryUsageDescription: "Elige una foto (por ejemplo una factura) para preguntarle a Brav IA."
         NSFaceIDUsageDescription: "Confirma pagos y canjes de tu Bravísima con Face ID."
         NSSupportsLiveActivities: true
         CFBundleURLTypes:
@@ -65,6 +68,9 @@ targets:
           - UIApplicationShortcutItemType: buscar
             UIApplicationShortcutItemTitle: Buscar
             UIApplicationShortcutItemIconSymbolName: magnifyingglass
+          - UIApplicationShortcutItemType: repetir
+            UIApplicationShortcutItemTitle: Repetir último pedido
+            UIApplicationShortcutItemIconSymbolName: arrow.clockwise
           - UIApplicationShortcutItemType: bravisima
             UIApplicationShortcutItemTitle: Mi tarjeta Bravísima
             UIApplicationShortcutItemIconSymbolName: creditcard

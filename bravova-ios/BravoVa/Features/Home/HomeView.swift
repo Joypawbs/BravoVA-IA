@@ -5,6 +5,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppState.self) private var app
     @State private var query = ""
+    @FocusState private var searchFocused: Bool
     private let catalog = Catalog.shared
 
     /// Todos los pasillos de la tienda, como en la 3.1 (los 750 productos se ven desde Inicio)
@@ -17,6 +18,10 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                         prompt: app.store == .bravo ? "Buscar productos o marcas" : "Buscar productos o mascotas")
+            .searchFocused($searchFocused)
+            .onChange(of: app.focusSearch, initial: true) { _, want in
+                if want { searchFocused = true; app.focusSearch = false }
+            }
             .toolbar {
                 StoreLogoToolbarItem()
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -241,7 +246,7 @@ struct QuantityControl: View {
             }
         }
         .animation(.smooth(duration: 0.2), value: qty)
-        .sensoryFeedback(.selection, trigger: qty)
+        .haptic(.selection, trigger: qty)
     }
 }
 

@@ -71,7 +71,7 @@ struct FavoriteButton: View {
                 .contentTransition(.symbolEffect(.replace))
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.impact(weight: .light), trigger: on)
+        .haptic(.impact(weight: .light), trigger: on)
         .accessibilityLabel(on ? "Quitar de favoritos" : "Agregar a favoritos")
     }
 }

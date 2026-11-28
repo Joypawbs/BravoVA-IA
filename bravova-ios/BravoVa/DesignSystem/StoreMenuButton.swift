@@ -38,7 +38,7 @@ struct StoreMenuButton: View {
         }
         // 5 toques seguidos al logo: huevo de pascua de las huellitas
         .simultaneousGesture(TapGesture().onEnded { Easter.shared.logoTapped() })
-        .sensoryFeedback(.selection, trigger: app.store)
+        .haptic(.selection, trigger: app.store)
         .accessibilityLabel("Tienda actual: \(app.store.title). Cambiar de tienda")
     }
 }

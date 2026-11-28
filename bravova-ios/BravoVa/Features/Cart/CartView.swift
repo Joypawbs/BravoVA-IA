@@ -105,7 +105,7 @@ struct CartView: View {
                 }
             }
             .overlay(alignment: .bottom) { undoBanner }
-            .sensoryFeedback(.impact(weight: .light), trigger: undo?.id)
+            .haptic(.impact(weight: .light), trigger: undo?.id)
         }
         .presentationDragIndicator(.visible)
     }

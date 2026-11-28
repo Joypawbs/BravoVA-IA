@@ -93,7 +93,7 @@ jobs:
           for HUEVO in spamton toriel; do
             xcrun simctl terminate "$UDID" com.aistudio.bravova.rdshop 2>/dev/null || true
             xcrun simctl launch "$UDID" com.aistudio.bravova.rdshop -tab home -huevo "$HUEVO" >/dev/null
-            sleep 5
+            sleep 3
             xcrun simctl io "$UDID" screenshot "../capturas/huevo_$HUEVO.png"
           done
           # Brav IA de verdad: una consulta y la línea BRAVIA_FUENTE que imprime la app

@@ -69,6 +69,8 @@ struct AccountView: View {
                 }
 
                 Section("Ayuda") {
+                    NavigationLink { SettingsView() } label: { Label("Ajustes", systemImage: "gearshape") }
+                    NavigationLink { HelpView() } label: { Label("Ayuda y comprobantes", systemImage: "questionmark.circle") }
                     Link(destination: URL(string: "https://superbravo.com.do")!) {
                         Label("superbravo.com.do", systemImage: "safari")
                     }
@@ -223,7 +225,7 @@ struct OrderDetailView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .sensoryFeedback(.selection, trigger: current)
+                .haptic(.selection, trigger: current)
             }
             Section("Productos") {
                 ForEach(order.lines, id: \.sku) { line in

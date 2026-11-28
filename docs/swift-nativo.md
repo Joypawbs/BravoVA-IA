@@ -74,20 +74,20 @@ La 3.2 dejó fuera funciones de la 3.1. La 3.2.1 las recupera todas. La lista sa
 | 20 | Pedido en vivo (Live Activity y Dynamic Island) | BravoWidgets, v1.3 / v2.5 | Pendiente |
 | 21 | Widgets: Ofertas y Bravísima, con datos | BravoWidgets | Revisar |
 | 22 | Mis pedidos: calificar la entrega, repetir | AccountGridScreen, v2.0b1 | Parcial: calificar y repetir hechos; seguimiento con #19 |
-| 23 | Listas: crear, gestionar, compartir por WhatsApp | ManagedShoppingListCard, v1.2 | Parcial |
+| 23 | Listas: crear, gestionar, compartir por WhatsApp | ManagedShoppingListCard, v1.2 | Hecho (crear, renombrar, quitar, pasar al carrito, compartir por WhatsApp) |
 | 24 | Notificaciones (locales) y su pantalla de avisos | FcmPushControlAndFeedCard | Pendiente |
-| 25 | Brav IA: Copiar, Reintentar, valorar | BravIaChatScreen, v3.1 | Pendiente |
-| 26 | Brav IA: panel de presupuesto (deslizador, Armar, Ajustar, Listas) | BravIaChatScreen, v2.5 / v3.1 | Pendiente |
-| 27 | Brav IA: dictado por voz y foto adjunta (factura NCF) | ServicesIos (speech, image picker) | Pendiente |
-| 28 | Brav IA: historial de conversaciones | BravIaHistoryAutoListHeroCard | Pendiente |
-| 29 | Brav IA: "Agregar todo", guardar como lista, "Pedir por mí" | v1.4 / v2.2 | Pendiente |
-| 30 | Enlaces bravova://bravia?q=… y bravova://carrito | v2.2 / v3.0 | Pendiente |
-| 31 | Atajos del ícono: Buscar, Repetir último pedido, Bravísima | v2.0b1 | Parcial |
+| 25 | Brav IA: Copiar, Reintentar, valorar | BravIaChatScreen, v3.1 | Hecho (Copiar, Reintentar, Ãºtil o no Ãºtil) |
+| 26 | Brav IA: panel de presupuesto (deslizador, Armar, Ajustar, Listas) | BravIaChatScreen, v2.5 / v3.1 | Hecho (panel con monto, personas y tipo de compra; arma la pregunta) |
+| 27 | Brav IA: dictado por voz y foto adjunta (factura NCF) | ServicesIos (speech, image picker) | Hecho (dictado es-DO con Speech y foto adjunta enviada a Gemini) |
+| 28 | Brav IA: historial de conversaciones | BravIaHistoryAutoListHeroCard | Hecho (Ãºltimas 30 conversaciones en el telÃ©fono; abrir, borrar, nueva) |
+| 29 | Brav IA: "Agregar todo", guardar como lista, "Pedir por mí" | v1.4 / v2.2 | Hecho (Agregar todo, Guardar como lista, Pedir por mÃ­) |
+| 30 | Enlaces bravova://bravia?q=… y bravova://carrito | v2.2 / v3.0 | Hecho (bravova://bravia?q=, carrito, buscar, bravisima, repetir, producto/SKU) |
+| 31 | Atajos del ícono: Buscar, Repetir último pedido, Bravísima | v2.0b1 | Hecho (Buscar, Repetir Ãºltimo pedido, Mi tarjeta BravÃ­sima) |
 | 32 | Huevos de pascua: búsqueda (efectos y sonidos de 8 bits) y huella (5 toques al logo) | EasterEggs, EasterEffects, PawEasterEgg | Hecho (35 huevos, sonido 8 bits, efectos y huellitas) |
-| 33 | Ajustes: modo oscuro, ahorro de datos, vibraciones | AccountGridScreen, v1.2 | Pendiente |
-| 34 | Ayuda: horario, comprobantes NCF, contacto | AccountGridScreen, v2.2 | Pendiente |
+| 33 | Ajustes: modo oscuro, ahorro de datos, vibraciones | AccountGridScreen, v1.2 | Hecho (tema claro/oscuro/automÃ¡tico, ahorro de datos sin fotos, vibraciones) |
+| 34 | Ayuda: horario, comprobantes NCF, contacto | AccountGridScreen, v2.2 | Hecho (horario, NCF, cÃ³mo funcionan los pedidos, contacto, crÃ©ditos de fotos) |
 | 35 | Inicio de sesión con Google (y Apple) | BravoGoogleAuthScreen | Hecho |
-| 36 | Fotos: todo producto con foto del tipo correcto | catálogo | Pendiente |
+| 36 | Fotos: todo producto con foto del tipo correcto | catálogo | Parcial: +18 fotos del tipo correcto (fotos.json, con crÃ©ditos); 57 artÃ­culos de mascota sin foto libre encontrada muestran el Ã­cono del pasillo |
 
 **Cuándo se publica:**
 - Todas las filas en "Hecho".

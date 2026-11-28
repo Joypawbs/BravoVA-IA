@@ -52,7 +52,7 @@ struct ScannerView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(role: .close) { dismiss() } }
             }
-            .sensoryFeedback(.success, trigger: code)
+            .haptic(.success, trigger: code)
             .task(id: code) {
                 guard let code else { return }
                 lookup = .loading
