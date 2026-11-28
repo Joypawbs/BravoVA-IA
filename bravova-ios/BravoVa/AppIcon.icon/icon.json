@@ -1,0 +1,69 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "solid": "srgb:0.89020,0.02353,0.07451,1.00000"
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "srgb:0.10196,0.10588,0.12157,1.00000"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Logotipo b",
+      "layers": [
+        {
+          "image-name": "1_b.svg",
+          "name": "b",
+          "glass": true
+        }
+      ],
+      "specular": true,
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.3
+      }
+    },
+    {
+      "name": "Acentos",
+      "layers": [
+        {
+          "image-name": "2_ruedas.svg",
+          "name": "ruedas",
+          "glass": true
+        },
+        {
+          "image-name": "3_hoja.svg",
+          "name": "hoja",
+          "glass": true
+        },
+        {
+          "image-name": "4_destellos.svg",
+          "name": "destellos",
+          "glass": true,
+          "opacity": 0.9
+        }
+      ],
+      "specular": true,
+      "shadow": {
+        "kind": "layer-color",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.2
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}

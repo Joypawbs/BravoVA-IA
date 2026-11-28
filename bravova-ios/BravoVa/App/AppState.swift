@@ -1,0 +1,42 @@
+import SwiftUI
+import Observation
+
+enum AppTab: String, Hashable {
+    case home, catalog, bravia, bravisima, account
+}
+
+enum StoreMode: String, CaseIterable, Identifiable {
+    case bravo, arca
+
+    var id: String { rawValue }
+    var title: String { self == .bravo ? "Supermercados Bravo" : "El Arca Petshop" }
+    var subtitle: String { self == .bravo ? "Los expertos en vender barato" : "Nutrición y cuidado de mascotas" }
+    var logo: String { self == .bravo ? "logo_bravo" : "logo_arca" }
+    var accent: Color { self == .bravo ? Brand.bravoRed : Brand.arcaTeal }
+}
+
+/// Estado global de la app. Se irá llenando con el catálogo, el carrito, la cuenta, etc.
+@Observable
+final class AppState {
+    var tab: AppTab
+    var store: StoreMode {
+        didSet { UserDefaults.standard.set(store.rawValue, forKey: Keys.store) }
+    }
+
+    private enum Keys { static let store = "tienda" }
+
+    init() {
+        let defaults = UserDefaults.standard
+        store = StoreMode(rawValue: defaults.string(forKey: Keys.store) ?? "") ?? .bravo
+        // Las capturas del CI abren cada pestaña con el argumento "-tab <nombre>"
+        tab = AppTab(rawValue: defaults.string(forKey: "tab") ?? "") ?? .home
+    }
+}
+
+enum AppConfig {
+    /// Clave de Gemini inyectada al compilar (Info.plist ← ajuste GEMINI_API_KEY del CI).
+    static var geminiKey: String {
+        (Bundle.main.object(forInfoDictionaryKey: "BravIAGeminiKey") as? String ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
