@@ -72,6 +72,9 @@ import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
@@ -233,40 +236,25 @@ fun BravisimaScreen(
     onCopyCardNumber: (String) -> Unit,
     onSignOutGoogle: () -> Unit
 ) {
-    val context = currentPlatformContext()
+    // 3.2: rediseño. Solo lo que existe en el programa real de Bravo (Bravísimo Club):
+    // 1 punto por cada RD$100, 1 punto = RD$1, se canjea desde 100 puntos y los puntos de un año
+    // vencen el 31 de marzo del siguiente. Sin niveles, metas ni códigos de descuento inventados.
     val view = currentPlatformView()
     val clipboard = LocalClipboardManager.current
-    val scope = rememberCoroutineScope()
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val neededForNextPeso = cartTotals.nextHundredRemainder.roundToInt()
-
-    var isGoogleSigningIn by remember { mutableStateOf(false) }
-    var authErrorBanner by remember { mutableStateOf<String?>(null) }
-    var maskCardNumber by remember { mutableStateOf(false) }
-    var isEditingSettings by remember { mutableStateOf(false) }
-    var editableHolderName by remember(bravisimaCard.holderName) { mutableStateOf(bravisimaCard.holderName) }
-    var editableGoal by remember(bravisimaCard.monthlyGoal) { mutableIntStateOf(bravisimaCard.monthlyGoal) }
-    var editableCategory by remember(bravisimaCard.preferredCategory) { mutableStateOf(bravisimaCard.preferredCategory) }
-    var promoCodeInput by remember { mutableStateOf("") }
-    var showCardLockBiometricPrompt by remember { mutableStateOf(false) }
-
+    val brand = Tone.brand
+    val points = balance.coerceAtLeast(0)
+    val canRedeem = points >= 100
     val cardNumber = bravisimaCard.cardNumber.ifBlank { userProfile.bravisimaNumber }
-    val displayCardNumber = if (maskCardNumber && cardNumber.length >= 4) {
-        "BRV-••••-••••-${cardNumber.takeLast(4)}"
-    } else {
-        cardNumber
-    }
-    // Código de barras real (Code 128) para que el escáner de la caja lo lea
+    val memberName = userProfile.name.ifBlank { bravisimaCard.holderName }
     val barcodeModules = remember(cardNumber) { com.example.ui.components.Code128.modules(cardNumber) }
     var showFullscreenCode by remember { mutableStateOf(false) }
     if (showFullscreenCode) {
         com.example.ui.components.BravisimaFullscreenCode(
             cardNumber = cardNumber,
-            memberName = userProfile.name,
+            memberName = memberName,
             onDismiss = { showFullscreenCode = false }
         )
     }
-
     val hazeState = LocalTranslucentHazeState.current
 
     Box(
@@ -278,1198 +266,249 @@ fun BravisimaScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(
+                start = 16.dp, end = 16.dp, top = 74.dp,
+                bottom = com.example.ui.components.LocalBottomChromeInset.current
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Tarjeta de membresía: rojo sólido de marca con texto blanco (contraste alto)
             item(key = "bravisima_card", contentType = "loyalty_card") {
-                val cardGradient = if (bravisimaCard.isLocked) {
-                    listOf(Tone.inkSoft, Color(0xFF1E293B), Tone.ink)
-                } else {
-                    listOf(primaryColor, BravoRedDark, Color(0xFF4C0519))
-                }
-                var cardSize by remember { mutableStateOf(IntSize.Zero) }
-                var isCardPressed by remember { mutableStateOf(false) }
-                var targetTiltX by remember { mutableFloatStateOf(0f) }
-                var targetTiltY by remember { mutableFloatStateOf(0f) }
-                var glareXFrac by remember { mutableFloatStateOf(0.5f) }
-                var glareYFrac by remember { mutableFloatStateOf(0.35f) }
-
-                val animatedTiltX by animateFloatAsState(
-                    targetValue = targetTiltX,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow
-                    ),
-                    label = "cardTiltX"
-                )
-                val animatedTiltY by animateFloatAsState(
-                    targetValue = targetTiltY,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow
-                    ),
-                    label = "cardTiltY"
-                )
-                val animatedCardScale by animateFloatAsState(
-                    targetValue = if (isCardPressed) 1.015f else 1f,
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-                    label = "cardScale"
-                )
-                val sweepTransition = rememberInfiniteTransition(label = "card_holo_sweep")
-                val sweepProgress by sweepTransition.animateFloat(
-                    initialValue = -0.35f,
-                    targetValue = 1.45f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(durationMillis = 4500, easing = FastOutSlowInEasing),
-                        repeatMode = RepeatMode.Restart
-                    ),
-                    label = "holoSweepProgress"
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                        .onSizeChanged { cardSize = it }
-                        .graphicsLayer {
-                            cameraDistance = 12f * density
-                            rotationX = animatedTiltX
-                            rotationY = animatedTiltY
-                            scaleX = animatedCardScale
-                            scaleY = animatedCardScale
-                        }
-                        .pointerInput(Unit) {
-                            awaitPointerEventScope {
-                                while (true) {
-                                    val event = awaitPointerEvent(PointerEventPass.Initial)
-                                    val activePointer = event.changes.firstOrNull { it.pressed }
-                                    if (activePointer != null && cardSize.width > 0 && cardSize.height > 0) {
-                                        isCardPressed = true
-                                        val nx = ((activePointer.position.x / cardSize.width) - 0.5f).coerceIn(-0.5f, 0.5f)
-                                        val ny = ((activePointer.position.y / cardSize.height) - 0.5f).coerceIn(-0.5f, 0.5f)
-                                        targetTiltY = nx * 16f
-                                        targetTiltX = -ny * 14f
-                                        glareXFrac = (nx + 0.5f).coerceIn(0f, 1f)
-                                        glareYFrac = (ny + 0.5f).coerceIn(0f, 1f)
-                                    } else {
-                                        isCardPressed = false
-                                        targetTiltX = 0f
-                                        targetTiltY = 0f
-                                    }
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = BravoRedDark,
+                    modifier = Modifier.fillMaxWidth().testTag("bravisima_membership_card")
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    text = "Bravísima",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Membresía de Supermercados Bravo",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.85f)
+                                )
+                            }
+                            Surface(shape = RoundedCornerShape(12.dp), color = Color.White) {
+                                Box(Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+                                    BravoOfficialLogoBadge(scale = 0.7f)
                                 }
                             }
                         }
-                        .shadow(18.dp, RoundedCornerShape(26.dp), spotColor = primaryColor.copy(alpha = 0.35f))
-                        .clip(RoundedCornerShape(26.dp))
-                        .background(Brush.linearGradient(colors = cardGradient))
-                        .testTag("bravisima_digital_card")
-                ) {
-                    Canvas(modifier = Modifier.matchParentSize()) {
-                        val w = size.width
-                        val h = size.height
-                        if (isCardPressed) {
-                            val center = Offset(w * glareXFrac, h * glareYFrac)
-                            drawCircle(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(Color.White.copy(alpha = 0.24f), Color.Transparent),
-                                    center = center,
-                                    radius = w * 0.55f
-                                ),
-                                radius = w * 0.55f,
-                                center = center
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = "Puntos disponibles",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.85f)
                             )
-                        }
-                        val sweepX = w * sweepProgress
-                        drawRect(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.White.copy(alpha = 0.14f),
-                                    BravoAmber.copy(alpha = 0.12f),
-                                    Color.Transparent
-                                ),
-                                start = Offset(sweepX - w * 0.28f, 0f),
-                                end = Offset(sweepX + w * 0.18f, h)
+                            Text(
+                                text = formatMoney(points),
+                                style = MaterialTheme.typography.displayLarge,
+                                color = Color.White,
+                                modifier = Modifier.testTag("bravisima_points")
                             )
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Black.copy(alpha = 0.24f),
-                                        Color.Black.copy(alpha = 0.08f),
-                                        Color.Black.copy(alpha = 0.36f)
-                                    )
-                                )
-                            )
-                    )
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                DiagonalMetadataStrip(
-                                    items = listOf(
-                                        // Sin "NIVEL": así las tres etiquetas caben en una línea
-                                        // (con él, "1% CASHBACK" se cortaba)
-                                        bravisimaCard.tier.label.uppercase(),
-                                        if (bravisimaCard.isLocked) "BLOQUEADA" else "ACTIVA",
-                                        "1% CASHBACK"
-                                    ),
-                                    slashColor = Color.White,
-                                    textColor = Color.White,
-                                    fontSizeSp = 11f,
-                                    maxLines = 1
-                                )
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                Text(
-                                    text = "Bravísima digital",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 28.sp,
-                                    color = Color.White
-                                )
-
-                                Text(
-                                    text = bravisimaCard.holderName.uppercase(),
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    letterSpacing = 1.1.sp,
-                                    color = Color.White.copy(alpha = 0.96f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
+                            Text(
+                                text = "Equivalen a RD$${formatMoney(points)} para tus compras",
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White
-                            ) {
-                                Box(modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)) {
-                                    BravoOfficialLogoBadge(scale = 0.84f)
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White)
-                                .clickable(enabled = !bravisimaCard.isLocked, onClickLabel = "Mostrar el código en grande para la caja") {
-                                    performCrispHaptic(view, HapticStyle.CONFIRM)
-                                    showFullscreenCode = true
-                                }
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                                .testTag("bravisima_barcode_plate"),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Canvas(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(40.dp)
-                            ) {
-                                val unitWidth = size.width / barcodeModules.size
-                                barcodeModules.forEachIndexed { i, isBar ->
-                                    if (isBar) drawRect(
-                                        color = if (bravisimaCard.isLocked) Tone.muted else Color(0xFF111827),
-                                        topLeft = Offset(i * unitWidth, 0f),
-                                        size = Size(unitWidth + 0.5f, size.height)
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = displayCardNumber,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    letterSpacing = 1.sp,
-                                    color = Tone.ink,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 12.dp)
-                                )
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = if (maskCardNumber) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                        contentDescription = "Mostrar u ocultar número de tarjeta",
-                                        tint = Color(0xFF1E293B),
-                                        modifier = Modifier
-                                            .size(20.dp)
-                                            .clickable {
-                                                performCrispHaptic(view, HapticStyle.TICK)
-                                                maskCardNumber = !maskCardNumber
-                                            }
-                                            .testTag("bravisima_toggle_mask_button")
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Default.ContentCopy,
-                                        contentDescription = "Copiar número Bravísima",
-                                        tint = Color(0xFF1E293B),
-                                        modifier = Modifier
-                                            .size(19.dp)
-                                            .clickable {
-                                                performCrispHaptic(view, HapticStyle.TICK)
-                                                clipboard.setText(AnnotatedString(cardNumber))
-                                                onCopyCardNumber(cardNumber)
-                                            }
-                                            .testTag("bravisima_copy_number_button")
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Column {
-                                Text(
-                                    text = if (bravisimaCard.isLocked) "BALANCE PROTEGIDO" else "BALANCE DISPONIBLE",
-                                    fontSize = 12.sp,
-                                    letterSpacing = 0.7.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White.copy(alpha = 0.94f)
-                                )
-                                Text(
-                                    text = "RD$${formatMoney(balance)}.00",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 28.sp,
-                                    color = Color.White
-                                )
-                            }
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Button(
-                                    onClick = {
-                                        performCrispHaptic(view, HapticStyle.CONFIRM)
-                                        onOpenScanner()
-                                    },
-                                    enabled = !bravisimaCard.isLocked,
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color.White.copy(alpha = 0.18f),
-                                        contentColor = Color.White,
-                                        disabledContainerColor = Color.White.copy(alpha = 0.10f),
-                                        disabledContentColor = Color.White.copy(alpha = 0.55f)
-                                    ),
-                                    border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.48f)),
-                                    shape = RoundedCornerShape(999.dp),
-                                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .testTag("bravisima_scan_button")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.QrCodeScanner,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = "Escanear",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-
-                                Button(
-                                    onClick = {
-                                        performCrispHaptic(view, HapticStyle.CONFIRM)
-                                        onRedeemInCart()
-                                    },
-                                    enabled = !bravisimaCard.isLocked,
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color.White,
-                                        contentColor = BravoRedDark,
-                                        disabledContainerColor = Color.White.copy(alpha = 0.55f),
-                                        disabledContentColor = Color(0xFF1E293B)
-                                    ),
-                                    shape = RoundedCornerShape(999.dp),
-                                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
-                                    modifier = Modifier
-                                        .weight(1.25f)
-                                        .testTag("bravisima_redeem_button")
-                                ) {
-                                    Text(
-                                        text = if (bravisimaCard.isLocked) "Bloqueada" else "Canjear en carrito",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            item(key = "bravisima_auth_status", contentType = "auth_status_card") {
-                TranslucentCard(
-                    darkMode = darkMode,
-                    cornerRadius = 22.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                        .testTag("bravisima_auth_card")
-                ) {
-                    if (isGuestMode) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(primaryColor.copy(alpha = 0.14f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.VerifiedUser,
-                                        contentDescription = "Cuenta Google y Bravísima",
-                                        tint = primaryColor,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Vincula tu cuenta de Google",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "Inicia sesión con tu cuenta de Google para sincronizar y gestionar tu Tarjeta Bravísima en todos tus dispositivos.",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = 12.sp,
-                                        lineHeight = 15.5.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-
-                            AnimatedVisibility(
-                                visible = authErrorBanner != null,
-                                enter = fadeIn(),
-                                exit = fadeOut()
-                            ) {
-                                authErrorBanner?.let { err ->
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.errorContainer,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text(
-                                            text = err,
-                                            fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.onErrorContainer,
-                                            modifier = Modifier.padding(10.dp)
-                                        )
-                                    }
-                                }
-                            }
-
-                            Button(
-                                onClick = {
-                                    if (isGoogleSigningIn) return@Button
-                                    HapticFeedbackManager.onConfirmAction(view)
-                                    authErrorBanner = null
-                                    isGoogleSigningIn = true
-                                    scope.launch {
-                                        val result = launchGoogleSignInSheet(context)
-                                        isGoogleSigningIn = false
-                                        result.onFailure { e ->
-                                            authErrorBanner = e.message
-                                                ?: "No se pudo completar el inicio de sesión con Google."
-                                        }
-                                    }
-                                },
-                                enabled = !isGoogleSigningIn,
-                                shape = RoundedCornerShape(999.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 11.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp)
-                                    .testTag("bravisima_google_signin_button")
-                            ) {
-                                if (isGoogleSigningIn) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.2.dp,
-                                        color = Color.White
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Conectando con Google...",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        color = Color.White
-                                    )
-                                } else {
-                                    // Sin el icono de destellos: igual que el botón de Google del inicio de sesión
-                                    Text(
-                                        text = "Iniciar sesión con Google",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        color = Color.White
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 13.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(Tone.success.copy(alpha = 0.14f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.CloudDone,
-                                        contentDescription = "Sincronizado con Google",
-                                        tint = Tone.success,
-                                        modifier = Modifier.size(19.dp)
-                                    )
-                                }
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Text(
-                                            text = bravisimaCard.holderName,
-                                            fontFamily = PlusJakartaSans,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 15.sp,
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        if (isSavingBravisima) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(12.dp),
-                                                strokeWidth = 1.8.dp,
-                                                color = primaryColor
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = "${bravisimaCard.holderEmail ?: userProfile.email} • Cuenta Google Activa",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-
-                            OutlinedButton(
-                                onClick = {
-                                    HapticFeedbackManager.onNavigationClick(view)
-                                    onSignOutGoogle()
-                                },
-                                border = BorderStroke(1.2.dp, primaryColor.copy(alpha = 0.55f)),
-                                shape = RoundedCornerShape(999.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                modifier = Modifier
-                                    .height(34.dp)
-                                    .testTag("bravisima_sign_out_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                                    contentDescription = "Cerrar sesión de Google",
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Salir",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = primaryColor
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            item(key = "bravisima_management", contentType = "card_management") {
-                val tier = bravisimaCard.tier
-                val nextTarget = tier.nextTierTargetRd
-                val tierProgress = if (nextTarget != null && nextTarget > tier.minLifetimeRd) {
-                    ((bravisimaCard.lifetimeEarned - tier.minLifetimeRd).toFloat() /
-                        (nextTarget - tier.minLifetimeRd).toFloat()).coerceIn(0f, 1f)
-                } else {
-                    1f
-                }
-                val goalProgress = (bravisimaCard.balance.toFloat() / bravisimaCard.monthlyGoal.toFloat()).coerceIn(0f, 1f)
-
-                TranslucentCard(
-                    darkMode = darkMode,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                        .testTag("bravisima_management_card")
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Gestionar mi Bravísima",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
-                            )
-                            BravoUnderline(isArca = false)
-                        }
-
-                        // Nivel y meta del mes
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(
-                                    if (darkMode) Color.White.copy(alpha = 0.08f)
-                                    else Tone.surfaceSubtle
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.22f),
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                                .padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Nivel ${tier.label} • RD$${formatMoney(bravisimaCard.lifetimeEarned)}",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Surface(
-                                    shape = RoundedCornerShape(999.dp),
-                                    color = primaryColor.copy(alpha = if (darkMode) 0.22f else 0.12f)
-                                ) {
-                                    Text(
-                                        text = if (nextTarget != null) "Meta: RD$$nextTarget" else "Nivel máximo",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        color = if (darkMode) Color.White else BravoRedDark,
-                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
-                                    )
-                                }
-                            }
-                            val tipPulse by rememberInfiniteTransition(label = "tier_tip_pulse").animateFloat(
-                                initialValue = 0.72f,
-                                targetValue = 1.25f,
-                                animationSpec = infiniteRepeatable(
-                                    animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
-                                    repeatMode = RepeatMode.Reverse
-                                ),
-                                label = "tierTipPulse"
-                            )
-                            BoxWithConstraints(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(16.dp),
-                                contentAlignment = Alignment.CenterStart
-                            ) {
-                                val trackWidth = maxWidth
-                                LinearProgressIndicator(
-                                    progress = { tierProgress },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(9.dp)
-                                        .clip(RoundedCornerShape(99.dp)),
-                                    color = primaryColor,
-                                    trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .offset(x = ((trackWidth - 13.dp) * tierProgress.coerceIn(0f, 1f)))
-                                        .size(13.dp)
-                                        .graphicsLayer {
-                                            scaleX = tipPulse
-                                            scaleY = tipPulse
-                                        }
-                                        .clip(CircleShape)
-                                        .background(BravoAmber)
-                                        .border(1.5.dp, Color.White, CircleShape)
-                                )
-                            }
-                            Text(
-                                text = "${tier.benefitSummary} • Meta mensual: RD$${formatMoney(bravisimaCard.balance)} / RD$${formatMoney(bravisimaCard.monthlyGoal)} (${(goalProgress * 100).roundToInt()}%)",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 12.sp,
-                                lineHeight = 18.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.86f)
                             )
                         }
-
-                        // Bloqueo de seguridad
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (bravisimaCard.isLocked) Icons.Default.Lock else Icons.Default.LockOpen,
-                                    contentDescription = null,
-                                    tint = if (bravisimaCard.isLocked) Tone.brand else Tone.successBright,
-                                    modifier = Modifier.size(21.dp)
-                                )
-                                Column {
-                                    Text(
-                                        text = if (bravisimaCard.isLocked) "Tarjeta bloqueada" else "Seguridad de tarjeta activa",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = if (bravisimaCard.isLocked) {
-                                            "Canjes y códigos pausados temporalmente"
-                                        } else {
-                                            "Toca para bloquear temporalmente tu Bravísima"
-                                        },
-                                        fontFamily = PlusJakartaSans,
-                                        fontSize = 12.sp,
-                                        lineHeight = 17.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f)
-                                    )
-                                }
-                            }
-                            BravoSwitch(
-                                checked = bravisimaCard.isLocked,
-                                onCheckedChange = {
-                                    performCrispHaptic(view, HapticStyle.TICK)
-                                    showCardLockBiometricPrompt = true
-                                },
-                                accent = Tone.brand,
-                                modifier = Modifier.testTag("bravisima_lock_switch")
-                            )
-                        }
-
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
-
-                        // Canje automático
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CreditCard,
-                                    contentDescription = null,
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(21.dp)
-                                )
-                                Column {
-                                    Text(
-                                        text = "Canje automático en carrito",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "Aplica tu balance Bravísima al pagar automáticamente",
-                                        fontFamily = PlusJakartaSans,
-                                        fontSize = 12.sp,
-                                        lineHeight = 17.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f)
-                                    )
-                                }
-                            }
-                            BravoSwitch(
-                                checked = bravisimaCard.autoRedeemInCart && !bravisimaCard.isLocked,
-                                onCheckedChange = {
-                                    performCrispHaptic(view, HapticStyle.TICK)
-                                    onToggleAutoRedeem()
-                                },
-                                enabled = !bravisimaCard.isLocked,
-                                accent = primaryColor,
-                                modifier = Modifier.testTag("bravisima_autoredeem_switch")
-                            )
-                        }
-
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
-
-                        // Editar alias y meta de ahorro
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable {
-                                    performCrispHaptic(view, HapticStyle.TICK)
-                                    isEditingSettings = !isEditingSettings
-                                }
-                                .padding(vertical = 4.dp)
-                                .testTag("bravisima_toggle_settings_editor"),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = null,
-                                    tint = primaryColor,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Text(
-                                    text = "Personalizar titular, meta y pasillo favorito",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = primaryColor
-                                )
-                            }
-                            Icon(
-                                imageVector = if (isEditingSettings) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = null,
-                                tint = primaryColor
-                            )
-                        }
-
-                        AnimatedVisibility(visible = isEditingSettings) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.padding(top = 4.dp)
-                            ) {
-                                OutlinedTextField(
-                                    value = editableHolderName,
-                                    onValueChange = { editableHolderName = it },
-                                    label = { Text("Nombre en la tarjeta Bravísima") },
-                                    singleLine = true,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .testTag("bravisima_holder_name_input")
-                                )
-
-                                Text(
-                                    text = "Meta mensual de ahorro: RD$${formatMoney(editableGoal)}",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    listOf(300, 500, 1000, 2000).forEach { goalOption ->
-                                        val selected = editableGoal == goalOption
-                                        Surface(
-                                            onClick = {
-                                                performCrispHaptic(view, HapticStyle.TICK)
-                                                editableGoal = goalOption
-                                            },
-                                            shape = RoundedCornerShape(999.dp),
-                                            color = if (selected) primaryColor else primaryColor.copy(alpha = 0.10f),
-                                            border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.4f))
-                                        ) {
-                                            Text(
-                                                text = "RD$$goalOption",
-                                                fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 12.sp,
-                                                color = if (selected) Color.White else primaryColor,
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Text(
-                                    text = "Categoría preferida de bonos",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    listOf("Todo Bravo", "Despensa", "Carnes y Frescos", "El Arca Mascotas").forEach { catOption ->
-                                        val selected = editableCategory == catOption
-                                        Surface(
-                                            onClick = {
-                                                performCrispHaptic(view, HapticStyle.TICK)
-                                                editableCategory = catOption
-                                            },
-                                            shape = RoundedCornerShape(999.dp),
-                                            color = if (selected) primaryColor else primaryColor.copy(alpha = 0.10f),
-                                            border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.4f))
-                                        ) {
-                                            Text(
-                                                text = catOption,
-                                                fontFamily = PlusJakartaSans,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 12.sp,
-                                                color = if (selected) Color.White else primaryColor,
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Button(
-                                    onClick = {
-                                        HapticFeedbackManager.onConfirmAction(view)
-                                        onSaveCardSettings(editableHolderName, editableGoal, editableCategory)
-                                        isEditingSettings = false
-                                    },
-                                    shape = RoundedCornerShape(999.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .testTag("bravisima_save_settings_button")
-                                ) {
-                                    Text(
-                                        text = if (isGuestMode) "Guardar en mi dispositivo" else "Guardar Cambios en mi Cuenta",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        color = Color.White
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            item(key = "bravisima_promo_redeem", contentType = "promo_code_card") {
-                TranslucentCard(
-                    darkMode = darkMode,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Activar código promocional",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
-                            )
-                            BravoUnderline(isArca = false)
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedTextField(
-                                value = promoCodeInput,
-                                onValueChange = { promoCodeInput = it },
-                                placeholder = { Text("Ej. BRAVO25") },
-                                singleLine = true,
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.LocalOffer,
-                                        contentDescription = null,
-                                        tint = primaryColor,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("bravisima_promo_input")
-                            )
-                            Button(
-                                onClick = {
-                                    HapticFeedbackManager.onConfirmAction(view)
-                                    onRedeemPromoCode(promoCodeInput)
-                                    promoCodeInput = ""
-                                },
-                                enabled = !bravisimaCard.isLocked && promoCodeInput.isNotBlank(),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 14.dp),
-                                modifier = Modifier
-                                    .height(52.dp)
-                                    .testTag("bravisima_apply_promo_button")
-                            ) {
-                                Text(
-                                    text = "Aplicar",
-                                    fontFamily = PlusJakartaSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = Color.White
-                                )
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            listOf("BRAVO25" to "+RD$25", "BRAVISIMA50" to "+RD$50", "ARCA20" to "+RD$20").forEach { (code, reward) ->
-                                val alreadyClaimed = bravisimaCard.claimedPromoCodes.any { it.equals(code, ignoreCase = true) }
-                                Surface(
-                                    onClick = {
-                                        if (!alreadyClaimed) {
-                                            performCrispHaptic(view, HapticStyle.TICK)
-                                            promoCodeInput = code
-                                        }
-                                    },
-                                    shape = RoundedCornerShape(999.dp),
-                                    color = if (alreadyClaimed) {
-                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                    } else {
-                                        primaryColor.copy(alpha = 0.10f)
-                                    },
-                                    border = BorderStroke(
-                                        1.dp,
-                                        if (alreadyClaimed) Color.Transparent else primaryColor.copy(alpha = 0.35f)
-                                    )
-                                ) {
-                                    Text(
-                                        text = if (alreadyClaimed) "$code ✓ Canjeado" else "$code ($reward)",
-                                        fontFamily = PlusJakartaSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                        color = if (alreadyClaimed) {
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f)
-                                        } else {
-                                            if (darkMode) Color.White else BravoRedDark
-                                        },
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            item(key = "bravisima_progress", contentType = "progress_card") {
-                TranslucentCard(
-                    darkMode = darkMode,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Progreso en tu carrito actual",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
-                            )
-                            BravoUnderline(isArca = false)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            DiagonalMetadataStrip(
-                                items = listOf("+RD$${cartTotals.bravisimaGenerated}", "Hoy"),
-                                slashColor = if (darkMode) Color(0xFF34D399) else Tone.success,
-                                fontSizeSp = 12.5f
-                            )
-                        }
-
                         Text(
-                            text = "Recibes RD$1.00 de retorno automático por cada RD$100.00 en compras.",
-                            fontFamily = PlusJakartaSans,
-                            fontSize = 12.sp,
-                            lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.84f),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        LinearProgressIndicator(
-                            progress = { cartTotals.progressPct },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(10.dp)
-                                .clip(RoundedCornerShape(99.dp)),
-                            color = primaryColor,
-                            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
-                        )
-
-                        DiagonalMetadataStrip(
-                            items = listOf("Próximo peso", "Faltan RD$$neededForNextPeso"),
-                            slashColor = primaryColor,
-                            fontSizeSp = 12f
+                            text = memberName.uppercase(),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
             }
 
-            item(key = "bravisima_movements", contentType = "movements_card") {
-                TranslucentCard(
-                    darkMode = darkMode,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
+            // Código para la caja: negro sobre blanco, como una tarjeta física
+            item(key = "bravisima_barcode", contentType = "barcode") {
+                Surface(
+                    onClick = {
+                        HapticFeedbackManager.onNavigationClick(view)
+                        showFullscreenCode = true
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.White,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    modifier = Modifier.fillMaxWidth().testTag("bravisima_barcode_panel")
                 ) {
                     Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(
+                        Canvas(modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                            val unitWidth = size.width / barcodeModules.size
+                            barcodeModules.forEachIndexed { i, isBar ->
+                                if (isBar) drawRect(
+                                    color = Color(0xFF111111),
+                                    topLeft = Offset(i * unitWidth, 0f),
+                                    size = Size(unitWidth + 0.5f, size.height)
+                                )
+                            }
+                        }
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Movimientos recientes (${movements.size})",
-                                fontFamily = PlusJakartaSans,
+                                text = cardNumber,
+                                fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
+                                letterSpacing = 1.sp,
+                                color = Color(0xFF111111),
+                                maxLines = 1,
+                                modifier = Modifier.weight(1f)
                             )
-                            BravoUnderline(isArca = false)
-                        }
-
-                        if (movements.isEmpty()) {
-                            Text(
-                                text = "Aún no hay movimientos registrados en tu Tarjeta Bravísima.",
-                                fontFamily = PlusJakartaSans,
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        } else {
-                            movements.forEachIndexed { idx, mov ->
-                                val isPositive = mov.amount >= 0
-                                val formattedAmount = if (isPositive) {
-                                    "+RD$${formatMoney(mov.amount)}.00"
-                                } else {
-                                    "-RD$${formatMoney(abs(mov.amount))}.00"
-                                }
-                                MovementRow(
-                                    title = mov.title,
-                                    meta = listOf(mov.dateLabel, mov.subtitle),
-                                    amountText = formattedAmount,
-                                    isPositive = isPositive,
-                                    darkMode = darkMode
+                            IconButton(
+                                onClick = {
+                                    clipboard.setText(AnnotatedString(cardNumber))
+                                    onCopyCardNumber(cardNumber)
+                                },
+                                modifier = Modifier.size(44.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentCopy,
+                                    contentDescription = "Copiar número de membresía",
+                                    tint = Color(0xFF374151)
                                 )
-                                if (idx < movements.lastIndex) {
-                                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                                }
                             }
+                        }
+                        Text(
+                            text = "Toca para mostrarlo en grande en la caja",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF4B5563)
+                        )
+                    }
+                }
+            }
+
+            // Acciones
+            item(key = "bravisima_actions", contentType = "actions") {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(
+                        onClick = {
+                            performCrispHaptic(view, HapticStyle.CONFIRM)
+                            onRedeemInCart()
+                        },
+                        enabled = canRedeem,
+                        shape = RoundedCornerShape(999.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = brand, contentColor = Color.White),
+                        modifier = Modifier.fillMaxWidth().height(52.dp).testTag("bravisima_redeem_button")
+                    ) {
+                        Text("Usar mis puntos en el carrito", style = MaterialTheme.typography.labelLarge)
+                    }
+                    if (!canRedeem) {
+                        Text(
+                            text = "Puedes canjear desde 100 puntos. Te faltan ${100 - points}.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            HapticFeedbackManager.onNavigationClick(view)
+                            onOpenScanner()
+                        },
+                        shape = RoundedCornerShape(999.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        modifier = Modifier.fillMaxWidth().height(52.dp)
+                    ) {
+                        Icon(Icons.Default.QrCodeScanner, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Escanear un producto", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+            }
+
+            // Cómo funciona (datos del programa oficial)
+            item(key = "bravisima_how", contentType = "info") {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Cómo funciona",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        listOf(
+                            Icons.Default.ShoppingCart to "Ganas 1 punto por cada RD$100 de compra, en tienda y en BravoVa.",
+                            Icons.Default.Payments to "Cada punto vale RD$1. Puedes canjear desde 100 puntos.",
+                            Icons.Default.Badge to "Presenta tu membresía antes de pagar para acumular y canjear.",
+                            Icons.Default.Event to "Los puntos de cada año vencen el 31 de marzo del año siguiente."
+                        ).forEach { (icon, text) ->
+                            Row(
+                                verticalAlignment = Alignment.Top,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(icon, contentDescription = null, tint = brand, modifier = Modifier.size(20.dp))
+                                Text(
+                                    text = text,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Movimientos
+            item(key = "bravisima_movements_title", contentType = "title") {
+                Text(
+                    text = "Movimientos",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            if (movements.isEmpty()) {
+                item(key = "bravisima_movements_empty", contentType = "empty") {
+                    Text(
+                        text = if (isGuestMode) "Inicia sesión para ver los puntos que has ganado y canjeado."
+                        else "Aún no tienes movimientos. Tus puntos aparecerán aquí después de comprar.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                items(items = movements.take(20), key = { "mov_${it.id}_${it.title}_${it.dateLabel}" }) { mov ->
+                    val positive = mov.amount >= 0
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                            MovementRow(
+                                title = mov.title,
+                                meta = listOf(mov.dateLabel, mov.subtitle).filter { it.isNotBlank() },
+                                amountText = (if (positive) "+" else "−") + "${abs(mov.amount)} pts",
+                                isPositive = positive,
+                                darkMode = darkMode
+                            )
                         }
                     }
                 }
@@ -1478,49 +517,12 @@ fun BravisimaScreen(
 
         GlassTopBar(
             darkMode = darkMode,
-            accent = primaryColor,
+            accent = brand,
             title = "Bravísima",
             modifier = Modifier.align(Alignment.TopCenter),
             // Pestaña principal del dock: sin "atrás" (como Inicio, Catálogo y Cuenta)
-            onBack = null,
-            actions = listOf(
-                GlassBarAction(symbol = "creditcard", icon = null, label = "Nivel ${bravisimaCard.tier.label}", text = bravisimaCard.tier.label, highlighted = true)
-            )
+            onBack = null
         )
-
-        if (showCardLockBiometricPrompt) {
-            val actionTitle = if (bravisimaCard.isLocked) {
-                "Desbloquear tarjeta Bravísima"
-            } else {
-                "Bloquear tarjeta Bravísima"
-            }
-            val actionDesc = if (bravisimaCard.isLocked) {
-                "Usa ${com.example.platform.biometryPhrase()} para reactivar canjes y uso de tu Tarjeta Bravísima."
-            } else {
-                "Usa ${com.example.platform.biometryPhrase()} para proteger y pausar temporalmente tu Tarjeta Bravísima."
-            }
-            BiometricOrderPromptDialog(
-                request = BiometricPromptRequest(
-                    operation = BiometricCriticalOperation.UNLOCK_BRAVISIMA_CARD,
-                    title = actionTitle,
-                    subtitle = "Balance protegido: RD$${formatMoney(balance)}.00",
-                    description = actionDesc,
-                    badgeTitle = "SEGURIDAD TARJETA BRAVÍSIMA",
-                    amountRd = balance,
-                    itemCount = 1,
-                    cashbackRd = 0,
-                    paymentMethodLabel = displayCardNumber,
-                    deliveryOrBranchLabel = "Nivel ${bravisimaCard.tier.label}"
-                ),
-                isArca = false,
-                darkMode = darkMode,
-                onDismiss = { showCardLockBiometricPrompt = false },
-                onAuthenticated = {
-                    showCardLockBiometricPrompt = false
-                    onToggleCardLock()
-                }
-            )
-        }
     }
 }
 

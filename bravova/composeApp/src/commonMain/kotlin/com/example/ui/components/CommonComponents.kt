@@ -981,6 +981,27 @@ fun BravoArcaSelectorMenuOverlay(
     val useRealHaze = false
     val containerCol = MaterialTheme.colorScheme.surface
 
+    // iOS 26+: menú nativo de Liquid Glass (SwiftUI) en vez del panel de Compose
+    // (si la presentación nativa fallara, se usa el panel de Compose)
+    var nativeMenuFailed by remember { mutableStateOf(false) }
+    val useNativeMenu = remember { nativeLiquidGlassAvailable() } && !nativeMenuFailed
+    val latestSelect by rememberUpdatedState(onSelectStore)
+    val latestDismiss by rememberUpdatedState(onDismiss)
+    if (useNativeMenu) {
+        LaunchedEffect(expanded) {
+            if (!expanded) return@LaunchedEffect
+            val shown = PlatformExtras.presentStoreMenu(
+                activeArca = isArca,
+                darkMode = darkMode,
+                onPickBravo = { latestSelect(StoreMode.BRAVO) },
+                onPickArca = { latestSelect(StoreMode.ARCA) },
+                onDismiss = { latestDismiss() }
+            )
+            if (!shown) nativeMenuFailed = true
+        }
+        return
+    }
+
     androidx.compose.animation.AnimatedVisibility(
         visible = expanded,
         enter = androidx.compose.animation.fadeIn(animationSpec = tween(180)) +

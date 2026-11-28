@@ -484,6 +484,103 @@ struct GlassToastView: View {
 
 // MARK: - Vista rápida de producto (hoja nativa; en iOS 26+ es de vidrio)
 
+// MARK: - Menú "Cambiar de tienda" (Liquid Glass nativo)
+
+/// Panel de vidrio que nace del logo (arriba a la izquierda) con un resorte, como los menús de iOS 26.
+/// El fondo apenas se oscurece para que el vidrio refracte la pantalla de detrás.
+struct GlassStoreMenu: View {
+    let activeArca: Bool
+    let dark: Bool
+    let onPick: (Bool) -> Void
+    let onClose: () -> Void
+    @State private var shown = false
+    @State private var closing = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var openAnim: Animation { reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82) }
+    private var closeAnim: Animation { reduceMotion ? .easeIn(duration: 0.12) : .spring(response: 0.26, dampingFraction: 0.95) }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Color.black.opacity(shown ? (dark ? 0.28 : 0.14) : 0)
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture { close(nil) }
+                .accessibilityLabel("Cerrar")
+                .accessibilityAddTraits(.isButton)
+            if shown {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Cambiar de tienda")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 14).padding(.top, 8).padding(.bottom, 2)
+                    row(arca: false, title: "Supermercados Bravo", subtitle: "Los expertos en vender barato", logo: "logo_bravo_official")
+                    row(arca: true, title: "El Arca Petshop", subtitle: "Nutrición y cuidado de mascotas", logo: "logo_arca_official")
+                }
+                .padding(8)
+                .frame(width: 312, alignment: .leading)
+                .bravoGlass(RoundedRectangle(cornerRadius: 30, style: .continuous), interactive: false)
+                .padding(.leading, 14)
+                .padding(.top, 50)
+                .transition(reduceMotion ? .opacity : .scale(scale: 0.6, anchor: .topLeading).combined(with: .opacity))
+            }
+        }
+        .environment(\.colorScheme, dark ? .dark : .light)
+        .bravoFeedback(.selection, trigger: shown)
+        .onAppear { withAnimation(openAnim) { shown = true } }
+    }
+
+    private func close(_ arca: Bool?) {
+        guard !closing else { return }
+        closing = true
+        withAnimation(closeAnim) { shown = false }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+            if let arca { onPick(arca) } else { onClose() }
+        }
+    }
+
+    private func row(arca: Bool, title: String, subtitle: String, logo: String) -> some View {
+        let active = arca == activeArca
+        return Button { close(arca) } label: {
+            HStack(spacing: 12) {
+                logoImage(logo)
+                    .frame(width: 76, height: 40)
+                    .padding(6)
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.system(size: 16, weight: .bold, design: .rounded)).foregroundStyle(.primary)
+                    Text(subtitle).font(.system(size: 13, weight: .regular)).foregroundStyle(.secondary).lineLimit(2)
+                }
+                Spacer(minLength: 0)
+                if active {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(arca ? Color(red: 0.42, green: 0.47, blue: 0) : Color(red: 0.88, green: 0.15, blue: 0.11))
+                }
+            }
+            .padding(10)
+            .frame(minHeight: 64)
+            .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.primary.opacity(active ? 0.08 : 0)))
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title + (active ? ", tienda actual" : ""))
+    }
+
+    /// Los logos vienen de los recursos de Compose que ya van dentro de la app
+    private func logoImage(_ name: String) -> some View {
+        let path = Bundle.main.path(forResource: name, ofType: "png",
+                                    inDirectory: "compose-resources/composeResources/com.example.resources/drawable")
+        return Group {
+            if let path, let img = UIImage(contentsOfFile: path) {
+                Image(uiImage: img).resizable().scaledToFit()
+            } else {
+                Image(systemName: "storefront").font(.system(size: 22)).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
 struct QuickViewSheet: View {
     let title: String; let subtitle: String; let price: String; let imageUrl: String
     @State var isFavorite: Bool
@@ -1042,6 +1139,24 @@ final class LiquidGlassBridge: NSObject, IosGlassBridge {
             s.prefersGrabberVisible = true
         }
         top.present(sheet, animated: true)
+        return true
+    }
+
+    func presentStoreMenu(activeArca: Bool, darkMode: Bool, onPickBravo: @escaping () -> Void,
+                          onPickArca: @escaping () -> Void, onDismiss: @escaping () -> Void) -> Bool {
+        guard #available(iOS 26.0, *), let top = topViewController() else { return false }
+        weak var host: UIViewController?
+        let finish: (@escaping () -> Void) -> Void = { action in
+            host?.dismiss(animated: false) { action(); onDismiss() }
+        }
+        let menu = UIHostingController(rootView: GlassStoreMenu(
+            activeArca: activeArca, dark: darkMode,
+            onPick: { arca in finish(arca ? onPickArca : onPickBravo) },
+            onClose: { finish({}) }))
+        menu.modalPresentationStyle = .overFullScreen
+        menu.view.backgroundColor = .clear
+        host = menu
+        top.present(menu, animated: false)
         return true
     }
 

@@ -117,6 +117,9 @@ expect fun NativeGlassToast(text: String, symbol: String, accent: Color, darkMod
  * (Live Activity / Dynamic Island en iOS, notificación de progreso en Android).
  */
 expect object PlatformExtras {
+    /** Menú nativo de cambio de tienda con Liquid Glass (iOS 26+). Devuelve false si no hay (se usa Compose). */
+    fun presentStoreMenu(activeArca: Boolean, darkMode: Boolean, onPickBravo: () -> Unit, onPickArca: () -> Unit, onDismiss: () -> Unit): Boolean
+
     /** Devuelve false si la plataforma no tiene hoja nativa (se usa la de Compose). */
     fun presentQuickView(
         title: String,

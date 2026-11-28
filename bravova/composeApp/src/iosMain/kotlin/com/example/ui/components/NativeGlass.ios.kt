@@ -97,6 +97,7 @@ interface IosGlassBridge {
         onFavorite: () -> Unit,
         onShare: () -> Unit
     ): Boolean
+    fun presentStoreMenu(activeArca: Boolean, darkMode: Boolean, onPickBravo: () -> Unit, onPickArca: () -> Unit, onDismiss: () -> Unit): Boolean
     fun startDeliveryActivity(orderId: String, branch: String, stage: String, etaMinutes: Int, progress: Double)
     fun updateDeliveryActivity(stage: String, etaMinutes: Int, progress: Double)
     fun endDeliveryActivity()
@@ -298,6 +299,9 @@ actual fun NativeGlassProgressCapsule(
 }
 
 actual object PlatformExtras {
+    actual fun presentStoreMenu(activeArca: Boolean, darkMode: Boolean, onPickBravo: () -> Unit, onPickArca: () -> Unit, onDismiss: () -> Unit): Boolean =
+        IosBridges.glass?.presentStoreMenu(activeArca, darkMode, onPickBravo, onPickArca, onDismiss) == true
+
     actual fun presentQuickView(
         title: String, subtitle: String, price: String, imageUrl: String, isFavorite: Boolean, accentArgb: Int,
         onAdd: () -> Unit, onFavorite: () -> Unit, onShare: () -> Unit

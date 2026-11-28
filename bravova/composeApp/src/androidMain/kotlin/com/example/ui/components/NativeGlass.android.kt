@@ -73,6 +73,8 @@ actual fun NativeGlassBudgetPanel(
 
 /** Android: el pedido en curso se muestra como notificación de progreso en vivo (Live Update en Android 16). */
 actual object PlatformExtras {
+    actual fun presentStoreMenu(activeArca: Boolean, darkMode: Boolean, onPickBravo: () -> Unit, onPickArca: () -> Unit, onDismiss: () -> Unit): Boolean = false
+
     private const val CHANNEL = "bravova_pedido_en_vivo"
     private const val ID = 4242
     private var orderId = ""
