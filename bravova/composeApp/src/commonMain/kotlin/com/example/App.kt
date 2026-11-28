@@ -42,7 +42,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -169,7 +168,7 @@ fun BravoRoot(
     val appPrefs = remember { sharedPrefs("bravova_prefs") }
     LaunchedEffect(Unit) { initializeVerifiedGoogleFallbackState(AppContext.instance) }
 
-    val systemDark = isSystemInDarkTheme()
+    val systemDark = com.example.platform.systemDarkTheme()
     var authScreenDarkMode by remember(systemDark) {
         mutableStateOf(systemDark)
     }

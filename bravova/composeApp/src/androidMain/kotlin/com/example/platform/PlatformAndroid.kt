@@ -118,6 +118,10 @@ actual object PlatformInfo {
 actual fun currentDarkModeHint(context: PlatformContext): Boolean =
     (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
+/** En Android, isSystemInDarkTheme() ya se actualiza en vivo. */
+@androidx.compose.runtime.Composable
+actual fun systemDarkTheme(): Boolean = androidx.compose.foundation.isSystemInDarkTheme()
+
 /* ------------------------------------------------------------------ */
 /*  Preferences                                                        */
 /* ------------------------------------------------------------------ */

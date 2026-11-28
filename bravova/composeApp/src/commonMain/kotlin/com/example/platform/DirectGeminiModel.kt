@@ -33,8 +33,20 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  * instala sin firmar (Sideloadly/AltStore). Sin clave, usa Firebase AI Logic como antes.
  */
 fun createAiModel(modelName: String, config: AiModelConfig = AiModelConfig()): GenerativeModelCompat =
-    if (AiKeys.GEMINI.isNotBlank()) DirectGeminiModel(modelName, config, AiKeys.GEMINI)
+    if (AiKeys.GEMINI.isNotBlank()) DirectGeminiModel(freeTierModel(modelName), config, AiKeys.GEMINI)
     else createGenerativeModel(modelName, config)
+
+/**
+ * Nivel gratuito de la API de Gemini (AI Studio, noviembre de 2026): 3.8 Flash permite solo
+ * 5 por minuto y 20 al día; cada Flash Lite, 15 por minuto y 500 al día, con cupo propio.
+ * Con 20 al día Brav IA se quedaba sin cupo enseguida, así que el principal pasa a 3.5 Flash
+ * Lite y el de respaldo a 3.1 Flash Lite: ~1000 peticiones diarias entre los dos.
+ */
+private fun freeTierModel(requested: String): String = when (requested) {
+    "gemini-3.8-flash" -> "gemini-3.5-flash-lite"
+    "gemini-3.5-flash-lite" -> "gemini-3.1-flash-lite"
+    else -> requested
+}
 
 /** True si Brav IA va directo a la API de Gemini (no necesita App Check). */
 val isDirectAiEnabled: Boolean get() = AiKeys.GEMINI.isNotBlank()

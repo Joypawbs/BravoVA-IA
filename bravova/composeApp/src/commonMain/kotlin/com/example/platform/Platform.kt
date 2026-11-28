@@ -353,6 +353,14 @@ expect fun createGenerativeModel(modelName: String, config: AiModelConfig = AiMo
 /** Whether the system UI is currently in dark mode. */
 expect fun currentDarkModeHint(context: PlatformContext): Boolean
 
+/**
+ * Tema del sistema que se actualiza en vivo. En iOS, isSystemInDarkTheme() de Compose solo lee el
+ * tema al abrir la app (JetBrains/compose-multiplatform#3575): si la persona cambia a modo oscuro
+ * con la app abierta, no se enteraba.
+ */
+@androidx.compose.runtime.Composable
+expect fun systemDarkTheme(): Boolean
+
 /** Platform-specific database file location (Room KMP). */
 expect fun getDatabaseBuilder(context: PlatformContext): androidx.room.RoomDatabase.Builder<com.example.data.local.BravoDatabase>
 

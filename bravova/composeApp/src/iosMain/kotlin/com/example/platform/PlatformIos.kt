@@ -74,6 +74,19 @@ actual object PlatformInfo {
 actual fun currentDarkModeHint(context: PlatformContext): Boolean =
     UIScreen.mainScreen.traitCollection.userInterfaceStyle == UIUserInterfaceStyle.UIUserInterfaceStyleDark
 
+/** Lee el tema de la pantalla cada segundo (una lectura de propiedad: casi no cuesta). */
+@androidx.compose.runtime.Composable
+actual fun systemDarkTheme(): Boolean {
+    val state = androidx.compose.runtime.produceState(initialValue = currentDarkModeHint(IosPlatformContext)) {
+        while (true) {
+            kotlinx.coroutines.delay(1000)
+            val now = currentDarkModeHint(IosPlatformContext)
+            if (now != value) value = now
+        }
+    }
+    return state.value
+}
+
 /* ------------------------------------------------------------------ */
 /*  Preferences (NSUserDefaults with a per-file key prefix)             */
 /* ------------------------------------------------------------------ */
