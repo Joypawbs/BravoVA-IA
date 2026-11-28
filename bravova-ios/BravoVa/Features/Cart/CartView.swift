@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Carrito en hoja. El total sale del catálogo; el pago con Face ID se añade en el siguiente paso.
+/// Carrito en hoja. El total sale del catálogo; "Continuar" lleva a confirmar con Face ID.
 struct CartView: View {
     @Environment(AppState.self) private var app
     @Environment(\.dismiss) private var dismiss
@@ -53,6 +53,17 @@ struct CartView: View {
                         } footer: {
                             Text("Los precios son los del catálogo de la app y pueden variar en tienda.")
                         }
+                    }
+                    .safeAreaInset(edge: .bottom) {
+                        NavigationLink {
+                            CheckoutView()
+                        } label: {
+                            Text("Continuar")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .controlSize(.large)
+                        .padding()
                     }
                 }
             }

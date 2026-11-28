@@ -34,7 +34,7 @@ struct RootView: View {
                 BravisimaView()
             }
             Tab("Cuenta", systemImage: "person.crop.circle", value: AppTab.account) {
-                PlaceholderScreen(title: "Cuenta", symbol: "person.crop.circle")
+                AccountView()
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
