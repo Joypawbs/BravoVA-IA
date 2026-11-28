@@ -1071,7 +1071,7 @@ fun BravIaChatScreen(
                                     shape = RoundedCornerShape(999.dp),
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                     modifier = Modifier
-                                        .height(34.dp)
+                                        .height(40.dp)
                                         .testTag("bravia_open_lists_pill")
                                 ) {
                                     Text("Mis listas", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
@@ -1087,7 +1087,7 @@ fun BravIaChatScreen(
                                     shape = RoundedCornerShape(999.dp),
                                     contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
                                     modifier = Modifier
-                                        .height(34.dp)
+                                        .height(40.dp)
                                         .testTag("budget_build_button")
                                 ) {
                                     Text("Armar", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
@@ -1102,7 +1102,7 @@ fun BravIaChatScreen(
                                     shape = RoundedCornerShape(999.dp),
                                     contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
                                     modifier = Modifier
-                                        .height(34.dp)
+                                        .height(40.dp)
                                         .testTag("budget_adjust_button")
                                 ) {
                                     Text("Ajustar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = primaryColor)
