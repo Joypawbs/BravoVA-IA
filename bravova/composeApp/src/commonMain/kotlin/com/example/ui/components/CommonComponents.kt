@@ -1354,6 +1354,13 @@ fun VerticalProductCard(
         label = "product_card_press_scale"
     )
 
+    // Baymard (grocery): resaltar en la lista lo que ya está en el carrito; el contador solo
+    // se pasa por alto en el teléfono. Borde suave del color de la tienda.
+    val inCartBorder by animateColorAsState(
+        targetValue = if (qtyInCart > 0) accent.copy(alpha = 0.55f) else Color.Transparent,
+        label = "product_card_in_cart_border"
+    )
+
     TranslucentCard(
         darkMode = darkMode,
         isArca = isArca,
@@ -1363,6 +1370,7 @@ fun VerticalProductCard(
             // (con 232 dp el selector quedaba cortado por abajo al agregar un producto)
             .height(248.dp)
             .graphicsLayer { scaleX = pressScale; scaleY = pressScale }
+            .border(1.5.dp, inCartBorder, RoundedCornerShape(16.dp))
             .pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {

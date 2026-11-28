@@ -376,3 +376,16 @@ enum class BiometryKind(val displayName: String, val instruction: String, val se
 }
 
 expect fun deviceBiometryKind(): BiometryKind
+
+private val cachedBiometry: BiometryKind by lazy { deviceBiometryKind() }
+
+/** Para frases: "Pagar con Face ID", "Usa Touch ID para…", "Autoriza con tu huella". */
+fun biometryPhrase(): String =
+    if (cachedBiometry == BiometryKind.FINGERPRINT) "tu huella" else cachedBiometry.displayName
+
+/** Para etiquetas cortas: "3DS + Face ID", "3DS + Huella". */
+fun biometryLabel(): String =
+    if (cachedBiometry == BiometryKind.FINGERPRINT) "Huella" else cachedBiometry.displayName
+
+/** True si el equipo usa reconocimiento facial (para elegir el ícono). */
+fun biometryIsFace(): Boolean = cachedBiometry == BiometryKind.FACE_ID || cachedBiometry == BiometryKind.OPTIC_ID

@@ -911,7 +911,7 @@ fun BravoVaApp(
                                             operation = BiometricCriticalOperation.CONFIRM_AI_ORDER,
                                             title = "Confirmar Pedido Brav IA",
                                             subtitle = "Total RD$$estTotal.00 • $estCount artículo(s)",
-                                            description = "Autoriza con tu huella digital el pago con $cardLabel y el despacho inmediato de tu compra preparada por Brav IA.",
+                                            description = "Autoriza con ${com.example.platform.biometryPhrase()} el pago con $cardLabel y el despacho inmediato de tu compra preparada por Brav IA.",
                                             badgeTitle = "AUTORIZACIÓN BIOMÉTRICA BRAV IA",
                                             amountRd = estTotal,
                                             itemCount = estCount,

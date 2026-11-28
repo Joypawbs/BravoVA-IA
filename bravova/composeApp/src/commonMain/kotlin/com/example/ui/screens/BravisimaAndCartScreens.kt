@@ -1499,9 +1499,9 @@ fun BravisimaScreen(
                 "Bloquear tarjeta Bravísima"
             }
             val actionDesc = if (bravisimaCard.isLocked) {
-                "Confirma tu huella digital para reactivar canjes y uso de tu Tarjeta Bravísima."
+                "Usa ${com.example.platform.biometryPhrase()} para reactivar canjes y uso de tu Tarjeta Bravísima."
             } else {
-                "Confirma tu huella digital para proteger y pausar temporalmente tu Tarjeta Bravísima."
+                "Usa ${com.example.platform.biometryPhrase()} para proteger y pausar temporalmente tu Tarjeta Bravísima."
             }
             BiometricOrderPromptDialog(
                 request = BiometricPromptRequest(
@@ -1834,7 +1834,7 @@ fun CartCheckoutScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
-                                    items = listOf("Pago protegido con huella", activeBranch),
+                                    items = listOf("Pago protegido con ${com.example.platform.biometryPhrase()}", activeBranch),
                                     slashColor = primaryColor,
                                     fontSizeSp = 12f
                                 )
@@ -1850,13 +1850,13 @@ fun CartCheckoutScreen(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Fingerprint,
+                                        imageVector = (if (com.example.platform.biometryIsFace()) Icons.Default.Face else Icons.Default.Fingerprint),
                                         contentDescription = null,
                                         tint = Tone.successBright,
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Text(
-                                        text = "3DS + Huella",
+                                        text = "3DS + ${com.example.platform.biometryLabel()}",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
@@ -1929,7 +1929,7 @@ fun CartCheckoutScreen(
                                                 operation = BiometricCriticalOperation.CHANGE_PAYMENT_METHOD,
                                                 title = "Vincular nueva tarjeta",
                                                 subtitle = "Verificación biométrica requerida",
-                                                description = "Autoriza con tu huella digital para registrar un nuevo método de pago en el checkout.",
+                                                description = "Autoriza con ${com.example.platform.biometryPhrase()} para registrar un nuevo método de pago en el checkout.",
                                                 badgeTitle = "SEGURIDAD DE MÉTODO DE PAGO",
                                                 amountRd = cartTotals.finalPay.roundToInt(),
                                                 itemCount = cartTotals.count,
@@ -1996,7 +1996,7 @@ fun CartCheckoutScreen(
                                                         operation = BiometricCriticalOperation.CHANGE_PAYMENT_METHOD,
                                                         title = "Cambiar Método de Pago",
                                                         subtitle = "${method.brand} •••• ${method.last4} • Exp ${method.exp}",
-                                                        description = "Confirma tu huella digital para autorizar el cambio de tarjeta predeterminada en este pedido.",
+                                                        description = "Usa ${com.example.platform.biometryPhrase()} para autorizar el cambio de tarjeta predeterminada en este pedido.",
                                                         badgeTitle = "CAMBIO DE TARJETA EN CHECKOUT",
                                                         amountRd = cartTotals.finalPay.roundToInt(),
                                                         itemCount = cartTotals.count,
@@ -2228,7 +2228,7 @@ fun CartCheckoutScreen(
                                         operation = BiometricCriticalOperation.AUTHORIZE_BRAVISIMA_REDEMPTION,
                                         title = "Autorizar canje Bravísima",
                                         subtitle = "Aplicar -RD$${formatMoney(maxRedeemable)}.00 al pedido",
-                                        description = "Confirma tu identidad con huella digital para redimir tus puntos acumulados de Tarjeta Bravísima en este checkout.",
+                                        description = "Confirma tu identidad con ${com.example.platform.biometryPhrase()} para redimir tus puntos acumulados de Tarjeta Bravísima en este checkout.",
                                         badgeTitle = "CANJE DE SALDO BRAVÍSIMA",
                                         amountRd = maxRedeemable,
                                         itemCount = cartTotals.count,
@@ -2260,7 +2260,7 @@ fun CartCheckoutScreen(
                                                 operation = BiometricCriticalOperation.UNLOCK_BRAVISIMA_CARD,
                                                 title = "Desbloquear tarjeta Bravísima",
                                                 subtitle = "Balance disponible: RD$${formatMoney(bravisimaBalance)}.00",
-                                                description = "Tu Tarjeta Bravísima está bloqueada. Verifica tu huella digital para desbloquearla y habilitar el canje en el checkout.",
+                                                description = "Tu Tarjeta Bravísima está bloqueada. Usa ${com.example.platform.biometryPhrase()} para desbloquearla y habilitar el canje en el checkout.",
                                                 badgeTitle = "DESBLOQUEO BIOMÉTRICO BRAVÍSIMA",
                                                 amountRd = bravisimaBalance,
                                                 itemCount = cartTotals.count,
@@ -2296,9 +2296,9 @@ fun CartCheckoutScreen(
                                 )
                                 DiagonalMetadataStrip(
                                     items = if (isBravisimaLocked) {
-                                        listOf("Desbloqueo con huella", "RD$${formatMoney(bravisimaBalance)}.00")
+                                        listOf("Desbloqueo con ${com.example.platform.biometryPhrase()}", "RD$${formatMoney(bravisimaBalance)}.00")
                                     } else {
-                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con huella")
+                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con ${com.example.platform.biometryPhrase()}")
                                     },
                                     slashColor = if (isBravisimaLocked) BravoRed else primaryColor,
                                     fontSizeSp = 12f
@@ -2318,7 +2318,7 @@ fun CartCheckoutScreen(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.LockOpen,
-                                            contentDescription = "Desbloquear con huella",
+                                            contentDescription = "Desbloquear con ${com.example.platform.biometryPhrase()}",
                                             tint = BravoRed,
                                             modifier = Modifier.size(13.dp)
                                         )
@@ -2467,8 +2467,8 @@ fun CartCheckoutScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Fingerprint,
-                                    contentDescription = "Solicitud de huella digital",
+                                    imageVector = (if (com.example.platform.biometryIsFace()) Icons.Default.Face else Icons.Default.Fingerprint),
+                                    contentDescription = "Autorización con ${com.example.platform.biometryPhrase()}",
                                     tint = if (lastVerificationResult != null) Tone.successBright else primaryColor,
                                     modifier = Modifier.size(19.dp)
                                 )
@@ -2490,7 +2490,7 @@ fun CartCheckoutScreen(
                                         } else {
                                             "Identidad biométrica verificada para operaciones críticas del checkout."
                                         }
-                                    } ?: "Pagos con $activeCardSummary, canjes Bravísima y envío requieren huella.",
+                                    } ?: "Pagos con $activeCardSummary, canjes Bravísima y envío requieren ${com.example.platform.biometryPhrase()}.",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 12.sp,
@@ -2521,9 +2521,9 @@ fun CartCheckoutScreen(
                         AnimatedPurchaseButton(
                             loading = isProcessingPayment,
                             loadingText = "Procesando pago…",
-                            text = if (needsBiometric) "Pagar con huella • RD$${formatMoney(payTotalRd)}"
+                            text = if (needsBiometric) "Pagar con ${com.example.platform.biometryPhrase()} • RD$${formatMoney(payTotalRd)}"
                             else "Confirmar pedido • RD$${formatMoney(payTotalRd)}",
-                            icon = if (needsBiometric) Icons.Default.Fingerprint else Icons.Default.VerifiedUser,
+                            icon = if (needsBiometric) (if (com.example.platform.biometryIsFace()) Icons.Default.Face else Icons.Default.Fingerprint) else Icons.Default.VerifiedUser,
                             primaryColor = primaryColor,
                             onClick = {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
@@ -2537,7 +2537,7 @@ fun CartCheckoutScreen(
                                         operation = BiometricCriticalOperation.CONFIRM_PAYMENT_AND_ORDER,
                                         title = "Confirmar Pago y Pedido",
                                         subtitle = "Total RD$${formatMoney(finalPayRd)}.00 • $activeCardSummary",
-                                        description = "Coloca tu huella digital para autorizar el cargo en $activeCardSummary ($ncfType) y despachar tu pedido ($activeDeliverySummary).",
+                                        description = "Usa ${com.example.platform.biometryPhrase()} para autorizar el cargo en $activeCardSummary ($ncfType) y despachar tu pedido ($activeDeliverySummary).",
                                         badgeTitle = "AUTORIZACIÓN BIOMÉTRICA DE PAGO",
                                         amountRd = finalPayRd,
                                         itemCount = cartTotals.count,
@@ -2671,9 +2671,9 @@ fun BiometricOrderPromptDialog(
     BiometricOrderPromptDialog(
         request = BiometricPromptRequest(
             operation = BiometricCriticalOperation.CONFIRM_PAYMENT_AND_ORDER,
-            title = "Confirmar Pedido con Huella",
+            title = "Confirmar pedido con ${com.example.platform.biometryPhrase()}",
             subtitle = "Total RD$${formatMoney(totalAmountRd)}.00 • $itemCount artículo(s)",
-            description = "Coloca tu huella digital para autorizar el pago y confirmar tu pedido.",
+            description = "Usa ${com.example.platform.biometryPhrase()} para autorizar el pago y confirmar tu pedido.",
             badgeTitle = "AUTORIZACIÓN BIOMÉTRICA BRAVO",
             amountRd = totalAmountRd,
             itemCount = itemCount,
