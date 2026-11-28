@@ -105,6 +105,14 @@ jobs:
           # La imagen xcode-27 trae Xcode 27 como predeterminado
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
+      - name: Clave de Brav IA (Gemini)
+        working-directory: bravova
+        run: |
+          # Genera AiKeys.kt con la clave ANTES de Xcode: su fase de Gradle no recibe las
+          # variables del CI y conserva la que deja este paso. Sin clave no se publica (la 3.1
+          # salió sin ella y Brav IA no podía responder en el iPhone).
+          ./gradlew --no-daemon :composeApp:help | tee /tmp/clave.log
+          grep -q "clave de Gemini presente" /tmp/clave.log || { echo "::error::Falta la clave de Gemini (secreto GEMINI_API_KEY)"; exit 1; }
       - name: Compilar IPA sin firmar
         working-directory: bravova/iosApp
         run: |

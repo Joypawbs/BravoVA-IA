@@ -131,7 +131,9 @@ final class BravoVaTourUITests: XCTestCase {
         // Fuente de la respuesta: si salió del catálogo, la app lo dice debajo del mensaje
         let sinIA = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] %@", "Respuesta sin IA")).firstMatch.exists
         let parcial = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] %@", "Respuesta parcial")).firstMatch.exists
-        print("[tour] FUENTE_BRAVIA=\(sinIA ? "local" : (parcial ? "parcial" : "ia"))")
+        // Control: si la prueba no puede leer ni la pregunta escrita, no sabemos la fuente
+        let legible = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] %@", "sancocho")).firstMatch.exists
+        print("[tour] FUENTE_BRAVIA=\(!legible ? "desconocida" : (sinIA ? "local" : (parcial ? "parcial" : "ia")))")
         shot("receta_2_respuesta")
     }
 

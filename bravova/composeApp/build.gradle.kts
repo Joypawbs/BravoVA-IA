@@ -20,11 +20,22 @@ run {
     val props = Properties().apply {
         rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
     }
-    val key = ((project.findProperty("GEMINI_API_KEY") as String?)
-        ?: System.getenv("GEMINI_API_KEY")
-        ?: props.getProperty("GEMINI_API_KEY")
-        ?: "").trim().filter { it.isLetterOrDigit() || it == '-' || it == '_' }
+    // Un valor vacío cuenta como "sin clave" (antes una variable vacía tapaba local.properties)
     val file = aiKeysDir.get().file("com/example/platform/AiKeys.kt").asFile
+    val previous = file.takeIf { it.exists() }?.readText()
+        ?.let { Regex("GEMINI: String = \"([^\"]*)\"").find(it)?.groupValues?.get(1) }.orEmpty()
+    val key = listOf(
+        project.findProperty("GEMINI_API_KEY") as String?,
+        System.getenv("GEMINI_API_KEY"),
+        props.getProperty("GEMINI_API_KEY"),
+        // Xcode vuelve a llamar a Gradle (fase "Compile Kotlin Framework") sin las variables
+        // de entorno del CI: se conserva la clave que dejó la compilación anterior
+        previous
+    ).firstOrNull { !it.isNullOrBlank() }.orEmpty()
+        .trim().filter { it.isLetterOrDigit() || it == '-' || it == '_' || it == '.' }
+    // Solo se informa si hay clave y su largo, nunca la clave: así el registro de la compilación
+    // dice si Brav IA va a poder usar Gemini (la 3.1 se publicó sin clave y nadie lo notó)
+    logger.lifecycle("Brav IA: clave de Gemini " + if (key.isEmpty()) "AUSENTE (se usará Firebase AI Logic)" else "presente (${key.length} caracteres)")
     val text = "package com.example.platform\n\n" +
         "/** Generado por build.gradle.kts. No se guarda en el repositorio. */\n" +
         "internal object AiKeys {\n    const val GEMINI: String = \"$key\"\n}\n"
