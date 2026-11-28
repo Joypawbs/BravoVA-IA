@@ -28,6 +28,21 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
+      - name: Revisar la clave de Gemini (sin mostrarla)
+        run: |
+          K="$GEMINI_API_KEY"
+          echo "largo=${#K}"
+          [[ "$K" == AIza* ]] && echo "empieza con AIza: sí" || echo "empieza con AIza: no"
+          [[ "$K" =~ [[:space:]] ]] && echo "tiene espacios o saltos de línea: sí" || echo "tiene espacios o saltos de línea: no"
+          [[ "$K" == *'"'* || "$K" == *"'"* ]] && echo "tiene comillas: sí" || echo "tiene comillas: no"
+          [[ "$K" == *=* ]] && echo "tiene '=': sí" || echo "tiene '=': no"
+          M=$(printf '%s' "$K" | grep -oE 'AIza[0-9A-Za-z_-]{35}' | head -1)
+          echo "contiene una clave con forma de Gemini: $([ -n "$M" ] && echo sí || echo no)"
+          # Qué dice Google de la clave (solo el estado y el motivo, nunca la clave)
+          T="${M:-$K}"
+          curl -s -o /tmp/r.json -w "HTTP %{http_code}\n" -H "x-goog-api-key: $T" \
+            "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1"
+          python3 -c 'import json;d=json.load(open("/tmp/r.json"));e=d.get("error",{});print("motivo:",e.get("status"),"|",(e.get("message") or "ok")[:200]);[print("detalle:",x.get("reason"),x.get("metadata",{}).get("service","")) for x in e.get("details",[]) if x.get("reason")]' || true
       - name: Generar el proyecto
         run: |
           brew install xcodegen >/dev/null

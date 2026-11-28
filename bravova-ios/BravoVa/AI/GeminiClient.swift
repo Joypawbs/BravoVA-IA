@@ -20,10 +20,19 @@ struct GeminiClient {
             switch self {
             case .noKey: return "Brav IA no tiene clave de Gemini en esta compilación."
             case .http(let code, _) where code == 429: return "Brav IA alcanzó el límite de consultas. Prueba en un minuto."
-            case .http(let code, _) where code == 403: return "La clave de Gemini no tiene permiso (403)."
+            case .http(let code, let body) where code == 403: return "La clave de Gemini no tiene permiso (403). \(Self.googleMessage(body))"
             case .http(let code, let body): return "Gemini respondió \(code): \(body.prefix(160))"
             case .empty: return "Gemini no devolvió texto."
             }
+        }
+
+        /// El "message" del error de Google (no contiene la clave).
+        static func googleMessage(_ body: String) -> String {
+            guard let data = body.data(using: .utf8),
+                  let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let err = root["error"] as? [String: Any],
+                  let msg = err["message"] as? String else { return "" }
+            return String(msg.prefix(160))
         }
     }
 

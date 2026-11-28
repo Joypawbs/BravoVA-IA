@@ -39,8 +39,12 @@ final class AppState {
 
 enum AppConfig {
     /// Clave de Gemini inyectada al compilar (Info.plist ← ajuste GEMINI_API_KEY del CI).
-    static var geminiKey: String {
-        (Bundle.main.object(forInfoDictionaryKey: "BravIAGeminiKey") as? String ?? "")
+    /// Si el secreto trae algo más alrededor (comillas, "GEMINI_API_KEY=", espacios), se toma solo
+    /// la parte con forma de clave de Google (AIza + 35 caracteres).
+    static let geminiKey: String = {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "BravIAGeminiKey") as? String ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+        if let r = raw.range(of: "AIza[0-9A-Za-z_-]{35}", options: .regularExpression) { return String(raw[r]) }
+        return raw.trimmingCharacters(in: CharacterSet(charactersIn: "\"' "))
+    }()
 }
