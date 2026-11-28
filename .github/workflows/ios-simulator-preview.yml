@@ -10,6 +10,18 @@ on:
       solo:
         description: "Solo esta prueba (por ejemplo iosAppUITests/BravoVaTourUITests/testVidrioBravIa); vacío = todas"
         default: ""
+      iphone:
+        description: "Modelo de iPhone (empieza por): iPhone 17 Pro, iPhone 17 Pro Max, iPhone SE, iPhone 16e…"
+        default: ""
+      texto:
+        description: "Tamaño de texto (content size): vacío = normal; extra-large, extra-extra-large (≈130 %), accessibility-medium…"
+        default: ""
+      apariencia:
+        description: "light o dark"
+        default: light
+      variante:
+        description: "Sufijo de la rama de capturas (capturas-simulador-<variante>) para no pisar otras corridas"
+        default: ""
 
 permissions:
   contents: write
@@ -46,10 +58,12 @@ jobs:
         run: bash ../scripts/generar_proyecto.sh
       - name: Boot iPhone
         run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];c=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith(('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro')) and 'Max' not in x['name']] or [x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone')];print(c[0]['udid'])")
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;PREF='${{ inputs.iphone }}';d=json.load(sys.stdin)['devices'];c=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if (x['name'].startswith(PREF) if PREF else (x['name'].startswith(('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro')) and 'Max' not in x['name']))] or [x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone')];print(c[0]['udid'])")
           echo "UDID=$UDID" >> $GITHUB_ENV
           xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
-          xcrun simctl ui "$UDID" appearance light
+          xcrun simctl ui "$UDID" appearance "${{ inputs.apariencia || 'light' }}"
+          if [ -n "${{ inputs.texto }}" ]; then xcrun simctl ui "$UDID" content_size "${{ inputs.texto }}"; fi
+          xcrun simctl list devices | grep "$UDID" || true
       - name: Recorrido automático (XCUITest)
         working-directory: bravova/iosApp
         run: |
@@ -92,12 +106,12 @@ jobs:
         if: always()
         run: |
           mkdir -p /tmp/pub && cp sim-out/*.png sim-out/*.log sim-out/*.txt /tmp/pub/ 2>/dev/null || true
-          cd /tmp/pub && git init -q -b capturas-simulador
+          cd /tmp/pub && git init -q -b capturas-simulador${{ inputs.variante && format('-{0}', inputs.variante) || '' }}
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           printf '# Capturas del simulador iOS\n\nGeneradas por el flujo "Vista en simulador iOS" (%s).\n' "$(date -u)" > README.md
           for f in *.png; do printf '\n### %s\n![%s](%s)\n' "$f" "$f" "$f" >> README.md; done
           git add -A && git commit -qm "Capturas del simulador iOS"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" capturas-simulador
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" capturas-simulador${{ inputs.variante && format('-{0}', inputs.variante) || '' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
