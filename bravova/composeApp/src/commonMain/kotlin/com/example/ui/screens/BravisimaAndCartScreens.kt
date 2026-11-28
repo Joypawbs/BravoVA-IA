@@ -2298,7 +2298,7 @@ fun CartCheckoutScreen(
                                     items = if (isBravisimaLocked) {
                                         listOf("Desbloqueo con ${com.example.platform.biometryPhrase()}", "RD$${formatMoney(bravisimaBalance)}.00")
                                     } else {
-                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con ${com.example.platform.biometryPhrase()}")
+                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00")
                                     },
                                     slashColor = if (isBravisimaLocked) BravoRed else primaryColor,
                                     fontSizeSp = 12f
@@ -2495,7 +2495,7 @@ fun CartCheckoutScreen(
                                         } else {
                                             "Identidad biométrica verificada para operaciones críticas del checkout."
                                         }
-                                    } ?: "Pagos con $activeCardSummary, canjes Bravísima y envío requieren ${com.example.platform.biometryPhrase()}.",
+                                    } ?: "Al pagar se te pedirá ${com.example.platform.biometryPhrase()}.",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 12.sp,
@@ -3220,8 +3220,9 @@ fun DeliveryTrackingScreen(
             contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 1. Aviso en vivo del estado del pedido
-            item(key = "live_delivery_notification_banner", contentType = "live_banner") {
+            // 1. Aviso en vivo del estado del pedido. Entregado: no se muestra (decía "en ruta",
+            // 34 km/h y 72% en un pedido ya entregado)
+            if (deliveryStage != OrderDeliveryStage.DELIVERED) item(key = "live_delivery_notification_banner", contentType = "live_banner") {
                 LiveDeliveryNotificationBannerCard(
                     banner = liveDeliveryBanner,
                     deliveryStage = deliveryStage,
@@ -3278,7 +3279,7 @@ fun DeliveryTrackingScreen(
                                         size = 14.dp
                                     )
                                     Text(
-                                        text = "#${ord.id} • ${ordStage.progressPct}%",
+                                        text = if (ordStage == OrderDeliveryStage.DELIVERED) "#${ord.id}" else "#${ord.id} • ${ordStage.progressPct}%",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
@@ -3322,12 +3323,12 @@ fun DeliveryTrackingScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Map,
-                                    contentDescription = "Mapa GPS en Vivo",
+                                    contentDescription = null,
                                     tint = Tone.success,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Text(
-                                    text = "Mapa GPS en Tiempo Real • Tráfico y Velocidad",
+                                    text = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Recorrido del pedido" else "Mapa en vivo",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
