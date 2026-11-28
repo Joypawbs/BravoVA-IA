@@ -87,7 +87,7 @@ La 3.2 dejó fuera funciones de la 3.1. La 3.2.1 las recupera todas. La lista sa
 | 33 | Ajustes: modo oscuro, ahorro de datos, vibraciones | AccountGridScreen, v1.2 | Hecho (tema claro/oscuro/automático, ahorro de datos sin fotos, vibraciones) |
 | 34 | Ayuda: horario, comprobantes NCF, contacto | AccountGridScreen, v2.2 | Hecho (horario, NCF, cómo funcionan los pedidos, contacto, créditos de fotos) |
 | 35 | Inicio de sesión con Google (y Apple) | BravoGoogleAuthScreen | Hecho |
-| 36 | Fotos: todo producto con foto del tipo correcto | catálogo | Parcial: +27 fotos del tipo correcto (fotos.json, con créditos en Ayuda); 48 artículos (sobre todo medicinas y accesorios de mascota) sin foto libre fiable muestran el ícono de su pasillo |
+| 36 | Fotos: todo producto con foto del tipo correcto | catálogo | Hecho: los 75 productos que no tenían foto ya la tienen (fotos.json, con créditos en Ayuda); varias son aproximadas o de otra marca y muestran el tipo de producto o su uso |
 
 **Cuándo se publica:**
 - Todas las filas en "Hecho".

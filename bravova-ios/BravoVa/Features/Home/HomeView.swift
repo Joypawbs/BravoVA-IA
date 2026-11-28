@@ -209,6 +209,9 @@ struct ProductCard: View {
                 Text(Money.rd(product.price))
                     .font(.subheadline.bold())
                     .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .layoutPriority(1)
                 Spacer(minLength: 4)
                 QuantityControl(sku: product.sku, compact: true)
             }
