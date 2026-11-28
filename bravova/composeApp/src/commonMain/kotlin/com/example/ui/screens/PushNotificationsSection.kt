@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.components.BravoSwitch
 import com.example.ui.theme.Tone
 
 import com.example.platform.*
@@ -239,16 +240,13 @@ fun FcmPushControlAndFeedCard(
                             )
                         }
 
-                        Switch(
+                        BravoSwitch(
                             checked = topic.enabled,
                             onCheckedChange = { enabled ->
                                 performCrispHaptic(view, HapticStyle.TICK)
                                 onToggleTopic(topic.topicKey, enabled)
                             },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = primaryColor
-                            ),
+                            accent = primaryColor,
                             modifier = Modifier.testTag("fcm_topic_switch_${topic.topicKey}")
                         )
                     }

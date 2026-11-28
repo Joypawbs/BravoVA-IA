@@ -139,6 +139,24 @@ object BravIaEngine {
         ${StoreFacts.all.joinToString("\n        ") { "- $it" }}
     """.trimIndent()
 
+    /**
+     * Esquema de la respuesta para la salida estructurada de Gemini: el modelo solo puede
+     * devolver un JSON con esta forma. "respuesta" va primero para que se vea mientras se escribe.
+     */
+    val RESPONSE_SCHEMA: String = """
+        {"type":"object",
+         "properties":{
+           "respuesta":{"type":"string"},
+           "productos":{"type":"array","items":{"type":"object",
+             "properties":{"sku":{"type":"string"},"cantidad":{"type":"integer","minimum":1,"maximum":$MAX_QTY},"motivo":{"type":"string"}},
+             "required":["sku","cantidad"]}},
+           "receta_id":{"type":"string"},
+           "pregunta":{"type":"string"},
+           "sugerencia":{"type":"object","properties":{"asunto":{"type":"string"},"resumen":{"type":"string"}}}
+         },
+         "required":["respuesta","productos"]}
+    """.trimIndent()
+
     /* -------------------------------------------------------------- */
     /*  1. Qué productos le enseñamos al modelo                         */
     /* -------------------------------------------------------------- */

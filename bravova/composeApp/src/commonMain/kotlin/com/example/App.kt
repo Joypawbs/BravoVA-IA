@@ -42,7 +42,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -50,6 +49,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -169,7 +170,7 @@ fun BravoRoot(
     val appPrefs = remember { sharedPrefs("bravova_prefs") }
     LaunchedEffect(Unit) { initializeVerifiedGoogleFallbackState(AppContext.instance) }
 
-    val systemDark = isSystemInDarkTheme()
+    val systemDark = com.example.platform.systemDarkTheme()
     var authScreenDarkMode by remember(systemDark) {
         mutableStateOf(systemDark)
     }
@@ -548,6 +549,16 @@ fun BravoVaApp(
                         drawRect(color = rootBgColor)
                     }
 
+                    // Margen inferior común: barra de pestañas + carrito (si se ve) + zona segura
+                    val cartBarShown = cartTotals.count > 0 &&
+                        currentScreen in listOf(AppScreen.HOME, AppScreen.CATALOG, AppScreen.CATEGORY)
+                    val navBarBottom = androidx.compose.foundation.layout.WindowInsets.navigationBars
+                        .asPaddingValues().calculateBottomPadding()
+                    val bottomChromeInset = navBarBottom + com.example.ui.components.BottomChrome.DockHeight +
+                        com.example.ui.components.BottomChrome.ContentGap +
+                        (if (cartBarShown) com.example.ui.components.BottomChrome.CartBarHeight +
+                            com.example.ui.components.BottomChrome.CartBarGap else 0.dp)
+
                     SharedTransitionLayout {
                     AnimatedContent(
                         targetState = currentScreen,
@@ -572,6 +583,7 @@ fun BravoVaApp(
                         CompositionLocalProvider(
                             LocalProductHeroScopes provides ProductHeroScopes(this@SharedTransitionLayout, this@AnimatedContent),
                             LocalDataSaver provides dataSaver,
+                            com.example.ui.components.LocalBottomChromeInset provides bottomChromeInset,
                             // La pantalla que sale desvanece ya su vidrio nativo (no se superpone con la que entra)
                             com.example.ui.components.LocalGlassPresence provides
                                 (this@AnimatedContent.transition.targetState == androidx.compose.animation.EnterExitState.Visible)
@@ -912,7 +924,7 @@ fun BravoVaApp(
                                             operation = BiometricCriticalOperation.CONFIRM_AI_ORDER,
                                             title = "Confirmar Pedido Brav IA",
                                             subtitle = "Total RD$$estTotal.00 • $estCount artículo(s)",
-                                            description = "Autoriza con tu huella digital el pago con $cardLabel y el despacho inmediato de tu compra preparada por Brav IA.",
+                                            description = "Autoriza con ${com.example.platform.biometryPhrase()} el pago con $cardLabel y el despacho inmediato de tu compra preparada por Brav IA.",
                                             badgeTitle = "AUTORIZACIÓN BIOMÉTRICA BRAV IA",
                                             amountRd = estTotal,
                                             itemCount = estCount,
@@ -1084,7 +1096,7 @@ fun BravoVaApp(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
-                                .height(150.dp)
+                                .height(if (cartBarShown) 210.dp else 150.dp)
                                 .background(
                                     androidx.compose.ui.graphics.Brush.verticalGradient(
                                         0f to scrimColor.copy(alpha = 0f),
@@ -1114,7 +1126,7 @@ fun BravoVaApp(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .navigationBarsPadding()
-                            .padding(start = 16.dp, end = 16.dp, bottom = if (PlatformInfo.isAndroid) 88.dp else 84.dp)
+                            .padding(start = 16.dp, end = 16.dp, bottom = com.example.ui.components.BottomChrome.DockHeight + com.example.ui.components.BottomChrome.CartBarGap)
                     ) {
                         com.example.ui.components.GlassPresence(transition.targetState == androidx.compose.animation.EnterExitState.Visible) {
                         CartSummaryBar(

@@ -183,7 +183,7 @@ fun BarcodeScannerModal(
                                 .size(38.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (useLiveCamera) BravoRed else Color.White.copy(alpha = 0.14f)
+                                    if (useLiveCamera) Tone.brand else Color.White.copy(alpha = 0.14f)
                                 )
                                 .testTag("scanner_camera_toggle")
                         ) {
@@ -302,7 +302,7 @@ fun BarcodeScannerModal(
 
                         val laserY = h * laserProgress
                         drawLine(
-                            color = BravoRed.copy(alpha = 0.35f),
+                            color = Tone.brand.copy(alpha = 0.35f),
                             start = Offset(8f, laserY),
                             end = Offset(w - 8f, laserY),
                             strokeWidth = 12f,
@@ -358,10 +358,10 @@ fun BarcodeScannerModal(
                                     onSelectProductSku(chip.sku)
                                 },
                                 shape = RoundedCornerShape(999.dp),
-                                color = if (isSelected) BravoRed else Color.White.copy(alpha = 0.1f),
+                                color = if (isSelected) Tone.brand else Color.White.copy(alpha = 0.1f),
                                 border = androidx.compose.foundation.BorderStroke(
                                     1.dp,
-                                    if (isSelected) BravoRed else Color.White.copy(alpha = 0.2f)
+                                    if (isSelected) Tone.brand else Color.White.copy(alpha = 0.2f)
                                 ),
                                 modifier = Modifier.testTag("scanner_chip_${chip.sku}")
                             ) {
@@ -465,7 +465,7 @@ fun BarcodeScannerModal(
                                         HapticFeedbackManager.onAddToCart(view)
                                         onAddScannedProduct(selectedProduct)
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = BravoRed),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Tone.brand),
                                     shape = RoundedCornerShape(999.dp),
                                     modifier = Modifier
                                         .weight(1.2f)

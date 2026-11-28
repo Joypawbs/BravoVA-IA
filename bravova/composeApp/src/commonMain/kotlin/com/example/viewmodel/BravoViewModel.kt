@@ -28,7 +28,8 @@ import com.example.platform.System
 import com.example.platform.TimeZone
 import com.example.platform.URLEncoder
 import com.example.platform.content
-import com.example.platform.createGenerativeModel
+import com.example.platform.createAiModel
+import com.example.platform.isDirectAiEnabled
 import com.example.platform.AiModelConfig
 import com.example.platform.appCheckDebugTokenOrNull
 import com.example.platform.AiContent
@@ -162,11 +163,11 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     val allCachedProducts: StateFlow<List<Product>> = _allCachedProducts.asStateFlow()
 
     private val geminiModel by lazy {
-        createGenerativeModel("gemini-3.8-flash")
+        createAiModel("gemini-3.8-flash")
     }
 
     private val geminiFallbackModel by lazy {
-        createGenerativeModel("gemini-3.5-flash-lite")
+        createAiModel("gemini-3.5-flash-lite")
     }
 
     /*
@@ -177,10 +178,11 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     private val bravIaChatConfig = AiModelConfig(
         systemInstruction = BravIaEngine.SYSTEM_INSTRUCTION,
         jsonOutput = true,
-        temperature = 0.3
+        temperature = 0.3,
+        jsonSchema = BravIaEngine.RESPONSE_SCHEMA
     )
-    private val bravIaChatModel by lazy { createGenerativeModel("gemini-3.8-flash", bravIaChatConfig) }
-    private val bravIaChatFallbackModel by lazy { createGenerativeModel("gemini-3.5-flash-lite", bravIaChatConfig) }
+    private val bravIaChatModel by lazy { createAiModel("gemini-3.8-flash", bravIaChatConfig) }
+    private val bravIaChatFallbackModel by lazy { createAiModel("gemini-3.5-flash-lite", bravIaChatConfig) }
 
     /**
      * Brav IA usa Firebase AI Logic, que no necesita un usuario con sesión (la protege App Check).
@@ -375,7 +377,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         BravisimaMovement(
             id = "mov_seed_1",
             title = "Compra Bravo Churchill",
-            subtitle = "Orden #ORD-88412 • Retorno 1%",
+            subtitle = "Pedido #ORD-88412 • Retorno 1%",
             dateLabel = "Hace 3 días",
             amount = 24,
             movementType = "earn",
@@ -384,7 +386,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         BravisimaMovement(
             id = "mov_seed_2",
             title = "Compra Bravo Enriquillo",
-            subtitle = "Orden #ORD-87905 • Retorno 1%",
+            subtitle = "Pedido #ORD-87905 • Retorno 1%",
             dateLabel = "18 Mar",
             amount = 19,
             movementType = "earn",
@@ -1359,7 +1361,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         if (showFeedbackToast) {
             showToast(
                 stage.emoji,
-                "Orden #${updatedOrder.id}: ${stage.statusText} (${stage.progressPct}%)"
+                "Pedido #${updatedOrder.id}: ${stage.statusText} (${stage.progressPct}%)"
             )
         }
     }
@@ -2222,7 +2224,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     BravisimaMovement(
                         id = "mov_earn_${orderId}_${System.currentTimeMillis()}",
                         title = "Compra $branch",
-                        subtitle = "Orden #$orderId • Retorno 1%",
+                        subtitle = "Pedido #$orderId • Retorno 1%",
                         dateLabel = "Hace un instante",
                         amount = t.bravisimaGenerated,
                         movementType = "earn",
@@ -2235,7 +2237,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                     BravisimaMovement(
                         id = "mov_redeem_${orderId}_${System.currentTimeMillis() + 1}",
                         title = "Canje en Carrito",
-                        subtitle = "Orden #$orderId • Descuento aplicado",
+                        subtitle = "Pedido #$orderId • Descuento aplicado",
                         dateLabel = "Hace un instante",
                         amount = -t.redeemed,
                         movementType = "redeem",
@@ -3067,7 +3069,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
                 var local = runCatching { localAnswer() }.getOrElse {
                     GroundedReply(text = "No pude preparar la respuesta esta vez. Intenta de nuevo en un momento.", items = emptyList(), recipe = null, suggestion = null, total = 0, budgetExceededBy = null)
                 }
-                val token = if (reason == "acceso de la app no verificado") runCatching { appCheckDebugTokenOrNull() }.getOrNull() else null
+                val token = if (!isDirectAiEnabled && reason == "acceso de la app no verificado") runCatching { appCheckDebugTokenOrNull() }.getOrNull() else null
                 if (token != null) {
                     local = local.copy(text = local.text + "\n\nPara activar la IA en esta instalación, registra este token en Firebase → App Check → app de iOS → Administrar tokens de depuración:\n" + token)
                 }
@@ -3086,7 +3088,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             "quota" in m || "429" in m || "resource exhausted" in m -> "límite de uso alcanzado"
             "network" in m || "internet" in m || "offline" in m || "timed out" in m || "unreachable" in m -> "sin internet"
             "not found" in m || "404" in m -> "modelo no disponible"
-            "api key" in m || "invalid" in m -> "configuración de Firebase"
+            "api key" in m || "invalid" in m -> "configuración de la IA"
             else -> (e.message ?: "error").take(60)
         }
     }

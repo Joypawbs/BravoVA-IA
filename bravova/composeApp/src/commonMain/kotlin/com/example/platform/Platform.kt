@@ -341,7 +341,9 @@ interface GenerativeModelCompat {
 data class AiModelConfig(
     val systemInstruction: String? = null,
     val jsonOutput: Boolean = false,
-    val temperature: Double = -1.0
+    val temperature: Double = -1.0,
+    /** Esquema JSON de la respuesta (salida estructurada). Solo lo usa la API directa de Gemini. */
+    val jsonSchema: String? = null
 )
 
 expect fun createGenerativeModel(modelName: String, config: AiModelConfig = AiModelConfig()): GenerativeModelCompat
@@ -352,6 +354,14 @@ expect fun createGenerativeModel(modelName: String, config: AiModelConfig = AiMo
 
 /** Whether the system UI is currently in dark mode. */
 expect fun currentDarkModeHint(context: PlatformContext): Boolean
+
+/**
+ * Tema del sistema que se actualiza en vivo. En iOS, isSystemInDarkTheme() de Compose solo lee el
+ * tema al abrir la app (JetBrains/compose-multiplatform#3575): si la persona cambia a modo oscuro
+ * con la app abierta, no se enteraba.
+ */
+@androidx.compose.runtime.Composable
+expect fun systemDarkTheme(): Boolean
 
 /** Platform-specific database file location (Room KMP). */
 expect fun getDatabaseBuilder(context: PlatformContext): androidx.room.RoomDatabase.Builder<com.example.data.local.BravoDatabase>
@@ -366,3 +376,16 @@ enum class BiometryKind(val displayName: String, val instruction: String, val se
 }
 
 expect fun deviceBiometryKind(): BiometryKind
+
+private val cachedBiometry: BiometryKind by lazy { deviceBiometryKind() }
+
+/** Para frases: "Pagar con Face ID", "Usa Touch ID para…", "Autoriza con tu huella". */
+fun biometryPhrase(): String =
+    if (cachedBiometry == BiometryKind.FINGERPRINT) "tu huella" else cachedBiometry.displayName
+
+/** Para etiquetas cortas: "3DS + Face ID", "3DS + Huella". */
+fun biometryLabel(): String =
+    if (cachedBiometry == BiometryKind.FINGERPRINT) "Huella" else cachedBiometry.displayName
+
+/** True si el equipo usa reconocimiento facial (para elegir el ícono). */
+fun biometryIsFace(): Boolean = cachedBiometry == BiometryKind.FACE_ID || cachedBiometry == BiometryKind.OPTIC_ID

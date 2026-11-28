@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.components.BravoSwitch
 import org.jetbrains.compose.resources.stringResource
 
 import com.example.ui.theme.Tone
@@ -277,7 +278,7 @@ fun BravisimaScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "bravisima_card", contentType = "loyalty_card") {
@@ -1000,7 +1001,7 @@ fun BravisimaScreen(
                                 Icon(
                                     imageVector = if (bravisimaCard.isLocked) Icons.Default.Lock else Icons.Default.LockOpen,
                                     contentDescription = null,
-                                    tint = if (bravisimaCard.isLocked) BravoRed else Tone.successBright,
+                                    tint = if (bravisimaCard.isLocked) Tone.brand else Tone.successBright,
                                     modifier = Modifier.size(21.dp)
                                 )
                                 Column {
@@ -1024,16 +1025,13 @@ fun BravisimaScreen(
                                     )
                                 }
                             }
-                            Switch(
+                            BravoSwitch(
                                 checked = bravisimaCard.isLocked,
                                 onCheckedChange = {
                                     performCrispHaptic(view, HapticStyle.TICK)
                                     showCardLockBiometricPrompt = true
                                 },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = BravoRed
-                                ),
+                                accent = Tone.brand,
                                 modifier = Modifier.testTag("bravisima_lock_switch")
                             )
                         }
@@ -1074,17 +1072,14 @@ fun BravisimaScreen(
                                     )
                                 }
                             }
-                            Switch(
+                            BravoSwitch(
                                 checked = bravisimaCard.autoRedeemInCart && !bravisimaCard.isLocked,
                                 onCheckedChange = {
                                     performCrispHaptic(view, HapticStyle.TICK)
                                     onToggleAutoRedeem()
                                 },
                                 enabled = !bravisimaCard.isLocked,
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = primaryColor
-                                ),
+                                accent = primaryColor,
                                 modifier = Modifier.testTag("bravisima_autoredeem_switch")
                             )
                         }
@@ -1499,9 +1494,9 @@ fun BravisimaScreen(
                 "Bloquear tarjeta Bravísima"
             }
             val actionDesc = if (bravisimaCard.isLocked) {
-                "Confirma tu huella digital para reactivar canjes y uso de tu Tarjeta Bravísima."
+                "Usa ${com.example.platform.biometryPhrase()} para reactivar canjes y uso de tu Tarjeta Bravísima."
             } else {
-                "Confirma tu huella digital para proteger y pausar temporalmente tu Tarjeta Bravísima."
+                "Usa ${com.example.platform.biometryPhrase()} para proteger y pausar temporalmente tu Tarjeta Bravísima."
             }
             BiometricOrderPromptDialog(
                 request = BiometricPromptRequest(
@@ -1641,7 +1636,7 @@ fun CartCheckoutScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (cartItems.isEmpty()) {
@@ -1834,7 +1829,7 @@ fun CartCheckoutScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
-                                    items = listOf("Pago protegido con huella", activeBranch),
+                                    items = listOf("Pago protegido con ${com.example.platform.biometryPhrase()}", activeBranch),
                                     slashColor = primaryColor,
                                     fontSizeSp = 12f
                                 )
@@ -1850,13 +1845,13 @@ fun CartCheckoutScreen(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Fingerprint,
+                                        imageVector = (if (com.example.platform.PlatformInfo.isIos) Icons.Default.Lock else Icons.Default.Fingerprint),
                                         contentDescription = null,
                                         tint = Tone.successBright,
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Text(
-                                        text = "3DS + Huella",
+                                        text = "3DS + ${com.example.platform.biometryLabel()}",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
@@ -1929,7 +1924,7 @@ fun CartCheckoutScreen(
                                                 operation = BiometricCriticalOperation.CHANGE_PAYMENT_METHOD,
                                                 title = "Vincular nueva tarjeta",
                                                 subtitle = "Verificación biométrica requerida",
-                                                description = "Autoriza con tu huella digital para registrar un nuevo método de pago en el checkout.",
+                                                description = "Autoriza con ${com.example.platform.biometryPhrase()} para registrar un nuevo método de pago en el checkout.",
                                                 badgeTitle = "SEGURIDAD DE MÉTODO DE PAGO",
                                                 amountRd = cartTotals.finalPay.roundToInt(),
                                                 itemCount = cartTotals.count,
@@ -1996,7 +1991,7 @@ fun CartCheckoutScreen(
                                                         operation = BiometricCriticalOperation.CHANGE_PAYMENT_METHOD,
                                                         title = "Cambiar Método de Pago",
                                                         subtitle = "${method.brand} •••• ${method.last4} • Exp ${method.exp}",
-                                                        description = "Confirma tu huella digital para autorizar el cambio de tarjeta predeterminada en este pedido.",
+                                                        description = "Usa ${com.example.platform.biometryPhrase()} para autorizar el cambio de tarjeta predeterminada en este pedido.",
                                                         badgeTitle = "CAMBIO DE TARJETA EN CHECKOUT",
                                                         amountRd = cartTotals.finalPay.roundToInt(),
                                                         itemCount = cartTotals.count,
@@ -2228,7 +2223,7 @@ fun CartCheckoutScreen(
                                         operation = BiometricCriticalOperation.AUTHORIZE_BRAVISIMA_REDEMPTION,
                                         title = "Autorizar canje Bravísima",
                                         subtitle = "Aplicar -RD$${formatMoney(maxRedeemable)}.00 al pedido",
-                                        description = "Confirma tu identidad con huella digital para redimir tus puntos acumulados de Tarjeta Bravísima en este checkout.",
+                                        description = "Confirma tu identidad con ${com.example.platform.biometryPhrase()} para redimir tus puntos acumulados de Tarjeta Bravísima en este checkout.",
                                         badgeTitle = "CANJE DE SALDO BRAVÍSIMA",
                                         amountRd = maxRedeemable,
                                         itemCount = cartTotals.count,
@@ -2260,7 +2255,7 @@ fun CartCheckoutScreen(
                                                 operation = BiometricCriticalOperation.UNLOCK_BRAVISIMA_CARD,
                                                 title = "Desbloquear tarjeta Bravísima",
                                                 subtitle = "Balance disponible: RD$${formatMoney(bravisimaBalance)}.00",
-                                                description = "Tu Tarjeta Bravísima está bloqueada. Verifica tu huella digital para desbloquearla y habilitar el canje en el checkout.",
+                                                description = "Tu Tarjeta Bravísima está bloqueada. Usa ${com.example.platform.biometryPhrase()} para desbloquearla y habilitar el canje en el checkout.",
                                                 badgeTitle = "DESBLOQUEO BIOMÉTRICO BRAVÍSIMA",
                                                 amountRd = bravisimaBalance,
                                                 itemCount = cartTotals.count,
@@ -2292,23 +2287,23 @@ fun CartCheckoutScreen(
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
-                                    color = if (isBravisimaLocked) BravoRed else MaterialTheme.colorScheme.onSurface
+                                    color = if (isBravisimaLocked) Tone.brand else MaterialTheme.colorScheme.onSurface
                                 )
                                 DiagonalMetadataStrip(
                                     items = if (isBravisimaLocked) {
-                                        listOf("Desbloqueo con huella", "RD$${formatMoney(bravisimaBalance)}.00")
+                                        listOf("Desbloqueo con ${com.example.platform.biometryPhrase()}", "RD$${formatMoney(bravisimaBalance)}.00")
                                     } else {
-                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con huella")
+                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00")
                                     },
-                                    slashColor = if (isBravisimaLocked) BravoRed else primaryColor,
+                                    slashColor = if (isBravisimaLocked) Tone.brand else primaryColor,
                                     fontSizeSp = 12f
                                 )
                             }
                             if (isBravisimaLocked) {
                                 Surface(
                                     shape = RoundedCornerShape(999.dp),
-                                    color = BravoRed.copy(alpha = 0.14f),
-                                    border = BorderStroke(1.dp, BravoRed.copy(alpha = 0.4f)),
+                                    color = Tone.brand.copy(alpha = 0.14f),
+                                    border = BorderStroke(1.dp, Tone.brand.copy(alpha = 0.4f)),
                                     modifier = Modifier.testTag("cart_unlock_bravisima_button")
                                 ) {
                                     Row(
@@ -2318,8 +2313,8 @@ fun CartCheckoutScreen(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.LockOpen,
-                                            contentDescription = "Desbloquear con huella",
-                                            tint = BravoRed,
+                                            contentDescription = "Desbloquear con ${com.example.platform.biometryPhrase()}",
+                                            tint = Tone.brand,
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
@@ -2327,7 +2322,7 @@ fun CartCheckoutScreen(
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
-                                            color = BravoRed
+                                            color = Tone.brand
                                         )
                                     }
                                 }
@@ -2372,12 +2367,17 @@ fun CartCheckoutScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Cargo con $activeCardSummary ($ncfType)", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                            DiagonalMetadataStrip(
-                                items = listOf("GRATIS", "+RD$${cartTotals.bravisimaGenerated} Bravísima"),
-                                slashColor = Tone.success,
-                                fontSizeSp = 12f
+                            // Antes: "Cargo con Visa •••• 4821 (B02)GRATIS / +RD$2 Braví…" pegado y cortado.
+                            // El NCF ya se elige arriba y lo ganado en Bravísima sale en la franja verde.
+                            Text(
+                                "Comisión con $activeCardSummary",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 12.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false).padding(end = 8.dp)
                             )
+                            Text("Gratis", color = Tone.success, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
 
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
@@ -2467,8 +2467,8 @@ fun CartCheckoutScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Fingerprint,
-                                    contentDescription = "Solicitud de huella digital",
+                                    imageVector = (if (com.example.platform.PlatformInfo.isIos) Icons.Default.Lock else Icons.Default.Fingerprint),
+                                    contentDescription = "Autorización con ${com.example.platform.biometryPhrase()}",
                                     tint = if (lastVerificationResult != null) Tone.successBright else primaryColor,
                                     modifier = Modifier.size(19.dp)
                                 )
@@ -2476,8 +2476,8 @@ fun CartCheckoutScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = lastVerificationResult?.let {
-                                        "Sello Biométrico Activo • ${it.transactionToken}"
-                                    } ?: "Confirmación con BiometricPrompt",
+                                        "Pago verificado • ${it.transactionToken}"
+                                    } ?: "Confirmación con ${com.example.platform.biometryLabel()}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 12.sp,
@@ -2490,7 +2490,7 @@ fun CartCheckoutScreen(
                                         } else {
                                             "Identidad biométrica verificada para operaciones críticas del checkout."
                                         }
-                                    } ?: "Pagos con $activeCardSummary, canjes Bravísima y envío requieren huella.",
+                                    } ?: "Al pagar se te pedirá ${com.example.platform.biometryPhrase()}.",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 12.sp,
@@ -2521,9 +2521,9 @@ fun CartCheckoutScreen(
                         AnimatedPurchaseButton(
                             loading = isProcessingPayment,
                             loadingText = "Procesando pago…",
-                            text = if (needsBiometric) "Pagar con huella • RD$${formatMoney(payTotalRd)}"
+                            text = if (needsBiometric) "Pagar con ${com.example.platform.biometryPhrase()} • RD$${formatMoney(payTotalRd)}"
                             else "Confirmar pedido • RD$${formatMoney(payTotalRd)}",
-                            icon = if (needsBiometric) Icons.Default.Fingerprint else Icons.Default.VerifiedUser,
+                            icon = if (needsBiometric) (if (com.example.platform.PlatformInfo.isIos) Icons.Default.Lock else Icons.Default.Fingerprint) else Icons.Default.VerifiedUser,
                             primaryColor = primaryColor,
                             onClick = {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
@@ -2537,7 +2537,7 @@ fun CartCheckoutScreen(
                                         operation = BiometricCriticalOperation.CONFIRM_PAYMENT_AND_ORDER,
                                         title = "Confirmar Pago y Pedido",
                                         subtitle = "Total RD$${formatMoney(finalPayRd)}.00 • $activeCardSummary",
-                                        description = "Coloca tu huella digital para autorizar el cargo en $activeCardSummary ($ncfType) y despachar tu pedido ($activeDeliverySummary).",
+                                        description = "Usa ${com.example.platform.biometryPhrase()} para autorizar el cargo en $activeCardSummary ($ncfType) y despachar tu pedido ($activeDeliverySummary).",
                                         badgeTitle = "AUTORIZACIÓN BIOMÉTRICA DE PAGO",
                                         amountRd = finalPayRd,
                                         itemCount = cartTotals.count,
@@ -2671,14 +2671,14 @@ fun BiometricOrderPromptDialog(
     BiometricOrderPromptDialog(
         request = BiometricPromptRequest(
             operation = BiometricCriticalOperation.CONFIRM_PAYMENT_AND_ORDER,
-            title = "Confirmar Pedido con Huella",
+            title = "Confirmar pedido con ${com.example.platform.biometryPhrase()}",
             subtitle = "Total RD$${formatMoney(totalAmountRd)}.00 • $itemCount artículo(s)",
-            description = "Coloca tu huella digital para autorizar el pago y confirmar tu pedido.",
+            description = "Usa ${com.example.platform.biometryPhrase()} para autorizar el pago y confirmar tu pedido.",
             badgeTitle = "AUTORIZACIÓN BIOMÉTRICA BRAVO",
             amountRd = totalAmountRd,
             itemCount = itemCount,
             cashbackRd = cashbackRd,
-            paymentMethodLabel = "Pago Protegido 3DS + BiometricPrompt",
+            paymentMethodLabel = "Pago protegido 3DS + ${com.example.platform.biometryLabel()}",
             deliveryOrBranchLabel = "Despacho inmediato"
         ),
         isArca = isArca,
@@ -2706,7 +2706,9 @@ fun BiometricOrderPromptDialog(
     // Face ID / Touch ID / huella según el equipo (LAContext.biometryType en iOS)
     val biometry = remember { com.example.platform.deviceBiometryKind() }
     val usesFace = biometry == com.example.platform.BiometryKind.FACE_ID || biometry == com.example.platform.BiometryKind.OPTIC_ID
-    val biometryIcon = if (usesFace) Icons.Default.Face else Icons.Default.Fingerprint
+    // En iPhone, iOS ya muestra su propia animación de Face ID: aquí solo un candado discreto
+    val isIosDevice = com.example.platform.PlatformInfo.isIos
+    val biometryIcon = if (isIosDevice) Icons.Default.Lock else Icons.Default.Fingerprint
     // Los datos del cargo van en filas aparte; aquí solo la instrucción, corta y sin cortes
     val baseInstruction = "${biometry.instruction} para autorizar el pago y despachar tu pedido."
     var statusMessage by remember(request) {
@@ -2737,7 +2739,7 @@ fun BiometricOrderPromptDialog(
     fun completeVerification(hardwareResult: BiometricVerificationResult? = null) {
         if (scanState == "scanning" || scanState == "verified") return
         scanState = "scanning"
-        statusMessage = "Validando firma biométrica y criptograma de seguridad..."
+        statusMessage = "Verificando…"
         performCrispHaptic(view, HapticStyle.TICK)
         scope.launch {
             kotlinx.coroutines.delay(420L)
@@ -2753,7 +2755,7 @@ fun BiometricOrderPromptDialog(
             )
             verifiedTokenPreview = finalResult.transactionToken
             scanState = "verified"
-            statusMessage = "¡Identidad verificada! Token ${finalResult.transactionToken}"
+            statusMessage = "Listo, pago autorizado"
             HapticFeedbackManager.onCheckoutConfirm(view)
             kotlinx.coroutines.delay(320L)
             onAuthenticatedWithResult(finalResult)
@@ -2945,8 +2947,14 @@ fun BiometricOrderPromptDialog(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    // Zona del sensor de huella
-                    Box(
+                    // Zona del sensor de huella (solo Android; en iPhone la animación de Face ID la pone iOS)
+                    if (isIosDevice) {
+                        if (scanState == "scanning") {
+                            CircularProgressIndicator(color = sensorAccent, strokeWidth = 2.5.dp, modifier = Modifier.size(28.dp))
+                        } else if (scanState == "verified") {
+                            Icon(Icons.Default.CheckCircle, contentDescription = "Pago autorizado", tint = sensorAccent, modifier = Modifier.size(32.dp))
+                        }
+                    } else Box(
                         modifier = Modifier
                             .size(110.dp)
                             .clip(CircleShape)
@@ -3006,7 +3014,7 @@ fun BiometricOrderPromptDialog(
                         }
                     }
 
-                    Text(
+                    if (!isIosDevice) Text(
                         text = verifiedTokenPreview?.let { "Criptograma verificado: $it" }
                             ?: if (scanState == "verified") "Identidad confirmada" else biometry.sensorHint,
                         fontFamily = PlusJakartaSans,
@@ -3204,11 +3212,12 @@ fun DeliveryTrackingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 1. Aviso en vivo del estado del pedido
-            item(key = "live_delivery_notification_banner", contentType = "live_banner") {
+            // 1. Aviso en vivo del estado del pedido. Entregado: no se muestra (decía "en ruta",
+            // 34 km/h y 72% en un pedido ya entregado)
+            if (deliveryStage != OrderDeliveryStage.DELIVERED) item(key = "live_delivery_notification_banner", contentType = "live_banner") {
                 LiveDeliveryNotificationBannerCard(
                     banner = liveDeliveryBanner,
                     deliveryStage = deliveryStage,
@@ -3265,7 +3274,7 @@ fun DeliveryTrackingScreen(
                                         size = 14.dp
                                     )
                                     Text(
-                                        text = "#${ord.id} • ${ordStage.progressPct}%",
+                                        text = if (ordStage == OrderDeliveryStage.DELIVERED) "#${ord.id}" else "#${ord.id} • ${ordStage.progressPct}%",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
@@ -3301,7 +3310,8 @@ fun DeliveryTrackingScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 14.dp, vertical = 12.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            // Alineado a la izquierda como el resto de secciones (antes iba centrado en dos líneas)
+                            horizontalAlignment = Alignment.Start
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -3309,29 +3319,25 @@ fun DeliveryTrackingScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Map,
-                                    contentDescription = "Mapa GPS en Vivo",
+                                    contentDescription = null,
                                     tint = Tone.success,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Text(
-                                    text = "Mapa GPS en Tiempo Real • Tráfico y Velocidad",
+                                    text = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Recorrido del pedido" else "Mapa en vivo",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center
+                                    maxLines = 1
                                 )
                             }
-                            BravoUnderline(isArca = false)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "${driverTelemetry.currentStreet} • ${driverTelemetry.lastUpdatedLabel}",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                                maxLines = 1,
+                                maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -3353,9 +3359,9 @@ fun DeliveryTrackingScreen(
                                             )
                                         )
                                     },
+                                    // Colores con significado: neutro = acción, verde = activo, rojo solo para errores
                                     shape = RoundedCornerShape(999.dp),
-                                    color = primaryColor.copy(alpha = 0.12f),
-                                    border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.35f)),
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
                                     modifier = Modifier.testTag("refresh_real_gps_button")
                                 ) {
                                     Row(
@@ -3370,11 +3376,11 @@ fun DeliveryTrackingScreen(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = "Mi GPS",
+                                            text = "Mi ubicación",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
-                                            color = primaryColor
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                 }
@@ -3408,7 +3414,7 @@ fun DeliveryTrackingScreen(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = if (driverTelemetry.isAutoSimulating) "Auto-Tráfico Activo" else "Reanudar ruta",
+                                            text = if (driverTelemetry.isAutoSimulating) "Ruta en vivo" else "Reanudar ruta",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
@@ -4080,12 +4086,15 @@ private fun LiveDeliveryNotificationBannerCard(
     onTriggerSystemNotification: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val activeTitle = banner?.title ?: "${deliveryStage.statusText} • Carlos Rodríguez en ruta"
-    val activeSubtitle = banner?.subtitle ?: "${telemetry.currentStreet} • ${telemetry.trafficCondition}"
-    val activeIconKey = banner?.iconKey ?: deliveryStage.emoji
+    // Una sola fuente de verdad: el estado del pedido. Velocidad y "en ruta" solo mientras
+    // el repartidor se mueve; antes el aviso inicial (72 %, 34 km/h) salía en cualquier estado.
+    val isMoving = deliveryStage == OrderDeliveryStage.IN_TRANSIT || deliveryStage == OrderDeliveryStage.ARRIVING
+    val activeTitle = if (isMoving) banner?.title ?: "Carlos Rodríguez va en camino" else deliveryStage.statusText
+    val activeSubtitle = if (isMoving) banner?.subtitle ?: "${telemetry.currentStreet} • ${telemetry.trafficCondition}" else deliveryStage.description
+    val activeIconKey = if (isMoving) banner?.iconKey ?: deliveryStage.emoji else deliveryStage.emoji
     val speedKmh = banner?.speedKmh ?: telemetry.currentSpeedKmh
     val etaMin = banner?.etaMinutes ?: telemetry.dynamicEtaMinutes
-    val progressFraction = banner?.let { (it.progressPct / 100f).coerceIn(0f, 1f) } ?: deliveryStage.progressFraction
+    val progressFraction = if (isMoving) banner?.let { (it.progressPct / 100f).coerceIn(0f, 1f) } ?: deliveryStage.progressFraction else deliveryStage.progressFraction
 
     TranslucentCard(
         darkMode = darkMode,
@@ -4125,23 +4134,37 @@ private fun LiveDeliveryNotificationBannerCard(
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
+                        // Una sola fila: "En vivo" + número de pedido como insignia (antes se partía en dos líneas)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.NotificationsActive,
-                                contentDescription = "Notificación en vivo",
+                                contentDescription = null,
                                 tint = Tone.success,
-                                modifier = Modifier.size(13.dp)
+                                modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = "NOTIFICACIÓN LIVE • #$orderIdDisplay",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.sp,
-                                color = Tone.success
+                                text = "En vivo",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Tone.success,
+                                maxLines = 1
                             )
+                            Surface(
+                                shape = RoundedCornerShape(999.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant
+                            ) {
+                                Text(
+                                    text = "#$orderIdDisplay",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
                         }
                         Text(
                             text = activeTitle,
@@ -4168,7 +4191,7 @@ private fun LiveDeliveryNotificationBannerCard(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Surface(
+                    if (isMoving) Surface(
                         onClick = onTriggerSystemNotification,
                         shape = RoundedCornerShape(999.dp),
                         color = primaryColor.copy(alpha = 0.12f)
@@ -4225,7 +4248,7 @@ private fun LiveDeliveryNotificationBannerCard(
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        text = if (deliveryStage == OrderDeliveryStage.DELIVERED) "Pedido entregado en tu puerta" else "Llegada estimada en ~$etaMin min • ${telemetry.remainingDistanceKm} km",
+                        text = when { deliveryStage == OrderDeliveryStage.DELIVERED -> "Pedido entregado en tu puerta"; isMoving -> "Llegada en ~$etaMin min • ${telemetry.remainingDistanceKm} km"; else -> "Llegada estimada en ~${deliveryStage.etaMinutes} min" },
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
@@ -4237,7 +4260,8 @@ private fun LiveDeliveryNotificationBannerCard(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 12.sp,
-                    color = primaryColor
+                    // Mismo verde que la barra: el porcentaje es avance, no una alerta
+                    color = Tone.success
                 )
             }
 

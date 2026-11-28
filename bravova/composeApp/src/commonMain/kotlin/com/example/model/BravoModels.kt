@@ -241,14 +241,14 @@ enum class OrderDeliveryStage(
 ) {
     RECEIVED(
         stepIndex = 0,
-        statusText = "Orden recibida",
+        statusText = "Pedido recibido",
         shortLabel = "Recibido",
         progressFraction = 0.20f,
         progressPct = 20,
         etaMinutes = 12,
         routePointIndex = 0,
         emoji = "receipt",
-        description = "Orden confirmada y asignada al equipo de selección en sucursal.",
+        description = "Pedido confirmado y asignado al equipo de selección en sucursal.",
         updatedDateLabel = "Hoy, recién recibida"
     ),
     PREPARED(
@@ -297,7 +297,7 @@ enum class OrderDeliveryStage(
         routePointIndex = 8,
         emoji = "check",
         description = "¡Pedido entregado exitosamente en tu dirección! Gracias por comprar en Bravo.",
-        updatedDateLabel = "Entregado"
+        updatedDateLabel = "Hoy"
     );
 
     val stepNumber: Int

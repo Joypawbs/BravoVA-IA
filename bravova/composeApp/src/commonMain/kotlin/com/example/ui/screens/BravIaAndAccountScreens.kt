@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.components.BravoSwitch
 import com.example.ui.theme.Tone
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -63,6 +64,15 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.platform.Log
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -1005,7 +1015,9 @@ fun BravIaChatScreen(
                     start = 14.dp,
                     end = 14.dp,
                     top = topOverlayPadding + 6.dp,
-                    bottom = dynamicInputBottomPadding + 148.dp
+                    // Con el teclado abierto solo hace falta dejar sitio al campo de escritura;
+                    // los 148 dp de antes dejaban un hueco vacío y empujaban la respuesta bajo el panel
+                    bottom = dynamicInputBottomPadding + (if (isImeVisible) 76.dp else 148.dp)
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -1061,7 +1073,7 @@ fun BravIaChatScreen(
                                     shape = RoundedCornerShape(999.dp),
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                     modifier = Modifier
-                                        .height(34.dp)
+                                        .height(40.dp)
                                         .testTag("bravia_open_lists_pill")
                                 ) {
                                     Text("Mis listas", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
@@ -1077,7 +1089,7 @@ fun BravIaChatScreen(
                                     shape = RoundedCornerShape(999.dp),
                                     contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
                                     modifier = Modifier
-                                        .height(34.dp)
+                                        .height(40.dp)
                                         .testTag("budget_build_button")
                                 ) {
                                     Text("Armar", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = primaryColor)
@@ -1092,7 +1104,7 @@ fun BravIaChatScreen(
                                     shape = RoundedCornerShape(999.dp),
                                     contentPadding = PaddingValues(horizontal = 11.dp, vertical = 6.dp),
                                     modifier = Modifier
-                                        .height(34.dp)
+                                        .height(40.dp)
                                         .testTag("budget_adjust_button")
                                 ) {
                                     Text("Ajustar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = primaryColor)
@@ -1375,6 +1387,19 @@ fun BravIaChatScreen(
                                     textColor = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface
                                 )
 
+                                // Transparencia: si la IA no respondió y salió la respuesta del catálogo,
+                                // se dice (antes no se distinguía de una respuesta real de la IA)
+                                if (!isUser && !msg.isLoading && msg.modelLabel?.let {
+                                        "sin conexión" in it || "parcial" in it
+                                    } == true) {
+                                    Text(
+                                        text = if ("parcial" in msg.modelLabel.orEmpty()) "Respuesta parcial: la IA tardó demasiado"
+                                        else "Respuesta sin IA: sin conexión con el asistente",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
                                 if (!isUser && msg.suggestionPayload != null) {
                                     SuggestionMailDispatchedCard(
                                         payload = msg.suggestionPayload,
@@ -1479,6 +1504,19 @@ fun BravIaChatScreen(
                                         }
                                     }
                                 }
+
+                                // Guía de IA generativa de Apple: Reintentar y Copiar junto a la
+                                // respuesta, y una valoración voluntaria que no interrumpe el chat.
+                                if (!isUser && !isLatestAiResponding && msg.text.isNotBlank()) {
+                                    AiReplyActions(
+                                        messageId = msg.id,
+                                        text = msg.text,
+                                        accent = primaryColor,
+                                        canRetry = precedingUserQuery.isNotBlank() && !isGenerating,
+                                        onRetry = { onSendPrompt(precedingUserQuery) },
+                                        showDisclaimer = msg.id == messages.lastOrNull()?.id
+                                    )
+                                }
                             }
 
                             if (!isUser && recommendedProducts.isNotEmpty()) {
@@ -1488,7 +1526,7 @@ fun BravIaChatScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = "Artículos del Catálogo (${recommendedProducts.size})",
+                                        text = "Artículos del catálogo (${recommendedProducts.size})",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 13.5.sp,
@@ -1914,7 +1952,8 @@ fun BravIaChatScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 6.dp, bottom = 8.dp)
-                        .height(132.dp)
+                        // Más alto: ahora lleva la etiqueta "Presupuesto", el mínimo/máximo y una línea de ayuda
+                        .height(176.dp)
                         .testTag("budget_glass_panel")
                 )
             }
@@ -2164,7 +2203,7 @@ fun BravIaChatScreen(
                             text = when {
                                 !pendingImageUri.isNullOrBlank() -> "Cuéntame qué quieres saber de la foto…"
                                 isArca -> "Pregunta por tu mascota o envía una foto…"
-                                else -> "Pide una receta, productos o envía una foto…"
+                                else -> "Pide una receta o productos…"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 12.sp,
@@ -2724,7 +2763,7 @@ fun AccountGridScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "account_large_title") {
@@ -3026,7 +3065,7 @@ fun AccountSubScreenView(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 184.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             when (subScreen) {
@@ -3106,7 +3145,11 @@ fun AccountSubScreenView(
                                         )
                                     }
                                     DiagonalMetadataStrip(
-                                        items = listOf(
+                                        // Entregado: sin "Avance 100%" ni "Seguimiento en vivo" (ya no hay nada que seguir)
+                                        items = if (topStage == OrderDeliveryStage.DELIVERED) listOf(
+                                            topOrder?.branch ?: "Av. Winston Churchill",
+                                            topOrder?.date ?: "Hoy"
+                                        ) else listOf(
                                             topOrder?.branch ?: "Av. Winston Churchill",
                                             "Avance ${topStage.progressPct}%",
                                             "Seguimiento en vivo"
@@ -3159,7 +3202,7 @@ fun AccountSubScreenView(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Orden ${order.id}",
+                                    text = "Pedido ${order.id}",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
@@ -3189,7 +3232,8 @@ fun AccountSubScreenView(
                                             size = 13.dp
                                         )
                                         Text(
-                                            text = "${orderStage.statusText} • ${orderStage.progressPct}%",
+                                            // Entregado: el 100% y la barra sobran; solo se muestran mientras va en camino
+                                            text = if (orderStage == OrderDeliveryStage.DELIVERED) orderStage.statusText else "${orderStage.statusText} • ${orderStage.progressPct}%",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = badgeTint
@@ -3202,7 +3246,7 @@ fun AccountSubScreenView(
                                 slashColor = primaryColor,
                                 fontSizeSp = 12f
                             )
-                            LinearProgressIndicator(
+                            if (orderStage != OrderDeliveryStage.DELIVERED) LinearProgressIndicator(
                                 progress = { orderStage.progressFraction },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -3574,13 +3618,13 @@ fun AccountSubScreenView(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                Switch(
+                                BravoSwitch(
                                     checked = followsSystemTheme,
                                     onCheckedChange = { follow ->
                                         performCrispHaptic(view, HapticStyle.CONFIRM)
                                         if (follow) onFollowSystemTheme() else onToggleDarkMode()
                                     },
-                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor),
+                                    accent = primaryColor,
                                     modifier = Modifier.testTag("follow_system_theme_switch")
                                 )
                             }
@@ -3628,13 +3672,13 @@ fun AccountSubScreenView(
                                         )
                                     }
                                 }
-                                Switch(
+                                BravoSwitch(
                                     checked = darkMode,
                                     onCheckedChange = {
                                         performCrispHaptic(view, HapticStyle.CONFIRM)
                                         onToggleDarkMode()
                                     },
-                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor),
+                                    accent = primaryColor,
                                     modifier = Modifier.testTag("dark_mode_switch")
                                 )
                             }
@@ -3670,13 +3714,13 @@ fun AccountSubScreenView(
                                         )
                                     }
                                 }
-                                Switch(
+                                BravoSwitch(
                                     checked = notificationsEnabled,
                                     onCheckedChange = {
                                         performCrispHaptic(view, HapticStyle.TICK)
                                         onToggleNotifications()
                                     },
-                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = primaryColor)
+                                    accent = primaryColor
                                 )
                             }
                             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
@@ -3998,7 +4042,7 @@ fun AccountSubScreenView(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Buzón de Sugerencias y Mejora Continua",
+                                    text = "Buzón de sugerencias y mejora continua",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.5.sp,
@@ -4240,6 +4284,84 @@ fun AccountSubScreenView(
             },
             backLabel = "Volver a mi cuenta",
             backTestTag = "account_sub_back_button"
+        )
+    }
+}
+
+/**
+ * Acciones bajo cada respuesta de Brav IA (guía de IA generativa de Apple): Copiar, Reintentar y
+ * una valoración 👍/👎 voluntaria. La valoración solo cambia el icono y queda en el registro: no
+ * interrumpe la conversación ni abre formularios.
+ */
+@Composable
+private fun AiReplyActions(
+    messageId: Long,
+    text: String,
+    accent: Color,
+    canRetry: Boolean,
+    onRetry: () -> Unit,
+    showDisclaimer: Boolean
+) {
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    var copied by remember(messageId) { mutableStateOf(false) }
+    var rating by rememberSaveable(messageId) { mutableStateOf(0) } // 1 = útil, -1 = no útil
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
+    LaunchedEffect(copied) {
+        if (copied) { kotlinx.coroutines.delay(1500); copied = false }
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        @Composable
+        fun action(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, tint: Color, enabled: Boolean = true, onClick: () -> Unit) {
+            IconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(36.dp)) {
+                Icon(icon, contentDescription = label, tint = if (enabled) tint else tint.copy(alpha = 0.35f), modifier = Modifier.size(18.dp))
+            }
+        }
+        action(
+            if (copied) Icons.Default.Check else Icons.Default.ContentCopy,
+            if (copied) "Copiado" else "Copiar respuesta",
+            if (copied) accent else muted
+        ) {
+            clipboard.setText(androidx.compose.ui.text.AnnotatedString(text))
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            copied = true
+        }
+        action(Icons.Default.Refresh, "Reintentar respuesta", muted, enabled = canRetry) {
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            onRetry()
+        }
+        Spacer(Modifier.weight(1f))
+        action(
+            if (rating == 1) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+            "Respuesta útil",
+            if (rating == 1) accent else muted
+        ) {
+            rating = if (rating == 1) 0 else 1
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            Log.d("BravIA", "valoracion mensaje=$messageId util=$rating")
+        }
+        action(
+            if (rating == -1) Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
+            "Respuesta no útil",
+            if (rating == -1) accent else muted
+        ) {
+            rating = if (rating == -1) 0 else -1
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            Log.d("BravIA", "valoracion mensaje=$messageId util=$rating")
+        }
+    }
+    if (showDisclaimer) {
+        Text(
+            text = "Brav IA puede equivocarse. Revisa precios y cantidades antes de pedir.",
+            style = MaterialTheme.typography.labelSmall,
+            color = muted.copy(alpha = 0.8f),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp)
         )
     }
 }

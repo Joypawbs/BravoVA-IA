@@ -24,6 +24,8 @@ permissions:
 env:
   # Clave de Google Maps (opcional): sin ella el seguimiento usa el mapa ilustrado
   MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+  # Clave de Gemini (Google AI Studio) para Brav IA (opcional): sin ella usa Firebase AI Logic
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
   # Qué se compila: el commit indicado, o la propia etiqueta si ya existe
   SRC: ${{ github.event.inputs.ref || github.event.inputs.tag || github.ref_name }}

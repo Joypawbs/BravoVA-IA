@@ -128,6 +128,10 @@ final class BravoVaTourUITests: XCTestCase {
             print("[tour] estado app tras \((i + 1) * 3) s: \(app.state.rawValue)")
             if app.state != .runningForeground { print("[tour] LA APP SE CERRÓ"); break }
         }
+        // Fuente de la respuesta: si salió del catálogo, la app lo dice debajo del mensaje
+        let sinIA = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] %@", "Respuesta sin IA")).firstMatch.exists
+        let parcial = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] %@", "Respuesta parcial")).firstMatch.exists
+        print("[tour] FUENTE_BRAVIA=\(sinIA ? "local" : (parcial ? "parcial" : "ia"))")
         shot("receta_2_respuesta")
     }
 

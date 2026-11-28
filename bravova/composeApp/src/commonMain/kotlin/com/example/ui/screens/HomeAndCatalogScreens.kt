@@ -75,6 +75,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.SearchOff
 import com.example.ui.components.matchesSearch
@@ -443,7 +444,7 @@ fun HomeScreen(
                     .fillMaxSize()
                     .translucentBackdropSource(hazeState, zIndex = 1f)
                     .testTag("home_screen_list"),
-                contentPadding = PaddingValues(top = 4.dp, bottom = 188.dp)
+                contentPadding = PaddingValues(top = 4.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current)
             ) {
                 if (debouncedQuery.isEmpty() && isSearchFocused) {
                     item(key = "search_suggestions", contentType = "suggestions") {
@@ -572,6 +573,10 @@ fun HomeScreen(
 
                     // Recordatorio: repetir la última compra con un toque
                     if (lastOrder != null && lastOrder.skus.isNotEmpty()) {
+                        // Pedido aún en camino: "¿Repetimos…? • En ruta ahora" no tenía sentido;
+                        // se muestra el seguimiento en su lugar
+                        val activeStage = com.example.model.OrderDeliveryStage.fromStatusString(lastOrder.status)
+                        val orderInProgress = activeStage != com.example.model.OrderDeliveryStage.DELIVERED
                         item(key = "home_repeat_last_order", contentType = "repeat_order") {
                             TranslucentCard(
                                 darkMode = darkMode,
@@ -589,20 +594,20 @@ fun HomeScreen(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     com.example.ui.components.EmptyStateBadge(
-                                        icon = Icons.Default.Replay,
+                                        icon = if (orderInProgress) Icons.Default.LocalShipping else Icons.Default.Replay,
                                         accent = primaryColor,
                                         modifier = Modifier.size(48.dp)
                                     )
                                     Column(Modifier.weight(1f)) {
                                         Text(
-                                            text = stringResource(Res.string.repeat_title),
+                                            text = if (orderInProgress) "Tu pedido va en camino" else stringResource(Res.string.repeat_title),
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 14.5.sp,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = stringResource(Res.string.repeat_products, lastOrder.skus.size, lastOrder.date),
+                                            text = if (orderInProgress) "${activeStage.statusText} • ${lastOrder.skus.size} productos" else stringResource(Res.string.repeat_products, lastOrder.skus.size, lastOrder.date),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 1,
@@ -612,14 +617,14 @@ fun HomeScreen(
                                     Surface(
                                         onClick = {
                                             performCrispHaptic(view, HapticStyle.CONFIRM)
-                                            onRepeatOrder(lastOrder.id)
+                                            if (orderInProgress) onNavigateToDelivery() else onRepeatOrder(lastOrder.id)
                                         },
                                         shape = RoundedCornerShape(999.dp),
                                         color = primaryColor,
                                         modifier = Modifier.testTag("home_repeat_order_button")
                                     ) {
                                         Text(
-                                            text = stringResource(Res.string.repeat_button),
+                                            text = if (orderInProgress) "Ver" else stringResource(Res.string.repeat_button),
                                             color = Color.White,
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
@@ -1030,7 +1035,7 @@ fun CatalogScreen(
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f)
                 .testTag("catalog_screen_list"),
-            contentPadding = PaddingValues(top = headerTopPadding + 4.dp, bottom = 188.dp),
+            contentPadding = PaddingValues(top = headerTopPadding + 4.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             if (debouncedFilter.isEmpty() && dailyRotatingOffers.isNotEmpty()) {
@@ -1259,7 +1264,7 @@ fun CategoryGridScreen(
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f)
                 .testTag("category_grid_screen"),
-            contentPadding = PaddingValues(top = headerTopPadding + 6.dp, bottom = 188.dp)
+            contentPadding = PaddingValues(top = headerTopPadding + 6.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current)
         ) {
             items(
                 items = rows,
@@ -1381,7 +1386,7 @@ fun ProductDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .translucentBackdropSource(hazeState, zIndex = 1f),
-            contentPadding = PaddingValues(top = 74.dp, bottom = 172.dp),
+            contentPadding = PaddingValues(top = 74.dp, bottom = com.example.ui.components.LocalBottomChromeInset.current),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "detail_main_card", contentType = "product_card") {
@@ -1502,10 +1507,12 @@ fun ProductDetailScreen(
                         if (showZoom) ZoomableProductImage(product = product, onDismiss = { showZoom = false })
                     }
 
-                    DiagonalMetadataStrip(
-                        items = listOf(product.category, "ITBIS incluido"),
-                        slashColor = primaryColor,
-                        fontSizeSp = 12f
+                    // La categoría ya sale en la ficha de arriba; aquí no se repite
+                    Text(
+                        text = "ITBIS incluido",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Text(
@@ -1592,9 +1599,11 @@ fun ProductDetailScreen(
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
 
+                    // Texto largo alineado a la izquierda (WWDC25: tipografía a la izquierda; un
+                    // párrafo centrado se lee peor). El título sigue el estilo de las demás secciones.
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                        horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Row(
@@ -1605,31 +1614,25 @@ fun ProductDetailScreen(
                                 imageVector = Icons.Default.Verified,
                                 contentDescription = null,
                                 tint = Tone.success,
-                                modifier = Modifier.size(15.dp)
+                                modifier = Modifier.size(16.dp)
                             )
                             Text(
                                 text = "Descripción",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.5.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        BravoUnderline(isArca = isArca)
                         Text(
                             text = richDescription.summary,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 12.5.sp,
-                            lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             richDescription.highlights.forEach { tag ->
                                 Surface(
