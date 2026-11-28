@@ -93,6 +93,76 @@ struct DailyPicksSection: View {
     }
 }
 
+/// "Tu pedido va en camino" / "En ruta" (3.1): aparece mientras hay un pedido en curso.
+struct ActiveOrderCard: View {
+    @Environment(AppState.self) private var app
+
+    var body: some View {
+        if let order = app.activeOrder {
+            TimelineView(.periodic(from: .now, by: 30)) { ctx in
+                let track = OrderProgress(order: order)
+                let stage = track.stage(at: ctx.date)
+                Button { app.trackingOrder = order } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: track.symbol(stage))
+                            .symbolVariant(.fill)
+                            .font(.title3)
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(app.store.accent, in: .circle)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(stage == .onTheWay ? "Tu pedido va en camino" : track.title(stage)).font(.headline)
+                            ProgressView(value: track.progress(at: ctx.date)).tint(app.store.accent)
+                            Text("\(order.id) · cerca de las \(track.arrival.formatted(date: .omitted, time: .shortened))")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.right").foregroundStyle(.tertiary)
+                    }
+                    .padding(14)
+                    .background(.background.secondary, in: .rect(cornerRadius: 18, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal)
+            }
+        }
+    }
+}
+
+/// Aviso de "bajó de precio" para los productos con alerta (precio real del catálogo).
+struct PriceDropCard: View {
+    @Environment(AppState.self) private var app
+
+    var body: some View {
+        let drops = app.priceAlerts.drops(in: .shared)
+        if !drops.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Label("Bajaron de precio", systemImage: "bell.badge.fill")
+                    .font(.headline)
+                    .foregroundStyle(.green)
+                ForEach(drops, id: \.0.sku) { drop in
+                    let (p, old) = drop
+                    Button { app.selectedProduct = p } label: {
+                        HStack {
+                            Text(p.name).lineLimit(1)
+                            Spacer()
+                            Text(Money.rd(old)).strikethrough().foregroundStyle(.secondary)
+                            Text(Money.rd(p.price)).bold()
+                        }
+                        .font(.subheadline)
+                        .monospacedDigit()
+                    }
+                    .buttonStyle(.plain)
+                }
+                Button("Entendido") { drops.forEach { app.priceAlerts.acknowledge($0.0) } }
+                    .font(.subheadline.weight(.semibold))
+            }
+            .padding(14)
+            .background(.green.opacity(0.08), in: .rect(cornerRadius: 18, style: .continuous))
+            .padding(.horizontal)
+        }
+    }
+}
+
 /// "¿Repetimos tu última compra?" con el último pedido real de esta tienda.
 struct RepeatOrderCard: View {
     @Environment(AppState.self) private var app

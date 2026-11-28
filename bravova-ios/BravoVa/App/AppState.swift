@@ -46,6 +46,11 @@ final class AppState {
     var focusSearch = false
     /// Pregunta que llega por enlace bravova://bravia?q=… para enviarla a Brav IA
     var braviaPrompt: String?
+    /// Pedido cuyo seguimiento se muestra en hoja (desde un enlace o la Live Activity)
+    var trackingOrder: Order?
+
+    /// Pedido más reciente que sigue en curso (para "Tu pedido va en camino")
+    var activeOrder: Order? { orders.orders.first { OrderProgress(order: $0).isActive } }
     var showScanner = false
 
     private enum Keys { static let store = "tienda" }

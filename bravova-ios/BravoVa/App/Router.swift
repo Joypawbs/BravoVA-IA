@@ -1,9 +1,10 @@
 import SwiftUI
 import UIKit
+import UserNotifications
 
 /// Acciones que llegan de fuera de la app: enlaces bravova:// y atajos del ícono (3D Touch).
 enum RouteAction: Equatable {
-    case search, bravisima, reorder, cart
+    case search, bravisima, reorder, cart, order, home
     case bravia(String?)
     case product(String)
 
@@ -19,6 +20,8 @@ enum RouteAction: Equatable {
         case "buscar": self = .search
         case "bravisima": self = .bravisima
         case "repetir": self = .reorder
+        case "pedido": self = .order
+        case "ofertas", "inicio": self = .home
         case "producto":
             let sku = url.pathComponents.dropFirst().first ?? ""
             guard !sku.isEmpty else { return nil }
@@ -51,6 +54,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         if let item = options.shortcutItem, let action = RouteAction(shortcut: item.type) {
             Task { @MainActor in Router.shared.pending = action }
         }
+        UNUserNotificationCenter.current().delegate = NoticeDelegate.shared
         let config = UISceneConfiguration(name: nil, sessionRole: session.role)
         config.delegateClass = SceneDelegate.self
         return config
@@ -78,6 +82,10 @@ extension AppState {
             tab = .bravisima
         case .cart:
             showCart = true
+        case .home:
+            tab = .home
+        case .order:
+            if let o = activeOrder ?? orders.orders.first { trackingOrder = o } else { tab = .account }
         case .reorder:
             if let order = lastOrder ?? orders.orders.first {
                 reorder(order)

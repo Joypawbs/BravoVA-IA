@@ -34,6 +34,7 @@ struct BravoVaApp: App {
 /// (se encoge al desplazar), así que no se dibuja ningún vidrio a mano.
 struct RootView: View {
     @Environment(AppState.self) private var app
+    @AppStorage("bienvenida.vista") private var welcomed = false
 
     var body: some View {
         @Bindable var app = app
@@ -58,6 +59,18 @@ struct RootView: View {
         .sheet(item: $app.selectedProduct) { ProductDetailView(product: $0) }
         .sheet(isPresented: $app.showCart) { CartView() }
         .fullScreenCover(isPresented: $app.showScanner) { ScannerView() }
+        // Bienvenida solo la primera vez (las capturas del CI abren con "-tab" y la saltan)
+        .fullScreenCover(isPresented: Binding(
+            get: { !welcomed && UserDefaults.standard.string(forKey: "tab") == nil },
+            set: { if !$0 { welcomed = true } })) {
+            WelcomeView { welcomed = true }
+        }
+        .sheet(item: $app.trackingOrder) { order in
+            NavigationStack {
+                TrackingView(order: order)
+                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button(role: .close) { app.trackingOrder = nil } } }
+            }
+        }
         .onChange(of: Router.shared.pending, initial: true) { _, action in
             guard let action else { return }
             app.perform(action)
@@ -76,7 +89,9 @@ struct RootView: View {
             default: break
             }
             // Captura del CI: "-huevo spamton" dispara ese huevo de pascua
-            if let egg = UserDefaults.standard.string(forKey: "huevo") { Easter.shared.check(egg) }
+            if let egg = UserDefaults.standard.string(forKey: "huevo") {
+                Task { try? await Task.sleep(for: .seconds(1)); Easter.shared.check(egg) }
+            }
         }
     }
 }

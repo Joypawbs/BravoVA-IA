@@ -166,6 +166,7 @@ struct CheckoutView: View {
                                      address: address, payment: PaymentOption(rawValue: paymentRaw) ?? .cash,
                                      extras: final)
         withAnimation(.smooth) { placed = order }
+        Task { await Notifier.schedule(for: order) }
     }
 }
 
@@ -186,7 +187,14 @@ struct OrderPlacedView: View {
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             Spacer()
-            Button("Listo", action: done)
+            NavigationLink {
+                TrackingView(order: order)
+            } label: {
+                Label("Seguir mi pedido", systemImage: "map").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.glass)
+            .controlSize(.large)
+            Button(action: done) { Text("Listo").frame(maxWidth: .infinity) }
                 .buttonStyle(.glassProminent)
                 .controlSize(.large)
         }

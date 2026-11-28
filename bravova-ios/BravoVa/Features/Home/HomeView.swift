@@ -39,6 +39,8 @@ struct HomeView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
                 allCategories
+                ActiveOrderCard()
+                PriceDropCard()
                 RepeatOrderCard()
                 ProductRail(title: "Lo de siempre", subtitle: "Lo que más pides aquí", items: app.usuals())
                 ProductRail(title: "Vistos hace poco", subtitle: "Para retomar donde ibas",
@@ -52,9 +54,17 @@ struct HomeView: View {
                 braviaBanner
             }
             .padding(.vertical, 12)
+            .id(refreshID)
         }
         .scrollIndicators(.hidden)
+        // Deslizar para actualizar: vuelve a descargar las fotos y recalcula avisos y pedidos
+        .refreshable {
+            URLCache.shared.removeAllCachedResponses()
+            refreshID = UUID()
+        }
     }
+
+    @State private var refreshID = UUID()
 
     private var allCategories: some View {
         NavigationLink {

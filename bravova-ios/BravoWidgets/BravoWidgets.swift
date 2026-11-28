@@ -28,9 +28,9 @@ struct DayProvider: TimelineProvider {
 }
 
 private let dayThemes = [
-    "Domingo Familiar & Embutidos", "Lunes de Frutas & Vegetales", "Martes de Carnes & Mariscos",
-    "Miércoles de Despensa & Bebidas", "Jueves de Lácteos & Panadería", "Viernes de Limpieza & Hogar",
-    "Sábado de Hogar & Cuidado Personal"
+    "Domingo familiar y de embutidos", "Lunes de frutas y vegetales", "Martes de carnes y mariscos",
+    "Miércoles de despensa y bebidas", "Jueves de lácteos y panadería", "Viernes de limpieza y hogar",
+    "Sábado de hogar y cuidado personal"
 ]
 
 struct OffersWidget: Widget {
@@ -38,18 +38,18 @@ struct OffersWidget: Widget {
         StaticConfiguration(kind: "BravoOffers", provider: DayProvider()) { entry in
             let theme = dayThemes[Calendar.current.component(.weekday, from: entry.date) - 1]
             VStack(alignment: .leading, spacing: 6) {
-                Label("Ofertas del día", systemImage: "tag.fill")
+                Label("Lo del día", systemImage: "calendar")
                     .font(.caption.weight(.bold)).foregroundStyle(bravoRed)
                 Text(theme).font(.headline.weight(.bold)).lineLimit(3).minimumScaleFactor(0.8)
                 Spacer(minLength: 0)
-                Text("Toca para ver las ofertas").font(.caption2).foregroundStyle(.secondary)
+                Text("Toca para ver los productos").font(.caption2).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .widgetURL(URL(string: "bravova://ofertas"))
             .containerBackground(for: .widget) { Color(.systemBackground) }
         }
-        .configurationDisplayName("Ofertas del día")
-        .description("El tema de ofertas de hoy en Supermercados Bravo.")
+        .configurationDisplayName("Lo del día")
+        .description("El pasillo destacado de hoy en Supermercados Bravo.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

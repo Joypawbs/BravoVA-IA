@@ -31,6 +31,7 @@ struct AccountView: View {
                             Label("Mis listas", systemImage: "list.bullet.clipboard")
                         }
                     }
+                    NavigationLink { NoticesView() } label: { Label("Avisos", systemImage: "bell") }
                     NavigationLink { FavoritesView() } label: {
                         LabeledContent {
                             Text("\(app.favorites.skus.count)")
@@ -209,6 +210,11 @@ struct OrderDetailView: View {
                     LabeledContent("Comprobante", value: x.ncf == "B01" ? "Crédito fiscal · \(x.rnc)" : "Consumidor final")
                     if !x.recipient.isBlank { LabeledContent("Recibe", value: "\(x.recipient) · \(x.recipientPhone)") }
                     if let s = SubstitutionPref(rawValue: x.substitution) { LabeledContent("Si algo se agota", value: s.title) }
+                }
+            }
+            Section {
+                NavigationLink { TrackingView(order: order) } label: {
+                    Label("Seguimiento del pedido", systemImage: "map")
                 }
             }
             Section("Califica tu \(order.mode == .pickup ? "recogida" : "entrega")") {
