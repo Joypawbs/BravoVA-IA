@@ -176,7 +176,7 @@ fun FcmPushControlAndFeedCard(
                                 modifier = Modifier.size(13.dp)
                             )
                             Text(
-                                text = if (hasSystemPermission) "Alertas Activas" else "Activar Permiso",
+                                text = if (hasSystemPermission) "Alertas activas" else "Activar permiso",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 12.sp,
@@ -282,7 +282,7 @@ fun FcmPushControlAndFeedCard(
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
-                            text = "Probar Oferta Push",
+                            text = "Probar oferta push",
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp,
@@ -292,7 +292,7 @@ fun FcmPushControlAndFeedCard(
                     }
 
                     AnimatedPurchaseButton(
-                        text = "Estado Pedido Push",
+                        text = "Estado del pedido (push)",
                         icon = Icons.Default.LocalShipping,
                         primaryColor = primaryColor,
                         onClick = {

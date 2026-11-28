@@ -740,23 +740,23 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         val isArca = _activeStore.value == StoreMode.ARCA
         val dayThemes = if (isArca) {
             listOf(
-                "Domingo de Snacks & Premios",
-                "Lunes de Aves & Exóticos",
-                "Martes de Alimentos Secos",
-                "Miércoles de Húmedos & Snacks",
-                "Jueves de Salud Veterinaria",
-                "Viernes de Arena & Higiene",
-                "Sábado de Mascotas & Hogar"
+                "Domingo de snacks y premios",
+                "Lunes de aves y exóticos",
+                "Martes de alimentos secos",
+                "Miércoles de húmedos y snacks",
+                "Jueves de salud veterinaria",
+                "Viernes de arena e higiene",
+                "Sábado de mascotas y hogar"
             )
         } else {
             listOf(
-                "Domingo Familiar & Embutidos",
-                "Lunes de Frutas & Vegetales",
-                "Martes de Carnes & Mariscos",
-                "Miércoles de Despensa & Bebidas",
-                "Jueves de Lácteos & Panadería",
-                "Viernes de Limpieza & Hogar",
-                "Sábado de Hogar & Cuidado Personal"
+                "Domingo familiar y de embutidos",
+                "Lunes de frutas y vegetales",
+                "Martes de carnes y mariscos",
+                "Miércoles de despensa y bebidas",
+                "Jueves de lácteos y panadería",
+                "Viernes de limpieza y hogar",
+                "Sábado de hogar y cuidado personal"
             )
         }
         val dayName = dayNames[dayOfWeekIndex]
@@ -1043,7 +1043,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
         _redeemBravisimaInCart.value = false
         _profile.value = _profile.value.copy(
             name = "Invitado BravoVa",
-            email = "Sesión de Invitado",
+            email = "Sesión de invitado",
             bravisimaNumber = guestCardNumber
         )
         _bravisimaCard.value = BravisimaCard(
@@ -1056,7 +1056,7 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
             autoRedeemInCart = false
         )
         _bravisimaMovements.value = defaultBravisimaMovements
-        _firestoreSyncStatus.value = "Modo Invitado Activo"
+        _firestoreSyncStatus.value = "Modo invitado activo"
         viewModelScope.launch {
             localRepo.saveGuestMode(true)
             val loadedOrders = localRepo.loadOrders(defaultOrders)

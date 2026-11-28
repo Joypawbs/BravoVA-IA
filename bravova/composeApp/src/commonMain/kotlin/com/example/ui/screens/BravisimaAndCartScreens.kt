@@ -221,6 +221,8 @@ fun BravisimaScreen(
     isGuestMode: Boolean,
     isSavingBravisima: Boolean,
     darkMode: Boolean,
+    /** Bravísima se abre desde Mi cuenta: lleva "atrás" como toda pantalla hija. */
+    onBack: (() -> Unit)? = null,
     onRedeemInCart: () -> Unit,
     onOpenScanner: () -> Unit,
     onToggleCardLock: () -> Unit,
@@ -412,20 +414,22 @@ fun BravisimaScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 DiagonalMetadataStrip(
                                     items = listOf(
-                                        "NIVEL ${bravisimaCard.tier.label.uppercase()}",
+                                        // Sin "NIVEL": así las tres etiquetas caben en una línea
+                                        // (con él, "1% CASHBACK" se cortaba)
+                                        bravisimaCard.tier.label.uppercase(),
                                         if (bravisimaCard.isLocked) "BLOQUEADA" else "ACTIVA",
-                                        "1% Cashback"
+                                        "1% CASHBACK"
                                     ),
                                     slashColor = Color.White,
                                     textColor = Color.White,
-                                    fontSizeSp = 12f,
-                                    maxLines = 2
+                                    fontSizeSp = 11f,
+                                    maxLines = 1
                                 )
 
                                 Spacer(modifier = Modifier.height(6.dp))
 
                                 Text(
-                                    text = "Bravísima Digital",
+                                    text = "Bravísima digital",
                                     fontFamily = PlusJakartaSans,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 24.sp,
@@ -671,7 +675,7 @@ fun BravisimaScreen(
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Vincula tu cuenta Google",
+                                        text = "Vincula tu cuenta de Google",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 14.5.sp,
@@ -750,13 +754,7 @@ fun BravisimaScreen(
                                         color = Color.White
                                     )
                                 } else {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = BravoAmber,
-                                        modifier = Modifier.size(17.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    // Sin el icono de destellos: igual que el botón de Google del inicio de sesión
                                     Text(
                                         text = "Iniciar sesión con Google",
                                         fontFamily = PlusJakartaSans,
@@ -931,7 +929,7 @@ fun BravisimaScreen(
                                     color = primaryColor.copy(alpha = if (darkMode) 0.22f else 0.12f)
                                 ) {
                                     Text(
-                                        text = if (nextTarget != null) "Meta: RD$$nextTarget" else "Nivel Máximo",
+                                        text = if (nextTarget != null) "Meta: RD$$nextTarget" else "Nivel máximo",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
@@ -1140,7 +1138,7 @@ fun BravisimaScreen(
                                 OutlinedTextField(
                                     value = editableHolderName,
                                     onValueChange = { editableHolderName = it },
-                                    label = { Text("Nombre en Tarjeta Bravísima") },
+                                    label = { Text("Nombre en la tarjeta Bravísima") },
                                     singleLine = true,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -1232,7 +1230,7 @@ fun BravisimaScreen(
                                         .testTag("bravisima_save_settings_button")
                                 ) {
                                     Text(
-                                        text = if (isGuestMode) "Guardar en mi Dispositivo" else "Guardar Cambios en mi Cuenta",
+                                        text = if (isGuestMode) "Guardar en mi dispositivo" else "Guardar Cambios en mi Cuenta",
                                         fontFamily = PlusJakartaSans,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.5.sp,
@@ -1261,7 +1259,7 @@ fun BravisimaScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Activar Código Promocional",
+                                text = "Activar código promocional",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 15.5.sp,
@@ -1488,6 +1486,7 @@ fun BravisimaScreen(
             accent = primaryColor,
             title = "Bravísima",
             modifier = Modifier.align(Alignment.TopCenter),
+            onBack = onBack,
             actions = listOf(
                 GlassBarAction(symbol = "creditcard", icon = null, label = "Nivel ${bravisimaCard.tier.label}", text = bravisimaCard.tier.label, highlighted = true)
             )
@@ -1495,9 +1494,9 @@ fun BravisimaScreen(
 
         if (showCardLockBiometricPrompt) {
             val actionTitle = if (bravisimaCard.isLocked) {
-                "Desbloquear Tarjeta Bravísima"
+                "Desbloquear tarjeta Bravísima"
             } else {
-                "Bloquear Tarjeta Bravísima"
+                "Bloquear tarjeta Bravísima"
             }
             val actionDesc = if (bravisimaCard.isLocked) {
                 "Confirma tu huella digital para reactivar canjes y uso de tu Tarjeta Bravísima."
@@ -1928,7 +1927,7 @@ fun CartCheckoutScreen(
                                         requestBiometricAuthorization(
                                             request = BiometricPromptRequest(
                                                 operation = BiometricCriticalOperation.CHANGE_PAYMENT_METHOD,
-                                                title = "Vincular Nueva Tarjeta",
+                                                title = "Vincular nueva tarjeta",
                                                 subtitle = "Verificación biométrica requerida",
                                                 description = "Autoriza con tu huella digital para registrar un nuevo método de pago en el checkout.",
                                                 badgeTitle = "SEGURIDAD DE MÉTODO DE PAGO",
@@ -2059,14 +2058,14 @@ fun CartCheckoutScreen(
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = "Comprobante Fiscal (DGII)",
+                                text = "Comprobante fiscal (DGII)",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                listOf("B02" to "Consumidor Final", "B01" to "Crédito Fiscal").forEach { (code, label) ->
+                                listOf("B02" to "Consumidor final", "B01" to "Crédito fiscal").forEach { (code, label) ->
                                     val selected = ncfType == code
                                     Surface(
                                         onClick = {
@@ -2209,7 +2208,7 @@ fun CartCheckoutScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Resumen de Compra",
+                                text = "Resumen de compra",
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 16.5.sp,
@@ -2227,7 +2226,7 @@ fun CartCheckoutScreen(
                                 requestBiometricAuthorization(
                                     request = BiometricPromptRequest(
                                         operation = BiometricCriticalOperation.AUTHORIZE_BRAVISIMA_REDEMPTION,
-                                        title = "Autorizar Canje Bravísima",
+                                        title = "Autorizar canje Bravísima",
                                         subtitle = "Aplicar -RD$${formatMoney(maxRedeemable)}.00 al pedido",
                                         description = "Confirma tu identidad con huella digital para redimir tus puntos acumulados de Tarjeta Bravísima en este checkout.",
                                         badgeTitle = "CANJE DE SALDO BRAVÍSIMA",
@@ -2259,14 +2258,14 @@ fun CartCheckoutScreen(
                                         requestBiometricAuthorization(
                                             request = BiometricPromptRequest(
                                                 operation = BiometricCriticalOperation.UNLOCK_BRAVISIMA_CARD,
-                                                title = "Desbloquear Tarjeta Bravísima",
+                                                title = "Desbloquear tarjeta Bravísima",
                                                 subtitle = "Balance disponible: RD$${formatMoney(bravisimaBalance)}.00",
                                                 description = "Tu Tarjeta Bravísima está bloqueada. Verifica tu huella digital para desbloquearla y habilitar el canje en el checkout.",
                                                 badgeTitle = "DESBLOQUEO BIOMÉTRICO BRAVÍSIMA",
                                                 amountRd = bravisimaBalance,
                                                 itemCount = cartTotals.count,
                                                 cashbackRd = cartTotals.bravisimaGenerated,
-                                                paymentMethodLabel = "Tarjeta Bravísima Digital",
+                                                paymentMethodLabel = "Tarjeta Bravísima digital",
                                                 deliveryOrBranchLabel = activeDeliverySummary
                                             ),
                                             onAuthorized = { res ->
@@ -2297,9 +2296,9 @@ fun CartCheckoutScreen(
                                 )
                                 DiagonalMetadataStrip(
                                     items = if (isBravisimaLocked) {
-                                        listOf("Desbloqueo con Huella", "RD$${formatMoney(bravisimaBalance)}.00")
+                                        listOf("Desbloqueo con huella", "RD$${formatMoney(bravisimaBalance)}.00")
                                     } else {
-                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con Huella")
+                                        listOf("Disponible", "RD$${formatMoney(bravisimaBalance)}.00", "Protegido con huella")
                                     },
                                     slashColor = if (isBravisimaLocked) BravoRed else primaryColor,
                                     fontSizeSp = 12f
@@ -2618,7 +2617,7 @@ fun CartCheckoutScreen(
         GlassTopBar(
             darkMode = darkMode,
             accent = primaryColor,
-            title = "Mi Carrito (${cartTotals.count})",
+            title = "Mi carrito (${cartTotals.count})",
             modifier = Modifier.align(Alignment.TopCenter),
             onBack = {
                         performCrispHaptic(view, HapticStyle.TICK)
@@ -2680,7 +2679,7 @@ fun BiometricOrderPromptDialog(
             itemCount = itemCount,
             cashbackRd = cashbackRd,
             paymentMethodLabel = "Pago Protegido 3DS + BiometricPrompt",
-            deliveryOrBranchLabel = "Despacho Inmediato"
+            deliveryOrBranchLabel = "Despacho inmediato"
         ),
         isArca = isArca,
         darkMode = darkMode,
@@ -3409,7 +3408,7 @@ fun DeliveryTrackingScreen(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = if (driverTelemetry.isAutoSimulating) "Auto-Tráfico Activo" else "Reanudar Ruta",
+                                            text = if (driverTelemetry.isAutoSimulating) "Auto-Tráfico Activo" else "Reanudar ruta",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
@@ -3439,7 +3438,7 @@ fun DeliveryTrackingScreen(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = "Tráfico Ahora",
+                                            text = "Tráfico ahora",
                                             fontFamily = PlusJakartaSans,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 12.sp,
@@ -3558,9 +3557,9 @@ fun DeliveryTrackingScreen(
                                         Column {
                                             Text(
                                                 text = when (driverTelemetry.trafficLevel) {
-                                                    "DENSO" -> "Tráfico Denso"
-                                                    "MODERADO" -> "Tráfico Moderado"
-                                                    else -> "Tráfico Fluido"
+                                                    "DENSO" -> "Tráfico denso"
+                                                    "MODERADO" -> "Tráfico moderado"
+                                                    else -> "Tráfico fluido"
                                                 },
                                                 fontFamily = PlusJakartaSans,
                                                 fontWeight = FontWeight.ExtraBold,
@@ -4865,7 +4864,7 @@ private fun DriverAiLiveChatCard(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
-                            contentDescription = "Repartidor Carlos Rodríguez",
+                            contentDescription = "Repartidor: Carlos Rodríguez",
                             tint = primaryColor,
                             modifier = Modifier.size(23.dp)
                         )

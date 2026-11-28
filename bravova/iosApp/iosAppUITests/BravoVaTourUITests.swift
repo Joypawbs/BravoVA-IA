@@ -67,7 +67,7 @@ final class BravoVaTourUITests: XCTestCase {
         app.terminate()
         app.launch()
         pause(6)
-        let guest = app.buttons["Continuar como Invitado"]
+        let guest = app.buttons["Continuar como invitado"]
         if guest.waitForExistence(timeout: 3) { guest.tap() }
         pause(4)
     }
@@ -80,7 +80,7 @@ final class BravoVaTourUITests: XCTestCase {
         pause(6)
         tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
-        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        tap(["Continuar como invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(5); shot("v25_inicio")
         tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
         pause(5); shot("v25_bravia_panel")
@@ -109,7 +109,7 @@ final class BravoVaTourUITests: XCTestCase {
         pause(6)
         tap(["Saltar"], fallback: CGVector(dx: 0.88, dy: 0.10), wait: 3)
         pause(2)
-        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        tap(["Continuar como invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4)
         tap(["Brav IA"], fallback: CGVector(dx: 0.52, dy: 0.935))
         pause(4); shot("receta_0_bravia")
@@ -148,20 +148,12 @@ final class BravoVaTourUITests: XCTestCase {
         }
         pause(3); shot("inicio_sesion")
 
-        tap(["Continuar como Invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
+        tap(["Continuar como invitado", "Invitado"], fallback: CGVector(dx: 0.5, dy: 0.77))
         pause(4); shot("home")
 
-        // Huevo de pascua: 5 toques al logo
-        // Toques individuales con su hora, para ver cuánto tarda cada uno en el simulador
-        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.16, dy: 0.097))
-        var t0 = Date()
-        for i in 0..<5 {
-            logo.press(forDuration: 0.05)
-            print("[tour] logo toque \(i + 1): \(String(format: "%.2f", Date().timeIntervalSince(t0))) s")
-            t0 = Date()
-        }
-        pause(2); shot("huellitas")
-        relaunch()
+        // El huevo de pascua (5 toques al logo) va al FINAL del recorrido: en la corrida anterior
+        // el segundo toque fallaba con "Failed to get matching snapshot", el test perdía 318 s y
+        // todas las pantallas siguientes quedaban sin capturar.
 
         // Búsqueda: huevo de pascua con efecto y filtros nuevos
         let search = app.descendants(matching: .any).matching(identifier: "home_search_input").firstMatch
@@ -189,7 +181,8 @@ final class BravoVaTourUITests: XCTestCase {
         relaunch()
 
         // Detalle de producto y vuelta al inicio
-        tap(["Café Soluble"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
+        // "product_card_" / "add_" son los testTag de las tarjetas: sirven si el producto cambia de lugar
+        tap(["Café Soluble", "product_card_"], fallback: CGVector(dx: 0.18, dy: 0.62), wait: 3)
         pause(3); shot("detalle_producto")
         // Desliza desde abajo para no abrir el visor de la foto
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
@@ -197,7 +190,7 @@ final class BravoVaTourUITests: XCTestCase {
         pause(2); shot("detalle_precio_por_unidad")
         tap(["Volver"], fallback: CGVector(dx: 0.08, dy: 0.10), wait: 3)
         pause(2)
-        tap(["Agregar Café"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)
+        tap(["Agregar Café", "add_"], fallback: CGVector(dx: 0.3, dy: 0.7), wait: 3)
         pause(2); shot("home_con_carrito")
         app.swipeUp(); pause(2); shot("home_ofertas")
         // Mantener presionado un producto abre la vista rápida (hoja nativa)
@@ -241,9 +234,13 @@ final class BravoVaTourUITests: XCTestCase {
         tap(["Seguimiento en vivo", "Seguir pedido", "Rastrear"], fallback: CGVector(dx: 0.5, dy: 0.35), wait: 3)
         pause(5); shot("seguimiento_mapa")
 
-        tap(["Inicio"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 3)
-        pause(2)
-        tap(["Carrito", "carrito"], fallback: CGVector(dx: 0.88, dy: 0.86), wait: 2)
+        // El carrito se abre con su enlace: buscar el botón en la home fallaba con
+        // "Failed to get matching snapshots" (árbol de accesibilidad de la home muy pesado).
+        if #available(iOS 16.4, *) {
+            app.open(URL(string: "bravova://carrito")!)
+        } else {
+            tap(["Carrito", "carrito"], fallback: CGVector(dx: 0.88, dy: 0.86), wait: 2)
+        }
         pause(3); shot("carrito")
         for _ in 0..<4 { app.swipeUp() }
         pause(2); shot("carrito_pago_y_entrega")
@@ -265,5 +262,17 @@ final class BravoVaTourUITests: XCTestCase {
         if let dir = shotsDir {
             try? app.debugDescription.write(to: dir.appendingPathComponent("a11y.txt"), atomically: true, encoding: .utf8)
         }
+
+        // Huevo de pascua, al final: si falla, ya están todas las demás capturas.
+        // Un solo toque con duración repetido, sin esperar a que la app quede "inactiva".
+        relaunch()
+        tap(["Inicio"], fallback: CGVector(dx: 0.5, dy: 0.92), wait: 2)
+        pause(2)
+        let logo = app.coordinate(withNormalizedOffset: CGVector(dx: 0.16, dy: 0.097))
+        for i in 0..<5 {
+            logo.press(forDuration: 0.05)
+            print("[tour] logo toque \(i + 1)")
+        }
+        pause(2); shot("huellitas")
     }
 }

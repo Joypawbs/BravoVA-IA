@@ -1359,7 +1359,9 @@ fun VerticalProductCard(
         isArca = isArca,
         cornerRadius = 16.dp,
         modifier = modifier
-            .height(232.dp)
+            // 248 dp: con el selector de cantidad visible el contenido suma ~246 dp
+            // (con 232 dp el selector quedaba cortado por abajo al agregar un producto)
+            .height(248.dp)
             .graphicsLayer { scaleX = pressScale; scaleY = pressScale }
             .pointerInput(Unit) {
                 awaitPointerEventScope {
