@@ -1387,6 +1387,19 @@ fun BravIaChatScreen(
                                     textColor = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface
                                 )
 
+                                // Transparencia: si la IA no respondió y salió la respuesta del catálogo,
+                                // se dice (antes no se distinguía de una respuesta real de la IA)
+                                if (!isUser && !msg.isLoading && msg.modelLabel?.let {
+                                        "sin conexión" in it || "parcial" in it
+                                    } == true) {
+                                    Text(
+                                        text = if ("parcial" in msg.modelLabel.orEmpty()) "Respuesta parcial: la IA tardó demasiado"
+                                        else "Respuesta sin IA: sin conexión con el asistente",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
                                 if (!isUser && msg.suggestionPayload != null) {
                                     SuggestionMailDispatchedCard(
                                         payload = msg.suggestionPayload,
