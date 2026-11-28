@@ -2186,7 +2186,7 @@ fun BravIaChatScreen(
                             text = when {
                                 !pendingImageUri.isNullOrBlank() -> "Cuéntame qué quieres saber de la foto…"
                                 isArca -> "Pregunta por tu mascota o envía una foto…"
-                                else -> "Pide una receta, productos o envía una foto…"
+                                else -> "Pide una receta o productos…"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 12.sp,

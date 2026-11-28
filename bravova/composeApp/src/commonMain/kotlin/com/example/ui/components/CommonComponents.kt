@@ -1414,21 +1414,24 @@ fun VerticalProductCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                ProductArtworkView(product = product, cornerRadius = 12.dp, modifier = Modifier.fillMaxSize().then(if (heroTransition) Modifier.productHeroImage(product.sku) else Modifier))
+                // Esquinas concéntricas (WWDC25): 16 dp de la tarjeta − 10 dp de margen = 6 dp
+                ProductArtworkView(product = product, cornerRadius = 6.dp, modifier = Modifier.fillMaxSize().then(if (heroTransition) Modifier.productHeroImage(product.sku) else Modifier))
                 if (onToggleFavorite != null) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                         contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
                         tint = if (isFavorite) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+                        // Área táctil de 40 dp (antes 28) con el mismo ícono de 18 dp; Apple pide ~44 pt
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .size(28.dp)
+                            .offset(x = 6.dp, y = (-6).dp)
+                            .size(40.dp)
                             .clip(CircleShape)
                             .clickable {
                                 performCrispHaptic(view, HapticStyle.CONFIRM)
                                 onToggleFavorite()
                             }
-                            .padding(5.dp)
+                            .padding(11.dp)
                     )
                 }
             }
@@ -1682,7 +1685,7 @@ private fun buildBoldAnnotatedLine(rawLine: String): androidx.compose.ui.text.An
                 val italicParts = boldParts[i].split("*")
                 for (j in italicParts.indices) {
                     if (j % 2 == 1) {
-                        withStyle(SpanStyle(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)) {
+                        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                             append(italicParts[j])
                         }
                     } else {
@@ -1819,7 +1822,8 @@ fun FormattedChatText(
                         Text(
                             text = buildBoldAnnotatedLine(block.content),
                             fontFamily = PlusJakartaSans,
-                            fontWeight = FontWeight.Bold,
+                            // Cuerpo en peso medio: así las **negritas** del texto sí destacan
+                            fontWeight = FontWeight.Medium,
                             color = textColor,
                             fontSize = 13.5.sp,
                             lineHeight = 19.5.sp,
@@ -1832,7 +1836,7 @@ fun FormattedChatText(
                     Text(
                         text = buildBoldAnnotatedLine(block.content),
                         fontFamily = PlusJakartaSans,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Medium,
                         color = textColor,
                         fontSize = 13.8.sp,
                         lineHeight = 20.sp,

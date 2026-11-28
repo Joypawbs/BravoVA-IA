@@ -1592,9 +1592,11 @@ fun ProductDetailScreen(
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
 
+                    // Texto largo alineado a la izquierda (WWDC25: tipografía a la izquierda; un
+                    // párrafo centrado se lee peor). El título sigue el estilo de las demás secciones.
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                        horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Row(
@@ -1605,31 +1607,25 @@ fun ProductDetailScreen(
                                 imageVector = Icons.Default.Verified,
                                 contentDescription = null,
                                 tint = Tone.success,
-                                modifier = Modifier.size(15.dp)
+                                modifier = Modifier.size(16.dp)
                             )
                             Text(
                                 text = "Descripción",
-                                fontFamily = PlusJakartaSans,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.5.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        BravoUnderline(isArca = isArca)
                         Text(
                             text = richDescription.summary,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 12.5.sp,
-                            lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             richDescription.highlights.forEach { tag ->
                                 Surface(
