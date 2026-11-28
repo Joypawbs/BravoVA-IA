@@ -73,6 +73,12 @@ private class DirectGeminiModel(
     private fun url(method: String) =
         "https://generativelanguage.googleapis.com/v1beta/models/$modelName:$method"
 
+    /**
+     * El esquema se manda mientras la API lo acepte. Si un modelo lo rechaza (HTTP 400), se
+     * repite la petición sin él y no se vuelve a intentar: el modo JSON y parseReply bastan.
+     */
+    private var useSchema = config.jsonSchema != null
+
     @OptIn(ExperimentalEncodingApi::class)
     private fun body(content: AiContent): String = buildJsonObject {
         config.systemInstruction?.let { sys ->
@@ -99,8 +105,21 @@ private class DirectGeminiModel(
         putJsonObject("generationConfig") {
             if (config.temperature >= 0) put("temperature", config.temperature)
             if (config.jsonOutput) put("responseMimeType", "application/json")
+            if (useSchema) config.jsonSchema?.let { schema ->
+                runCatching { aiJson.parseToJsonElement(schema) }.getOrNull()?.let { put("responseJsonSchema", it) }
+            }
         }
     }.toString()
+
+    /** 400 con esquema: se apaga el esquema y se reintenta una vez. */
+    private suspend fun <T> withSchemaFallback(block: suspend () -> T): T = try {
+        block()
+    } catch (e: IllegalStateException) {
+        if (useSchema && e.message?.startsWith("HTTP 400") == true) {
+            useSchema = false
+            block()
+        } else throw e
+    }
 
     /** Junta el texto de todas las partes del primer candidato. */
     private fun textOf(json: String): String? = runCatching {
@@ -112,6 +131,11 @@ private class DirectGeminiModel(
     }.getOrNull()
 
     override fun generateContentStream(content: AiContent): Flow<AiResponseChunk> = flow {
+        // El 400 llega antes del primer fragmento, así que reintentar no duplica texto
+        withSchemaFallback { streamInto(this, content) }
+    }
+
+    private suspend fun streamInto(collector: kotlinx.coroutines.flow.FlowCollector<AiResponseChunk>, content: AiContent) {
         aiHttp.preparePost(url("streamGenerateContent") + "?alt=sse") {
             header("x-goog-api-key", apiKey)
             contentType(ContentType.Application.Json)
@@ -126,12 +150,14 @@ private class DirectGeminiModel(
                 val line = channel.readUTF8Line() ?: break
                 if (!line.startsWith("data:")) continue
                 val text = textOf(line.removePrefix("data:").trim())
-                if (!text.isNullOrEmpty()) emit(AiResponseChunk(text))
+                if (!text.isNullOrEmpty()) collector.emit(AiResponseChunk(text))
             }
         }
     }
 
-    override suspend fun generateContent(content: AiContent): AiResponseChunk {
+    override suspend fun generateContent(content: AiContent): AiResponseChunk = withSchemaFallback { generateOnce(content) }
+
+    private suspend fun generateOnce(content: AiContent): AiResponseChunk {
         var text: String? = null
         aiHttp.preparePost(url("generateContent")) {
             header("x-goog-api-key", apiKey)

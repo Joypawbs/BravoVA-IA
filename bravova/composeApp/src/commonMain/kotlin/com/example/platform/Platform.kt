@@ -341,7 +341,9 @@ interface GenerativeModelCompat {
 data class AiModelConfig(
     val systemInstruction: String? = null,
     val jsonOutput: Boolean = false,
-    val temperature: Double = -1.0
+    val temperature: Double = -1.0,
+    /** Esquema JSON de la respuesta (salida estructurada). Solo lo usa la API directa de Gemini. */
+    val jsonSchema: String? = null
 )
 
 expect fun createGenerativeModel(modelName: String, config: AiModelConfig = AiModelConfig()): GenerativeModelCompat

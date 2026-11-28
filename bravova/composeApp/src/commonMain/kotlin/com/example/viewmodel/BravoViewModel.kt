@@ -178,7 +178,8 @@ class BravoViewModel(private val application: PlatformContext = AppContext.insta
     private val bravIaChatConfig = AiModelConfig(
         systemInstruction = BravIaEngine.SYSTEM_INSTRUCTION,
         jsonOutput = true,
-        temperature = 0.3
+        temperature = 0.3,
+        jsonSchema = BravIaEngine.RESPONSE_SCHEMA
     )
     private val bravIaChatModel by lazy { createAiModel("gemini-3.8-flash", bravIaChatConfig) }
     private val bravIaChatFallbackModel by lazy { createAiModel("gemini-3.5-flash-lite", bravIaChatConfig) }
