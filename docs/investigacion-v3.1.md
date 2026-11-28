@@ -48,4 +48,33 @@ Fuentes: [Grocery benchmark](https://baymard.com/research-articles/grocery-ecomm
 
 - `isSystemInDarkTheme()` solo lee el tema al abrir la app ([JetBrains #3575](https://github.com/JetBrains/compose-multiplatform/issues/3575)). En el recorrido, el modo oscuro salía claro. **Hecho:** `systemDarkTheme()` vuelve a leer el tema cada segundo en iOS.
 - Compose 1.11 trae un campo de texto nativo de UIKit, todavía experimental ([novedades 1.11](https://kotlinlang.org/docs/multiplatform/whats-new-compose-111.html)). Lo evaluamos para la próxima versión porque hoy usamos la 1.10.
+- "Reducir movimiento" de iOS: desde Compose 1.8 la app ya lo respeta sola (pone la duración de las animaciones en cero). No hace falta código propio ([hilo de Kotlin Slack](https://slack-chats.kotlinlang.org/t/34023010/hi-when-the-system-reduce-motion-accessibility-setting-is-en), [VoiceOver y accesibilidad en Compose iOS](https://kotlinlang.org/docs/multiplatform/compose-ios-accessibility.html)).
 - Lo que hace que una app se sienta pulida: tipografía y símbolos del sistema, respuesta háptica, accesibilidad y no usar patrones de web ([uxdesign.cc](https://uxdesign.cc/native-is-a-floor-not-a-ceiling-09bc4f27ddce), [swiftjectivec](https://swiftjectivec.com/A-Best-In-Class-App)).
+
+## 6. Sistema de diseño de Apple (WWDC25, sesión 356) y revisión pantalla por pantalla
+
+Fuentes: [Get to know the new design system](https://developer.apple.com/videos/play/wwdc2025/356), [notas de WWDC Notes](https://wwdcnotes.com/documentation/wwdc25-356-get-to-know-the-new-design-system/)
+
+| Principio | Qué vimos en las capturas | Qué hicimos |
+|---|---|---|
+| Tipografía alineada a la izquierda | El párrafo "Descripción" del producto iba centrado | A la izquierda y con los estilos del tema |
+| Esquinas concéntricas: radio interior = radio exterior − margen | Foto de 12 dp dentro de una tarjeta de 16 dp con 10 dp de margen | Foto con 6 dp |
+| Jerarquía clara | En Brav IA todo el texto iba en negrita y las **negritas** no se notaban | Cuerpo en peso medio |
+| Lenguaje claro y uno solo para cada cosa | "Mis pedidos" con tarjetas que decían "Orden"; "BiometricPrompt" (nombre técnico de Android) en el carrito; "(B02)GRATIS" pegado | Todo dice "Pedido"; "Confirmación con Face ID"; "Comisión con Visa … Gratis" |
+| No repetir datos | Pedido entregado con "100%", barra llena, "Avance 100%" y fecha "Entregado" | Solo el estado, la sucursal y la fecha |
+| Área táctil de unos 44 pt | Corazón de favoritos de 28 dp | 40 dp sin cambiar su aspecto |
+
+## 7. Vibración (Apple HIG: Playing haptics)
+
+Fuente: [Playing haptics](https://developer.apple.com/design/human-interface-guidelines/playing-haptics)
+
+- No abusar: si todo vibra, la vibración deja de significar algo. El impacto ligero es para objetos pequeños; la notificación de éxito, para tareas terminadas.
+- En la app, la vibración de "confirmar" se usaba en unos 40 toques comunes con un golpe medio a toda fuerza. **Hecho:** ahora es un impacto ligero, y el "éxito" queda para el pago y el pedido.
+
+## 8. Otras apps de supermercado (Instacart, 2026)
+
+Fuente: [notas de versión de Instacart Storefront](https://docs.instacart.com/storefront/releases/2026_04_0_release_notes)
+
+- Avisar en el pago si un producto del carrito ya no está disponible y ofrecer alternativas. **No aplica todavía:** el catálogo de la app no maneja existencias; queda anotado para cuando se conecte con el inventario real.
+- El carrito en el orden en que se agregaron los productos. **Se cumple.**
+- Instacart también lanzó un asistente de compras con IA, lo que confirma que Brav IA va en la dirección correcta.

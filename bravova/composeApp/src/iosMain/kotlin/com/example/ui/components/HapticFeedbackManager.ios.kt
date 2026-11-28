@@ -47,5 +47,7 @@ actual object HapticFeedbackManager {
         generator.selectionChanged()
     }
 
-    actual fun onConfirmAction(view: PlatformView) = impact(UIImpactFeedbackStyle.UIImpactFeedbackStyleMedium, 1.0)
+    // Se usa en ~40 toques comunes (favoritos, chips, botones). Apple HIG: no abusar de la
+    // vibración y usar impacto ligero para objetos pequeños; el "éxito" queda para el pago.
+    actual fun onConfirmAction(view: PlatformView) = impact(UIImpactFeedbackStyle.UIImpactFeedbackStyleLight, 0.8)
 }
