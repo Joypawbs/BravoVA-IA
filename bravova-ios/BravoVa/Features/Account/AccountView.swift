@@ -1,24 +1,16 @@
 import SwiftUI
+import AuthenticationServices
 
-/// Cuenta: tu nombre (solo en este teléfono), pedidos, tienda y datos de la app.
-/// Sin perfiles de ejemplo: lo que no has escrito no aparece.
+/// Cuenta: sesión (Google o Apple), pedidos, tienda y datos de la app.
+/// Sin perfiles de ejemplo: lo que no viene de tu cuenta no aparece.
 struct AccountView: View {
     @Environment(AppState.self) private var app
-    @AppStorage("perfil.nombre") private var name = ""
 
     var body: some View {
         @Bindable var app = app
         NavigationStack {
             Form {
-                Section {
-                    TextField("¿Cómo te llamamos?", text: $name)
-                        .textContentType(.givenName)
-                        .submitLabel(.done)
-                } header: {
-                    Text(name.isBlank ? "Hola" : "Hola, \(name)")
-                } footer: {
-                    Text("Se guarda solo en este iPhone.")
-                }
+                AccountSection()
 
                 Section("Compras") {
                     NavigationLink {
@@ -95,6 +87,66 @@ struct AccountView: View {
         let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let b = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
         return "\(v) (\(b))"
+    }
+}
+
+/// Sesión: con cuenta muestra nombre, correo y foto; sin cuenta, los botones de Apple y Google.
+private struct AccountSection: View {
+    @Environment(AppState.self) private var app
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        let auth = app.auth
+        if let user = auth.user {
+            Section {
+                HStack(spacing: 14) {
+                    AsyncImage(url: user.photo) { image in
+                        image.resizable().scaledToFill()
+                    } placeholder: {
+                        Image(systemName: "person.crop.circle.fill")
+                            .resizable()
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(width: 52, height: 52)
+                    .clipShape(.circle)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(user.name.isBlank ? "Tu cuenta" : user.name).font(.headline)
+                        if !user.email.isBlank {
+                            Text(user.email).font(.subheadline).foregroundStyle(.secondary)
+                        }
+                        Text("Con \(user.provider)").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Button("Cerrar sesión", role: .destructive) { auth.signOut() }
+            }
+        } else {
+            Section {
+                SignInWithAppleButton(.signIn) { auth.prepareApple($0) } onCompletion: { auth.completeApple($0) }
+                    .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
+                    .frame(height: 48)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
+                Button { auth.signInWithGoogle() } label: {
+                    HStack {
+                        if auth.busy { ProgressView() } else { Image(systemName: "g.circle.fill") }
+                        Text("Continuar con Google")
+                    }
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 40)
+                }
+                .buttonStyle(.glass)
+                .disabled(auth.busy)
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
+                if let error = auth.errorMessage {
+                    Label(error, systemImage: "exclamationmark.triangle")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            } header: {
+                Text("Inicia sesión")
+            } footer: {
+                Text("Tus pedidos, listas y tarjeta Bravísima se guardan en este iPhone, con o sin cuenta.")
+            }
+        }
     }
 }
 

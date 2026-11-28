@@ -8,13 +8,18 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    MARKETING_VERSION: "3.2.0"
-    CURRENT_PROJECT_VERSION: "30200"
+    MARKETING_VERSION: "3.2.1"
+    CURRENT_PROJECT_VERSION: "30201"
     # Modo Swift 5: la concurrencia estricta de Swift 6 no aporta nada visible aquí
     SWIFT_VERSION: "5.0"
     # La clave de Gemini NO se define aquí: Xcode toma la variable de entorno GEMINI_API_KEY
     # (secreto del CI) para $(GEMINI_API_KEY) del Info.plist. No se pasa por la línea de
     # comandos porque xcodebuild la imprimiría en el registro.
+packages:
+  # Solo para el inicio de sesión (Google y Apple); Brav IA no usa Firebase
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "12.0.0"
 targets:
   BravoVa:
     type: application
@@ -50,6 +55,9 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.aistudio.bravova.rdshop
             CFBundleURLSchemes: [bravova]
+          # Vuelta del inicio de sesión web de Firebase (GOOGLE_APP_ID codificado), igual que la 3.1
+          - CFBundleURLName: firebase-auth
+            CFBundleURLSchemes: [app-1-723529928496-ios-f5b4f6c4ac9eba9ce4c2f5]
         UIApplicationShortcutItems:
           - UIApplicationShortcutItemType: buscar
             UIApplicationShortcutItemTitle: Buscar
@@ -64,8 +72,17 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
+        OTHER_LDFLAGS: ["$(inherited)", "-ObjC"]
+    entitlements:
+      path: BravoVa/BravoVa.entitlements
+      properties:
+        com.apple.developer.applesignin: [Default]
     dependencies:
       - target: BravoWidgets
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseAuth
   BravoWidgets:
     type: app-extension
     platform: iOS

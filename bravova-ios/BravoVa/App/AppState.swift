@@ -16,6 +16,7 @@ enum StoreMode: String, CaseIterable, Identifiable {
 }
 
 /// Estado global de la app. Se irá llenando con el catálogo, el carrito, la cuenta, etc.
+@MainActor
 @Observable
 final class AppState {
     var tab: AppTab
@@ -30,6 +31,7 @@ final class AppState {
     let cart = Cart()
     let orders = OrderHistory()
     let lists = ShoppingLists()
+    let auth = AuthService()
     /// Ficha de producto abierta (hoja), desde cualquier pestaña
     var selectedProduct: Product?
     var showCart = false

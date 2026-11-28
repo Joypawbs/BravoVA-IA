@@ -8,6 +8,7 @@ struct BravoVaApp: App {
         WindowGroup {
             RootView()
                 .environment(app)
+                .onOpenURL { _ = AuthService.handle(url: $0) }
                 .tint(app.store.accent)
         }
     }
